@@ -1,0 +1,193 @@
+"""
+ADFarm — Hay Day-style farming game for Anki.
+Every card review earns coins, XP, crops, and random drops.
+"""
+
+from aqt import mw, gui_hooks
+from aqt.qt import QAction, QKeySequence
+
+# Persistent references (prevent GC)
+_farm_manager = None
+_farm_view = None
+_session_active = False
+
+
+def _get_manager():
+    global _farm_manager
+    if _farm_manager is None:
+        from .farm_manager import FarmManager
+        _farm_manager = FarmManager()
+    return _farm_manager
+
+
+def _get_view():
+    global _farm_view
+    if _farm_view is None:
+        from .ui_farm import FarmWebView
+        _farm_view = FarmWebView(_get_manager())
+    return _farm_view
+
+
+# =============================================================================
+# HOOKS
+# =============================================================================
+
+def on_profile_loaded():
+    global _farm_manager, _farm_view, _session_active
+    _farm_manager = None
+    _farm_view = None
+    _session_active = False
+
+    mgr = _get_manager()
+    mgr.generate_orders()
+    mgr.save()
+
+    config = mw.addonManager.getConfig(__name__) or {}
+    if config.get("show_farm_on_startup", True):
+        from aqt.qt import QTimer
+        QTimer.singleShot(1500, show_farm)
+
+
+def on_reviewer_did_answer(reviewer, card, ease):
+    global _session_active
+
+    mgr = _get_manager()
+
+    if not _session_active:
+        mgr.start_session()
+        _session_active = True
+
+    card_ivl = card.ivl if hasattr(card, "ivl") else 0
+    card_factor = card.factor if hasattr(card, "factor") else 2500
+
+    rewards = mgr.process_review(ease, card_ivl, card_factor)
+
+    # Level up?
+    level_up_notif = None
+    for notif in rewards.get("notifications", []):
+        if notif.get("type") == "level_up":
+            level_up_notif = notif
+            break
+
+    _process_animals(mgr)
+    _check_achievements(mgr)
+
+    # Update farm view if open
+    view = _get_view()
+    if view.web:
+        view.on_review(rewards)
+        if level_up_notif:
+            view.on_level_up(level_up_notif)
+    else:
+        # Toast notification
+        from .ui_dialogs import NotificationToast
+        coins = rewards.get("coins", 0)
+        xp = rewards.get("xp", 0)
+        if coins > 0 or xp > 0:
+            NotificationToast.show(f"+{coins} coins  +{xp} XP")
+        if level_up_notif:
+            from .ui_dialogs import LevelUpDialog
+            dlg = LevelUpDialog(level_up_notif, mw)
+            dlg.exec()
+
+    if mgr.state.session_reviews % 10 == 0:
+        mgr.save()
+
+
+def on_reviewer_will_end():
+    global _session_active
+    if not _session_active:
+        return
+    _session_active = False
+
+    mgr = _get_manager()
+    summary = mgr.end_session()
+
+    if summary.get("reviews", 0) > 0:
+        view = _get_view()
+        if view.web:
+            view.on_session_end(summary)
+        else:
+            config = mw.addonManager.getConfig(__name__) or {}
+            if config.get("show_session_summary", True):
+                from .ui_dialogs import SessionSummaryDialog
+                dlg = SessionSummaryDialog(summary, mw)
+                dlg.exec()
+
+
+def on_main_window_close():
+    global _farm_manager, _farm_view, _session_active
+    if _session_active:
+        on_reviewer_will_end()
+    if _farm_manager:
+        _farm_manager.save()
+    if _farm_view:
+        _farm_view.close()
+    _farm_manager = None
+    _farm_view = None
+
+
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+def _process_animals(mgr):
+    from . import progression
+    for animal_id, animal_data in mgr.state.animals.items():
+        animal_def = progression.ANIMAL_DEFINITIONS.get(animal_id)
+        if not animal_def:
+            continue
+        count = animal_data.get("count", 0)
+        if count <= 0:
+            continue
+        reviews_since = animal_data.get("reviews_since_last", 0) + 1
+        animal_data["reviews_since_last"] = reviews_since
+        produce_every = animal_def.get("produce_every_n_reviews", 10)
+        if reviews_since >= produce_every:
+            product = animal_def.get("product")
+            if product and mgr.state.add_item(product, count):
+                animal_data["reviews_since_last"] = 0
+
+
+def _check_achievements(mgr):
+    from . import achievements as ach_mod
+    from datetime import datetime
+    ach_mgr = ach_mod.AchievementManager()
+    state_dict = mgr.state.to_dict()
+    state_dict["num_plots"] = mgr.state.num_plots
+    session_data = {
+        "cards_reviewed": mgr.state.session_reviews,
+        "correct_count": mgr.state.total_correct,
+        "total_elapsed": 0,
+    }
+    newly_unlocked = ach_mgr.check_all(state_dict, session_data)
+    for ach in newly_unlocked:
+        mgr.state.achievements[ach["key"]] = {
+            "unlocked_at": datetime.now().isoformat(),
+        }
+        if ach.get("gems", 0) > 0:
+            mgr.state.gems += ach["gems"]
+
+
+# =============================================================================
+# MENU
+# =============================================================================
+
+def show_farm():
+    view = _get_view()
+    view.show()
+
+
+def _setup():
+    action = QAction("ADFarm", mw)
+    action.setShortcut(QKeySequence("Ctrl+Shift+F"))
+    action.triggered.connect(show_farm)
+    mw.form.menuTools.addAction(action)
+
+
+# Register
+gui_hooks.profile_did_open.append(on_profile_loaded)
+gui_hooks.reviewer_did_answer_card.append(on_reviewer_did_answer)
+gui_hooks.reviewer_will_end.append(on_reviewer_will_end)
+
+_setup()

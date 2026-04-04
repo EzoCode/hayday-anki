@@ -1,0 +1,969 @@
+"""
+Farm Manager - Core farm state, economy, inventory, and persistence.
+Handles coins, gems, items, storage, plots, and buildings.
+"""
+
+import json
+import os
+import random
+import time
+from pathlib import Path
+from datetime import datetime, date, timedelta
+from typing import Dict, List, Optional, Any, Tuple
+
+
+ADDON_DIR = Path(__file__).parent
+DATA_DIR = ADDON_DIR / "user_files"
+SAVE_FILE = DATA_DIR / "farm_save.json"
+
+DATA_DIR.mkdir(exist_ok=True)
+
+
+# --- Item Definitions ---
+
+ITEM_CATALOG = {
+    # Raw materials (from reviews)
+    "wheat": {"name": "Wheat", "emoji": "\U0001F33E", "category": "crop", "sell_price": 2, "xp": 1},
+    "corn": {"name": "Corn", "emoji": "\U0001F33D", "category": "crop", "sell_price": 3, "xp": 2},
+    "carrot": {"name": "Carrot", "emoji": "\U0001F955", "category": "crop", "sell_price": 4, "xp": 2},
+    "tomato": {"name": "Tomato", "emoji": "\U0001F345", "category": "crop", "sell_price": 5, "xp": 3},
+    "potato": {"name": "Potato", "emoji": "\U0001F954", "category": "crop", "sell_price": 4, "xp": 2},
+    "strawberry": {"name": "Strawberry", "emoji": "\U0001F353", "category": "crop", "sell_price": 7, "xp": 4},
+    "apple": {"name": "Apple", "emoji": "\U0001F34E", "category": "crop", "sell_price": 6, "xp": 3},
+    "sugarcane": {"name": "Sugarcane", "emoji": "\U0001F33F", "category": "crop", "sell_price": 5, "xp": 3},
+    "soybean": {"name": "Soybean", "emoji": "\U0001FAD8", "category": "crop", "sell_price": 4, "xp": 2},
+    "pumpkin": {"name": "Pumpkin", "emoji": "\U0001F383", "category": "crop", "sell_price": 8, "xp": 5},
+
+    # Animal products
+    "milk": {"name": "Milk", "emoji": "\U0001F95B", "category": "animal_product", "sell_price": 8, "xp": 4},
+    "egg": {"name": "Egg", "emoji": "\U0001F95A", "category": "animal_product", "sell_price": 6, "xp": 3},
+    "wool": {"name": "Wool", "emoji": "\U0001F9F6", "category": "animal_product", "sell_price": 10, "xp": 5},
+    "bacon": {"name": "Bacon", "emoji": "\U0001F953", "category": "animal_product", "sell_price": 12, "xp": 6},
+
+    # Processed goods
+    "bread": {"name": "Bread", "emoji": "\U0001F35E", "category": "processed", "sell_price": 10, "xp": 5},
+    "butter": {"name": "Butter", "emoji": "\U0001F9C8", "category": "processed", "sell_price": 12, "xp": 6},
+    "cheese": {"name": "Cheese", "emoji": "\U0001F9C0", "category": "processed", "sell_price": 15, "xp": 7},
+    "cake": {"name": "Cake", "emoji": "\U0001F370", "category": "processed", "sell_price": 25, "xp": 12},
+    "cookie": {"name": "Cookie", "emoji": "\U0001F36A", "category": "processed", "sell_price": 18, "xp": 8},
+    "sugar": {"name": "Sugar", "emoji": "\U0001F36C", "category": "processed", "sell_price": 8, "xp": 4},
+    "cream": {"name": "Cream", "emoji": "\U0001F95B", "category": "processed", "sell_price": 14, "xp": 6},
+    "pizza": {"name": "Pizza", "emoji": "\U0001F355", "category": "processed", "sell_price": 30, "xp": 15},
+    "burger": {"name": "Burger", "emoji": "\U0001F354", "category": "processed", "sell_price": 35, "xp": 18},
+    "pie": {"name": "Pie", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
+    "jam": {"name": "Jam", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
+    "juice": {"name": "Juice", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
+
+    # Upgrade materials (random drops)
+    "bolt": {"name": "Bolt", "emoji": "\U0001F529", "category": "material", "sell_price": 0, "xp": 0},
+    "plank": {"name": "Plank", "emoji": "\U0001FAB5", "category": "material", "sell_price": 0, "xp": 0},
+    "duct_tape": {"name": "Duct Tape", "emoji": "\U0001FA79", "category": "material", "sell_price": 0, "xp": 0},
+    "nail": {"name": "Nail", "emoji": "\U0001F4CC", "category": "material", "sell_price": 0, "xp": 0},
+    "screw": {"name": "Screw", "emoji": "\U0001FA9B", "category": "material", "sell_price": 0, "xp": 0},
+    "paint": {"name": "Paint", "emoji": "\U0001F3A8", "category": "material", "sell_price": 0, "xp": 0},
+    "land_deed": {"name": "Land Deed", "emoji": "\U0001F4DC", "category": "material", "sell_price": 0, "xp": 0},
+    "expansion_permit": {"name": "Expansion Permit", "emoji": "\U0001F3D7\uFE0F", "category": "material", "sell_price": 0, "xp": 0},
+
+    # Decorations
+    "fence": {"name": "Fence", "emoji": "\U0001FAB5", "category": "decoration", "sell_price": 5, "xp": 2},
+    "flower_pot": {"name": "Flower Pot", "emoji": "\U0001FAB4", "category": "decoration", "sell_price": 10, "xp": 3},
+    "bench": {"name": "Bench", "emoji": "\U0001FA91", "category": "decoration", "sell_price": 15, "xp": 5},
+    "fountain": {"name": "Fountain", "emoji": "\u26F2", "category": "decoration", "sell_price": 50, "xp": 15},
+    "scarecrow": {"name": "Scarecrow", "emoji": "\U0001F383", "category": "decoration", "sell_price": 20, "xp": 7},
+    "windmill_deco": {"name": "Windmill", "emoji": "\U0001F3E1", "category": "decoration", "sell_price": 100, "xp": 25},
+}
+
+
+# --- Random Drop Tables ---
+
+MATERIAL_DROP_TABLE = [
+    ("bolt", 0.25),
+    ("plank", 0.25),
+    ("duct_tape", 0.15),
+    ("nail", 0.15),
+    ("screw", 0.10),
+    ("paint", 0.05),
+    ("land_deed", 0.03),
+    ("expansion_permit", 0.02),
+]
+
+MYSTERY_BOX_REWARDS = {
+    "small": {
+        "cost_gems": 0,
+        "rewards": [
+            ({"coins": 10}, 0.30),
+            ({"coins": 25}, 0.20),
+            ({"item": "bolt", "qty": 2}, 0.15),
+            ({"item": "plank", "qty": 2}, 0.15),
+            ({"gems": 1}, 0.10),
+            ({"item": "nail", "qty": 3}, 0.10),
+        ],
+    },
+    "medium": {
+        "cost_gems": 3,
+        "rewards": [
+            ({"coins": 50}, 0.25),
+            ({"coins": 100}, 0.15),
+            ({"item": "duct_tape", "qty": 3}, 0.15),
+            ({"gems": 3}, 0.15),
+            ({"item": "expansion_permit", "qty": 1}, 0.10),
+            ({"coins": 200}, 0.10),
+            ({"gems": 5}, 0.10),
+        ],
+    },
+    "large": {
+        "cost_gems": 10,
+        "rewards": [
+            ({"coins": 200}, 0.20),
+            ({"coins": 500}, 0.15),
+            ({"gems": 5}, 0.15),
+            ({"gems": 10}, 0.10),
+            ({"item": "land_deed", "qty": 2}, 0.15),
+            ({"item": "expansion_permit", "qty": 2}, 0.10),
+            ({"coins": 1000}, 0.05),
+            ({"gems": 25}, 0.10),
+        ],
+    },
+}
+
+
+class FarmState:
+    """Complete farm state that can be serialized/deserialized."""
+
+    def __init__(self):
+        self.coins: int = 50  # Starting coins
+        self.gems: int = 5  # Starting gems
+        self.xp: int = 0
+        self.level: int = 1
+        self.total_reviews: int = 0
+        self.total_correct: int = 0
+        self.lifetime_reviews: int = 0
+
+        # Inventory: item_id -> quantity
+        self.inventory: Dict[str, int] = {}
+
+        # Storage
+        self.barn_capacity: int = 50
+        self.barn_level: int = 1
+        self.silo_capacity: int = 50
+        self.silo_level: int = 1
+
+        # Farm grid (plots)
+        self.plots: List[Dict] = []
+        self.num_plots: int = 6  # Starting plots
+        self._init_plots()
+
+        # Buildings owned: building_id -> {level, queue, ...}
+        self.buildings: Dict[str, Dict] = {}
+
+        # Animals owned: animal_id -> {count, last_collected, ...}
+        self.animals: Dict[str, Dict] = {}
+
+        # Decorations placed: list of {id, type, x, y}
+        self.decorations: List[Dict] = []
+
+        # Unlocked content
+        self.unlocked_crops: List[str] = ["wheat", "corn"]
+        self.unlocked_buildings: List[str] = ["bakery"]
+        self.unlocked_animals: List[str] = []
+
+        # Streaks
+        self.current_streak: int = 0
+        self.best_streak: int = 0
+        self.last_review_date: Optional[str] = None
+
+        # Daily
+        self.last_wheel_spin: Optional[str] = None
+        self.daily_mystery_boxes_opened: int = 0
+        self.last_mystery_box_date: Optional[str] = None
+
+        # Timestamps
+        self.created_at: str = datetime.now().isoformat()
+        self.last_session: Optional[str] = None
+
+        # Pending mystery boxes on farm
+        self.mystery_boxes: List[Dict] = []
+
+        # Session tracking
+        self.session_coins_earned: int = 0
+        self.session_xp_earned: int = 0
+        self.session_items_earned: Dict[str, int] = {}
+        self.session_reviews: int = 0
+
+        # Production queues: building_id -> [{"recipe_id", "started_session", "ready": bool}]
+        self.production_queues: Dict[str, List[Dict]] = {}
+
+        # Achievements: achievement_id -> {unlocked_at, ...}
+        self.achievements: Dict[str, Dict] = {}
+
+        # Events
+        self.active_events: List[Dict] = []
+
+        # Orders (truck/boat)
+        self.active_orders: List[Dict] = []
+        self.orders_completed: int = 0
+
+    def _init_plots(self):
+        """Initialize farm plots."""
+        self.plots = []
+        for i in range(self.num_plots):
+            self.plots.append({
+                "id": i,
+                "state": "empty",  # empty, planted, growing, ready, wilted
+                "crop": None,
+                "planted_at": None,
+                "growth_stage": 0,  # 0-4 (seed, sprout, growing, flowering, ready)
+                "reviews_needed": 0,  # Reviews needed to advance stage
+                "reviews_done": 0,
+            })
+
+    def add_plots(self, count: int):
+        """Add new plots to the farm."""
+        start_id = len(self.plots)
+        for i in range(count):
+            self.plots.append({
+                "id": start_id + i,
+                "state": "empty",
+                "crop": None,
+                "planted_at": None,
+                "growth_stage": 0,
+                "reviews_needed": 0,
+                "reviews_done": 0,
+            })
+        self.num_plots = len(self.plots)
+
+    def get_inventory_count(self) -> int:
+        """Get total items in inventory."""
+        return sum(self.inventory.values())
+
+    def get_barn_space(self) -> int:
+        """Get remaining barn space."""
+        material_count = sum(
+            qty for item_id, qty in self.inventory.items()
+            if ITEM_CATALOG.get(item_id, {}).get("category") == "material"
+        )
+        return self.barn_capacity - material_count
+
+    def get_silo_space(self) -> int:
+        """Get remaining silo space."""
+        crop_count = sum(
+            qty for item_id, qty in self.inventory.items()
+            if ITEM_CATALOG.get(item_id, {}).get("category") in ("crop", "animal_product", "processed")
+        )
+        return self.silo_capacity - crop_count
+
+    def add_item(self, item_id: str, quantity: int = 1) -> bool:
+        """Add item to inventory. Returns False if no space."""
+        cat = ITEM_CATALOG.get(item_id, {}).get("category", "")
+        if cat == "material":
+            if self.get_barn_space() < quantity:
+                return False
+        elif cat in ("crop", "animal_product", "processed"):
+            if self.get_silo_space() < quantity:
+                return False
+
+        self.inventory[item_id] = self.inventory.get(item_id, 0) + quantity
+        return True
+
+    def remove_item(self, item_id: str, quantity: int = 1) -> bool:
+        """Remove item from inventory. Returns False if insufficient."""
+        current = self.inventory.get(item_id, 0)
+        if current < quantity:
+            return False
+        self.inventory[item_id] = current - quantity
+        if self.inventory[item_id] <= 0:
+            del self.inventory[item_id]
+        return True
+
+    def to_dict(self) -> Dict:
+        """Serialize state to dict."""
+        return {
+            "coins": self.coins,
+            "gems": self.gems,
+            "xp": self.xp,
+            "level": self.level,
+            "total_reviews": self.total_reviews,
+            "total_correct": self.total_correct,
+            "lifetime_reviews": self.lifetime_reviews,
+            "inventory": self.inventory,
+            "barn_capacity": self.barn_capacity,
+            "barn_level": self.barn_level,
+            "silo_capacity": self.silo_capacity,
+            "silo_level": self.silo_level,
+            "plots": self.plots,
+            "num_plots": self.num_plots,
+            "buildings": self.buildings,
+            "animals": self.animals,
+            "decorations": self.decorations,
+            "unlocked_crops": self.unlocked_crops,
+            "unlocked_buildings": self.unlocked_buildings,
+            "unlocked_animals": self.unlocked_animals,
+            "current_streak": self.current_streak,
+            "best_streak": self.best_streak,
+            "last_review_date": self.last_review_date,
+            "last_wheel_spin": self.last_wheel_spin,
+            "daily_mystery_boxes_opened": self.daily_mystery_boxes_opened,
+            "last_mystery_box_date": self.last_mystery_box_date,
+            "created_at": self.created_at,
+            "last_session": self.last_session,
+            "mystery_boxes": self.mystery_boxes,
+            "production_queues": self.production_queues,
+            "achievements": self.achievements,
+            "active_events": self.active_events,
+            "active_orders": self.active_orders,
+            "orders_completed": self.orders_completed,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> "FarmState":
+        """Deserialize state from dict."""
+        state = cls()
+        for key, value in data.items():
+            if hasattr(state, key):
+                setattr(state, key, value)
+        return state
+
+
+class FarmManager:
+    """Main farm manager handling all game logic."""
+
+    def __init__(self):
+        self.state = FarmState()
+        self.load()
+        self._pending_notifications: List[Dict] = []
+
+    # --- Persistence ---
+
+    def save(self):
+        """Save farm state to disk."""
+        try:
+            DATA_DIR.mkdir(exist_ok=True)
+            with open(SAVE_FILE, "w") as f:
+                json.dump(self.state.to_dict(), f, indent=2)
+        except Exception as e:
+            print(f"[HayDay] Error saving farm: {e}")
+
+    def load(self):
+        """Load farm state from disk."""
+        try:
+            if SAVE_FILE.exists():
+                with open(SAVE_FILE, "r") as f:
+                    data = json.load(f)
+                self.state = FarmState.from_dict(data)
+        except Exception as e:
+            print(f"[HayDay] Error loading farm, starting fresh: {e}")
+            self.state = FarmState()
+
+    # --- Review Processing ---
+
+    def process_review(self, ease: int, card_ivl: int, card_factor: int) -> Dict:
+        """
+        Process a single card review. Returns rewards earned.
+        ease: 1=Again, 2=Hard, 3=Good, 4=Easy
+        card_ivl: card interval in days
+        card_factor: card ease factor (2500 = 250%)
+        """
+        rewards = {
+            "coins": 0,
+            "xp": 0,
+            "items": {},
+            "mystery_box": None,
+            "notifications": [],
+        }
+
+        # Base rewards by ease
+        coin_map = {1: 1, 2: 3, 3: 2, 4: 1}
+        xp_map = {1: 2, 2: 5, 3: 3, 4: 2}
+
+        base_coins = coin_map.get(ease, 2)
+        base_xp = xp_map.get(ease, 3)
+
+        # Difficulty bonus: harder cards (low factor) give more
+        if card_factor > 0:
+            difficulty_mult = max(1.0, (3000 - card_factor) / 1000)
+        else:
+            difficulty_mult = 1.0
+
+        # Interval bonus: mature cards give slightly more
+        maturity_bonus = min(card_ivl / 30, 2.0) if card_ivl > 0 else 0
+
+        coins = int(base_coins * difficulty_mult + maturity_bonus)
+        xp = int(base_xp * difficulty_mult + maturity_bonus)
+
+        # Apply event multipliers
+        coin_mult, xp_mult = self._get_event_multipliers()
+        coins = int(coins * coin_mult)
+        xp = int(xp * xp_mult)
+
+        rewards["coins"] = coins
+        rewards["xp"] = xp
+
+        self.state.coins += coins
+        self.state.xp += xp
+        self.state.total_reviews += 1
+        self.state.lifetime_reviews += 1
+        self.state.session_coins_earned += coins
+        self.state.session_xp_earned += xp
+        self.state.session_reviews += 1
+
+        if ease > 1:
+            self.state.total_correct += 1
+
+        # Determine crop drop based on level
+        crop_drop = self._roll_crop_drop()
+        if crop_drop:
+            item_id, qty = crop_drop
+            if self.state.add_item(item_id, qty):
+                rewards["items"][item_id] = qty
+                self.state.session_items_earned[item_id] = \
+                    self.state.session_items_earned.get(item_id, 0) + qty
+
+        # Random material drop (variable ratio reinforcement)
+        if random.random() < 0.12:  # ~12% chance per review
+            mat_id = self._roll_material_drop()
+            if mat_id and self.state.add_item(mat_id, 1):
+                rewards["items"][mat_id] = rewards["items"].get(mat_id, 0) + 1
+                self.state.session_items_earned[mat_id] = \
+                    self.state.session_items_earned.get(mat_id, 0) + 1
+
+        # Mystery box chance (~1 in 20 reviews)
+        if random.random() < 0.05:
+            box_size = random.choices(
+                ["small", "medium", "large"],
+                weights=[0.6, 0.3, 0.1]
+            )[0]
+            box = {
+                "size": box_size,
+                "x": random.randint(1, 8),
+                "y": random.randint(1, 6),
+                "created_at": datetime.now().isoformat(),
+            }
+            self.state.mystery_boxes.append(box)
+            rewards["mystery_box"] = box
+            rewards["notifications"].append({
+                "type": "mystery_box",
+                "message": f"A {box_size} mystery box appeared on your farm!",
+            })
+
+        # Advance crop growth on plots
+        self._advance_plots()
+
+        # Check level up
+        level_up = self._check_level_up()
+        if level_up:
+            rewards["notifications"].append(level_up)
+
+        self._pending_notifications.extend(rewards["notifications"])
+
+        return rewards
+
+    def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
+        """Roll for a crop drop based on unlocked crops."""
+        if random.random() < 0.35:  # 35% chance to get a crop
+            available = self.state.unlocked_crops
+            if available:
+                crop = random.choice(available)
+                return (crop, 1)
+        return None
+
+    def _roll_material_drop(self) -> Optional[str]:
+        """Roll for a material drop from the drop table."""
+        roll = random.random()
+        cumulative = 0
+        for item_id, weight in MATERIAL_DROP_TABLE:
+            cumulative += weight
+            if roll < cumulative:
+                return item_id
+        return "bolt"  # fallback
+
+    def _advance_plots(self):
+        """Advance growth on planted plots."""
+        for plot in self.state.plots:
+            if plot["state"] in ("planted", "growing"):
+                plot["reviews_done"] += 1
+                if plot["reviews_done"] >= plot["reviews_needed"]:
+                    plot["growth_stage"] += 1
+                    plot["reviews_done"] = 0
+                    if plot["growth_stage"] >= 4:
+                        plot["state"] = "ready"
+                    else:
+                        plot["state"] = "growing"
+                        plot["reviews_needed"] = max(2, plot["reviews_needed"] + 1)
+
+    def _get_event_multipliers(self) -> Tuple[float, float]:
+        """Get active event multipliers for coins and XP."""
+        coin_mult = 1.0
+        xp_mult = 1.0
+        now = datetime.now()
+        for event in self.state.active_events:
+            try:
+                end = datetime.fromisoformat(event.get("ends_at", ""))
+                if now < end:
+                    coin_mult *= event.get("coin_multiplier", 1.0)
+                    xp_mult *= event.get("xp_multiplier", 1.0)
+            except (ValueError, TypeError):
+                pass
+        return coin_mult, xp_mult
+
+    def _check_level_up(self) -> Optional[Dict]:
+        """Check if player leveled up and process unlocks."""
+        from . import progression
+        new_level = progression.get_level_for_xp(self.state.xp)
+        if new_level > self.state.level:
+            old_level = self.state.level
+            self.state.level = new_level
+
+            # Process unlocks for each level gained
+            all_unlocks = []
+            gem_reward = 0
+            for lvl in range(old_level + 1, new_level + 1):
+                unlocks = progression.get_unlocks_for_level(lvl)
+                all_unlocks.extend(unlocks)
+                gem_reward += progression.get_gem_reward_for_level(lvl)
+
+                # Apply unlocks
+                for unlock in unlocks:
+                    if unlock["type"] == "crop":
+                        if unlock["id"] not in self.state.unlocked_crops:
+                            self.state.unlocked_crops.append(unlock["id"])
+                    elif unlock["type"] == "building":
+                        if unlock["id"] not in self.state.unlocked_buildings:
+                            self.state.unlocked_buildings.append(unlock["id"])
+                    elif unlock["type"] == "animal":
+                        if unlock["id"] not in self.state.unlocked_animals:
+                            self.state.unlocked_animals.append(unlock["id"])
+                    elif unlock["type"] == "plots":
+                        self.state.add_plots(unlock.get("count", 2))
+
+            self.state.gems += gem_reward
+
+            return {
+                "type": "level_up",
+                "old_level": old_level,
+                "new_level": new_level,
+                "gem_reward": gem_reward,
+                "unlocks": all_unlocks,
+                "message": f"Level Up! You are now level {new_level}!",
+            }
+        return None
+
+    # --- Farm Actions ---
+
+    def plant_crop(self, plot_id: int, crop_id: str) -> bool:
+        """Plant a crop on a plot."""
+        if plot_id >= len(self.state.plots):
+            return False
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "empty":
+            return False
+        if crop_id not in self.state.unlocked_crops:
+            return False
+
+        plot["state"] = "planted"
+        plot["crop"] = crop_id
+        plot["planted_at"] = datetime.now().isoformat()
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 3  # Reviews to advance first stage
+        plot["reviews_done"] = 0
+        return True
+
+    def harvest_plot(self, plot_id: int) -> Optional[Dict]:
+        """Harvest a ready crop. Returns harvested items."""
+        if plot_id >= len(self.state.plots):
+            return None
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "ready":
+            return None
+
+        crop_id = plot["crop"]
+        item = ITEM_CATALOG.get(crop_id, {})
+
+        # Harvest quantity based on crop
+        qty = random.randint(2, 4)
+        xp_gain = item.get("xp", 1) * qty
+
+        harvested = {}
+        if self.state.add_item(crop_id, qty):
+            harvested[crop_id] = qty
+        else:
+            # Storage full
+            return None
+
+        self.state.xp += xp_gain
+
+        # Reset plot
+        plot["state"] = "empty"
+        plot["crop"] = None
+        plot["planted_at"] = None
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 0
+        plot["reviews_done"] = 0
+
+        return {"items": harvested, "xp": xp_gain}
+
+    def sell_item(self, item_id: str, quantity: int = 1) -> int:
+        """Sell items for coins. Returns coins earned."""
+        item = ITEM_CATALOG.get(item_id)
+        if not item or item.get("sell_price", 0) <= 0:
+            return 0
+
+        actual = min(quantity, self.state.inventory.get(item_id, 0))
+        if actual <= 0:
+            return 0
+
+        self.state.remove_item(item_id, actual)
+        coins = item["sell_price"] * actual
+        self.state.coins += coins
+        return coins
+
+    def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
+        """Buy and place a decoration."""
+        from . import progression
+        cost = progression.DECORATION_COSTS.get(deco_type, 0)
+        if cost > self.state.coins:
+            return False
+
+        self.state.coins -= cost
+        self.state.decorations.append({
+            "id": len(self.state.decorations),
+            "type": deco_type,
+            "x": x,
+            "y": y,
+        })
+        return True
+
+    def upgrade_barn(self) -> Optional[Dict]:
+        """Attempt barn upgrade. Returns cost info or None if can't afford."""
+        level = self.state.barn_level
+        cost = {
+            "bolt": level + 1,
+            "plank": level + 1,
+            "duct_tape": level + 1,
+        }
+
+        # Check materials
+        for item_id, qty in cost.items():
+            if self.state.inventory.get(item_id, 0) < qty:
+                return None
+
+        # Consume materials
+        for item_id, qty in cost.items():
+            self.state.remove_item(item_id, qty)
+
+        self.state.barn_level += 1
+        self.state.barn_capacity += 25
+        return {"new_level": self.state.barn_level, "new_capacity": self.state.barn_capacity}
+
+    def upgrade_silo(self) -> Optional[Dict]:
+        """Attempt silo upgrade."""
+        level = self.state.silo_level
+        cost = {
+            "nail": level + 1,
+            "screw": level + 1,
+            "paint": level + 1,
+        }
+
+        for item_id, qty in cost.items():
+            if self.state.inventory.get(item_id, 0) < qty:
+                return None
+
+        for item_id, qty in cost.items():
+            self.state.remove_item(item_id, qty)
+
+        self.state.silo_level += 1
+        self.state.silo_capacity += 25
+        return {"new_level": self.state.silo_level, "new_capacity": self.state.silo_capacity}
+
+    # --- Mystery Boxes ---
+
+    def open_mystery_box(self, box_index: int) -> Optional[Dict]:
+        """Open a mystery box. Returns rewards."""
+        if box_index >= len(self.state.mystery_boxes):
+            return None
+
+        box = self.state.mystery_boxes[box_index]
+        box_def = MYSTERY_BOX_REWARDS.get(box["size"], MYSTERY_BOX_REWARDS["small"])
+
+        # Check gem cost
+        if box_def["cost_gems"] > self.state.gems:
+            # Free open check (2 per day)
+            today = date.today().isoformat()
+            if self.state.last_mystery_box_date != today:
+                self.state.daily_mystery_boxes_opened = 0
+                self.state.last_mystery_box_date = today
+            if self.state.daily_mystery_boxes_opened >= 2 and box_def["cost_gems"] > 0:
+                return None
+            self.state.daily_mystery_boxes_opened += 1
+        else:
+            if box_def["cost_gems"] > 0:
+                self.state.gems -= box_def["cost_gems"]
+
+        # Roll reward
+        rewards_table = box_def["rewards"]
+        roll = random.random()
+        cumulative = 0
+        reward = rewards_table[0][0]  # fallback
+        for rwd, weight in rewards_table:
+            cumulative += weight
+            if roll < cumulative:
+                reward = rwd
+                break
+
+        # Apply reward
+        result = {"reward": reward, "box_size": box["size"]}
+        if "coins" in reward:
+            self.state.coins += reward["coins"]
+        if "gems" in reward:
+            self.state.gems += reward["gems"]
+        if "item" in reward:
+            self.state.add_item(reward["item"], reward.get("qty", 1))
+
+        # Remove box
+        self.state.mystery_boxes.pop(box_index)
+        return result
+
+    # --- Streak Management ---
+
+    def update_streak(self):
+        """Update daily streak."""
+        today = date.today().isoformat()
+        last = self.state.last_review_date
+
+        if last == today:
+            return
+
+        if last is None:
+            self.state.current_streak = 1
+        else:
+            try:
+                last_date = date.fromisoformat(last)
+                diff = (date.today() - last_date).days
+                if diff == 1:
+                    self.state.current_streak += 1
+                elif diff > 1:
+                    self.state.current_streak = 1
+            except ValueError:
+                self.state.current_streak = 1
+
+        if self.state.current_streak > self.state.best_streak:
+            self.state.best_streak = self.state.current_streak
+
+        self.state.last_review_date = today
+
+    # --- Orders (Truck/Boat) ---
+
+    def generate_orders(self):
+        """Generate new delivery orders if needed."""
+        if len(self.state.active_orders) >= 3:
+            return
+
+        order_items = [
+            item_id for item_id in self.state.unlocked_crops
+        ]
+        if "bread" in [b for b in self.state.unlocked_buildings]:
+            order_items.extend(["bread", "cookie"])
+
+        while len(self.state.active_orders) < 3 and order_items:
+            items_needed = {}
+            num_items = random.randint(1, min(3, self.state.level // 5 + 1))
+            for _ in range(num_items):
+                item = random.choice(order_items)
+                qty = random.randint(1, max(1, self.state.level // 3))
+                items_needed[item] = items_needed.get(item, 0) + qty
+
+            coin_reward = sum(
+                ITEM_CATALOG.get(i, {}).get("sell_price", 5) * q * 2
+                for i, q in items_needed.items()
+            )
+            xp_reward = sum(
+                ITEM_CATALOG.get(i, {}).get("xp", 2) * q * 2
+                for i, q in items_needed.items()
+            )
+
+            self.state.active_orders.append({
+                "id": len(self.state.active_orders) + self.state.orders_completed,
+                "items_needed": items_needed,
+                "coin_reward": coin_reward,
+                "xp_reward": xp_reward,
+                "type": random.choice(["truck", "boat"]),
+            })
+
+    def fulfill_order(self, order_index: int) -> Optional[Dict]:
+        """Fulfill a delivery order. Returns rewards or None."""
+        if order_index >= len(self.state.active_orders):
+            return None
+
+        order = self.state.active_orders[order_index]
+
+        # Check if we have all items
+        for item_id, qty in order["items_needed"].items():
+            if self.state.inventory.get(item_id, 0) < qty:
+                return None
+
+        # Consume items
+        for item_id, qty in order["items_needed"].items():
+            self.state.remove_item(item_id, qty)
+
+        # Give rewards
+        self.state.coins += order["coin_reward"]
+        self.state.xp += order["xp_reward"]
+        self.state.orders_completed += 1
+
+        result = {
+            "coins": order["coin_reward"],
+            "xp": order["xp_reward"],
+            "order_type": order["type"],
+        }
+
+        # Remove order and generate new one
+        self.state.active_orders.pop(order_index)
+        self.generate_orders()
+
+        return result
+
+    # --- Wheel of Fortune ---
+
+    def can_spin_wheel(self) -> bool:
+        """Check if daily wheel spin is available."""
+        today = date.today().isoformat()
+        return self.state.last_wheel_spin != today
+
+    def spin_wheel(self) -> Optional[Dict]:
+        """Spin the daily wheel of fortune."""
+        if not self.can_spin_wheel():
+            return None
+
+        self.state.last_wheel_spin = date.today().isoformat()
+
+        prizes = [
+            ({"coins": 25}, "25 Coins", 0.20),
+            ({"coins": 50}, "50 Coins", 0.15),
+            ({"coins": 100}, "100 Coins", 0.10),
+            ({"gems": 1}, "1 Gem", 0.15),
+            ({"gems": 3}, "3 Gems", 0.10),
+            ({"gems": 5}, "5 Gems", 0.05),
+            ({"item": "bolt", "qty": 3}, "3 Bolts", 0.10),
+            ({"item": "plank", "qty": 3}, "3 Planks", 0.10),
+            ({"item": "expansion_permit", "qty": 1}, "Expansion Permit", 0.05),
+        ]
+
+        roll = random.random()
+        cumulative = 0
+        chosen = prizes[0]
+        for prize, name, weight in prizes:
+            cumulative += weight
+            if roll < cumulative:
+                chosen = (prize, name, weight)
+                break
+
+        prize_data, prize_name, _ = chosen
+
+        # Apply prize
+        if "coins" in prize_data:
+            self.state.coins += prize_data["coins"]
+        if "gems" in prize_data:
+            self.state.gems += prize_data["gems"]
+        if "item" in prize_data:
+            self.state.add_item(prize_data["item"], prize_data.get("qty", 1))
+
+        return {"prize": prize_data, "name": prize_name}
+
+    # --- Session Management ---
+
+    def start_session(self):
+        """Start a new review session."""
+        self.state.session_coins_earned = 0
+        self.state.session_xp_earned = 0
+        self.state.session_items_earned = {}
+        self.state.session_reviews = 0
+        self._pending_notifications = []
+
+    def end_session(self) -> Dict:
+        """End session and return summary."""
+        self.update_streak()
+        self.generate_orders()
+
+        # Process production queues
+        self._process_production()
+
+        summary = {
+            "reviews": self.state.session_reviews,
+            "coins_earned": self.state.session_coins_earned,
+            "xp_earned": self.state.session_xp_earned,
+            "items_earned": dict(self.state.session_items_earned),
+            "level": self.state.level,
+            "total_coins": self.state.coins,
+            "total_gems": self.state.gems,
+            "streak": self.state.current_streak,
+            "notifications": list(self._pending_notifications),
+        }
+
+        self.state.last_session = datetime.now().isoformat()
+        self.save()
+        return summary
+
+    def _process_production(self):
+        """Process production queues - advance items that waited a session."""
+        for building_id, queue in self.state.production_queues.items():
+            for item in queue:
+                if not item.get("ready", False):
+                    sessions_waited = item.get("sessions_waited", 0) + 1
+                    item["sessions_waited"] = sessions_waited
+                    if sessions_waited >= item.get("sessions_required", 1):
+                        item["ready"] = True
+
+    # --- Data for UI ---
+
+    def get_farm_data(self) -> Dict:
+        """Get complete farm data for UI rendering."""
+        from . import progression
+
+        xp_for_current = progression.get_xp_for_level(self.state.level)
+        xp_for_next = progression.get_xp_for_level(self.state.level + 1)
+        xp_progress = self.state.xp - xp_for_current
+        xp_needed = xp_for_next - xp_for_current
+
+        return {
+            "level": self.state.level,
+            "xp": self.state.xp,
+            "xp_progress": xp_progress,
+            "xp_needed": xp_needed,
+            "xp_percent": min(100, int(xp_progress / max(1, xp_needed) * 100)),
+            "coins": self.state.coins,
+            "gems": self.state.gems,
+            "streak": self.state.current_streak,
+            "best_streak": self.state.best_streak,
+            "plots": self.state.plots,
+            "num_plots": self.state.num_plots,
+            "buildings": self.state.buildings,
+            "animals": self.state.animals,
+            "decorations": self.state.decorations,
+            "inventory": self.state.inventory,
+            "barn_capacity": self.state.barn_capacity,
+            "barn_level": self.state.barn_level,
+            "barn_used": self.state.barn_capacity - self.state.get_barn_space(),
+            "silo_capacity": self.state.silo_capacity,
+            "silo_level": self.state.silo_level,
+            "silo_used": self.state.silo_capacity - self.state.get_silo_space(),
+            "unlocked_crops": self.state.unlocked_crops,
+            "unlocked_buildings": self.state.unlocked_buildings,
+            "unlocked_animals": self.state.unlocked_animals,
+            "mystery_boxes": self.state.mystery_boxes,
+            "active_orders": self.state.active_orders,
+            "orders_completed": self.state.orders_completed,
+            "production_queues": self.state.production_queues,
+            "total_reviews": self.state.total_reviews,
+            "lifetime_reviews": self.state.lifetime_reviews,
+            "can_spin_wheel": self.can_spin_wheel(),
+            "item_catalog": {k: v for k, v in ITEM_CATALOG.items()},
+            "achievements": self.state.achievements,
+            "session_reviews": self.state.session_reviews,
+            "session_coins": self.state.session_coins_earned,
+            "session_xp": self.state.session_xp_earned,
+        }
+
+    def get_notifications(self) -> List[Dict]:
+        """Get and clear pending notifications."""
+        notifs = list(self._pending_notifications)
+        self._pending_notifications.clear()
+        return notifs

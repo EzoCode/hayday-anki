@@ -1,0 +1,10 @@
+{
+  "show_farm_on_startup": true,
+  "show_session_summary": true,
+  "show_daily_wheel": true,
+  "sound_enabled": true,
+  "sound_volume": 0.5,
+  "farm_dock_position": "right",
+  "theme": "default",
+  "language": "en"
+}
