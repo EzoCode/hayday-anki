@@ -250,6 +250,17 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "building_detail":
+                building_id = parts[2]
+                self._send_building_detail(building_id)
+
+            elif action == "start_production":
+                building_id = parts[2]
+                recipe_id = parts[3]
+                self._start_production(building_id, recipe_id)
+                self._send_state()
+                self.manager.save()
+
             elif action == "get_achievements":
                 self._send_achievements()
 
@@ -320,6 +331,59 @@ class FarmWebView:
         self.manager.state.buildings[building_id] = {"level": 1}
         bname = building_def["name"]
         self._js(f"showNotification('Built {bname}!')")
+
+    def _send_building_detail(self, building_id: str):
+        """Send building detail with recipes to JS for production dialog."""
+        from . import production, progression
+        prod_mgr = production.ProductionManager(self.manager.state)
+        building_def = progression.BUILDING_DEFINITIONS.get(building_id, {})
+        recipes = prod_mgr.get_available_recipes(building_id)
+
+        recipe_data = []
+        for recipe in recipes:
+            can, reason = prod_mgr.can_craft(building_id, recipe["id"])
+            recipe_data.append({
+                "id": recipe["id"],
+                "name": recipe["name"],
+                "emoji": recipe["emoji"],
+                "ingredients": recipe["ingredients"],
+                "xp": recipe["xp"],
+                "sessions_required": recipe["sessions_required"],
+                "can_craft": can,
+                "reason": reason,
+            })
+
+        queue = self.manager.state.production_queues.get(building_id, [])
+        queue_data = [
+            {
+                "name": item.get("name", ""),
+                "emoji": item.get("emoji", ""),
+                "ready": item.get("ready", False),
+                "sessions_waited": item.get("sessions_waited", 0),
+                "sessions_required": item.get("sessions_required", 1),
+            }
+            for item in queue
+        ]
+
+        data = {
+            "building_id": building_id,
+            "building_name": building_def.get("name", building_id),
+            "recipes": recipe_data,
+            "queue": queue_data,
+        }
+        self._js(f"updateBuildingDetail({json.dumps(data)})")
+
+    def _start_production(self, building_id: str, recipe_id: str):
+        """Start production of a recipe in a building."""
+        from . import production
+        prod_mgr = production.ProductionManager(self.manager.state)
+        result = prod_mgr.start_production(building_id, recipe_id)
+        if result:
+            r_name = result["name"]
+            self._js(f"showNotification('Started producing {r_name}!')")
+        else:
+            can, reason = prod_mgr.can_craft(building_id, recipe_id)
+            self._js(f"showNotification('{reason}')")
 
     def _collect_building(self, building_id: str):
         from . import production

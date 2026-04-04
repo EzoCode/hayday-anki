@@ -189,5 +189,6 @@ def _setup():
 gui_hooks.profile_did_open.append(on_profile_loaded)
 gui_hooks.reviewer_did_answer_card.append(on_reviewer_did_answer)
 gui_hooks.reviewer_will_end.append(on_reviewer_will_end)
+gui_hooks.profile_will_close.append(on_main_window_close)
 
 _setup()

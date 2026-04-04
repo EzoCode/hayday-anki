@@ -626,7 +626,86 @@ function showReward(data) {
 }
 
 function showBuildingDetail(bid) { pycmd(`farm:building_detail:${bid}`); }
-function updateBuildingDetail(data) { if (currentPanel === 'buildings') renderBuildingsPanel(); }
+function updateBuildingDetail(data) {
+  if (data && data.recipes) {
+    showProductionDialog(data);
+  } else {
+    if (currentPanel === 'buildings') renderBuildingsPanel();
+  }
+}
+
+function showProductionDialog(data) {
+  const title = document.getElementById('production-title');
+  const list = document.getElementById('production-recipes');
+  title.textContent = `🏭 ${data.building_name || 'Production'}`;
+  list.innerHTML = '';
+
+  // Show current queue
+  const queue = data.queue || [];
+  if (queue.length > 0) {
+    const queueDiv = document.createElement('div');
+    queueDiv.className = 'production-queue-section';
+    queueDiv.innerHTML = '<h3>In Progress</h3>';
+    queue.forEach(q => {
+      const slot = document.createElement('div');
+      slot.className = `production-queue-item ${q.ready ? 'ready' : ''}`;
+      const pct = Math.min(100, ((q.sessions_waited || 0) / Math.max(1, q.sessions_required || 1)) * 100);
+      slot.innerHTML = `
+        <span class="pq-emoji">${q.emoji || '?'}</span>
+        <div class="pq-info">
+          <strong>${q.name}</strong>
+          <span>${q.ready ? 'Ready to collect!' : `${q.sessions_waited}/${q.sessions_required} sessions`}</span>
+        </div>
+        ${!q.ready ? `<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>` : '<span class="pq-ready-badge">✓</span>'}
+      `;
+      queueDiv.appendChild(slot);
+    });
+    if (queue.some(q => q.ready)) {
+      const collectBtn = document.createElement('button');
+      collectBtn.className = 'action-btn';
+      collectBtn.textContent = 'Collect All';
+      collectBtn.style.marginTop = '8px';
+      collectBtn.onclick = () => { pycmd(`farm:collect:${data.building_id}`); hideOverlay(); };
+      queueDiv.appendChild(collectBtn);
+    }
+    list.appendChild(queueDiv);
+  }
+
+  // Show available recipes
+  const recipesDiv = document.createElement('div');
+  recipesDiv.className = 'production-recipes-section';
+  recipesDiv.innerHTML = '<h3>Recipes</h3>';
+  (data.recipes || []).forEach(recipe => {
+    const card = document.createElement('div');
+    card.className = `recipe-card ${recipe.can_craft ? '' : 'disabled'}`;
+
+    let ingredientsHTML = '';
+    Object.entries(recipe.ingredients || {}).forEach(([itemId, qty]) => {
+      const have = (farmData.inventory || {})[itemId] || 0;
+      const enough = have >= qty;
+      const name = itemId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      ingredientsHTML += `<span class="recipe-ingredient ${enough ? 'has' : 'need'}">${cropPortrait(itemId, 16)} ${name} ${have}/${qty}</span>`;
+    });
+
+    card.innerHTML = `
+      <div class="recipe-header">
+        <span class="recipe-emoji">${recipe.emoji || '?'}</span>
+        <div class="recipe-info">
+          <strong>${recipe.name}</strong>
+          <span class="recipe-time">${recipe.sessions_required} session${recipe.sessions_required > 1 ? 's' : ''} | +${recipe.xp} XP</span>
+        </div>
+      </div>
+      <div class="recipe-ingredients">${ingredientsHTML}</div>
+    `;
+    if (recipe.can_craft) {
+      card.onclick = () => { pycmd(`farm:start_production:${data.building_id}:${recipe.id}`); hideOverlay(); };
+    }
+    recipesDiv.appendChild(card);
+  });
+  list.appendChild(recipesDiv);
+
+  document.getElementById('production-overlay').classList.remove('hidden');
+}
 
 function formatNum(n) { return n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n); }
 

@@ -17,8 +17,22 @@ ADDON_DIR = Path(__file__).parent
 CACHE_DIR = ADDON_DIR / "user_files" / "generated_sprites"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-API_KEY = "AIzaSyCClutDOmBvpvBqv8Yfrm4yEgRDAYFiU-k"
 MODEL_NAME = "gemini-2.0-flash-exp"  # Fallback model with image generation
+
+
+def _get_api_key() -> str:
+    """Get API key from environment or Anki config."""
+    key = os.environ.get("GEMINI_API_KEY", "")
+    if key:
+        return key
+    try:
+        from aqt import mw
+        if mw:
+            config = mw.addonManager.getConfig(__name__) or {}
+            return config.get("gemini_api_key", "")
+    except Exception:
+        pass
+    return ""
 
 
 def _get_cache_path(prompt: str, size: str = "64x64") -> Path:
@@ -116,7 +130,11 @@ def _call_gemini_api(prompt: str) -> Optional[bytes]:
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=API_KEY)
+        api_key = _get_api_key()
+        if not api_key:
+            print("[HayDay] No Gemini API key configured. Set GEMINI_API_KEY env var or add gemini_api_key to addon config.")
+            return None
+        client = genai.Client(api_key=api_key)
 
         response = client.models.generate_content(
             model=MODEL_NAME,
