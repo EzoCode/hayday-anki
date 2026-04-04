@@ -36,6 +36,7 @@
 
 <!-- ===== FARM WORLD ===== -->
 <div id="farm-container">
+  <div id="farm-sky"></div>
   <div id="farm-world">
     <!-- Isometric farm grid -->
     <div id="farm-fields">
@@ -82,6 +83,9 @@
   <button class="tool-btn" onclick="showTab('achievements')" id="tab-achievements">
     <span class="tool-icon">🏆</span><span class="tool-label">Awards</span>
   </button>
+  <button class="tool-btn" onclick="showTab('stats')" id="tab-stats">
+    <span class="tool-icon">📊</span><span class="tool-label">Stats</span>
+  </button>
   <button class="tool-btn wheel-btn" onclick="spinWheel()" id="tab-wheel">
     <span class="tool-icon">🎡</span><span class="tool-label">Wheel</span>
   </button>
@@ -126,6 +130,12 @@
   <div class="panel-handle"></div>
   <div class="panel-header"><h2>🏆 Achievements</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="achievements-list"></div>
+</div>
+
+<div id="panel-stats" class="panel hidden">
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>📊 Statistics</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="stat-grid" id="stats-grid"></div>
 </div>
 
 <!-- ===== OVERLAYS ===== -->
@@ -195,5 +205,18 @@
     <div id="session-stats"></div>
     <div id="session-items"></div>
     <button class="action-btn" onclick="hideOverlay()">Continue Farming!</button>
+  </div>
+</div>
+
+<div id="sell-overlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2>💰 Sell Item</h2>
+    <div id="sell-item-info"></div>
+    <div class="sell-buttons">
+      <button class="action-btn sell-one-btn" onclick="doSell(1)">Sell 1</button>
+      <button class="action-btn sell-half-btn" onclick="doSellHalf()">Sell Half</button>
+      <button class="action-btn sell-all-btn" onclick="doSellAll()">Sell All</button>
+    </div>
+    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
 </div>

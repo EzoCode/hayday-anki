@@ -53,6 +53,8 @@ ITEM_CATALOG = {
     "pie": {"name": "Pie", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
     "jam": {"name": "Jam", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
     "juice": {"name": "Juice", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
+    "hot_dog": {"name": "Hot Dog", "emoji": "\U0001F32D", "category": "processed", "sell_price": 28, "xp": 14},
+    "corn_bread": {"name": "Corn Bread", "emoji": "\U0001F35E", "category": "processed", "sell_price": 12, "xp": 7},
 
     # Upgrade materials (random drops)
     "bolt": {"name": "Bolt", "emoji": "\U0001F529", "category": "material", "sell_price": 0, "xp": 0},
@@ -400,9 +402,10 @@ class FarmManager:
             "notifications": [],
         }
 
-        # Base rewards by ease
-        coin_map = {1: 1, 2: 3, 3: 2, 4: 1}
-        xp_map = {1: 2, 2: 5, 3: 3, 4: 2}
+        # Base rewards by ease (1=Again, 2=Hard, 3=Good, 4=Easy)
+        # Better answers = more rewards to incentivize mastery
+        coin_map = {1: 1, 2: 2, 3: 3, 4: 5}
+        xp_map = {1: 1, 2: 3, 3: 5, 4: 7}
 
         base_coins = coin_map.get(ease, 2)
         base_xp = xp_map.get(ease, 3)
@@ -479,6 +482,9 @@ class FarmManager:
 
         # Advance crop growth on plots
         self._advance_plots()
+
+        # Advance production queues (every 5 reviews = progress towards 1 session)
+        self._advance_production_partial()
 
         # Check level up
         level_up = self._check_level_up()
@@ -1017,6 +1023,7 @@ class FarmManager:
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
         self._pending_notifications = []
+        self.update_streak()
         self.check_events()
 
     def end_session(self) -> Dict:
@@ -1043,6 +1050,23 @@ class FarmManager:
         self.save()
         return summary
 
+    def _advance_production_partial(self):
+        """Advance production progress based on reviews within a session.
+        Every 10 reviews contributes fractional session progress tracked as review_progress.
+        """
+        for building_id, queue in self.state.production_queues.items():
+            for item in queue:
+                if not item.get("ready", False):
+                    progress = item.get("review_progress", 0) + 1
+                    reviews_per_session = 10  # 10 reviews = 1 session equivalent
+                    if progress >= reviews_per_session:
+                        item["review_progress"] = 0
+                        item["sessions_waited"] = item.get("sessions_waited", 0) + 1
+                        if item["sessions_waited"] >= item.get("sessions_required", 1):
+                            item["ready"] = True
+                    else:
+                        item["review_progress"] = progress
+
     def _process_production(self):
         """Process production queues - advance items that waited a session."""
         for building_id, queue in self.state.production_queues.items():
@@ -1050,6 +1074,7 @@ class FarmManager:
                 if not item.get("ready", False):
                     sessions_waited = item.get("sessions_waited", 0) + 1
                     item["sessions_waited"] = sessions_waited
+                    item["review_progress"] = 0  # Reset partial progress
                     if sessions_waited >= item.get("sessions_required", 1):
                         item["ready"] = True
 

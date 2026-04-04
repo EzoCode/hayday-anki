@@ -34,6 +34,15 @@ RECIPES: Dict[str, List[Dict]] = {
             "sessions_required": 1,
             "xp": 8,
         },
+        {
+            "id": "corn_bread",
+            "name": "Corn Bread",
+            "emoji": "\U0001F35E",
+            "ingredients": {"corn": 3, "egg": 1},
+            "output": {"corn_bread": 1},
+            "sessions_required": 1,
+            "xp": 7,
+        },
     ],
     "sugar_mill": [
         {
@@ -84,6 +93,15 @@ RECIPES: Dict[str, List[Dict]] = {
             "output": {"burger": 1},
             "sessions_required": 2,
             "xp": 18,
+        },
+        {
+            "id": "hot_dog",
+            "name": "Hot Dog",
+            "emoji": "\U0001F32D",
+            "ingredients": {"bread": 1, "bacon": 1, "corn": 1},
+            "output": {"hot_dog": 1},
+            "sessions_required": 1,
+            "xp": 14,
         },
     ],
     "pastry_shop": [
