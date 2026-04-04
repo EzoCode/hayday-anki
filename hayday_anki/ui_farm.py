@@ -111,10 +111,27 @@ class FarmWebView:
         for png_file in SPRITES_DIR.rglob("*.png"):
             # Skip spritesheets and walk files (keep individual extracted sprites)
             name = png_file.name
-            if name in ("Crop_Spritesheet.png", "farm_spritesheet.png",
-                        "chests_32x32.png", "cow_walk.png", "chicken_walk.png",
-                        "pig_walk.png", "sheep_walk.png", "coin_anim.png",
-                        "farmland.png", "plants.png"):
+            skip_names = {
+                "Crop_Spritesheet.png", "farm_spritesheet.png",
+                "chests_32x32.png", "cow_walk.png", "chicken_walk.png",
+                "pig_walk.png", "sheep_walk.png", "coin_anim.png",
+                "farmland.png", "plants.png",
+                # HayDay — skip backgrounds, dark variants, dialogs
+                "background.png", "shop-bg.png", "scoreboard-bg.png",
+                "details-bg.png", "new-level-bg.png",
+                "barn-dark.png", "silo-dark.png", "shop-dark.png",
+                "chicken_coop-dark.png", "pasture-dark.png",
+                "field-dark.png", "wheat-field-dark.png",
+                "alfalfa-field-dark.png", "mill-dark.png",
+                # Old generated sprites replaced by HayDay ones
+                "barn.png", "silo.png", "windmill.png", "coop.png",
+            }
+            # Also skip files from buildings/ folder (replaced by hayday/)
+            if png_file.parent.name == "buildings" and name in (
+                "bakery.png", "dairy.png", "bbq.png", "sugar_mill.png",
+            ):
+                continue
+            if name in skip_names:
                 continue
 
             rel = png_file.relative_to(SPRITES_DIR).as_posix()

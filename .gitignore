@@ -8,7 +8,6 @@ __pycache__/
 *.skill
 test_*.py
 hayday_anki/user_files/
-hayday_anki/sounds/
 hayday_anki/web/sprites/buildings/farm_spritesheet.png
 hayday_anki/web/sprites/crops/Crop_Spritesheet.png
 hayday_anki/web/sprites/animals/*_walk.png

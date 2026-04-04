@@ -1,28 +1,29 @@
 <!-- ===== HUD BAR ===== -->
 <div id="hud">
   <div class="hud-left">
-    <div class="hud-item level-badge" id="hud-level">
-      <span class="level-num">1</span>
+    <div class="hud-level" id="hud-level">
+      <img class="hud-star" id="hud-star-img" src="" alt=""><span class="level-num">1</span>
     </div>
-    <div class="hud-item xp-bar-container">
-      <div class="xp-bar" id="hud-xp-bar" style="width: 0%"></div>
-      <span class="xp-text" id="hud-xp-text">0 / 20 XP</span>
-    </div>
-  </div>
-  <div class="hud-center">
-    <div class="hud-item streak-display" id="hud-streak">
-      <span class="streak-icon">🔥</span>
-      <span class="streak-num" id="streak-count">0</span>
+    <div class="hud-xp">
+      <div class="xp-bar-bg" id="xp-bar-bg-img"></div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="hud-xp-bar" style="width:0%"></div>
+      </div>
+      <span class="xp-text" id="hud-xp-text">0/20</span>
     </div>
   </div>
   <div class="hud-right">
-    <div class="hud-item currency" id="hud-coins">
-      <span class="currency-icon">🪙</span>
-      <span class="currency-num" id="coin-count">50</span>
+    <div class="hud-currency" id="hud-streak">
+      <span class="streak-fire">🔥</span>
+      <span id="streak-count">0</span>
     </div>
-    <div class="hud-item currency" id="hud-gems">
+    <div class="hud-currency hud-coins" id="hud-coins">
+      <span class="currency-icon">🪙</span>
+      <span id="coin-count">50</span>
+    </div>
+    <div class="hud-currency hud-gems" id="hud-gems">
       <span class="currency-icon">💎</span>
-      <span class="currency-num" id="gem-count">5</span>
+      <span id="gem-count">5</span>
     </div>
   </div>
 </div>
@@ -30,36 +31,28 @@
 <!-- ===== NOTIFICATION AREA ===== -->
 <div id="notification-area"></div>
 
-<!-- ===== MAIN FARM VIEW ===== -->
+<!-- ===== FARM WORLD ===== -->
 <div id="farm-container">
-  <div id="farm-ground">
-    <!-- Fields Section -->
-    <div class="farm-section" id="section-fields">
-      <div class="farm-section-header">
-        <span class="farm-section-icon">🌾</span>
-        <span class="farm-section-title">Fields</span>
-      </div>
+  <div id="farm-world">
+    <!-- Isometric farm grid -->
+    <div id="farm-fields">
+      <div class="section-label">🌾 Fields</div>
       <div id="plots-grid"></div>
     </div>
 
-    <!-- Workshop Section -->
-    <div class="farm-section" id="section-buildings">
-      <div class="farm-section-header">
-        <span class="farm-section-icon">🏭</span>
-        <span class="farm-section-title">Workshop</span>
-      </div>
+    <!-- Buildings zone -->
+    <div id="farm-buildings">
+      <div class="section-label">🏭 Workshop</div>
       <div id="buildings-area"></div>
     </div>
 
-    <!-- Pasture Section -->
-    <div class="farm-section" id="section-animals">
-      <div class="farm-section-header">
-        <span class="farm-section-icon">🐄</span>
-        <span class="farm-section-title">Pasture</span>
-      </div>
+    <!-- Animals zone -->
+    <div id="farm-animals">
+      <div class="section-label">🐄 Pasture</div>
       <div id="animals-area"></div>
     </div>
 
+    <!-- Floating layers -->
     <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
     <div id="reward-layer"></div>
@@ -68,7 +61,7 @@
 
 <!-- ===== BOTTOM TOOLBAR ===== -->
 <div id="toolbar">
-  <button class="tool-btn" onclick="showTab('farm')" id="tab-farm">
+  <button class="tool-btn active" onclick="showTab('farm')" id="tab-farm">
     <span class="tool-icon">🌾</span><span class="tool-label">Farm</span>
   </button>
   <button class="tool-btn" onclick="showTab('buildings')" id="tab-buildings">
@@ -93,10 +86,8 @@
 
 <!-- ===== PANELS ===== -->
 <div id="panel-inventory" class="panel hidden">
-  <div class="panel-header">
-    <h2>📦 Inventory</h2>
-    <button class="close-btn" onclick="hidePanel()">✕</button>
-  </div>
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>📦 Inventory</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="panel-subheader">
     <span id="barn-status">🏚️ Barn: 0/50</span>
     <span id="silo-status">🏭 Silo: 0/50</span>
@@ -105,48 +96,41 @@
 </div>
 
 <div id="panel-buildings" class="panel hidden">
-  <div class="panel-header">
-    <h2>🏭 Buildings</h2>
-    <button class="close-btn" onclick="hidePanel()">✕</button>
-  </div>
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>🏭 Buildings</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="buildings-list"></div>
 </div>
 
 <div id="panel-orders" class="panel hidden">
-  <div class="panel-header">
-    <h2>🚚 Orders</h2>
-    <button class="close-btn" onclick="hidePanel()">✕</button>
-  </div>
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>🚚 Orders</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="orders-list"></div>
 </div>
 
 <div id="panel-shop" class="panel hidden">
-  <div class="panel-header">
-    <h2>🏪 Shop</h2>
-    <button class="close-btn" onclick="hidePanel()">✕</button>
-  </div>
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>🏪 Shop</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="shop-tabs">
-    <button class="shop-tab active" onclick="showShopCategory('decorations')">Decorations</button>
+    <button class="shop-tab active" onclick="showShopCategory('decorations')">Decor</button>
     <button class="shop-tab" onclick="showShopCategory('animals')">Animals</button>
-    <button class="shop-tab" onclick="showShopCategory('upgrades')">Upgrades</button>
+    <button class="shop-tab" onclick="showShopCategory('upgrades')">Upgrade</button>
+    <button class="shop-tab" onclick="showShopCategory('land')">Land</button>
   </div>
   <div id="shop-grid" class="item-grid"></div>
 </div>
 
 <div id="panel-achievements" class="panel hidden">
-  <div class="panel-header">
-    <h2>🏆 Achievements</h2>
-    <button class="close-btn" onclick="hidePanel()">✕</button>
-  </div>
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>🏆 Achievements</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="achievements-list"></div>
 </div>
 
 <!-- ===== OVERLAYS ===== -->
 <div id="wheel-overlay" class="overlay hidden">
-  <div class="wheel-container">
+  <div class="overlay-card wheel-container">
     <h2>🎡 Wheel of Fortune</h2>
     <div id="wheel-canvas-wrapper">
-      <canvas id="wheel-canvas" width="300" height="300"></canvas>
+      <canvas id="wheel-canvas" width="280" height="280"></canvas>
       <div id="wheel-pointer">▼</div>
     </div>
     <button id="wheel-spin-btn" class="action-btn" onclick="doSpinWheel()">Spin!</button>
@@ -156,11 +140,9 @@
 </div>
 
 <div id="mystery-box-overlay" class="overlay hidden">
-  <div class="mystery-box-container">
+  <div class="overlay-card">
     <h2>🎁 Mystery Box</h2>
-    <div id="mystery-box-animation">
-      <div class="box-icon" id="box-icon">📦</div>
-    </div>
+    <div id="mystery-box-animation"><div class="box-icon" id="box-icon">📦</div></div>
     <div id="mystery-box-result" class="hidden"></div>
     <button id="open-box-btn" class="action-btn" onclick="doOpenBox()">Open!</button>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
@@ -168,9 +150,9 @@
 </div>
 
 <div id="levelup-overlay" class="overlay hidden">
-  <div class="levelup-container">
+  <div class="overlay-card levelup-card">
     <div class="levelup-stars">⭐✨⭐✨⭐</div>
-    <h1 id="levelup-title">Level Up!</h1>
+    <h1>Level Up!</h1>
     <div id="levelup-level" class="levelup-number"></div>
     <div id="levelup-rewards"></div>
     <div id="levelup-unlocks"></div>
@@ -179,23 +161,23 @@
 </div>
 
 <div id="plant-overlay" class="overlay hidden">
-  <div class="plant-container">
+  <div class="overlay-card">
     <h2>🌱 Plant a Crop</h2>
-    <div id="crop-choices" class="item-grid"></div>
+    <div id="crop-choices"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
 </div>
 
 <div id="production-overlay" class="overlay hidden">
-  <div class="production-container">
+  <div class="overlay-card production-card">
     <h2 id="production-title">🏭 Production</h2>
-    <div id="production-recipes" class="recipe-list"></div>
+    <div id="production-recipes"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
 </div>
 
 <div id="session-overlay" class="overlay hidden">
-  <div class="session-container">
+  <div class="overlay-card">
     <h2>🎉 Session Complete!</h2>
     <div id="session-stats"></div>
     <div id="session-items"></div>
