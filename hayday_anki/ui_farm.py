@@ -261,6 +261,12 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "expand":
+                count = int(parts[2]) if len(parts) > 2 else 2
+                self._expand_farm(count)
+                self._send_state()
+                self.manager.save()
+
             elif action == "get_achievements":
                 self._send_achievements()
 
@@ -372,6 +378,29 @@ class FarmWebView:
             "queue": queue_data,
         }
         self._js(f"updateBuildingDetail({json.dumps(data)})")
+
+    def _expand_farm(self, count: int):
+        """Expand farm by adding plots (costs coins + materials)."""
+        cost_coins = 50 * self.manager.state.num_plots
+        cost_deed = 1
+        cost_permit = 1
+
+        if self.manager.state.coins < cost_coins:
+            self._js(f"showNotification('Need {cost_coins} coins to expand!')")
+            return
+        if self.manager.state.inventory.get("land_deed", 0) < cost_deed:
+            self._js("showNotification('Need a Land Deed to expand!')")
+            return
+        if self.manager.state.inventory.get("expansion_permit", 0) < cost_permit:
+            self._js("showNotification('Need an Expansion Permit!')")
+            return
+
+        self.manager.state.coins -= cost_coins
+        self.manager.state.remove_item("land_deed", cost_deed)
+        self.manager.state.remove_item("expansion_permit", cost_permit)
+        self.manager.state.add_plots(count)
+        new_total = self.manager.state.num_plots
+        self._js(f"showNotification('Farm expanded! Now {new_total} plots!')")
 
     def _start_production(self, building_id: str, recipe_id: str):
         """Start production of a recipe in a building."""

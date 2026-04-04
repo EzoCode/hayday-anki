@@ -74,6 +74,46 @@ const ANIMAL_EMOJI = {
   cow: '\u{1F404}', chicken: '\u{1F414}', pig: '\u{1F416}', sheep: '\u{1F411}'
 };
 
+// --- Expansion Plot Levels ---
+// Maps level -> how many plots that unlock grants (cumulative tracking)
+const EXPANSION_LEVELS = [
+  {level:3, count:2}, {level:5, count:2}, {level:10, count:2},
+  {level:15, count:2}, {level:20, count:2}, {level:25, count:2},
+  {level:30, count:2}, {level:35, count:2}, {level:40, count:2},
+  {level:50, count:2}, {level:60, count:1}, {level:70, count:1},
+  {level:80, count:1}, {level:90, count:1}, {level:100, count:1}
+];
+
+function getLockedTileCount() {
+  const currentLevel = farmData.level || 1;
+  const currentPlots = farmData.num_plots || 6;
+  // Calculate max plots available at current level
+  let maxPlots = 6; // base
+  for (const exp of EXPANSION_LEVELS) {
+    if (exp.level <= currentLevel) maxPlots += exp.count;
+  }
+  // Find the next few expansions the player hasn't unlocked yet
+  let futurePlots = 0;
+  let shown = 0;
+  for (const exp of EXPANSION_LEVELS) {
+    if (exp.level > currentLevel && shown < 3) {
+      futurePlots += exp.count;
+      shown++;
+    }
+  }
+  // Show between 3 and 6 locked tiles
+  const locked = Math.max(3, Math.min(6, futurePlots));
+  return locked;
+}
+
+function getNextExpansionLevel() {
+  const currentLevel = farmData.level || 1;
+  for (const exp of EXPANSION_LEVELS) {
+    if (exp.level > currentLevel) return exp;
+  }
+  return null;
+}
+
 // --- Main Update ---
 function updateFarm(data) {
   farmData = data;
@@ -81,6 +121,7 @@ function updateFarm(data) {
   renderPlots();
   renderBuildings();
   renderAnimals();
+  updateSectionVisibility();
   renderDecorations();
   renderMysteryBoxes();
   if (currentPanel === 'inventory') renderInventory();
@@ -113,6 +154,8 @@ function updateHUD() {
 function renderPlots() {
   const grid = document.getElementById('plots-grid');
   grid.innerHTML = '';
+
+  // Render owned plots
   (farmData.plots || []).forEach(plot => {
     const el = document.createElement('div');
     el.className = `plot plot-${plot.state}`;
@@ -146,6 +189,35 @@ function renderPlots() {
     }
     grid.appendChild(el);
   });
+
+  // Render locked expansion tiles
+  const lockedCount = getLockedTileCount();
+  const nextExp = getNextExpansionLevel();
+  for (let i = 0; i < lockedCount; i++) {
+    const el = document.createElement('div');
+    el.className = 'plot plot-locked';
+    const costCoins = 50 + (farmData.num_plots || 6) * 15 + i * 30;
+    const levelReq = nextExp ? nextExp.level : '?';
+    el.innerHTML = `
+      <span class="plot-lock-icon">\u{1F512}</span>
+      <span class="expand-cost">${uiSprite('coin',12)} Lv.${levelReq}</span>
+    `;
+    el.title = `Unlocks at level ${levelReq}`;
+    el.onclick = () => {
+      showNotification(`Reach level ${levelReq} to expand your farm!`);
+    };
+    grid.appendChild(el);
+  }
+}
+
+// --- Section Visibility ---
+function updateSectionVisibility() {
+  const buildingsSection = document.getElementById('section-buildings');
+  const animalsSection = document.getElementById('section-animals');
+  const ownedBuildings = Object.keys(farmData.buildings || {});
+  const ownedAnimals = Object.keys(farmData.animals || {});
+  if (buildingsSection) buildingsSection.style.display = ownedBuildings.length > 0 ? '' : 'none';
+  if (animalsSection) animalsSection.style.display = ownedAnimals.length > 0 ? '' : 'none';
 }
 
 // --- Buildings on Farm ---

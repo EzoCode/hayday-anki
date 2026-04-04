@@ -33,9 +33,33 @@
 <!-- ===== MAIN FARM VIEW ===== -->
 <div id="farm-container">
   <div id="farm-ground">
-    <div id="plots-grid"></div>
-    <div id="buildings-area"></div>
-    <div id="animals-area"></div>
+    <!-- Fields Section -->
+    <div class="farm-section" id="section-fields">
+      <div class="farm-section-header">
+        <span class="farm-section-icon">🌾</span>
+        <span class="farm-section-title">Fields</span>
+      </div>
+      <div id="plots-grid"></div>
+    </div>
+
+    <!-- Workshop Section -->
+    <div class="farm-section" id="section-buildings">
+      <div class="farm-section-header">
+        <span class="farm-section-icon">🏭</span>
+        <span class="farm-section-title">Workshop</span>
+      </div>
+      <div id="buildings-area"></div>
+    </div>
+
+    <!-- Pasture Section -->
+    <div class="farm-section" id="section-animals">
+      <div class="farm-section-header">
+        <span class="farm-section-icon">🐄</span>
+        <span class="farm-section-title">Pasture</span>
+      </div>
+      <div id="animals-area"></div>
+    </div>
+
     <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
     <div id="reward-layer"></div>
