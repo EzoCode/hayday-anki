@@ -58,7 +58,7 @@ const EXPANSION_LEVELS = [
 
 function updateFarm(data) {
   farmData = data;
-  updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections();
+  updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections(); checkStorageWarnings();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -66,6 +66,19 @@ function updateFarm(data) {
     if (currentPanel === 'shop') renderShop();
     if (currentPanel === 'achievements') renderAchievements();
   }
+}
+
+let _lastStorageWarning = 0;
+function checkStorageWarnings() {
+  const now = Date.now();
+  if (now - _lastStorageWarning < 30000) return; // Max once per 30s
+  const d = farmData;
+  const barnPct = (d.barn_used||0) / Math.max(1, d.barn_capacity||50);
+  const siloPct = (d.silo_used||0) / Math.max(1, d.silo_capacity||50);
+  if (barnPct >= 1) { showNotification('\u{1F6A8} Barn is FULL! Upgrade or sell items.'); _lastStorageWarning = now; }
+  else if (barnPct >= 0.9) { showNotification('\u{26A0}\u{FE0F} Barn is almost full! (' + d.barn_used + '/' + d.barn_capacity + ')'); _lastStorageWarning = now; }
+  if (siloPct >= 1) { showNotification('\u{1F6A8} Silo is FULL! Upgrade or sell items.'); _lastStorageWarning = now; }
+  else if (siloPct >= 0.9) { showNotification('\u{26A0}\u{FE0F} Silo is almost full! (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
 }
 
 function updateHUD() {
@@ -79,6 +92,19 @@ function updateHUD() {
   document.getElementById('streak-count').textContent = d.streak || 0;
   document.getElementById('coin-count').textContent = formatNum(d.coins || 0);
   document.getElementById('gem-count').textContent = formatNum(d.gems || 0);
+  // Streak bonus indicator
+  const streakEl = document.getElementById('hud-streak');
+  const bonus = d.streak_bonus_pct || 0;
+  streakEl.title = bonus > 0 ? `Streak bonus: +${bonus}%` : 'Review daily to build streak!';
+  // Active events banner
+  const banner = document.getElementById('event-banner');
+  const events = d.active_events || [];
+  if (events.length > 0) {
+    banner.innerHTML = events.map(e => `<span class="event-tag">${e.emoji} ${e.name}</span>`).join('');
+    banner.style.display = '';
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
 function renderPlots() {
@@ -142,6 +168,42 @@ function renderAnimals() {
 function updateSections() {
   document.getElementById('farm-buildings').style.display = Object.keys(farmData.buildings||{}).length ? '' : 'none';
   document.getElementById('farm-animals').style.display = Object.keys(farmData.animals||{}).length ? '' : 'none';
+  updateTabBadges();
+}
+
+function updateTabBadges() {
+  const d = farmData, inv = d.inventory||{};
+  // Orders badge: count how many orders can be fulfilled
+  let fulfillable = 0;
+  (d.active_orders||[]).forEach(order => {
+    let canDo = true;
+    Object.entries(order.items_needed||{}).forEach(([id,qty]) => { if ((inv[id]||0) < qty) canDo = false; });
+    if (canDo) fulfillable++;
+  });
+  setBadge('tab-orders', fulfillable);
+
+  // Buildings badge: count ready productions
+  let readyCount = 0;
+  Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
+  setBadge('tab-buildings', readyCount);
+
+  // Mystery boxes badge
+  setBadge('tab-farm', (d.mystery_boxes||[]).length);
+
+  // Wheel badge
+  setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
+}
+
+function setBadge(tabId, count) {
+  const tab = document.getElementById(tabId);
+  if (!tab) return;
+  let badge = tab.querySelector('.tab-badge');
+  if (count > 0) {
+    if (!badge) { badge = document.createElement('span'); badge.className = 'tab-badge'; tab.appendChild(badge); }
+    badge.textContent = count;
+  } else if (badge) {
+    badge.remove();
+  }
 }
 
 function renderMysteryBoxes() {
@@ -239,7 +301,30 @@ function fulfillOrder(i){pycmd(`farm:fulfill_order:${i}`)}
 
 function spinWheel(){if(farmData.can_spin_wheel){document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification('Come back tomorrow!')}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
-function showWheelResult(r){wheelSpinning=false;let a=0,sp=0.4;(function spin(){a+=sp;sp*=.995;drawWheel(a);if(sp>.002)requestAnimationFrame(spin);else{document.getElementById('wheel-result').textContent=`You won: ${r.name}!`;document.getElementById('wheel-result').classList.remove('hidden')}})()}
+function showWheelResult(r){
+  wheelSpinning=false;
+  const segs=9, segAngle=2*Math.PI/segs;
+  // Target angle: pointer is at top (3*PI/2), land on middle of winning segment
+  const targetSeg = r.index||0;
+  const targetAngle = (2*Math.PI) - (targetSeg * segAngle + segAngle/2);
+  // Add several full rotations for drama
+  const totalRotation = targetAngle + Math.PI*2*6 + Math.random()*Math.PI*2;
+  let elapsed=0, duration=4000, startTime=null;
+  function easeOutCubic(t){return 1-Math.pow(1-t,3)}
+  (function spin(ts){
+    if(!startTime)startTime=ts;
+    elapsed=ts-startTime;
+    const progress=Math.min(elapsed/duration,1);
+    const angle=totalRotation*easeOutCubic(progress);
+    drawWheel(angle);
+    if(progress<1){requestAnimationFrame(spin)}
+    else{
+      document.getElementById('wheel-result').textContent=`You won: ${r.name}!`;
+      document.getElementById('wheel-result').classList.remove('hidden');
+      document.getElementById('wheel-spin-btn').disabled=true;
+    }
+  })(performance.now());
+}
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25\u{1FA99}',c:'#f44336'},{l:'50\u{1FA99}',c:'#e91e63'},{l:'100\u{1FA99}',c:'#9c27b0'},{l:'1\u{1F48E}',c:'#673ab7'},{l:'3\u{1F48E}',c:'#3f51b5'},{l:'5\u{1F48E}',c:'#2196f3'},{l:'3\u{1F529}',c:'#009688'},{l:'3\u{1FAB5}',c:'#4caf50'},{l:'\u{1F4DC}',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
 function showMysteryBox(i){currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else icon.textContent='\u{1F4E6}'}
@@ -248,6 +333,22 @@ function showBoxResult(r){const icon=document.getElementById('box-icon');icon.cl
 
 function showLevelUp(d){document.getElementById('levelup-level').textContent=d.new_level;let rw='';if(d.gem_reward>0)rw=`\u{1F48E} +${d.gem_reward} gems`;document.getElementById('levelup-rewards').innerHTML=rw;let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${u.emoji||''} ${u.name}</span>`});document.getElementById('levelup-unlocks').innerHTML=ul;document.getElementById('levelup-overlay').classList.remove('hidden')}
 function hideLevelUp(){document.getElementById('levelup-overlay').classList.add('hidden')}
+
+function showDailyLoginBonus(d){
+  const day=d.day||1, reward=d.reward||{};
+  const el=document.getElementById('login-bonus-overlay');
+  document.getElementById('login-day').textContent=day;
+  // Build day indicators (7 days)
+  let dots='';
+  for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
+  document.getElementById('login-days-row').innerHTML=dots;
+  let rw='';
+  if(reward.coins)rw+=`<span class="login-reward-item">\u{1FA99} +${reward.coins}</span>`;
+  if(reward.gems)rw+=`<span class="login-reward-item">\u{1F48E} +${reward.gems}</span>`;
+  document.getElementById('login-reward-detail').innerHTML=rw;
+  el.classList.remove('hidden');
+}
+function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
 function showSessionSummary(d){document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">Cards</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">Coins</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">XP</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">Streak</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${id} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
 

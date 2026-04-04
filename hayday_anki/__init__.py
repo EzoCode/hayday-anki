@@ -40,12 +40,22 @@ def on_profile_loaded():
 
     mgr = _get_manager()
     mgr.generate_orders()
+    login_bonus = mgr.check_daily_login()
     mgr.save()
 
     config = mw.addonManager.getConfig(__name__) or {}
     if config.get("show_farm_on_startup", True):
         from aqt.qt import QTimer
-        QTimer.singleShot(1500, show_farm)
+
+        def _show_farm_with_bonus():
+            show_farm()
+            if login_bonus:
+                view = _get_view()
+                if view.web:
+                    import json
+                    view._js(f"showDailyLoginBonus({json.dumps(login_bonus)})")
+
+        QTimer.singleShot(1500, _show_farm_with_bonus)
 
 
 def on_reviewer_did_answer(reviewer, card, ease):

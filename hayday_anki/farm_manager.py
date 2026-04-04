@@ -196,6 +196,10 @@ class FarmState:
         # Achievements: achievement_id -> {unlocked_at, ...}
         self.achievements: Dict[str, Dict] = {}
 
+        # Daily login
+        self.last_login_date: Optional[str] = None
+        self.login_streak: int = 0
+
         # Events
         self.active_events: List[Dict] = []
 
@@ -304,6 +308,8 @@ class FarmState:
             "last_wheel_spin": self.last_wheel_spin,
             "daily_mystery_boxes_opened": self.daily_mystery_boxes_opened,
             "last_mystery_box_date": self.last_mystery_box_date,
+            "last_login_date": self.last_login_date,
+            "login_streak": self.login_streak,
             "created_at": self.created_at,
             "last_session": self.last_session,
             "mystery_boxes": self.mystery_boxes,
@@ -335,24 +341,47 @@ class FarmManager:
     # --- Persistence ---
 
     def save(self):
-        """Save farm state to disk."""
+        """Save farm state to disk with atomic write and backup."""
         try:
             DATA_DIR.mkdir(exist_ok=True)
-            with open(SAVE_FILE, "w") as f:
-                json.dump(self.state.to_dict(), f, indent=2)
+            data = self.state.to_dict()
+            json_str = json.dumps(data, indent=2)
+
+            # Atomic write: write to temp file first, then rename
+            tmp_file = SAVE_FILE.with_suffix(".tmp")
+            with open(tmp_file, "w", encoding="utf-8") as f:
+                f.write(json_str)
+
+            # Keep one backup of previous save
+            if SAVE_FILE.exists():
+                backup_file = SAVE_FILE.with_suffix(".json.bak")
+                try:
+                    import shutil
+                    shutil.copy2(SAVE_FILE, backup_file)
+                except Exception:
+                    pass
+
+            # Atomic rename
+            tmp_file.replace(SAVE_FILE)
         except Exception as e:
-            print(f"[HayDay] Error saving farm: {e}")
+            print(f"[ADFarm] Error saving farm: {e}")
 
     def load(self):
-        """Load farm state from disk."""
-        try:
-            if SAVE_FILE.exists():
-                with open(SAVE_FILE, "r") as f:
-                    data = json.load(f)
-                self.state = FarmState.from_dict(data)
-        except Exception as e:
-            print(f"[HayDay] Error loading farm, starting fresh: {e}")
-            self.state = FarmState()
+        """Load farm state from disk, with backup fallback."""
+        for path in [SAVE_FILE, SAVE_FILE.with_suffix(".json.bak")]:
+            try:
+                if path.exists():
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    self.state = FarmState.from_dict(data)
+                    if path != SAVE_FILE:
+                        print(f"[ADFarm] Recovered from backup save")
+                    return
+            except (json.JSONDecodeError, Exception) as e:
+                print(f"[ADFarm] Error loading {path.name}: {e}")
+                continue
+        print("[ADFarm] No valid save found, starting fresh")
+        self.state = FarmState()
 
     # --- Review Processing ---
 
@@ -390,10 +419,13 @@ class FarmManager:
         coins = int(base_coins * difficulty_mult + maturity_bonus)
         xp = int(base_xp * difficulty_mult + maturity_bonus)
 
+        # Streak bonus: +5% per streak day, up to +50%
+        streak_mult = 1.0 + min(self.state.current_streak * 0.05, 0.50)
+
         # Apply event multipliers
         coin_mult, xp_mult = self._get_event_multipliers()
-        coins = int(coins * coin_mult)
-        xp = int(xp * xp_mult)
+        coins = int(coins * coin_mult * streak_mult)
+        xp = int(xp * xp_mult * streak_mult)
 
         rewards["coins"] = coins
         rewards["xp"] = xp
@@ -757,11 +789,24 @@ class FarmManager:
         if len(self.state.active_orders) >= 3:
             return
 
-        order_items = [
-            item_id for item_id in self.state.unlocked_crops
-        ]
-        if "bread" in [b for b in self.state.unlocked_buildings]:
-            order_items.extend(["bread", "cookie"])
+        # Build pool of orderable items based on unlocked content
+        order_items = list(self.state.unlocked_crops)
+
+        # Add animal products if player owns any animals
+        animal_products = {
+            "cow": "milk", "chicken": "egg", "pig": "bacon", "sheep": "wool"
+        }
+        for animal_id, product in animal_products.items():
+            if self.state.animals.get(animal_id, {}).get("count", 0) > 0:
+                order_items.append(product)
+
+        # Add processed goods from owned buildings
+        from . import production
+        for building_id in self.state.buildings:
+            for recipe in production.RECIPES.get(building_id, []):
+                for output_id in recipe["output"]:
+                    if output_id not in order_items:
+                        order_items.append(output_id)
 
         while len(self.state.active_orders) < 3 and order_items:
             items_needed = {}
@@ -771,12 +816,16 @@ class FarmManager:
                 qty = random.randint(1, max(1, self.state.level // 3))
                 items_needed[item] = items_needed.get(item, 0) + qty
 
+            # Boat orders are harder but more rewarding
+            order_type = random.choice(["truck", "boat"])
+            reward_mult = 3 if order_type == "boat" else 2
+
             coin_reward = sum(
-                ITEM_CATALOG.get(i, {}).get("sell_price", 5) * q * 2
+                ITEM_CATALOG.get(i, {}).get("sell_price", 5) * q * reward_mult
                 for i, q in items_needed.items()
             )
             xp_reward = sum(
-                ITEM_CATALOG.get(i, {}).get("xp", 2) * q * 2
+                ITEM_CATALOG.get(i, {}).get("xp", 2) * q * reward_mult
                 for i, q in items_needed.items()
             )
 
@@ -785,7 +834,7 @@ class FarmManager:
                 "items_needed": items_needed,
                 "coin_reward": coin_reward,
                 "xp_reward": xp_reward,
-                "type": random.choice(["truck", "boat"]),
+                "type": order_type,
             })
 
     def fulfill_order(self, order_index: int) -> Optional[Dict]:
@@ -866,7 +915,98 @@ class FarmManager:
         if "item" in prize_data:
             self.state.add_item(prize_data["item"], prize_data.get("qty", 1))
 
-        return {"prize": prize_data, "name": prize_name}
+        # Return index so JS can land on correct segment
+        prize_index = next(
+            (i for i, (p, n, w) in enumerate(prizes) if n == prize_name), 0
+        )
+        return {"prize": prize_data, "name": prize_name, "index": prize_index}
+
+    # --- Auto Events ---
+
+    def check_events(self):
+        """Generate automatic events (weekend bonus, etc.)."""
+        now = datetime.now()
+
+        # Clean expired events
+        self.state.active_events = [
+            e for e in self.state.active_events
+            if datetime.fromisoformat(e.get("ends_at", now.isoformat())) > now
+        ]
+
+        # Weekend bonus: Saturday & Sunday
+        active_ids = {e.get("id") for e in self.state.active_events}
+        if now.weekday() >= 5:  # Saturday=5, Sunday=6
+            if "weekend_bonus" not in active_ids:
+                # Event ends at end of Sunday
+                days_until_monday = 7 - now.weekday()
+                end = now.replace(hour=23, minute=59, second=59) + timedelta(days=days_until_monday - 1)
+                self.state.active_events.append({
+                    "id": "weekend_bonus",
+                    "name": "Weekend Bonus!",
+                    "emoji": "\U0001F389",
+                    "coin_multiplier": 1.5,
+                    "xp_multiplier": 2.0,
+                    "ends_at": end.isoformat(),
+                })
+
+        # Streak milestone event: 7-day streak bonus
+        if self.state.current_streak >= 7 and self.state.current_streak % 7 == 0:
+            evt_id = f"streak_milestone_{self.state.current_streak}"
+            if evt_id not in active_ids:
+                end = (now + timedelta(hours=24)).isoformat()
+                self.state.active_events.append({
+                    "id": evt_id,
+                    "name": f"{self.state.current_streak}-Day Streak!",
+                    "emoji": "\U0001F525",
+                    "coin_multiplier": 2.0,
+                    "xp_multiplier": 2.0,
+                    "ends_at": end,
+                })
+
+    # --- Daily Login Bonus ---
+
+    def check_daily_login(self) -> Optional[Dict]:
+        """Check and grant daily login bonus. Returns bonus info or None."""
+        today = date.today().isoformat()
+        if self.state.last_login_date == today:
+            return None
+
+        # Update login streak
+        if self.state.last_login_date:
+            try:
+                last = date.fromisoformat(self.state.last_login_date)
+                if (date.today() - last).days == 1:
+                    self.state.login_streak += 1
+                elif (date.today() - last).days > 1:
+                    self.state.login_streak = 1
+            except ValueError:
+                self.state.login_streak = 1
+        else:
+            self.state.login_streak = 1
+
+        self.state.last_login_date = today
+
+        # Escalating daily rewards based on login streak
+        day = min(self.state.login_streak, 7)
+        daily_rewards = {
+            1: {"coins": 20, "desc": "20 coins"},
+            2: {"coins": 30, "desc": "30 coins"},
+            3: {"coins": 40, "gems": 1, "desc": "40 coins + 1 gem"},
+            4: {"coins": 50, "gems": 1, "desc": "50 coins + 1 gem"},
+            5: {"coins": 75, "gems": 2, "desc": "75 coins + 2 gems"},
+            6: {"coins": 100, "gems": 3, "desc": "100 coins + 3 gems"},
+            7: {"coins": 150, "gems": 5, "desc": "150 coins + 5 gems"},
+        }
+
+        reward = daily_rewards[day]
+        self.state.coins += reward.get("coins", 0)
+        self.state.gems += reward.get("gems", 0)
+
+        return {
+            "day": self.state.login_streak,
+            "reward": reward,
+            "message": f"Day {self.state.login_streak} login bonus: {reward['desc']}!",
+        }
 
     # --- Session Management ---
 
@@ -877,6 +1017,7 @@ class FarmManager:
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
         self._pending_notifications = []
+        self.check_events()
 
     def end_session(self) -> Dict:
         """End session and return summary."""
@@ -960,6 +1101,12 @@ class FarmManager:
             "session_reviews": self.state.session_reviews,
             "session_coins": self.state.session_coins_earned,
             "session_xp": self.state.session_xp_earned,
+            "streak_bonus_pct": min(self.state.current_streak * 5, 50),
+            "active_events": [
+                {"name": e.get("name", ""), "emoji": e.get("emoji", "")}
+                for e in self.state.active_events
+                if datetime.fromisoformat(e.get("ends_at", "2000-01-01")) > datetime.now()
+            ],
         }
 
     def get_notifications(self) -> List[Dict]:

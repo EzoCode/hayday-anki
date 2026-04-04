@@ -28,6 +28,9 @@
   </div>
 </div>
 
+<!-- ===== EVENT BANNER ===== -->
+<div id="event-banner" style="display:none"></div>
+
 <!-- ===== NOTIFICATION AREA ===== -->
 <div id="notification-area"></div>
 
@@ -173,6 +176,16 @@
     <h2 id="production-title">🏭 Production</h2>
     <div id="production-recipes"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+  </div>
+</div>
+
+<div id="login-bonus-overlay" class="overlay hidden">
+  <div class="overlay-card login-bonus-card">
+    <h2>🌅 Daily Login Bonus!</h2>
+    <div id="login-days-row" class="login-days-row"></div>
+    <div class="login-day-big">Day <span id="login-day">1</span></div>
+    <div id="login-reward-detail" class="login-reward-detail"></div>
+    <button class="action-btn" onclick="hideLoginBonus()">Collect!</button>
   </div>
 </div>
 
