@@ -71,11 +71,11 @@ class FarmWebView:
         self.web = AnkiWebView(parent=self._window, title="ADFarm")
         layout.addWidget(self.web)
 
-        # Load content
-        self._load_page()
-
-        # Set bridge
+        # Set bridge BEFORE loading content (avoids race condition)
         self.web.set_bridge_command(self._on_bridge_cmd, self)
+
+        # Load content (JS will call pycmd('farm:get_state') on DOMContentLoaded)
+        self._load_page()
 
         self._window.show()
 

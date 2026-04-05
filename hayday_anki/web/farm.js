@@ -430,67 +430,134 @@ function showInfo(data) {
 }
 
 function showBuildMenu() {
-  // Show available buildings to build
+  // Show ALL buildings — built, available, and locked with requirements
   const unlocked = farmData.unlocked_buildings || [];
   const built = Object.keys(farmData.buildings || {});
-  const available = unlocked.filter(b => !built.includes(b));
+  const defs = farmData.building_defs || {};
+  const level = farmData.level || 1;
+  const coins = farmData.coins || 0;
+  const landFree = (farmData.land_total||20) - (farmData.land_used||0);
 
-  if (available.length === 0) {
-    showNotification('Aucun bâtiment disponible !');
-    return;
+  // Get all known buildings from defs + progression
+  const ALL_BUILDINGS = [
+    {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
+    {id:'bbq',lvl:35},{id:'pastry_shop',lvl:40},{id:'jam_maker',lvl:45},
+    {id:'pizzeria',lvl:50},{id:'juice_press',lvl:55},{id:'pie_oven',lvl:70},
+  ];
+
+  let html = '';
+
+  // Built buildings
+  const builtList = ALL_BUILDINGS.filter(b => built.includes(b.id));
+  if (builtList.length > 0) {
+    html += '<div class="req-section"><h4>\u2705 Construits</h4>';
+    builtList.forEach(b => {
+      const def = defs[b.id]||{};
+      html += `<div class="recipe-card" onclick="pycmd('farm:building_detail:${b.id}');hideOverlay()">
+        <div class="recipe-header"><span class="recipe-emoji">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong><span class="recipe-time">Tap pour produire</span></div></div></div>`;
+    });
+    html += '</div>';
   }
 
-  // Use info overlay as a building selection menu
-  const defs = farmData.building_defs || {};
-  let html = '<div class="req-section"><h4>Bâtiments disponibles :</h4>';
-  available.forEach(bid => {
-    const def = defs[bid] || {};
-    const name = def.name || buildingName(bid);
-    const cost = def.cost_coins || 0;
-    html += `<div class="recipe-card" onclick="pycmd('farm:build:${bid}');hideOverlay()">
-      <div class="recipe-header">
-        <span class="recipe-emoji">${def.emoji || '\u{1F3ED}'}</span>
-        <div class="recipe-info"><strong>${name}</strong><span class="recipe-time">\u{1FA99} ${cost} pièces</span></div>
-      </div>
-    </div>`;
-  });
-  html += '</div>';
+  // Available to build
+  const availList = ALL_BUILDINGS.filter(b => unlocked.includes(b.id) && !built.includes(b.id));
+  if (availList.length > 0) {
+    html += '<div class="req-section"><h4>\u{1F528} Disponibles</h4>';
+    availList.forEach(b => {
+      const def = defs[b.id]||{};
+      const cost = def.cost_coins||0;
+      const canBuy = coins >= cost && landFree >= 2;
+      html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:build:${b.id}');hideOverlay()`:''}">
+        <div class="recipe-header"><span class="recipe-emoji">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
+        <span class="recipe-time">\u{1FA99} ${cost} + 2 terrain${canBuy?'':coins<cost?' (pas assez)':' (terrain plein)'}</span></div></div>
+        <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
+    });
+    html += '</div>';
+  }
 
-  showInfo({
-    icon: '\u{1F3D7}\u{FE0F}',
-    title: 'Construire',
-    desc: 'Choisis un bâtiment à construire (2 terrains)',
-  });
+  // Locked (not yet unlocked by level)
+  const lockedList = ALL_BUILDINGS.filter(b => !unlocked.includes(b.id) && !built.includes(b.id));
+  if (lockedList.length > 0) {
+    html += '<div class="req-section"><h4>\u{1F512} \u00C0 d\u00E9bloquer</h4>';
+    lockedList.forEach(b => {
+      const def = defs[b.id]||{};
+      const cost = def.cost_coins||0;
+      html += `<div class="recipe-card disabled">
+        <div class="recipe-header"><span class="recipe-emoji" style="filter:grayscale(1) opacity(.5)">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
+        <span class="recipe-time">\u{1F512} Niveau ${b.lvl} requis (tu es ${level}) \u2022 \u{1FA99} ${cost}</span></div></div>
+        <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
+    });
+    html += '</div>';
+  }
+
+  showInfo({ icon: '\u{1F3D7}\u{FE0F}', title: 'B\u00E2timents', desc: 'Construis des b\u00E2timents pour transformer tes r\u00E9coltes en produits de valeur !' });
   document.getElementById('info-requirements').innerHTML = html;
 }
 
 function showAnimalMenu() {
   const unlocked = farmData.unlocked_animals || [];
-  if (unlocked.length === 0) {
-    showNotification('Aucun animal disponible !');
-    return;
+  const level = farmData.level || 1;
+  const coins = farmData.coins || 0;
+  const landFree = (farmData.land_total||20) - (farmData.land_used||0);
+  const defs = farmData.animal_defs || {};
+
+  const ALL_ANIMALS = [
+    {id:'cow',lvl:10},{id:'chicken',lvl:20},{id:'pig',lvl:30},{id:'sheep',lvl:60},
+  ];
+
+  let html = '';
+
+  // Owned
+  const owned = (farmData.pastures||[]).map(p => p.animal_type);
+  const ownedUnique = [...new Set(owned)];
+  if (ownedUnique.length > 0) {
+    html += '<div class="req-section"><h4>\u2705 Tes animaux</h4>';
+    ownedUnique.forEach(aid => {
+      const def = defs[aid]||{};
+      const count = (farmData.pastures||[]).filter(p=>p.animal_type===aid).reduce((s,p)=>s+(p.count||1),0);
+      html += `<div class="recipe-card" onclick="showAnimalInfo('${aid}');hideOverlay()">
+        <div class="recipe-header">${animalLbl(aid,28)||`<span class="recipe-emoji">${def.emoji||''}</span>`}
+        <div class="recipe-info"><strong>${def.name||aid} x${count}</strong>
+        <span class="recipe-time">Produit ${def.product_emoji||''} ${def.product||''} / ${def.produce_every_n_reviews||10} reviews</span></div></div></div>`;
+    });
+    html += '</div>';
   }
 
-  const defs = farmData.animal_defs || {};
-  let html = '<div class="req-section"><h4>Animaux disponibles :</h4>';
-  unlocked.forEach(aid => {
-    const def = defs[aid] || {};
-    const name = def.name || aid;
-    const cost = def.cost_coins || 0;
-    html += `<div class="recipe-card" onclick="pycmd('farm:add_pasture:${aid}');hideOverlay()">
-      <div class="recipe-header">
-        ${animalLbl(aid, 32) || `<span class="recipe-emoji">${def.emoji || '\u{1F404}'}</span>`}
-        <div class="recipe-info"><strong>${name}</strong><span class="recipe-time">\u{1FA99} ${cost} pièces \u2022 Produit: ${def.product_emoji||''} ${def.product||''}</span></div>
-      </div>
-    </div>`;
-  });
-  html += '</div>';
+  // Available
+  const availAnimals = ALL_ANIMALS.filter(a => unlocked.includes(a.id));
+  if (availAnimals.length > 0) {
+    html += '<div class="req-section"><h4>\u{1F43E} Disponibles</h4>';
+    availAnimals.forEach(a => {
+      const def = defs[a.id]||{};
+      const cost = def.cost_coins||0;
+      const canBuy = coins >= cost && landFree >= 2;
+      html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:add_pasture:${a.id}');hideOverlay()`:''}">
+        <div class="recipe-header">${animalLbl(a.id,28)||`<span class="recipe-emoji">${def.emoji||''}</span>`}
+        <div class="recipe-info"><strong>${def.name||a.id}</strong>
+        <span class="recipe-time">\u{1FA99} ${cost} + 2 terrain \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
+    });
+    html += '</div>';
+  }
 
-  showInfo({
-    icon: '\u{1F404}',
-    title: 'Nouvel enclos',
-    desc: 'Adopte un animal (2 terrains)',
-  });
+  // Locked
+  const lockedAnimals = ALL_ANIMALS.filter(a => !unlocked.includes(a.id));
+  if (lockedAnimals.length > 0) {
+    html += '<div class="req-section"><h4>\u{1F512} \u00C0 d\u00E9bloquer</h4>';
+    lockedAnimals.forEach(a => {
+      const def = defs[a.id]||{};
+      const cost = def.cost_coins||0;
+      html += `<div class="recipe-card disabled">
+        <div class="recipe-header"><span class="recipe-emoji" style="filter:grayscale(1) opacity(.5)">${def.emoji||''}</span>
+        <div class="recipe-info"><strong>${def.name||a.id}</strong>
+        <span class="recipe-time">\u{1F512} Niveau ${a.lvl} (tu es ${level}) \u2022 \u{1FA99} ${cost} \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
+    });
+    html += '</div>';
+  }
+
+  showInfo({ icon: '\u{1F404}', title: 'Animaux', desc: 'Les animaux produisent des ressources pr\u00E9cieuses pendant que tu r\u00E9vises !' });
   document.getElementById('info-requirements').innerHTML = html;
 }
 

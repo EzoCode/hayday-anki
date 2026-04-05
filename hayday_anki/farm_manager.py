@@ -212,9 +212,17 @@ class FarmState:
 
         # Land system (new)
         self.land_total: int = 20      # Total land units available
-        self.fields: List[Dict] = []   # Crop fields [{id, crop, state, growth_stage, reviews_needed, reviews_done, planted_at}]
+        self.fields: List[Dict] = []   # Crop fields
         self.placed_buildings: List[Dict] = []  # [{id, building_type}]
         self.pastures: List[Dict] = []  # [{id, animal_type, count, reviews_since_last}]
+
+        # Initialize 3 starter fields for new players
+        for i in range(3):
+            self.fields.append({
+                "id": i, "crop": None, "state": "empty",
+                "growth_stage": 0, "reviews_needed": 0,
+                "reviews_done": 0, "planted_at": None,
+            })
 
         # Lifetime tracking counters (for achievements)
         self.total_harvests: int = 0
@@ -716,19 +724,19 @@ class FarmManager:
     # --- Farm Actions ---
 
     def clear_wilted(self, plot_id: int) -> bool:
-        """Clear a wilted plot so it can be replanted."""
-        if plot_id >= len(self.state.plots):
+        """Clear a wilted field so it can be replanted."""
+        field = next((f for f in self.state.fields if f["id"] == plot_id), None)
+        if field is None:
             return False
-        plot = self.state.plots[plot_id]
-        if plot["state"] != "wilted":
+        if field["state"] != "wilted":
             return False
-        plot["state"] = "empty"
-        plot["crop"] = None
-        plot["planted_at"] = None
-        plot["growth_stage"] = 0
-        plot["reviews_needed"] = 0
-        plot["reviews_done"] = 0
-        plot.pop("_ready_since", None)
+        field["state"] = "empty"
+        field["crop"] = None
+        field["planted_at"] = None
+        field["growth_stage"] = 0
+        field["reviews_needed"] = 0
+        field["reviews_done"] = 0
+        field.pop("_ready_since", None)
         return True
 
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
