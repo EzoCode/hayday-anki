@@ -250,7 +250,20 @@ class FarmState:
             })
 
     def add_plots(self, count: int):
-        """Add new plots to the farm."""
+        """Add new plots/fields to the farm."""
+        # Add to the new fields system (used by UI)
+        field_id = max([f["id"] for f in self.fields], default=-1) + 1
+        for i in range(count):
+            self.fields.append({
+                "id": field_id + i,
+                "crop": None,
+                "state": "empty",
+                "growth_stage": 0,
+                "reviews_needed": 0,
+                "reviews_done": 0,
+                "planted_at": None,
+            })
+        # Keep legacy plots in sync
         start_id = len(self.plots)
         for i in range(count):
             self.plots.append({
@@ -654,7 +667,7 @@ class FarmManager:
                     field["state"] = "growing"
                     # Keep reviews_needed consistent from crop definition
                     crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
-                    field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3) // 4)
+                    field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
 
         # Wilt check on all ready fields
         for field in self.state.fields:
@@ -752,7 +765,7 @@ class FarmManager:
 
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
-        reviews_per_stage = max(1, crop_def.get("growth_reviews", 3) // 4)
+        reviews_per_stage = max(1, crop_def.get("growth_reviews", 3))
 
         field["state"] = "planted"
         field["crop"] = crop_id
@@ -1347,12 +1360,13 @@ class FarmManager:
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
         self._pending_notifications = []
+        # Update streak at session start so the correct bonus applies during reviews
+        self.update_streak()
         self.check_events()
 
     def end_session(self) -> Dict:
         """End session and return summary."""
         self.state.total_sessions += 1
-        self.update_streak()
         self.generate_orders()
 
         # Process production queues
@@ -1403,15 +1417,38 @@ class FarmManager:
 
         # Build definitions dicts for JS (French names, costs, etc.)
         building_defs = {
-            bid: {"name": bdef.get("name", bid), "emoji": bdef.get("emoji", ""), "cost": bdef.get("cost_coins", 0), "desc": bdef.get("description", "")}
+            bid: {
+                "name": bdef.get("name", bid),
+                "emoji": bdef.get("emoji", ""),
+                "cost_coins": bdef.get("cost_coins", 0),
+                "cost": bdef.get("cost_coins", 0),
+                "description": bdef.get("description", ""),
+            }
             for bid, bdef in progression.BUILDING_DEFINITIONS.items()
         }
         animal_defs = {
-            aid: {"name": adef.get("name", aid), "emoji": adef.get("emoji", ""), "cost": adef.get("cost_coins", 0), "product": adef.get("product", ""), "max": adef.get("max_owned", 5)}
+            aid: {
+                "name": adef.get("name", aid),
+                "emoji": adef.get("emoji", ""),
+                "cost_coins": adef.get("cost_coins", 100),
+                "cost": adef.get("cost_coins", 100),
+                "product": adef.get("product", ""),
+                "product_emoji": ITEM_CATALOG.get(adef.get("product", ""), {}).get("emoji", ""),
+                "produce_every_n_reviews": adef.get("produce_every_n_reviews", 10),
+                "max": adef.get("max_owned", 5),
+            }
             for aid, adef in progression.ANIMAL_DEFINITIONS.items()
         }
         crop_defs = {
-            cid: {"name": cdef.get("name", cid), "emoji": cdef.get("emoji", "")}
+            cid: {
+                "name": cdef.get("name", cid),
+                "emoji": cdef.get("emoji", ""),
+                "growth_reviews": cdef.get("growth_reviews", 3),
+                "harvest_min": cdef.get("harvest_min", 2),
+                "harvest_max": cdef.get("harvest_max", 4),
+                "sell_price": cdef.get("sell_price", 2),
+                "xp_per_harvest": cdef.get("xp_per_harvest", 3),
+            }
             for cid, cdef in progression.CROP_DEFINITIONS.items()
         }
         deco_defs = {

@@ -405,6 +405,10 @@ class FarmWebView:
         if animal_id not in self.manager.state.unlocked_animals:
             self._js("showNotification('Animal pas encore débloqué !')")
             return
+        # Check land availability (animals use 2 land)
+        if self.manager.get_land_used() + 2 > self.manager.state.land_total:
+            self._js("showNotification('Pas assez de terrain !')")
+            return
         cost = animal_def.get("cost_coins", 100)
         if self.manager.state.coins < cost:
             self._js("showNotification('Pas assez de pièces !')")
@@ -420,6 +424,19 @@ class FarmWebView:
         if animal_id not in self.manager.state.animals:
             self.manager.state.animals[animal_id] = {"count": 0, "reviews_since_last": 0}
         self.manager.state.animals[animal_id]["count"] = current + 1
+        # Add to pastures so it renders on the farm
+        pasture_id = max([p["id"] for p in self.manager.state.pastures], default=-1) + 1
+        # Check if there's already a pasture for this animal type — increment count instead
+        existing = next((p for p in self.manager.state.pastures if p["animal_type"] == animal_id), None)
+        if existing:
+            existing["count"] = current + 1
+        else:
+            self.manager.state.pastures.append({
+                "id": pasture_id,
+                "animal_type": animal_id,
+                "count": 1,
+                "reviews_since_last": 0,
+            })
         aname = animal_def["name"]
         self._js(f"showNotification('{aname} acheté(e) !')")
 
@@ -429,8 +446,15 @@ class FarmWebView:
         if not building_def:
             self._js("showNotification('Bâtiment inconnu !')")
             return
+        if building_id not in self.manager.state.unlocked_buildings:
+            self._js("showNotification('Bâtiment pas encore débloqué !')")
+            return
         if building_id in self.manager.state.buildings:
             self._js("showNotification('Déjà construit !')")
+            return
+        # Check land availability (buildings use 2 land)
+        if self.manager.get_land_used() + 2 > self.manager.state.land_total:
+            self._js("showNotification('Pas assez de terrain !')")
             return
         cost = building_def.get("cost_coins", 100)
         if self.manager.state.coins < cost:
@@ -439,6 +463,9 @@ class FarmWebView:
         self.manager.state.coins -= cost
         self.manager.state.total_coins_spent += cost
         self.manager.state.buildings[building_id] = {"level": 1}
+        # Add to placed_buildings so it renders on the farm
+        place_id = max([b["id"] for b in self.manager.state.placed_buildings], default=-1) + 1
+        self.manager.state.placed_buildings.append({"id": place_id, "building_type": building_id})
         bname = building_def["name"]
         self._js(f"showNotification('{bname} construit !')")
 
