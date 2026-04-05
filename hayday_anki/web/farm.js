@@ -91,6 +91,17 @@ function img(key, w, h, cls) {
   if (!src) return '';
   return `<img src="${src}" width="${w||48}" height="${h||48}" class="${cls||''}" draggable="false">`;
 }
+// Inline coin/gem icons using real sprites
+function coinIcon(size) {
+  const src = S('ui_coin');
+  if (!src) return '<span class="inline-coin">🪙</span>';
+  return `<img src="${src}" width="${size||14}" height="${size||14}" class="inline-currency" draggable="false">`;
+}
+function gemIcon(size) {
+  const src = S('ui_gem');
+  if (!src) return '<span class="inline-gem">💎</span>';
+  return `<img src="${src}" width="${size||14}" height="${size||14}" class="inline-currency" draggable="false">`;
+}
 
 const CROP_SPRITE_MAP = {
   wheat:'wheat', corn:'corn', carrot:'turnip', tomato:'tomato',
@@ -211,6 +222,54 @@ function checkStorageWarnings() {
   else if (siloPct >= 0.9) { showNotification('\u{26A0}\u{FE0F} ' + LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
 }
 
+function initSpriteIcons() {
+  // HUD currency icons
+  const coinSrc = S('ui_coin');
+  const gemSrc = S('ui_gem');
+  if (coinSrc) document.getElementById('coin-icon-img').src = coinSrc;
+  if (gemSrc) document.getElementById('gem-icon-img').src = gemSrc;
+
+  // Toolbar tab icons — use real sprites
+  const tabIcons = {
+    'tab-icon-farm': S('hayday_wheat-icon') || S('crops_wheat_portrait'),
+    'tab-icon-buildings': S('hayday_barn'),
+    'tab-icon-inventory': S('ui_chest_0_closed'),
+    'tab-icon-orders': S('hayday_coin-box'),
+    'tab-icon-shop': S('hayday_shop'),
+    'tab-icon-achievements': S('hayday_star'),
+    'tab-icon-wheel': S('hayday_star'),
+  };
+  Object.entries(tabIcons).forEach(([id, src]) => {
+    const el = document.getElementById(id);
+    if (el && src) el.src = src;
+  });
+
+  // Zone header icons
+  const zoneIcons = {
+    'zone-icon-fields': S('hayday_wheat-icon') || S('crops_wheat_portrait'),
+    'zone-icon-workshop': S('hayday_barn'),
+    'zone-icon-pasture': S('hayday_cow-lbl') || S('hayday_cow'),
+    'zone-icon-village': S('hayday_scarecrow'),
+  };
+  Object.entries(zoneIcons).forEach(([id, src]) => {
+    const el = document.getElementById(id);
+    if (el && src) el.src = src;
+  });
+
+  // Panel header icons
+  const panelIcons = {
+    'panel-icon-inventory': S('ui_chest_0_closed'),
+    'panel-icon-buildings': S('hayday_barn'),
+    'panel-icon-orders': S('hayday_coin-box'),
+    'panel-icon-shop': S('hayday_shop'),
+    'panel-icon-achievements': S('hayday_star'),
+  };
+  Object.entries(panelIcons).forEach(([id, src]) => {
+    const el = document.getElementById(id);
+    if (el && src) el.src = src;
+  });
+}
+
 function updateHUD() {
   const d = farmData;
   const starSrc = S('hayday_star');
@@ -266,7 +325,7 @@ function renderFields() {
   // Update field cost on button
   const fieldCost = farmData.field_cost || 0;
   const addBtn = document.getElementById('add-field-btn');
-  if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (🪙${fieldCost})` : '+ Champ';
+  if (addBtn) addBtn.innerHTML = fieldCost > 0 ? `+ Champ (${coinIcon(12)}${fieldCost})` : '+ Champ';
 
   // Show/hide harvest all button
   const readyCount = fields.filter(f => f.state === 'ready').length;
@@ -274,7 +333,7 @@ function renderFields() {
   if (harvestAllBtn) {
     if (readyCount >= 2) {
       harvestAllBtn.style.display = '';
-      harvestAllBtn.textContent = `🌾 Tout récolter (${readyCount})`;
+      harvestAllBtn.innerHTML = `${img('hayday_wheat-icon',14,14)||'🌾'} Tout récolter (${readyCount})`;
     } else {
       harvestAllBtn.style.display = 'none';
     }
@@ -286,7 +345,7 @@ function renderFields() {
   if (plantAllBtn) {
     if (emptyWithLastCrop.length >= 2) {
       plantAllBtn.style.display = '';
-      plantAllBtn.textContent = `🌱 Tout planter (${emptyWithLastCrop.length})`;
+      plantAllBtn.innerHTML = `${img('crops_wheat_0',14,14)||'🌱'} Tout planter (${emptyWithLastCrop.length})`;
     } else {
       plantAllBtn.style.display = 'none';
     }
@@ -361,6 +420,7 @@ function renderWorkshop() {
     const name = buildingName(bid);
     const el = document.createElement('div');
     el.className = 'building-tile';
+    el.setAttribute('data-building', bid);
     el.onclick = () => pycmd('farm:building_detail:' + bid);
     const queue = (farmData.production_queues||{})[bid]||[];
     const ready = queue.filter(q=>q.ready).length;
@@ -785,8 +845,8 @@ function hidePanel() { currentPanel=null; document.querySelectorAll('.panel').fo
 function renderInventory() {
   const grid = document.getElementById('inventory-grid'); grid.innerHTML = '';
   const inv = farmData.inventory||{}, cat = farmData.item_catalog||{};
-  document.getElementById('barn-status').textContent = `\u{1F3DA}\u{FE0F} Grange: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
-  document.getElementById('silo-status').textContent = `\u{1F3ED} Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
+  document.getElementById('barn-status').innerHTML = `${img('hayday_barn',14,14)} Grange: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
+  document.getElementById('silo-status').innerHTML = `${img('hayday_silo',14,14)} Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
   Object.entries(inv).forEach(([id,qty]) => {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
@@ -801,7 +861,7 @@ function renderInventory() {
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${coinIcon(11)} ${it.sell_price}</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -882,7 +942,7 @@ function renderOrders() {
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type">${order.type==='boat'?'\u26F5 Bateau':'\u{1F69A} Camion'}</span>
-        <span class="order-reward">\u{1FA99} ${order.coin_reward} • +${order.xp_reward} XP</span>
+        <span class="order-reward">${coinIcon(13)} ${order.coin_reward} • +${order.xp_reward} XP</span>
       </div>
       <div class="order-items">${items}</div>
       <button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
@@ -929,7 +989,7 @@ function renderShopDeco(grid){
     el.className='item-cell';
     el.style.opacity=ok?'1':'.45';
     el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
-    el.innerHTML=`<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span><span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">\u{1FA99} ${cost}</span>`;
+    el.innerHTML=`<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span><span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">${coinIcon(11)} ${cost}</span>`;
     grid.appendChild(el);
   });
 }
@@ -993,7 +1053,7 @@ function renderShopAnimals(grid){
     el.innerHTML=`
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
-      <span class="item-price">${unlocked?`🪙 ${cost}`:`🔒 Niv.${info.lvl}`}</span>
+      <span class="item-price">${unlocked?`${coinIcon(11)} ${cost}`:`🔒 Niv.${info.lvl}`}</span>
       <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
     `;
     grid.appendChild(el);
@@ -1152,7 +1212,7 @@ function showSellDialog(id, qty) {
   if (!overlay) return pycmd(`farm:sell:${id}:1`);
   document.getElementById('sell-item-name').textContent = `${cat.emoji||''} ${itemName(id)}`;
   document.getElementById('sell-item-stock').textContent = `Stock : ${qty}`;
-  document.getElementById('sell-unit-price').textContent = `\u{1FA99} ${price} / unité`;
+  document.getElementById('sell-unit-price').innerHTML = `${coinIcon(14)} ${price} / unité`;
   const btns = document.getElementById('sell-buttons');
   btns.innerHTML = '';
   const amounts = [1];
@@ -1166,7 +1226,7 @@ function showSellDialog(id, qty) {
     const total = n * price;
     const btn = document.createElement('button');
     btn.className = 'sell-amount-btn';
-    btn.innerHTML = `<span>${label}</span><span class="sell-total">\u{1FA99} ${total}</span>`;
+    btn.innerHTML = `<span>${label}</span><span class="sell-total">${coinIcon(14)} ${total}</span>`;
     btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('click'); };
     btns.appendChild(btn);
   });
@@ -1202,7 +1262,7 @@ function showWheelResult(r){
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25\u{1FA99}',c:'#f44336'},{l:'50\u{1FA99}',c:'#e91e63'},{l:'100\u{1FA99}',c:'#9c27b0'},{l:'1\u{1F48E}',c:'#673ab7'},{l:'3\u{1F48E}',c:'#3f51b5'},{l:'5\u{1F48E}',c:'#2196f3'},{l:'3\u{1F529}',c:'#009688'},{l:'3\u{1FAB5}',c:'#4caf50'},{l:'\u{1F4DC}',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else icon.textContent='\u{1F4E6}'}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else icon.textContent='\u{1F4E6}'}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
 function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
@@ -1228,8 +1288,8 @@ function showDailyLoginBonus(d){
   for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
   document.getElementById('login-days-row').innerHTML=dots;
   let rw='';
-  if(reward.coins)rw+=`<span class="login-reward-item">\u{1FA99} +${reward.coins}</span>`;
-  if(reward.gems)rw+=`<span class="login-reward-item">\u{1F48E} +${reward.gems}</span>`;
+  if(reward.coins)rw+=`<span class="login-reward-item">${coinIcon(20)} +${reward.coins}</span>`;
+  if(reward.gems)rw+=`<span class="login-reward-item">${gemIcon(18)} +${reward.gems}</span>`;
   document.getElementById('login-reward-detail').innerHTML=rw;
   el.classList.remove('hidden');
 }
@@ -1300,6 +1360,7 @@ function updateTutorialStep() {
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('tab-farm').classList.add('active');
+  initSpriteIcons();
   drawWheel();
   renderFarmer();
   pycmd('farm:get_state');

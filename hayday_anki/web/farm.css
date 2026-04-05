@@ -233,22 +233,34 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 
 /* Deco tiles in village zone */
 .deco-tile {
-  width: 68px;
-  height: 68px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 10px;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.12s;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 8px rgba(0,0,0,0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  overflow: hidden;
 }
-.deco-tile:hover { transform: translateY(-2px); }
-.deco-tile img { max-width: 44px; max-height: 44px; }
-.deco-emoji { font-size: 28px; }
-.deco-name { font-size: 7px; color: rgba(255,255,255,0.5); font-weight: 600; margin-top: 1px; }
+.deco-tile::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 18px;
+  background: linear-gradient(180deg, transparent, rgba(93,163,58,0.3));
+  border-radius: 0 0 12px 12px;
+}
+.deco-tile:hover { transform: translateY(-3px) scale(1.05); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 6px 14px rgba(0,0,0,0.3); }
+.deco-tile img { max-width: 44px; max-height: 44px; position: relative; z-index: 1; }
+.deco-emoji { font-size: 32px; position: relative; z-index: 1; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3)); }
+.deco-name { font-size: 7px; color: rgba(255,255,255,0.6); font-weight: 700; margin-top: 1px; position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 
 /* Pasture tile */
 .pasture-tile {
@@ -371,6 +383,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
 .plot-crop img{image-rendering:auto;max-width:52px;max-height:52px}
 .plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2}
+.plot-ready-label{font-size:9px;font-weight:900;color:var(--gold);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(255,215,0,.4);background:rgba(0,0,0,.35);padding:1px 6px;border-radius:8px;bottom:4px}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.2);font-weight:200;position:relative;z-index:1}
@@ -441,9 +454,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-1px)}
 .tool-btn.active{color:var(--orange)}
 .tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:18px;height:3px;background:var(--orange);border-radius:2px;box-shadow:0 0 8px rgba(244,146,42,.6)}
-.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .tool-label{font-size:8px;font-weight:700;letter-spacing:.3px}
-.wheel-btn .tool-icon{animation:wheelIdle 5s linear infinite}
 @keyframes wheelIdle{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
 
@@ -457,6 +468,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .panel-subheader{display:flex;gap:14px;padding:0 16px 6px;font-size:11px;color:#888;font-weight:700}
 .close-btn{background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;color:#999;padding:3px 7px;border-radius:50%;transition:all .15s}
 .close-btn:hover{background:rgba(0,0,0,.12);transform:scale(1.1)}
+.panel-icon{width:22px;height:22px;object-fit:contain;vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
 
 /* ===== SETTINGS PANEL ===== */
 .settings-list{padding:10px 16px;display:flex;flex-direction:column;gap:8px}
@@ -567,7 +579,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .crop-choice{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.3));border-radius:12px;padding:8px 10px;border:1px solid rgba(0,0,0,.05);cursor:pointer;transition:all .15s;margin-bottom:5px}
 .crop-choice:hover{background:rgba(255,255,255,.85);border-color:var(--orange);transform:translateX(4px);box-shadow:0 3px 8px rgba(0,0,0,.08)}
 .crop-choice-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-.crop-choice-icon img{image-rendering:pixelated;max-width:36px;max-height:36px}
+.crop-choice-icon img{image-rendering:auto;max-width:36px;max-height:36px}
 .crop-choice-info{flex:1}
 .crop-choice-info strong{font-size:13px;color:var(--text-d)}
 .crop-choice-info span{font-size:9px;color:#888;display:block}
@@ -675,19 +687,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 /* ===== DECORATION IMPROVEMENTS ===== */
 .decoration-item{position:absolute;font-size:22px;filter:drop-shadow(1px 2px 4px rgba(0,0,0,.35));pointer-events:auto;cursor:grab;animation:decoIdle 4s ease-in-out infinite;transition:transform .2s}
 .decoration-item:hover{transform:scale(1.3);filter:drop-shadow(2px 3px 6px rgba(0,0,0,.5))}
-.decoration-item img{max-width:32px;max-height:32px;image-rendering:pixelated}
+.decoration-item img{max-width:32px;max-height:32px;image-rendering:auto}
 @keyframes decoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
 
 /* ===== FARMER CHARACTER ===== */
 #farmer-character{position:absolute;bottom:8px;right:12px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.35))}
-.farmer-sprite{image-rendering:pixelated}
+.farmer-sprite{image-rendering:auto}
 @keyframes farmerBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* ===== TUTORIAL ===== */
 .tutorial-card{max-width:320px}
 .tutorial-card h2{margin-top:6px}
 #tutorial-farmer{margin-bottom:4px}
-#tutorial-farmer img{image-rendering:pixelated;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+#tutorial-farmer img{image-rendering:auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
 .tutorial-step{display:none;padding:8px 4px;font-size:13px;color:var(--text-d);line-height:1.5}
 .tutorial-step.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
@@ -721,6 +733,51 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 /* ===== PLOT GROWING ANIMATION ===== */
 .plot-planted .plot-crop,.plot-growing .plot-crop{animation:growPulse 3s ease-in-out infinite}
 @keyframes growPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ===== PLOT CROP BOUNCE (Ready to harvest) ===== */
+.plot-crop-bounce{animation:cropBounce 1.2s ease-in-out infinite !important}
+@keyframes cropBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-6px) scale(1.08)}50%{transform:translateY(-3px) scale(1.04)}70%{transform:translateY(-5px) scale(1.06)}}
+
+/* Harvest click feedback */
+.plot-ready:active .plot-crop{animation:harvestPop .3s ease-out !important}
+@keyframes harvestPop{0%{transform:scale(1)}40%{transform:scale(1.3) translateY(-8px)}100%{transform:scale(0.5) translateY(-20px);opacity:0}}
+
+/* ===== SPRITE-BASED CURRENCY ICONS ===== */
+.currency-icon-img{width:18px;height:18px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));image-rendering:auto;vertical-align:middle}
+#gem-icon-img{width:16px;height:16px}
+.inline-currency{vertical-align:middle;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));image-rendering:auto;margin-right:1px}
+
+/* ===== TOOLBAR SPRITE ICONS ===== */
+.tab-icon{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));image-rendering:auto;opacity:.7;transition:opacity .2s}
+.tool-btn.active .tab-icon{opacity:1;filter:drop-shadow(0 0 4px rgba(244,146,42,.5))}
+.tool-btn:hover .tab-icon{opacity:.9}
+.tab-icon-wheel{animation:wheelIdle 5s linear infinite}
+.tool-icon{font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;height:24px}
+
+/* ===== ZONE HEADER ICONS ===== */
+.zone-icon{width:20px;height:20px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));image-rendering:auto;margin-right:4px;vertical-align:middle}
+
+/* ===== BUILDING DIFFERENTIATION ===== */
+.building-tile[data-building="bakery"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(15deg) saturate(1.2)}
+.building-tile[data-building="sugar_mill"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(-10deg) brightness(1.1)}
+.building-tile[data-building="dairy"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(180deg) saturate(.8) brightness(1.1)}
+.building-tile[data-building="bbq"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(330deg) saturate(1.3)}
+.building-tile[data-building="pastry_shop"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(40deg) saturate(1.1) brightness(1.05)}
+.building-tile[data-building="jam_maker"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(280deg) saturate(1.2)}
+.building-tile[data-building="pizzeria"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(20deg) saturate(1.3) brightness(.95)}
+.building-tile[data-building="juice_press"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(90deg) saturate(.9) brightness(1.1)}
+.building-tile[data-building="pie_oven"] .building-img{filter:drop-shadow(2px 4px 4px rgba(0,0,0,.35)) hue-rotate(340deg) saturate(1.1)}
+
+/* Building name tags with colored accent */
+.building-tile[data-building="bakery"] .building-name::before{content:'🍞 '}
+.building-tile[data-building="sugar_mill"] .building-name::before{content:'🍬 '}
+.building-tile[data-building="dairy"] .building-name::before{content:'🥛 '}
+.building-tile[data-building="bbq"] .building-name::before{content:'🔥 '}
+.building-tile[data-building="pastry_shop"] .building-name::before{content:'🎂 '}
+.building-tile[data-building="jam_maker"] .building-name::before{content:'🍓 '}
+.building-tile[data-building="pizzeria"] .building-name::before{content:'🍕 '}
+.building-tile[data-building="juice_press"] .building-name::before{content:'🧃 '}
+.building-tile[data-building="pie_oven"] .building-name::before{content:'🥧 '}
 
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.5s ease-in-out infinite !important}
