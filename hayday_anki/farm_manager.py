@@ -972,6 +972,7 @@ class FarmManager:
         # Give rewards
         self.state.coins += order["coin_reward"]
         self.state.xp += order["xp_reward"]
+        self.state.total_coins_earned += order["coin_reward"]
         self.state.orders_completed += 1
 
         result = {
@@ -1256,6 +1257,24 @@ class FarmManager:
         if FarmManager._item_catalog_cache is None:
             FarmManager._item_catalog_cache = {k: v for k, v in ITEM_CATALOG.items()}
 
+        # Build definitions dicts for JS (French names, costs, etc.)
+        building_defs = {
+            bid: {"name": bdef.get("name", bid), "emoji": bdef.get("emoji", ""), "cost": bdef.get("cost_coins", 0), "desc": bdef.get("description", "")}
+            for bid, bdef in progression.BUILDING_DEFINITIONS.items()
+        }
+        animal_defs = {
+            aid: {"name": adef.get("name", aid), "emoji": adef.get("emoji", ""), "cost": adef.get("cost_coins", 0), "product": adef.get("product", ""), "max": adef.get("max_owned", 5)}
+            for aid, adef in progression.ANIMAL_DEFINITIONS.items()
+        }
+        crop_defs = {
+            cid: {"name": cdef.get("name", cid), "emoji": cdef.get("emoji", "")}
+            for cid, cdef in progression.CROP_DEFINITIONS.items()
+        }
+        deco_defs = {
+            did: {"name": ddef.get("name", did), "emoji": ddef.get("emoji", ""), "cost": ddef.get("cost", 0)}
+            for did, ddef in progression.DECORATION_CATALOG.items()
+        }
+
         return {
             "level": self.state.level,
             "xp": self.state.xp,
@@ -1299,6 +1318,16 @@ class FarmManager:
                 for e in self.state.active_events
                 if datetime.fromisoformat(e.get("ends_at", "2000-01-01")) > datetime.now()
             ],
+            "building_defs": building_defs,
+            "animal_defs": animal_defs,
+            "crop_defs": crop_defs,
+            "deco_defs": deco_defs,
+            "total_harvests": self.state.total_harvests,
+            "total_coins_earned": self.state.total_coins_earned,
+            "total_items_sold": self.state.total_items_sold,
+            "total_produced": self.state.total_produced,
+            "total_sessions": self.state.total_sessions,
+            "total_correct": self.state.total_correct,
         }
 
     def get_notifications(self) -> List[Dict]:

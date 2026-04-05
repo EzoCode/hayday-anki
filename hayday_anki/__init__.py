@@ -192,15 +192,17 @@ def _process_animals(mgr):
     if collected_products:
         view = _get_view()
         if view.web:
+            import json
             for p in collected_products:
-                import json
-                view._js(f"showNotification('{p['emoji']} +{p['qty']} {p['name']}', 'reward')")
+                msg = f"{p['emoji']} +{p['qty']} {p['name']}"
+                view._js(f"showNotification({json.dumps(msg)}, 'reward')")
 
 
 def _check_achievements(mgr):
     global _achievement_manager
     from . import achievements as ach_mod
     from datetime import datetime
+    import json
     if _achievement_manager is None:
         _achievement_manager = ach_mod.AchievementManager()
     ach_mgr = _achievement_manager
@@ -216,8 +218,21 @@ def _check_achievements(mgr):
         mgr.state.achievements[ach["key"]] = {
             "unlocked_at": datetime.now().isoformat(),
         }
-        if ach.get("gems", 0) > 0:
-            mgr.state.gems += ach["gems"]
+        gem_reward = ach.get("gems", 0)
+        if gem_reward > 0:
+            mgr.state.gems += gem_reward
+
+        # Show achievement notification in UI
+        view = _get_view()
+        if view.web:
+            ach_name = ach.get("name", "")
+            ach_tier = ach.get("tier", "")
+            tier_emoji = {"bronze": "\U0001F949", "silver": "\U0001F948", "gold": "\U0001F947"}.get(ach_tier, "\U0001F3C6")
+            gem_text = f" +{gem_reward}\U0001F48E" if gem_reward > 0 else ""
+            msg = f"{tier_emoji} {ach_name} ({ach_tier}){gem_text}"
+            view._js(f"showNotification({json.dumps(msg)}, 'reward')")
+            if ach_tier == "gold":
+                view._js("createConfetti()")
 
 
 # =============================================================================
