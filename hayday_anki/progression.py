@@ -284,11 +284,9 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 1, "id": "plots_70", "name": "+1 Parcelle"},
     ],
     80: [
-        {"type": "building", "id": "candy_machine", "name": "Machine à bonbons", "emoji": "\U0001F36C"},
         {"type": "plots", "count": 1, "id": "plots_80", "name": "+1 Parcelle"},
     ],
     90: [
-        {"type": "building", "id": "pottery", "name": "Poterie", "emoji": "\U0001F3FA"},
         {"type": "plots", "count": 1, "id": "plots_90", "name": "+1 Parcelle"},
     ],
     100: [

@@ -153,8 +153,7 @@ class FarmState:
 
         # Farm grid (plots)
         self.plots: List[Dict] = []
-        self.num_plots: int = 6  # Starting plots
-        self._init_plots()
+        self.num_plots: int = 3  # Starting plots
 
         # Buildings owned: building_id -> {level, queue, ...}
         self.buildings: Dict[str, Dict] = {}
@@ -223,6 +222,7 @@ class FarmState:
                 "growth_stage": 0, "reviews_needed": 0,
                 "reviews_done": 0, "planted_at": None,
             })
+        self.num_plots = len(self.fields)
 
         # Lifetime tracking counters (for achievements)
         self.total_harvests: int = 0
@@ -403,20 +403,15 @@ class FarmState:
         # Migrate old plots to fields if needed
         if not state.fields and state.plots:
             for i, plot in enumerate(state.plots):
-                if plot.get("state") != "empty":
-                    state.fields.append({
-                        "id": i,
-                        "crop": plot.get("crop"),
-                        "state": plot.get("state", "empty"),
-                        "growth_stage": plot.get("growth_stage", 0),
-                        "reviews_needed": plot.get("reviews_needed", 0),
-                        "reviews_done": plot.get("reviews_done", 0),
-                        "planted_at": plot.get("planted_at"),
-                    })
-            # Add some empty fields too
-            if not state.fields:
-                for i in range(3):
-                    state.fields.append({"id": i, "crop": None, "state": "empty", "growth_stage": 0, "reviews_needed": 0, "reviews_done": 0, "planted_at": None})
+                state.fields.append({
+                    "id": i,
+                    "crop": plot.get("crop"),
+                    "state": plot.get("state", "empty"),
+                    "growth_stage": plot.get("growth_stage", 0),
+                    "reviews_needed": plot.get("reviews_needed", 0),
+                    "reviews_done": plot.get("reviews_done", 0),
+                    "planted_at": plot.get("planted_at"),
+                })
         # Migrate old buildings dict to placed_buildings
         if not state.placed_buildings and state.buildings:
             for bid, bdata in state.buildings.items():
@@ -503,11 +498,11 @@ class FarmManager:
             if isinstance(k, str) and isinstance(v, (int, float)) and v > 0
         }
 
-        # Ensure plots list integrity
+        # Ensure plots list integrity (legacy)
         if not isinstance(s.plots, list):
             s.plots = []
-            s._init_plots()
-        s.num_plots = len(s.plots)
+        # num_plots should reflect fields (authoritative), not legacy plots
+        s.num_plots = max(len(s.fields), len(s.plots))
 
         # Ensure storage levels are valid
         s.barn_level = max(1, int(s.barn_level) if isinstance(s.barn_level, (int, float)) else 1)
@@ -805,6 +800,7 @@ class FarmManager:
         if self.state.coins < cost:
             return False
         self.state.coins -= cost
+        self.state.total_coins_spent += cost
         pasture_id = max([p["id"] for p in self.state.pastures], default=-1) + 1
         self.state.pastures.append({
             "id": pasture_id,
@@ -835,6 +831,7 @@ class FarmManager:
         if self.state.coins < cost:
             return False
         self.state.coins -= cost
+        self.state.total_coins_spent += cost
         self.state.buildings[building_id] = {"level": 1}
         place_id = max([b["id"] for b in self.state.placed_buildings], default=-1) + 1
         self.state.placed_buildings.append({"id": place_id, "building_type": building_id})
@@ -899,6 +896,7 @@ class FarmManager:
         field["growth_stage"] = 0
         field["reviews_needed"] = 0
         field["reviews_done"] = 0
+        field.pop("_ready_since", None)
 
         return {"items": harvested, "xp": xp_gain}
 

@@ -511,27 +511,25 @@ class FarmWebView:
         self._js(f"updateBuildingDetail({json.dumps(data)})")
 
     def _expand_farm(self, count: int):
-        """Expand farm by adding plots (costs coins + materials)."""
-        cost_coins = 50 * self.manager.state.num_plots
+        """Expand farm by adding field plots (costs coins + land_deed)."""
+        num_fields = len(self.manager.state.fields)
+        cost_coins = 50 * num_fields
         cost_deed = 1
-        cost_permit = 1
 
         if self.manager.state.coins < cost_coins:
-            self._js(f"showNotification('Il faut {cost_coins} pièces pour agrandir !')")
+            self._js(f"showNotification('Il faut {cost_coins} pièces !')")
             return
         if self.manager.state.inventory.get("land_deed", 0) < cost_deed:
             self._js("showNotification('Titre de propriété requis !')")
-            return
-        if self.manager.state.inventory.get("expansion_permit", 0) < cost_permit:
-            self._js("showNotification('Permis d\\'expansion requis !')")
             return
 
         self.manager.state.coins -= cost_coins
         self.manager.state.total_coins_spent += cost_coins
         self.manager.state.remove_item("land_deed", cost_deed)
-        self.manager.state.remove_item("expansion_permit", cost_permit)
-        self.manager.state.add_plots(count)
-        new_total = self.manager.state.num_plots
+        # Add new fields (not legacy plots)
+        for _ in range(count):
+            self.manager.add_field()
+        new_total = len(self.manager.state.fields)
         self._js(f"showNotification('Ferme agrandie ! {new_total} parcelles !')")
 
     def _start_production(self, building_id: str, recipe_id: str):
