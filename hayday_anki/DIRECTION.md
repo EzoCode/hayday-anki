@@ -62,6 +62,12 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 3. **Achat animal bloque** : le JS bloquait l'achat d'un animal supplementaire (ex: 2e vache) en exigeant 2 terrains, alors que le backend Python sait que l'enclos existe deja. Corrige pour verifier si un enclos existe.
 4. **AchievementManager duplique** : _send_achievements() creait un nouveau manager a chaque appel au lieu de reutiliser l'instance. Corrige avec cache sur l'instance.
 
+## Bugs corriges (2026-04-05, session 4)
+1. **showAnimalShopInfo crash** : la variable `animalType` etait indefinie (parametre nomme `aid`) — crash JS quand on clique sur l'info d'un animal dans la boutique. Corrige : `animalType` → `aid`.
+2. **Croissance des cultures (BUG MAJEUR)** : `_advance_plots()` n'avancait qu'UN seul champ aleatoire par review. Avec 9 champs, le ble (12 reviews normalement) prenait ~108 reviews. Corrige : TOUS les champs actifs avancent a chaque review, comme dans Hay Day.
+3. **Harvest overflow** : `max(1, get_silo_space())` quand silo plein renvoyait 1 au lieu de 0, tentant un ajout impossible. Corrige : utilise directement `get_silo_space()` avec verification > 0.
+4. **unlocked_buildings type** : `Object.keys(farmData.unlocked_buildings||{})` traitait un tableau comme un objet. Corrige pour `(farmData.unlocked_buildings||[]).length`.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Ameliorer l'apparence des decorations dans la zone Village

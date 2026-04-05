@@ -278,7 +278,7 @@ function renderWorkshop() {
   const placed = farmData.placed_buildings || [];
   const zone = document.getElementById('zone-workshop');
 
-  if (placed.length === 0 && Object.keys(farmData.unlocked_buildings||{}).length === 0) {
+  if (placed.length === 0 && (farmData.unlocked_buildings||[]).length === 0) {
     zone.style.display = 'none';
     return;
   }
@@ -907,7 +907,7 @@ function showAnimalShopInfo(aid) {
   const maxN = def.max_owned||def.max||5;
   const cost = def.cost_coins||def.cost||100;
   const unlocked = (farmData.unlocked_animals||[]).includes(aid);
-  const hasPasture = (farmData.pastures||[]).some(p => p.animal_type === animalType);
+  const hasPasture = (farmData.pastures||[]).some(p => p.animal_type === aid);
   const needsLand = !hasPasture;
   const landFree = (farmData.land_total||20) - (farmData.land_used||0);
   const reqs = [

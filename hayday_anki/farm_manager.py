@@ -616,13 +616,13 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance ONE random growing field per review. Ready crops wilt after too long."""
+        """Advance ALL growing fields per review. Ready crops wilt after too long."""
         from . import progression
 
-        # Pick one random active field to advance
-        active = [f for f in self.state.fields if f["state"] in ("planted", "growing")]
-        if active:
-            field = random.choice(active)
+        # Advance every active field each review (like Hay Day — all crops grow in parallel)
+        for field in self.state.fields:
+            if field["state"] not in ("planted", "growing"):
+                continue
             field["reviews_done"] += 1
             if field["reviews_done"] >= field["reviews_needed"]:
                 field["growth_stage"] += 1
@@ -632,7 +632,6 @@ class FarmManager:
                     field["_ready_since"] = self.state.total_reviews
                 else:
                     field["state"] = "growing"
-                    # Keep reviews_needed consistent from crop definition
                     crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
                     field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
 
@@ -885,11 +884,11 @@ class FarmManager:
         if self.state.add_item(crop_id, qty):
             harvested[crop_id] = qty
         else:
-            # Storage full — harvest anyway, overflow to give partial reward
-            overflow_qty = max(1, self.state.get_silo_space())
-            if overflow_qty > 0 and self.state.add_item(crop_id, overflow_qty):
-                harvested[crop_id] = overflow_qty
-                qty = overflow_qty
+            # Storage full — harvest what we can fit
+            space = self.state.get_silo_space()
+            if space > 0 and self.state.add_item(crop_id, space):
+                harvested[crop_id] = space
+                qty = space
             else:
                 return None
 
