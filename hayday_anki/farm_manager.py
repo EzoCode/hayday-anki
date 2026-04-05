@@ -553,15 +553,28 @@ class FarmManager:
                 rewards["items"][item_id] = qty
                 self.state.session_items_earned[item_id] = \
                     self.state.session_items_earned.get(item_id, 0) + qty
+            else:
+                crop_name = ITEM_CATALOG.get(item_id, {}).get("name", item_id)
+                rewards["notifications"].append({
+                    "type": "storage_full",
+                    "message": f"Silo plein ! {crop_name} perdu(e). Vendez ou améliorez le silo.",
+                })
 
         # Random material drop (variable ratio reinforcement)
         if random.random() < 0.12:  # ~12% chance per review
             mat_id = self._roll_material_drop()
-            if mat_id and self.state.add_item(mat_id, 1):
-                rewards["items"][mat_id] = rewards["items"].get(mat_id, 0) + 1
-                self.state.session_items_earned[mat_id] = \
-                    self.state.session_items_earned.get(mat_id, 0) + 1
-                self.state.materials_collected += 1
+            if mat_id:
+                if self.state.add_item(mat_id, 1):
+                    rewards["items"][mat_id] = rewards["items"].get(mat_id, 0) + 1
+                    self.state.session_items_earned[mat_id] = \
+                        self.state.session_items_earned.get(mat_id, 0) + 1
+                    self.state.materials_collected += 1
+                else:
+                    mat_name = ITEM_CATALOG.get(mat_id, {}).get("name", mat_id)
+                    rewards["notifications"].append({
+                        "type": "storage_full",
+                        "message": f"Grange pleine ! {mat_name} perdu. Vendez ou améliorez la grange.",
+                    })
 
         # Mystery box chance (~1 in 20 reviews)
         if random.random() < 0.05:
@@ -809,6 +822,43 @@ class FarmManager:
         self._sync_animals_from_pastures()
         return True
 
+    def get_pasture_fail_reason(self, animal_type: str) -> str:
+        """Return a specific reason why adding a pasture/animal failed."""
+        from . import progression
+        animal_def = progression.ANIMAL_DEFINITIONS.get(animal_type)
+        if not animal_def:
+            return "Animal inconnu."
+        if animal_type not in self.state.unlocked_animals:
+            return f"Niveau insuffisant pour {animal_def.get('name', animal_type)}."
+        cost = animal_def.get("cost_coins", 100)
+        if self.state.coins < cost:
+            return f"Pas assez de pièces ({self.state.coins}/{cost})."
+        max_owned = animal_def.get("max_owned", 5)
+        existing = next((p for p in self.state.pastures if p["animal_type"] == animal_type), None)
+        current = existing["count"] if existing else 0
+        if current >= max_owned:
+            return f"Maximum atteint ({current}/{max_owned})."
+        if not existing and self.get_land_used() + 2 > self.state.land_total:
+            return f"Terrain plein ! ({self.get_land_used()}/{self.state.land_total})"
+        return "Impossible d'acheter cet animal."
+
+    def get_build_fail_reason(self, building_id: str) -> str:
+        """Return a specific reason why building construction failed."""
+        from . import progression
+        building_def = progression.BUILDING_DEFINITIONS.get(building_id)
+        if not building_def:
+            return "Bâtiment inconnu."
+        if building_id not in self.state.unlocked_buildings:
+            return f"Niveau insuffisant pour {building_def.get('name', building_id)}."
+        if building_id in self.state.buildings:
+            return f"{building_def.get('name', building_id)} est déjà construit."
+        cost = building_def.get("cost_coins", 100)
+        if self.state.coins < cost:
+            return f"Pas assez de pièces ({self.state.coins}/{cost})."
+        if self.get_land_used() + 2 > self.state.land_total:
+            return f"Terrain plein ! ({self.get_land_used()}/{self.state.land_total})"
+        return "Impossible de construire."
+
     def _sync_animals_from_pastures(self):
         """Rebuild animals dict from pastures list (single source of truth)."""
         self.state.animals = {}
@@ -893,6 +943,7 @@ class FarmManager:
                 return None
 
         self.state.xp += xp_gain
+        self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
 
         # Reset field
@@ -1134,6 +1185,8 @@ class FarmManager:
         self.state.coins += order["coin_reward"]
         self.state.xp += order["xp_reward"]
         self.state.total_coins_earned += order["coin_reward"]
+        self.state.session_coins_earned += order["coin_reward"]
+        self.state.session_xp_earned += order["xp_reward"]
         self.state.orders_completed += 1
 
         result = {
@@ -1531,6 +1584,21 @@ class FarmManager:
             "total_sessions": self.state.total_sessions,
             "total_correct": self.state.total_correct,
             "field_cost": self.get_field_cost(),
+            "next_unlock": self._get_next_unlock_preview(),
+        }
+
+    def _get_next_unlock_preview(self) -> Optional[Dict]:
+        """Get preview of the next meaningful unlock for motivation display."""
+        from . import progression
+        result = progression.get_next_unlocks(self.state.level)
+        if not result:
+            return None
+        return {
+            "level": result["level"],
+            "items": [
+                {"name": u.get("name", ""), "emoji": u.get("emoji", ""), "type": u.get("type", "")}
+                for u in result["unlocks"]
+            ],
         }
 
     def get_notifications(self) -> List[Dict]:

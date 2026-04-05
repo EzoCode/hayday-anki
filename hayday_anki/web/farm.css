@@ -38,6 +38,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .hud-settings:hover{opacity:1}
 @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.25) translateY(-1px);filter:brightness(1.4)}}
 
+/* ===== NEXT UNLOCK HINT ===== */
+#next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 8px;font-size:10px;font-weight:700;color:rgba(255,215,0,.9);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(0,0,0,.15),rgba(0,0,0,.25),rgba(0,0,0,.15));letter-spacing:.3px;overflow:hidden}
+.next-unlock-label{background:rgba(255,215,0,.2);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.25);font-size:9px;font-weight:800;white-space:nowrap}
+
 /* ===== EVENT BANNER ===== */
 #event-banner{display:flex;gap:6px;justify-content:center;padding:4px 8px;background:linear-gradient(90deg,rgba(255,215,0,.15),rgba(255,152,0,.2),rgba(255,215,0,.15));border-bottom:1px solid rgba(255,215,0,.2);animation:eventGlow 3s ease-in-out infinite}
 .event-tag{font-size:11px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px rgba(0,0,0,.4);padding:2px 8px;background:rgba(0,0,0,.25);border-radius:10px;border:1px solid rgba(255,215,0,.2);animation:eventPulse 2s ease-in-out infinite}

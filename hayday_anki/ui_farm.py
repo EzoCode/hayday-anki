@@ -269,7 +269,8 @@ class FarmWebView:
                     bname = bdef.get("name", building_id)
                     self._js(f"showNotification('{bname} construit !')")
                 else:
-                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
+                    reason = self.manager.get_build_fail_reason(building_id)
+                    self._js(f"showNotification({json.dumps(reason)})")
                 self._send_state()
                 self.manager.save()
 
@@ -368,7 +369,8 @@ class FarmWebView:
                     aname = adef.get("name", animal_type)
                     self._js(f"showNotification('{aname} acheté(e) !')")
                 else:
-                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau/max.')")
+                    reason = self.manager.get_pasture_fail_reason(animal_type)
+                    self._js(f"showNotification({json.dumps(reason)})")
                 self._send_state()
                 self.manager.save()
 
@@ -380,7 +382,8 @@ class FarmWebView:
                     bname = bdef.get("name", building_id)
                     self._js(f"showNotification('{bname} construit !')")
                 else:
-                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
+                    reason = self.manager.get_build_fail_reason(building_id)
+                    self._js(f"showNotification({json.dumps(reason)})")
                 self._send_state()
                 self.manager.save()
 
@@ -521,6 +524,11 @@ class FarmWebView:
         """Called after a card review — show reward animation."""
         if self.web:
             self._js(f"showReward({json.dumps(rewards)})")
+            # Show any additional notifications (storage full, etc.)
+            for notif in rewards.get("notifications", []):
+                if notif.get("type") in ("storage_full",):
+                    msg = notif.get("message", "")
+                    self._js(f"showNotification({json.dumps(msg)})")
             self._send_state()
 
     def on_level_up(self, data: dict):

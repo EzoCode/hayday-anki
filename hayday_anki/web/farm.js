@@ -122,6 +122,15 @@ function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
 const CROP_EMOJI = { wheat:'\u{1F33E}',corn:'\u{1F33D}',carrot:'\u{1F955}',tomato:'\u{1F345}',potato:'\u{1F954}',sugarcane:'\u{1F33F}',soybean:'\u{1FAD8}',strawberry:'\u{1F353}',apple:'\u{1F34E}',pumpkin:'\u{1F383}' };
 const ANIMAL_EMOJI = { cow:'\u{1F404}',chicken:'\u{1F414}',pig:'\u{1F416}',sheep:'\u{1F411}' };
+// Centralized building/animal definitions (single source of truth)
+const ALL_BUILDINGS = [
+  {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
+  {id:'bbq',lvl:35},{id:'pastry_shop',lvl:40},{id:'jam_maker',lvl:45},
+  {id:'pizzeria',lvl:50},{id:'juice_press',lvl:55},{id:'pie_oven',lvl:70},
+];
+const ALL_ANIMALS = [
+  {id:'cow',lvl:10},{id:'chicken',lvl:20},{id:'pig',lvl:30},{id:'sheep',lvl:60},
+];
 const GROWTH_LABEL = ['Graine','Pousse','Croissance','Floraison','Prêt !'];
 const EXPANSION_LEVELS = [
   {lvl:3,plots:2},{lvl:5,plots:2},{lvl:10,plots:2},{lvl:15,plots:2},{lvl:20,plots:2},
@@ -210,6 +219,16 @@ function updateHUD() {
   const streakEl = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
   streakEl.title = bonus > 0 ? `Streak bonus: +${bonus}%` : 'Review daily to build streak!';
+  // Next unlock preview
+  const nextEl = document.getElementById('next-unlock-hint');
+  if (nextEl && d.next_unlock) {
+    const nu = d.next_unlock;
+    const mainItem = nu.items.find(i => i.type !== 'plots') || nu.items[0];
+    nextEl.innerHTML = `<span class="next-unlock-label">Niv.${nu.level}</span> ${mainItem.emoji||''} ${mainItem.name}`;
+    nextEl.style.display = '';
+  } else if (nextEl) {
+    nextEl.style.display = 'none';
+  }
   // Active events banner
   const banner = document.getElementById('event-banner');
   const events = d.active_events || [];
@@ -525,13 +544,6 @@ function showBuildMenu() {
   const coins = farmData.coins || 0;
   const landFree = (farmData.land_total||20) - (farmData.land_used||0);
 
-  // Get all known buildings from defs + progression
-  const ALL_BUILDINGS = [
-    {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
-    {id:'bbq',lvl:35},{id:'pastry_shop',lvl:40},{id:'jam_maker',lvl:45},
-    {id:'pizzeria',lvl:50},{id:'juice_press',lvl:55},{id:'pie_oven',lvl:70},
-  ];
-
   let html = '';
 
   // Built buildings
@@ -590,10 +602,6 @@ function showAnimalMenu() {
   const coins = farmData.coins || 0;
   const landFree = (farmData.land_total||20) - (farmData.land_used||0);
   const defs = farmData.animal_defs || {};
-
-  const ALL_ANIMALS = [
-    {id:'cow',lvl:10},{id:'chicken',lvl:20},{id:'pig',lvl:30},{id:'sheep',lvl:60},
-  ];
 
   let html = '';
 
@@ -763,11 +771,6 @@ function renderInventory() {
 
 function renderBuildingsPanel() {
   const list = document.getElementById('buildings-list'); list.innerHTML = '';
-  const ALL_BUILDINGS = [
-    {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
-    {id:'bbq',lvl:35},{id:'pastry_shop',lvl:40},{id:'jam_maker',lvl:45},
-    {id:'pizzeria',lvl:50},{id:'juice_press',lvl:55},{id:'pie_oven',lvl:70},
-  ];
   const built = Object.keys(farmData.buildings||{});
   const unlocked = farmData.unlocked_buildings||[];
   const level = farmData.level||1;

@@ -265,6 +265,7 @@ class ProductionManager:
                             "xp": item["xp"],
                         })
                         self.state.xp += item["xp"]
+                        self.state.session_xp_earned += item["xp"]
                     else:
                         # Storage full — keep in queue
                         remaining.append(item)

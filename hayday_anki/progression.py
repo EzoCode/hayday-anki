@@ -310,6 +310,18 @@ def get_all_unlocks_up_to(level: int) -> List[Dict]:
     return unlocks
 
 
+def get_next_unlocks(current_level: int) -> Optional[Dict]:
+    """Get the next unlock milestone and its contents. Returns None if no more unlocks."""
+    for lvl in sorted(UNLOCK_TABLE.keys()):
+        if lvl > current_level:
+            # Filter out plots-only levels — find one with a meaningful unlock
+            unlocks = UNLOCK_TABLE[lvl]
+            meaningful = [u for u in unlocks if u["type"] in ("crop", "building", "animal", "feature")]
+            if meaningful:
+                return {"level": lvl, "unlocks": unlocks}
+    return None
+
+
 # =============================================================================
 # CROP DEFINITIONS
 # =============================================================================
