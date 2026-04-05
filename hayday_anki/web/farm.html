@@ -1,3 +1,9 @@
+<!-- ===== AUDIO (hidden, src set via Python) ===== -->
+<audio id="snd-ambient" loop preload="auto"></audio>
+<audio id="snd-click" preload="auto"></audio>
+<audio id="snd-error" preload="auto"></audio>
+<audio id="snd-levelup" preload="auto"></audio>
+
 <!-- ===== HUD BAR ===== -->
 <div id="hud">
   <div class="hud-left">
@@ -18,13 +24,14 @@
       <span id="streak-count">0</span>
     </div>
     <div class="hud-currency hud-coins" id="hud-coins">
-      <span class="currency-icon">🪙</span>
+      <span class="currency-icon" id="coin-icon">🪙</span>
       <span id="coin-count">50</span>
     </div>
     <div class="hud-currency hud-gems" id="hud-gems">
-      <span class="currency-icon">💎</span>
+      <span class="currency-icon" id="gem-icon">💎</span>
       <span id="gem-count">5</span>
     </div>
+    <button class="hud-settings" onclick="toggleSettings()" title="Settings">⚙️</button>
   </div>
 </div>
 
@@ -36,6 +43,7 @@
 
 <!-- ===== FARM WORLD ===== -->
 <div id="farm-container">
+  <div class="farm-sky"></div>
   <div id="farm-world">
     <!-- Isometric farm grid -->
     <div id="farm-fields">
@@ -60,6 +68,9 @@
     <div id="mystery-boxes-layer"></div>
     <div id="reward-layer"></div>
   </div>
+  <div class="farm-atmosphere"></div>
+  <div id="sparkle-layer"></div>
+  <div id="confetti-layer"></div>
 </div>
 
 <!-- ===== BOTTOM TOOLBAR ===== -->
@@ -128,12 +139,27 @@
   <div id="achievements-list"></div>
 </div>
 
+<div id="panel-settings" class="panel hidden">
+  <div class="panel-handle"></div>
+  <div class="panel-header"><h2>⚙️ Settings</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="settings-list">
+    <label class="setting-row"><span>🔊 Sound</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
+    <label class="setting-row"><span>🎵 Music</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
+    <label class="setting-row"><span>🔔 Notifications</span><input type="checkbox" id="setting-notifs" checked onchange="toggleNotifs(this.checked)"></label>
+  </div>
+  <div class="settings-info">
+    <p id="farm-stats"></p>
+  </div>
+</div>
+
 <!-- ===== OVERLAYS ===== -->
 <div id="wheel-overlay" class="overlay hidden">
   <div class="overlay-card wheel-container">
     <h2>🎡 Wheel of Fortune</h2>
     <div id="wheel-canvas-wrapper">
-      <canvas id="wheel-canvas" width="280" height="280"></canvas>
+      <div class="wheel-border">
+        <canvas id="wheel-canvas" width="280" height="280"></canvas>
+      </div>
       <div id="wheel-pointer">▼</div>
     </div>
     <button id="wheel-spin-btn" class="action-btn" onclick="doSpinWheel()">Spin!</button>

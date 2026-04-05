@@ -21,6 +21,7 @@ from aqt.webview import AnkiWebView
 ADDON_DIR = Path(__file__).parent
 WEB_DIR = ADDON_DIR / "web"
 SPRITES_DIR = WEB_DIR / "sprites"
+SOUNDS_DIR = ADDON_DIR / "sounds"
 
 
 class FarmWindow(QDialog):
@@ -87,11 +88,14 @@ class FarmWebView:
         # Build sprite atlas as base64 data URIs
         sprite_atlas_js = self._build_sprite_atlas()
 
-        # Wrap CSS + body + sprite atlas + JS into one blob
+        # Build sound data URIs for audio elements
+        sound_setup_js = self._build_sound_setup()
+
+        # Wrap CSS + body + sprite atlas + sounds + JS into one blob
         full_body = (
             f"<style>\n{css}\n</style>\n"
             f"{body_html}\n"
-            f"<script>\n{sprite_atlas_js}\n{js}\n</script>"
+            f"<script>\n{sprite_atlas_js}\n{sound_setup_js}\n{js}\n</script>"
         )
 
         self.web.stdHtml(
@@ -148,6 +152,32 @@ class FarmWebView:
         for key, uri in sorted(atlas.items()):
             lines.append(f'  "{key}": "{uri}",')
         lines.append("};")
+        return "\n".join(lines)
+
+    def _build_sound_setup(self) -> str:
+        """Encode sound files as base64 and set audio element sources."""
+        if not SOUNDS_DIR.exists():
+            return "// No sounds directory found"
+
+        sound_map = {
+            "ambient": "ambient.mp3",
+            "click": "click.wav",
+            "error": "error.wav",
+            "levelup": "levelup.wav",
+        }
+        lines = ["// Sound setup"]
+        for snd_id, filename in sound_map.items():
+            filepath = SOUNDS_DIR / filename
+            if filepath.exists():
+                try:
+                    data = filepath.read_bytes()
+                    b64 = base64.b64encode(data).decode("ascii")
+                    mime = "audio/mpeg" if filename.endswith(".mp3") else "audio/wav"
+                    lines.append(
+                        f'document.getElementById("snd-{snd_id}").src = "data:{mime};base64,{b64}";'
+                    )
+                except Exception:
+                    pass
         return "\n".join(lines)
 
     def _on_bridge_cmd(self, cmd: str) -> Optional[str]:

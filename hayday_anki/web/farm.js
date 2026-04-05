@@ -9,6 +9,33 @@ let currentShopCategory = 'decorations';
 let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
+let notificationsEnabled = true;
+
+// --- Sound Manager ---
+const SoundMgr = {
+  enabled: true,
+  musicEnabled: false,
+  volume: 0.5,
+  play(id) {
+    if (!this.enabled) return;
+    const el = document.getElementById(`snd-${id}`);
+    if (el && el.src) { el.volume = this.volume; el.currentTime = 0; el.play().catch(()=>{}); }
+  },
+  playMusic() {
+    if (!this.musicEnabled) return;
+    const el = document.getElementById('snd-ambient');
+    if (el && el.src) { el.volume = this.volume * 0.3; el.play().catch(()=>{}); }
+  },
+  stopMusic() {
+    const el = document.getElementById('snd-ambient');
+    if (el) { el.pause(); el.currentTime = 0; }
+  }
+};
+
+function toggleSound(on) { SoundMgr.enabled = on; }
+function toggleMusic(on) { SoundMgr.musicEnabled = on; if (on) SoundMgr.playMusic(); else SoundMgr.stopMusic(); }
+function toggleNotifs(on) { notificationsEnabled = on; }
+function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
 function S(key) { return (typeof SPRITES !== 'undefined' && SPRITES[key]) ? SPRITES[key] : null; }
@@ -56,6 +83,46 @@ const EXPANSION_LEVELS = [
   {lvl:60,plots:1},{lvl:70,plots:1},{lvl:80,plots:1},{lvl:90,plots:1},{lvl:100,plots:1}
 ];
 
+// --- Visual Effects ---
+function createSparkleRain() {
+  const layer = document.getElementById('sparkle-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  const colors = ['#ffd700', '#ff6b6b', '#4fc3f7', '#ab47bc', '#66bb6a', '#ff8a65'];
+  const icons = ['\u2728', '\u2B50', '\u{1F4AB}', '\u{1F31F}', '\u2726', '\u2605'];
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle-particle';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 2) + 's';
+    s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    s.style.color = colors[Math.floor(Math.random() * colors.length)];
+    s.textContent = icons[Math.floor(Math.random() * icons.length)];
+    layer.appendChild(s);
+  }
+  setTimeout(() => { layer.innerHTML = ''; }, 4500);
+}
+
+function createConfetti() {
+  const layer = document.getElementById('confetti-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  const colors = ['#f44336','#e91e63','#9c27b0','#2196f3','#4caf50','#ff9800','#ffd700'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = (40 + Math.random() * 20) + '%';
+    c.style.setProperty('--dx', ((Math.random() - 0.5) * 300) + 'px');
+    c.style.setProperty('--dy', (-(100 + Math.random() * 200)) + 'px');
+    c.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = (Math.random() * 0.3) + 's';
+    layer.appendChild(c);
+  }
+  setTimeout(() => { layer.innerHTML = ''; }, 2500);
+}
+
+// --- Core State Update ---
 function updateFarm(data) {
   farmData = data;
   updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections(); checkStorageWarnings();
@@ -65,13 +132,14 @@ function updateFarm(data) {
     if (currentPanel === 'orders') renderOrders();
     if (currentPanel === 'shop') renderShop();
     if (currentPanel === 'achievements') renderAchievements();
+    if (currentPanel === 'settings') renderSettings();
   }
 }
 
 let _lastStorageWarning = 0;
 function checkStorageWarnings() {
   const now = Date.now();
-  if (now - _lastStorageWarning < 30000) return; // Max once per 30s
+  if (now - _lastStorageWarning < 30000) return;
   const d = farmData;
   const barnPct = (d.barn_used||0) / Math.max(1, d.barn_capacity||50);
   const siloPct = (d.silo_used||0) / Math.max(1, d.silo_capacity||50);
@@ -173,7 +241,6 @@ function updateSections() {
 
 function updateTabBadges() {
   const d = farmData, inv = d.inventory||{};
-  // Orders badge: count how many orders can be fulfilled
   let fulfillable = 0;
   (d.active_orders||[]).forEach(order => {
     let canDo = true;
@@ -181,16 +248,10 @@ function updateTabBadges() {
     if (canDo) fulfillable++;
   });
   setBadge('tab-orders', fulfillable);
-
-  // Buildings badge: count ready productions
   let readyCount = 0;
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
-
-  // Mystery boxes badge
   setBadge('tab-farm', (d.mystery_boxes||[]).length);
-
-  // Wheel badge
   setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
 }
 
@@ -223,13 +284,16 @@ function showTab(tab) {
   if (tab === 'farm') { hidePanel(); pycmd('farm:get_state'); return; }
   currentPanel = tab;
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(`tab-${tab}`)?.classList.add('active');
+  const tabEl = document.getElementById(`tab-${tab}`);
+  if (tabEl) tabEl.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
   const panel = document.getElementById(`panel-${tab}`);
   if (panel) { panel.classList.remove('hidden');
     if(tab==='inventory')renderInventory();if(tab==='buildings')renderBuildingsPanel();
-    if(tab==='orders')renderOrders();if(tab==='shop')renderShop();if(tab==='achievements')renderAchievements();
+    if(tab==='orders')renderOrders();if(tab==='shop')renderShop();
+    if(tab==='achievements')renderAchievements();if(tab==='settings')renderSettings();
   }
+  SoundMgr.play('click');
 }
 function hidePanel() { currentPanel=null; document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden')); document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active')); document.getElementById('tab-farm')?.classList.add('active'); }
 
@@ -285,29 +349,35 @@ function renderShop() {
   else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
 }
 function showShopCategory(cat){currentShopCategory=cat;renderShop()}
-function renderShopDeco(grid){[{id:'fence',n:'Fence',c:10},{id:'flower_pot',n:'Flower Pot',c:25},{id:'bench',n:'Bench',c:50},{id:'scarecrow',n:'Scarecrow',c:75},{id:'hay_bale',n:'Hay Bale',c:15},{id:'tree_oak',n:'Oak',c:100},{id:'pond',n:'Pond',c:150},{id:'fountain',n:'Fountain',c:200},{id:'windmill_deco',n:'Windmill',c:500}].forEach(d=>{const ok=(farmData.coins||0)>=d.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok)pycmd(`farm:buy_deco:${d.id}`)};el.innerHTML=`<span class="item-name">${d.n}</span><span class="item-price">\u{1FA99} ${d.c}</span>`;grid.appendChild(el)})}
-function renderShopAnimals(grid){[{id:'cow',n:'Cow',c:100,l:10},{id:'chicken',n:'Chicken',c:50,l:20},{id:'pig',n:'Pig',c:200,l:30},{id:'sheep',n:'Sheep',c:500,l:60}].forEach(a=>{const unlocked=(farmData.unlocked_animals||[]).includes(a.id);const ok=unlocked&&(farmData.coins||0)>=a.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok)pycmd(`farm:buy_animal:${a.id}`)};el.innerHTML=`${animalLbl(a.id,36)||animalImg(a.id,36)}<span class="item-name">${a.n}</span><span class="item-price">${unlocked?`\u{1FA99} ${a.c}`:`Lvl ${a.l}`}</span>`;grid.appendChild(el)})}
-function renderShopUpgrades(grid){const d=farmData;[{id:'barn',n:'Barn',desc:`Lv${d.barn_level||1}\u2192${(d.barn_level||1)+1}`,info:`${d.barn_capacity||50}\u2192${(d.barn_capacity||50)+25}`},{id:'silo',n:'Silo',desc:`Lv${d.silo_level||1}\u2192${(d.silo_level||1)+1}`,info:`${d.silo_capacity||50}\u2192${(d.silo_capacity||50)+25}`}].forEach(u=>{const el=document.createElement('div');el.className='item-cell';el.style.minHeight='80px';el.onclick=()=>pycmd(`farm:upgrade:${u.id}`);el.innerHTML=`${buildingImg(u.id,44)}<span class="item-name">${u.n}</span><span class="item-price">${u.desc}</span><span class="item-price" style="font-size:8px">${u.info}</span>`;grid.appendChild(el)})}
-function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(farmData.inventory||{}).land_deed||0,permits=(farmData.inventory||{}).expansion_permit||0;const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.style.gridColumn='1/-1';const ok=(farmData.coins||0)>=cost&&deeds>=1&&permits>=1;el.style.opacity=ok?'1':'.5';el.onclick=()=>{if(ok)pycmd('farm:expand:2');else showNotification(`Need ${cost} coins + Land Deed + Expansion Permit`)};el.innerHTML=`${lockImg(32)}<span class="item-name">Expand Farm (+2 plots)</span><span class="item-price">\u{1FA99} ${cost} + \u{1F4DC}x1 + \u{1F3D7}\u{FE0F}x1</span><span class="item-price" style="font-size:8px">Current: ${np} plots | Deeds: ${deeds} | Permits: ${permits}</span>`;grid.appendChild(el)}
+function renderShopDeco(grid){[{id:'fence',n:'Fence',c:10},{id:'flower_pot',n:'Flower Pot',c:25},{id:'bench',n:'Bench',c:50},{id:'scarecrow',n:'Scarecrow',c:75},{id:'hay_bale',n:'Hay Bale',c:15},{id:'tree_oak',n:'Oak',c:100},{id:'pond',n:'Pond',c:150},{id:'fountain',n:'Fountain',c:200},{id:'windmill_deco',n:'Windmill',c:500}].forEach(d=>{const ok=(farmData.coins||0)>=d.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${d.id}`);SoundMgr.play('click')}};el.innerHTML=`<span class="item-name">${d.n}</span><span class="item-price">\u{1FA99} ${d.c}</span>`;grid.appendChild(el)})}
+function renderShopAnimals(grid){[{id:'cow',n:'Cow',c:100,l:10},{id:'chicken',n:'Chicken',c:50,l:20},{id:'pig',n:'Pig',c:200,l:30},{id:'sheep',n:'Sheep',c:500,l:60}].forEach(a=>{const unlocked=(farmData.unlocked_animals||[]).includes(a.id);const ok=unlocked&&(farmData.coins||0)>=a.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_animal:${a.id}`);SoundMgr.play('click')}};el.innerHTML=`${animalLbl(a.id,36)||animalImg(a.id,36)}<span class="item-name">${a.n}</span><span class="item-price">${unlocked?`\u{1FA99} ${a.c}`:`Lvl ${a.l}`}</span>`;grid.appendChild(el)})}
+function renderShopUpgrades(grid){const d=farmData;[{id:'barn',n:'Barn',desc:`Lv${d.barn_level||1}\u2192${(d.barn_level||1)+1}`,info:`${d.barn_capacity||50}\u2192${(d.barn_capacity||50)+25}`},{id:'silo',n:'Silo',desc:`Lv${d.silo_level||1}\u2192${(d.silo_level||1)+1}`,info:`${d.silo_capacity||50}\u2192${(d.silo_capacity||50)+25}`}].forEach(u=>{const el=document.createElement('div');el.className='item-cell';el.style.minHeight='80px';el.onclick=()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')};el.innerHTML=`${buildingImg(u.id,44)}<span class="item-name">${u.n}</span><span class="item-price">${u.desc}</span><span class="item-price" style="font-size:8px">${u.info}</span>`;grid.appendChild(el)})}
+function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(farmData.inventory||{}).land_deed||0,permits=(farmData.inventory||{}).expansion_permit||0;const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.style.gridColumn='1/-1';const ok=(farmData.coins||0)>=cost&&deeds>=1&&permits>=1;el.style.opacity=ok?'1':'.5';el.onclick=()=>{if(ok){pycmd('farm:expand:2');SoundMgr.play('click')}else showNotification(`Need ${cost} coins + Land Deed + Expansion Permit`)};el.innerHTML=`${lockImg(32)}<span class="item-name">Expand Farm (+2 plots)</span><span class="item-price">\u{1FA99} ${cost} + \u{1F4DC}x1 + \u{1F3D7}\u{FE0F}x1</span><span class="item-price" style="font-size:8px">Current: ${np} plots | Deeds: ${deeds} | Permits: ${permits}</span>`;grid.appendChild(el)}
+
+function renderSettings() {
+  const stats = document.getElementById('farm-stats');
+  if (stats && farmData) {
+    const d = farmData;
+    stats.innerHTML = `Level ${d.level||1} \u2022 ${formatNum(d.total_reviews||0)} reviews \u2022 ${formatNum(d.lifetime_reviews||0)} lifetime \u2022 Best streak: ${d.best_streak||0} days`;
+  }
+}
 
 function renderAchievements(){pycmd('farm:get_achievements')}
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);card.innerHTML=`<span class="achievement-icon">${a.icon||'\u{1F3C6}'}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:'<p style="font-size:8px;color:#4caf50">Done!</p>'}</div>${a.gems>0?`<span class="achievement-gem-reward">\u{1F48E} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay()};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span>Review cards to grow</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span>Review cards to grow</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
-function harvestPlot(id){pycmd(`farm:harvest:${id}`)}
-function sellItem(id){pycmd(`farm:sell:${id}:1`)}
-function fulfillOrder(i){pycmd(`farm:fulfill_order:${i}`)}
+function harvestPlot(id){SoundMgr.play('click');pycmd(`farm:harvest:${id}`)}
+function sellItem(id){SoundMgr.play('click');pycmd(`farm:sell:${id}:1`)}
+function fulfillOrder(i){SoundMgr.play('click');pycmd(`farm:fulfill_order:${i}`)}
 
-function spinWheel(){if(farmData.can_spin_wheel){document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification('Come back tomorrow!')}
-function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
+function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification('Come back tomorrow!')}
+function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
 function showWheelResult(r){
   wheelSpinning=false;
   const segs=9, segAngle=2*Math.PI/segs;
-  // Target angle: pointer is at top (3*PI/2), land on middle of winning segment
   const targetSeg = r.index||0;
   const targetAngle = (2*Math.PI) - (targetSeg * segAngle + segAngle/2);
-  // Add several full rotations for drama
   const totalRotation = targetAngle + Math.PI*2*6 + Math.random()*Math.PI*2;
   let elapsed=0, duration=4000, startTime=null;
   function easeOutCubic(t){return 1-Math.pow(1-t,3)}
@@ -322,23 +392,35 @@ function showWheelResult(r){
       document.getElementById('wheel-result').textContent=`You won: ${r.name}!`;
       document.getElementById('wheel-result').classList.remove('hidden');
       document.getElementById('wheel-spin-btn').disabled=true;
+      SoundMgr.play('levelup');
+      if (r.prize && (r.prize.gems >= 3 || r.prize.coins >= 100)) createConfetti();
     }
   })(performance.now());
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25\u{1FA99}',c:'#f44336'},{l:'50\u{1FA99}',c:'#e91e63'},{l:'100\u{1FA99}',c:'#9c27b0'},{l:'1\u{1F48E}',c:'#673ab7'},{l:'3\u{1F48E}',c:'#3f51b5'},{l:'5\u{1F48E}',c:'#2196f3'},{l:'3\u{1F529}',c:'#009688'},{l:'3\u{1FAB5}',c:'#4caf50'},{l:'\u{1F4DC}',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else icon.textContent='\u{1F4E6}'}
-function doOpenBox(){if(currentBoxIndex===null)return;document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
-function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t='You found: ';const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} coins!`;else if(rw.gems)t+=`${rw.gems} gems!`;else if(rw.item)t+=`${rw.qty||1}x ${rw.item}!`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null},600)}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else icon.textContent='\u{1F4E6}'}
+function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
+function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t='You found: ';const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} coins!`;else if(rw.gems)t+=`${rw.gems} gems!`;else if(rw.item)t+=`${rw.qty||1}x ${rw.item}!`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
-function showLevelUp(d){document.getElementById('levelup-level').textContent=d.new_level;let rw='';if(d.gem_reward>0)rw=`\u{1F48E} +${d.gem_reward} gems`;document.getElementById('levelup-rewards').innerHTML=rw;let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${u.emoji||''} ${u.name}</span>`});document.getElementById('levelup-unlocks').innerHTML=ul;document.getElementById('levelup-overlay').classList.remove('hidden')}
+function showLevelUp(d){
+  SoundMgr.play('levelup');
+  document.getElementById('levelup-level').textContent=d.new_level;
+  let rw='';if(d.gem_reward>0)rw=`\u{1F48E} +${d.gem_reward} gems`;
+  document.getElementById('levelup-rewards').innerHTML=rw;
+  let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${u.emoji||''} ${u.name}</span>`});
+  document.getElementById('levelup-unlocks').innerHTML=ul;
+  document.getElementById('levelup-overlay').classList.remove('hidden');
+  createSparkleRain();
+  createConfetti();
+}
 function hideLevelUp(){document.getElementById('levelup-overlay').classList.add('hidden')}
 
 function showDailyLoginBonus(d){
+  SoundMgr.play('levelup');
   const day=d.day||1, reward=d.reward||{};
   const el=document.getElementById('login-bonus-overlay');
   document.getElementById('login-day').textContent=day;
-  // Build day indicators (7 days)
   let dots='';
   for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
   document.getElementById('login-days-row').innerHTML=dots;
@@ -350,13 +432,13 @@ function showDailyLoginBonus(d){
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
-function showSessionSummary(d){document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">Cards</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">Coins</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">XP</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">Streak</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${id} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
+function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">Cards</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">Coins</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">XP</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">Streak</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${id} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
-function showNotification(msg,type){const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.style.color='#ffd700';el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
+function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.style.color='#ffd700';el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
 function showCoinBurst(x,y,n){const layer=document.getElementById('reward-layer');for(let i=0;i<(n||5);i++){const el=document.createElement('div');el.className='coin-particle';el.textContent='\u{1FA99}';el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';el.style.setProperty('--dx',((Math.random()-.5)*80)+'px');el.style.setProperty('--dy',(-(Math.random()*60+20))+'px');el.style.animationDelay=(i*50)+'ms';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1000)}}
-function showReward(d){if(d.coins){showFloatingReward(`+${d.coins}`,window.innerWidth/2,window.innerHeight/2-20);showCoinBurst(window.innerWidth/2,window.innerHeight/2)}if(d.xp)showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);if(d.items)Object.entries(d.items).forEach(([id,qty])=>{const c=(farmData.item_catalog||{})[id]||{};showNotification(`+${qty} ${c.name||id}`,'reward')});if(d.mystery_box)showNotification(`A ${d.mystery_box.size} mystery box appeared!`,'reward')}
+function showReward(d){SoundMgr.play('click');if(d.coins){showFloatingReward(`+${d.coins}`,window.innerWidth/2,window.innerHeight/2-20);showCoinBurst(window.innerWidth/2,window.innerHeight/2)}if(d.xp)showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);if(d.items)Object.entries(d.items).forEach(([id,qty])=>{const c=(farmData.item_catalog||{})[id]||{};showNotification(`+${qty} ${c.name||id}`,'reward')});if(d.mystery_box)showNotification(`A ${d.mystery_box.size} mystery box appeared!`,'reward')}
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
@@ -364,11 +446,11 @@ function showProductionDialog(data){
   document.getElementById('production-title').textContent=`\u{1F3ED} ${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML='<h3>In Progress</h3>';queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${q.emoji||'?'}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?'Ready!':q.sessions_waited+'/'+q.sessions_required+' sessions'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent='Collect All';btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay()};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML='<h3>In Progress</h3>';queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${q.emoji||'?'}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?'Ready!':q.sessions_waited+'/'+q.sessions_required+' sessions'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent='Collect All';btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('click')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML='<h3>Recipes</h3>';
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;const n=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${cropPortrait(id,14)||''} ${n} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${r.emoji||'?'}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} session${r.sessions_required>1?'s':''} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay()};rd.appendChild(c)});
+  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;const n=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${cropPortrait(id,14)||''} ${n} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${r.emoji||'?'}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} session${r.sessions_required>1?'s':''} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 
 function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
-document.addEventListener('DOMContentLoaded',()=>{document.getElementById('tab-farm').classList.add('active');drawWheel();pycmd('farm:get_state')});
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('tab-farm').classList.add('active');drawWheel();pycmd('farm:get_state');SoundMgr.playMusic()});

@@ -924,7 +924,7 @@ class FarmManager:
     # --- Auto Events ---
 
     def check_events(self):
-        """Generate automatic events (weekend bonus, etc.)."""
+        """Generate automatic events (weekend bonus, time-of-day, milestones)."""
         now = datetime.now()
 
         # Clean expired events
@@ -933,11 +933,11 @@ class FarmManager:
             if datetime.fromisoformat(e.get("ends_at", now.isoformat())) > now
         ]
 
-        # Weekend bonus: Saturday & Sunday
         active_ids = {e.get("id") for e in self.state.active_events}
+
+        # Weekend bonus: Saturday & Sunday
         if now.weekday() >= 5:  # Saturday=5, Sunday=6
             if "weekend_bonus" not in active_ids:
-                # Event ends at end of Sunday
                 days_until_monday = 7 - now.weekday()
                 end = now.replace(hour=23, minute=59, second=59) + timedelta(days=days_until_monday - 1)
                 self.state.active_events.append({
@@ -949,7 +949,43 @@ class FarmManager:
                     "ends_at": end.isoformat(),
                 })
 
-        # Streak milestone event: 7-day streak bonus
+        # Early Bird: studying before 9 AM
+        if now.hour < 9 and "early_bird" not in active_ids:
+            end = now.replace(hour=9, minute=0, second=0).isoformat()
+            self.state.active_events.append({
+                "id": "early_bird",
+                "name": "Early Bird!",
+                "emoji": "\U0001F305",
+                "coin_multiplier": 1.3,
+                "xp_multiplier": 1.5,
+                "ends_at": end,
+            })
+
+        # Night Owl: studying after 10 PM
+        if now.hour >= 22 and "night_owl" not in active_ids:
+            end = (now.replace(hour=23, minute=59, second=59)).isoformat()
+            self.state.active_events.append({
+                "id": "night_owl",
+                "name": "Night Owl!",
+                "emoji": "\U0001F989",
+                "coin_multiplier": 1.3,
+                "xp_multiplier": 1.5,
+                "ends_at": end,
+            })
+
+        # Lunch Rush: studying 12-14h
+        if 12 <= now.hour < 14 and "lunch_rush" not in active_ids:
+            end = now.replace(hour=14, minute=0, second=0).isoformat()
+            self.state.active_events.append({
+                "id": "lunch_rush",
+                "name": "Lunch Rush!",
+                "emoji": "\U0001F35C",
+                "coin_multiplier": 1.2,
+                "xp_multiplier": 1.3,
+                "ends_at": end,
+            })
+
+        # Streak milestone event: every 7-day streak
         if self.state.current_streak >= 7 and self.state.current_streak % 7 == 0:
             evt_id = f"streak_milestone_{self.state.current_streak}"
             if evt_id not in active_ids:
@@ -962,6 +998,38 @@ class FarmManager:
                     "xp_multiplier": 2.0,
                     "ends_at": end,
                 })
+
+        # Level milestone events: every 10 levels
+        if self.state.level >= 10 and self.state.level % 10 == 0:
+            evt_id = f"level_milestone_{self.state.level}"
+            if evt_id not in active_ids:
+                end = (now + timedelta(hours=12)).isoformat()
+                self.state.active_events.append({
+                    "id": evt_id,
+                    "name": f"Level {self.state.level} Party!",
+                    "emoji": "\U0001F38A",
+                    "coin_multiplier": 1.5,
+                    "xp_multiplier": 1.5,
+                    "ends_at": end,
+                })
+
+        # First session of the day bonus
+        today_str = date.today().isoformat()
+        if self.state.last_session:
+            try:
+                last_date = datetime.fromisoformat(self.state.last_session).date().isoformat()
+                if last_date != today_str and "first_session" not in active_ids:
+                    end = (now + timedelta(minutes=30)).isoformat()
+                    self.state.active_events.append({
+                        "id": "first_session",
+                        "name": "Fresh Start!",
+                        "emoji": "\U0001F331",
+                        "coin_multiplier": 1.25,
+                        "xp_multiplier": 1.25,
+                        "ends_at": end,
+                    })
+            except (ValueError, TypeError):
+                pass
 
     # --- Daily Login Bonus ---
 
