@@ -228,6 +228,11 @@ function renderFields() {
 
   document.getElementById('fields-count').textContent = fields.length;
 
+  // Update field cost on button
+  const fieldCost = farmData.field_cost || 0;
+  const addBtn = document.getElementById('add-field-btn');
+  if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (🪙${fieldCost})` : '+ Champ';
+
   if (fields.length === 0) {
     grid.innerHTML = '<div class="zone-empty-msg">Aucun champ. Ajoute-en un !</div>';
     return;
@@ -244,15 +249,22 @@ function renderFields() {
       el.innerHTML += '<span class="plot-plus">+</span>';
       el.onclick = () => showPlantDialog(field.id);
     } else if (field.state === 'ready') {
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, 4, 40)}</div><span class="plot-label">Récolter !</span>`;
+      const name = cropName(field.crop);
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, 4, 40)}</div><span class="plot-label">${name} — Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
-      const pct = Math.min(100, (done/needed)*100);
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Total progress across ALL 4 stages (not just current stage)
+      const cropDef = (farmData.crop_defs||{})[field.crop]||{};
+      const reviewsPerStage = cropDef.growth_reviews || needed;
+      const totalNeeded = reviewsPerStage * 4;
+      const totalDone = stage * reviewsPerStage + done;
+      const pct = Math.min(100, (totalDone/totalNeeded)*100);
+      const name = cropName(field.crop);
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
     }
     grid.appendChild(el);
   });
@@ -312,9 +324,13 @@ function renderPastures() {
     el.className = 'pasture-tile';
     el.style.animationDelay = `${Math.random()*2}s`;
     const lbl = S(`hayday_${p.animal_type}-lbl`);
-    const name = (p.animal_type||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    if (lbl) el.innerHTML = `<img src="${lbl}" width="50" height="50"><span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span>`;
-    else el.innerHTML = `${animalImg(p.animal_type,45)}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span>`;
+    const name = animalName(p.animal_type) || (p.animal_type||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    const adef = (farmData.animal_defs||{})[p.animal_type]||{};
+    const produceEvery = adef.produce_every_n_reviews || 10;
+    const reviewsSince = p.reviews_since_last || 0;
+    const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
+    const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
+    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${adef.product_emoji||''} ${reviewsSince}/${produceEvery}</span>`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
   });
@@ -390,7 +406,9 @@ function renderVillage() {
 function updateLandBar() {
   const used = farmData.land_used || 0;
   const total = farmData.land_total || 20;
-  document.getElementById('land-status').textContent = `\u{1F5FA}\u{FE0F} Terrain: ${used}/${total} utilisé`;
+  const pct = Math.min(100, Math.round(used / Math.max(1, total) * 100));
+  const statusEl = document.getElementById('land-status');
+  statusEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px"><span>\u{1F5FA}\u{FE0F} ${used}/${total}</span><div class="land-progress-bar"><div class="land-progress-fill" style="width:${pct}%"></div></div></div>`;
 }
 
 // --- Info Overlay ---
@@ -739,16 +757,48 @@ function renderInventory() {
 
 function renderBuildingsPanel() {
   const list = document.getElementById('buildings-list'); list.innerHTML = '';
-  (farmData.unlocked_buildings||[]).forEach(bid => {
+  const ALL_BUILDINGS = [
+    {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
+    {id:'bbq',lvl:35},{id:'pastry_shop',lvl:40},{id:'jam_maker',lvl:45},
+    {id:'pizzeria',lvl:50},{id:'juice_press',lvl:55},{id:'pie_oven',lvl:70},
+  ];
+  const built = Object.keys(farmData.buildings||{});
+  const unlocked = farmData.unlocked_buildings||[];
+  const level = farmData.level||1;
+  const coins = farmData.coins||0;
+  const landFree = (farmData.land_total||20) - (farmData.land_used||0);
+
+  ALL_BUILDINGS.forEach(b => {
+    const bid = b.id;
     const name = buildingName(bid);
     const bdef = (farmData.building_defs||{})[bid]||{};
-    const owned = bid in (farmData.buildings||{}), queue = (farmData.production_queues||{})[bid]||[];
+    const owned = built.includes(bid);
+    const isUnlocked = unlocked.includes(bid);
+    const queue = (farmData.production_queues||{})[bid]||[];
     const card = document.createElement('div'); card.className = 'building-card';
-    let qHTML = '';
-    if (owned) { qHTML = '<div class="building-queue">'; queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; }); for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>'; qHTML+='</div>'; }
-    const subtitle = owned ? LANG.tap_produce : `${LANG.not_built} — ${bdef.cost||0} \u{1FA99}`;
+
+    let qHTML = '', subtitle = '', opacity = '1';
+    if (owned) {
+      qHTML = '<div class="building-queue">';
+      queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; });
+      for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>';
+      qHTML+='</div>';
+      subtitle = LANG.tap_produce;
+      card.onclick = () => pycmd(`farm:building_detail:${bid}`);
+    } else if (isUnlocked) {
+      const cost = bdef.cost||0;
+      const canBuy = coins >= cost && landFree >= 2;
+      subtitle = `🪙 ${cost} + 2 terrain`;
+      if (!canBuy) opacity = '0.6';
+      card.onclick = () => pycmd(`farm:build:${bid}`);
+    } else {
+      subtitle = `🔒 Niveau ${b.lvl} requis (tu es ${level})`;
+      opacity = '0.35';
+      card.style.filter = 'grayscale(0.6)';
+    }
+
+    card.style.opacity = opacity;
     card.innerHTML = `<div class="building-card-icon">${buildingImg(bid,52)}</div><div class="building-card-info"><h3>${name}</h3><p>${subtitle}</p>${qHTML}</div>`;
-    card.onclick = () => owned ? pycmd(`farm:building_detail:${bid}`) : pycmd(`farm:build:${bid}`);
     list.appendChild(card);
   });
 }

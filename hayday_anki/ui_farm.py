@@ -219,7 +219,14 @@ class FarmWebView:
             elif action == "plant":
                 plot_id = int(parts[2])
                 crop_id = parts[3]
-                self.manager.plant_crop(plot_id, crop_id)
+                if self.manager.plant_crop(plot_id, crop_id):
+                    from . import progression
+                    crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+                    crop_name = crop_def.get("name", crop_id)
+                    total_reviews = crop_def.get("growth_reviews", 3) * 4
+                    self._js(f"showNotification('🌱 {crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)')")
+                else:
+                    self._js("showNotification('Impossible de planter ici !')")
                 self._send_state()
                 self.manager.save()
 
@@ -328,12 +335,20 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "add_field":
+                cost = self.manager.get_field_cost()
                 if self.manager.add_field():
-                    self._js("showNotification('Nouveau champ ajouté !')")
+                    msg = "Nouveau champ ajouté !"
+                    if cost > 0:
+                        msg = f"Nouveau champ ajouté ! (-{cost} pièces)"
+                    self._js(f"showNotification('{msg}')")
                 else:
                     used = self.manager.get_land_used()
                     total = self.manager.state.land_total
-                    self._js(f"showNotification('Terrain plein ({used}/{total}) ! Achète du terrain.')")
+                    coins = self.manager.state.coins
+                    if used >= total:
+                        self._js(f"showNotification('Terrain plein ({used}/{total}) ! Achète du terrain.')")
+                    else:
+                        self._js(f"showNotification('Pas assez de pièces ({coins}/{cost}) !')")
                 self._send_state()
                 self.manager.save()
 

@@ -181,6 +181,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
   color: rgba(255,255,255,0.7);
   font-size: 12px;
   font-weight: 700;
+  flex: 1;
+}
+.land-progress-bar {
+  flex: 1;
+  max-width: 80px;
+  height: 6px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.land-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #ff9800);
+  border-radius: 3px;
+  transition: width 0.4s;
 }
 
 .land-buy-btn {
@@ -217,7 +232,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 /* Pasture tile */
 .pasture-tile {
   width: 100px;
-  height: 90px;
+  height: 105px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -240,6 +255,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .pasture-name {
   font-size: 8px;
   color: rgba(255,255,255,0.5);
+  font-weight: 600;
+}
+.pasture-progress {
+  width: 80%;
+  height: 3px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.pasture-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #81c784, #4caf50);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.pasture-prod-label {
+  font-size: 7px;
+  color: rgba(255,255,255,0.45);
   font-weight: 600;
 }
 

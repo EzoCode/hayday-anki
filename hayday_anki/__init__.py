@@ -192,15 +192,8 @@ def _process_animals(mgr):
                     "emoji": item_info.get("emoji", ""),
                     "qty": count,
                 })
-    # Sync animals dict from pastures (keep dict in sync for backward compat)
-    mgr.state.animals = {}
-    for pasture in mgr.state.pastures:
-        aid = pasture.get("animal_type")
-        if aid:
-            mgr.state.animals[aid] = {
-                "count": pasture.get("count", 0),
-                "reviews_since_last": pasture.get("reviews_since_last", 0),
-            }
+    # Sync animals dict from pastures (single source of truth)
+    mgr._sync_animals_from_pastures()
     # Show notifications for collected animal products
     if collected_products:
         view = _get_view()

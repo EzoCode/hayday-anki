@@ -742,10 +742,23 @@ class FarmManager:
         field["reviews_done"] = 0
         return True
 
+    def get_field_cost(self) -> int:
+        """Get cost of adding a new field (scales with number of fields)."""
+        n = len(self.state.fields)
+        if n < 5:
+            return 0  # First 5 fields are free (starter fields)
+        return 10 * n  # 50, 60, 70, 80... coins
+
     def add_field(self) -> bool:
-        """Add a new empty field. Costs 1 land unit."""
+        """Add a new empty field. Costs 1 land unit + coins (scales with count)."""
         if self.get_land_used() >= self.state.land_total:
             return False
+        cost = self.get_field_cost()
+        if self.state.coins < cost:
+            return False
+        if cost > 0:
+            self.state.coins -= cost
+            self.state.total_coins_spent += cost
         field_id = max([f["id"] for f in self.state.fields], default=-1) + 1
         self.state.fields.append({
             "id": field_id,
@@ -756,6 +769,7 @@ class FarmManager:
             "reviews_done": 0,
             "planted_at": None,
         })
+        self.state.num_plots = len(self.state.fields)
         return True
 
     def add_pasture(self, animal_type: str) -> bool:
@@ -1102,8 +1116,8 @@ class FarmManager:
             })
 
     def fulfill_order(self, order_index: int) -> Optional[Dict]:
-        """Fulfill a delivery order. Returns rewards or None."""
-        if order_index >= len(self.state.active_orders):
+        """Fulfill a delivery order by index. Returns rewards or None."""
+        if order_index < 0 or order_index >= len(self.state.active_orders):
             return None
 
         order = self.state.active_orders[order_index]
@@ -1193,11 +1207,15 @@ class FarmManager:
         """Generate automatic events (weekend bonus, time-of-day, milestones)."""
         now = datetime.now()
 
-        # Clean expired events
-        self.state.active_events = [
-            e for e in self.state.active_events
-            if datetime.fromisoformat(e.get("ends_at", now.isoformat())) > now
-        ]
+        # Clean expired events (safe parsing — skip malformed)
+        valid_events = []
+        for e in self.state.active_events:
+            try:
+                if datetime.fromisoformat(e.get("ends_at", "")) > now:
+                    valid_events.append(e)
+            except (ValueError, TypeError):
+                pass  # Drop malformed events silently
+        self.state.active_events = valid_events
 
         active_ids = {e.get("id") for e in self.state.active_events}
 
@@ -1393,6 +1411,14 @@ class FarmManager:
 
     _item_catalog_cache = None
 
+    @staticmethod
+    def _is_event_active(event: Dict) -> bool:
+        """Safely check if an event is still active."""
+        try:
+            return datetime.fromisoformat(event.get("ends_at", "")) > datetime.now()
+        except (ValueError, TypeError):
+            return False
+
     def get_farm_data(self) -> Dict:
         """Get complete farm data for UI rendering."""
         from . import progression
@@ -1493,7 +1519,7 @@ class FarmManager:
             "active_events": [
                 {"name": e.get("name", ""), "emoji": e.get("emoji", "")}
                 for e in self.state.active_events
-                if datetime.fromisoformat(e.get("ends_at", "2000-01-01")) > datetime.now()
+                if self._is_event_active(e)
             ],
             "building_defs": building_defs,
             "animal_defs": animal_defs,
@@ -1505,6 +1531,7 @@ class FarmManager:
             "total_produced": self.state.total_produced,
             "total_sessions": self.state.total_sessions,
             "total_correct": self.state.total_correct,
+            "field_cost": self.get_field_cost(),
         }
 
     def get_notifications(self) -> List[Dict]:
