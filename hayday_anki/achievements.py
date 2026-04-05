@@ -183,13 +183,13 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     {
         "id": "marathon_runner",
         "name": "Marathonien",
-        "desc": "Étudier pendant {target}+ minutes en une session",
+        "desc": "Réviser {target}+ cartes en une seule session",
         "category": "time",
         "icon": "\U0001F3C3",
         "tiers": [
-            {"tier": "bronze", "target": 15, "gems": 1},
-            {"tier": "silver", "target": 30, "gems": 3},
-            {"tier": "gold", "target": 60, "gems": 8},
+            {"tier": "bronze", "target": 30, "gems": 1},
+            {"tier": "silver", "target": 75, "gems": 3},
+            {"tier": "gold", "target": 150, "gems": 8},
         ],
     },
     {
@@ -512,14 +512,14 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     # --- DIVERSITE ---
     {
         "id": "polyglot",
-        "name": "Polyglotte",
-        "desc": "Réviser des cartes de {target} paquets différents en un jour",
+        "name": "Cultivateur assidu",
+        "desc": "Compléter {target} sessions de révision",
         "category": "diversity",
         "icon": "\U0001F30E",
         "tiers": [
-            {"tier": "bronze", "target": 3, "gems": 1},
-            {"tier": "silver", "target": 5, "gems": 3},
-            {"tier": "gold", "target": 8, "gems": 8},
+            {"tier": "bronze", "target": 10, "gems": 1},
+            {"tier": "silver", "target": 50, "gems": 3},
+            {"tier": "gold", "target": 200, "gems": 8},
         ],
     },
 ]
@@ -617,8 +617,7 @@ class AchievementManager:
             return state.get("weekend_review_count", 0) >= target
 
         if ach_id == "marathon_runner":
-            session_minutes = session.get("total_elapsed", 0) / 60
-            return session_minutes >= target
+            return session.get("cards_reviewed", 0) >= target
 
         if ach_id == "dedicated_hours":
             # Approximate: ~15 seconds per review average
@@ -704,7 +703,7 @@ class AchievementManager:
 
         # --- Diversity ---
         if ach_id == "polyglot":
-            return session.get("decks_reviewed_today", 0) >= target
+            return state.get("total_sessions", 0) >= target
 
         return False
 

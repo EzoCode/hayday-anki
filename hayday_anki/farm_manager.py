@@ -192,6 +192,7 @@ class FarmState:
         self.session_xp_earned: int = 0
         self.session_items_earned: Dict[str, int] = {}
         self.session_reviews: int = 0
+        self.session_correct: int = 0
 
         # Production queues: building_id -> [{"recipe_id", "started_session", "ready": bool}]
         self.production_queues: Dict[str, List[Dict]] = {}
@@ -392,6 +393,7 @@ class FarmState:
         state.session_xp_earned = 0
         state.session_items_earned = {}
         state.session_reviews = 0
+        state.session_correct = 0
         state.production_queues = {}
         state.achievements = {}
         state.last_login_date = None
@@ -620,6 +622,7 @@ class FarmManager:
 
         if ease > 1:
             self.state.total_correct += 1
+            self.state.session_correct += 1
 
         # Track time-based achievement counters
         now = datetime.now()
@@ -1546,6 +1549,7 @@ class FarmManager:
         self.state.session_xp_earned = 0
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
+        self.state.session_correct = 0
         self._pending_notifications = []
         # Update streak at session start so the correct bonus applies during reviews
         self.update_streak()

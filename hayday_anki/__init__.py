@@ -224,7 +224,7 @@ def _check_achievements(mgr):
     state_dict = mgr.state.to_dict()
     session_data = {
         "cards_reviewed": mgr.state.session_reviews,
-        "correct_count": mgr.state.total_correct,
+        "correct_count": mgr.state.session_correct,
         "total_elapsed": 0,
     }
     newly_unlocked = ach_mgr.check_all(state_dict, session_data)
