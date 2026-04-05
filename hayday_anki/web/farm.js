@@ -751,12 +751,42 @@ function renderBuildingsPanel() {
 function renderOrders() {
   const list = document.getElementById('orders-list'); list.innerHTML = '';
   const orders = farmData.active_orders||[];
-  if (!orders.length) { list.innerHTML = `<div style="text-align:center;padding:20px;color:#999">${LANG.no_orders}</div>`; return; }
+
+  // Explanation header
+  const header = document.createElement('div');
+  header.style.cssText = 'padding:8px 12px;font-size:11px;color:#888;line-height:1.4';
+  header.innerHTML = '💡 <strong>Les commandes</strong> te rapportent <strong>2× le prix normal</strong> en pièces et XP. Remplis les items demandés et livre !';
+  list.appendChild(header);
+
+  if (!orders.length) {
+    list.innerHTML += `<div style="text-align:center;padding:20px;color:#999">Aucune commande pour le moment. Elles apparaissent après ta première session de révision !</div>`;
+    return;
+  }
+
   orders.forEach((order,i) => {
     const card = document.createElement('div'); card.className = 'order-card';
     const inv = farmData.inventory||{}; let canDo=true, items='';
-    Object.entries(order.items_needed||{}).forEach(([id,qty]) => { const have=inv[id]||0; if(have<qty) canDo=false; items+=`<div class="order-item ${have>=qty?'fulfilled':''}">${cropPortrait(id,16)||''} ${itemName(id)} ${have}/${qty}</div>`; });
-    card.innerHTML = `<div class="order-header"><span class="order-type">${order.type==='boat'?'\u26F5 Bateau':'\u{1F69A} Camion'}</span><span class="order-reward">\u{1FA99} ${order.coin_reward} +${order.xp_reward} XP</span></div><div class="order-items">${items}</div><button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">${canDo?LANG.deliver:LANG.missing_items}</button>`;
+    Object.entries(order.items_needed||{}).forEach(([id,qty]) => {
+      const have=inv[id]||0;
+      if(have<qty) canDo=false;
+      const enough = have >= qty;
+      items+=`<div class="order-item ${enough?'fulfilled':''}">
+        ${cropPortrait(id,18)||`<span style="font-size:14px">${(farmData.item_catalog||{})[id]?.emoji||''}</span>`}
+        <span style="font-weight:600">${itemName(id)}</span>
+        <span style="margin-left:auto;font-weight:700;color:${enough?'#4caf50':'#e74c3c'}">${have}/${qty}</span>
+      </div>`;
+    });
+
+    card.innerHTML = `
+      <div class="order-header">
+        <span class="order-type">${order.type==='boat'?'\u26F5 Bateau':'\u{1F69A} Camion'}</span>
+        <span class="order-reward">\u{1FA99} ${order.coin_reward} • +${order.xp_reward} XP</span>
+      </div>
+      <div class="order-items">${items}</div>
+      <button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
+        ${canDo?'📦 Livrer maintenant !':'⏳ Items manquants'}
+      </button>
+    `;
     list.appendChild(card);
   });
 }
@@ -768,10 +798,212 @@ function renderShop() {
   else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
 }
 function showShopCategory(cat){currentShopCategory=cat;renderShop()}
-function renderShopDeco(grid){const defs=farmData.deco_defs||{};const decoIds=['fence','flower_pot','bench','scarecrow','hay_bale','mailbox','lamp_post','garden_gnome','bird_bath','tree_oak','tree_pine','pond','swing','fountain','statue_chicken','tree_cherry','arch_flowers','statue_cow','windmill_deco'];decoIds.forEach(id=>{const d=defs[id]||{};const cost=d.cost||0;const ok=(farmData.coins||0)>=cost;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces !`)};el.innerHTML=`<span class="item-emoji">${d.emoji||DECO_EMOJI[id]||''}</span><span class="item-name">${d.name||decoName(id)}</span><span class="item-price">\u{1FA99} ${cost}</span>`;grid.appendChild(el)})}
-function renderShopAnimals(grid){const adefs=farmData.animal_defs||{};['cow','chicken','pig','sheep'].forEach(id=>{const a=adefs[id]||{};const name=a.name||animalName(id);const cost=a.cost||100;const unlocked=(farmData.unlocked_animals||[]).includes(id);const owned=(farmData.animals||{})[id];const count=owned?owned.count||0:0;const maxN=a.max||5;const ok=unlocked&&(farmData.coins||0)>=cost&&count<maxN;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_animal:${id}`);SoundMgr.play('click')}else if(!unlocked)showNotification(`Débloquez au niveau requis !`);else if(count>=maxN)showNotification(`Maximum de ${name} atteint !`);else showNotification(`Pas assez de pièces !`)};el.innerHTML=`${animalLbl(id,36)||animalImg(id,36)}<span class="item-name">${name} ${count>0?`(${count}/${maxN})`:''}</span><span class="item-price">${unlocked?`\u{1FA99} ${cost}`:`\u{1F512} Niv. requis`}</span>`;grid.appendChild(el)})}
-function renderShopUpgrades(grid){const d=farmData;[{id:'barn',n:'Grange',desc:`Niv. ${d.barn_level||1} \u2192 ${(d.barn_level||1)+1}`,info:`Capacité : ${d.barn_capacity||50} \u2192 ${(d.barn_capacity||50)+25}`,cost:`\u{1F529}x${(d.barn_level||1)+1} \u{1FAB5}x${(d.barn_level||1)+1} \u{1FA79}x${(d.barn_level||1)+1}`},{id:'silo',n:'Silo',desc:`Niv. ${d.silo_level||1} \u2192 ${(d.silo_level||1)+1}`,info:`Capacité : ${d.silo_capacity||50} \u2192 ${(d.silo_capacity||50)+25}`,cost:`\u{1F4CC}x${(d.silo_level||1)+1} \u{1FA9B}x${(d.silo_level||1)+1} \u{1F3A8}x${(d.silo_level||1)+1}`}].forEach(u=>{const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.onclick=()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')};el.innerHTML=`${buildingImg(u.id,44)}<span class="item-name">${u.n}</span><span class="item-price">${u.desc}</span><span class="item-price" style="font-size:8px">${u.info}</span><span class="item-price" style="font-size:7px;color:#888">${u.cost}</span>`;grid.appendChild(el)})}
-function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(farmData.inventory||{}).land_deed||0,permits=(farmData.inventory||{}).expansion_permit||0;const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.style.gridColumn='1/-1';const ok=(farmData.coins||0)>=cost&&deeds>=1&&permits>=1;el.style.opacity=ok?'1':'.5';el.onclick=()=>{if(ok){pycmd('farm:expand:2');SoundMgr.play('click')}else showNotification(`${cost} pièces + Titre + Permis requis`)};el.innerHTML=`${lockImg(32)}<span class="item-name">${LANG.expand_farm} (+2)</span><span class="item-price">\u{1FA99} ${cost} + \u{1F4DC}x1 + \u{1F3D7}\u{FE0F}x1</span><span class="item-price" style="font-size:8px">${LANG.current}: ${np} | ${LANG.deeds}: ${deeds} | ${LANG.permits}: ${permits}</span>`;grid.appendChild(el)}
+function renderShopDeco(grid){
+  const defs=farmData.deco_defs||{};
+  const coins=farmData.coins||0;
+  const DECOS=[
+    {id:'hay_bale',cat:'Basique'},{id:'fence',cat:'Basique'},{id:'mailbox',cat:'Basique'},
+    {id:'flower_pot',cat:'Basique'},{id:'lamp_post',cat:'Basique'},{id:'bench',cat:'Basique'},
+    {id:'scarecrow',cat:'Basique'},{id:'garden_gnome',cat:'Premium'},
+    {id:'bird_bath',cat:'Premium'},{id:'tree_oak',cat:'Nature'},{id:'tree_pine',cat:'Nature'},
+    {id:'pond',cat:'Nature'},{id:'swing',cat:'Premium'},{id:'fountain',cat:'Premium'},
+    {id:'statue_chicken',cat:'Spécial'},{id:'tree_cherry',cat:'Spécial'},
+    {id:'arch_flowers',cat:'Spécial'},{id:'statue_cow',cat:'Spécial'},{id:'windmill_deco',cat:'Spécial'},
+  ];
+  let lastCat='';
+  DECOS.forEach(item=>{
+    if(item.cat!==lastCat){
+      lastCat=item.cat;
+      const sep=document.createElement('div');
+      sep.style.cssText='grid-column:1/-1;font-size:10px;font-weight:800;color:#888;text-transform:uppercase;padding:6px 0 2px;letter-spacing:.5px';
+      sep.textContent=item.cat;
+      grid.appendChild(sep);
+    }
+    const d=defs[item.id]||{};
+    const cost=d.cost||0;
+    const ok=coins>=cost;
+    const el=document.createElement('div');
+    el.className='item-cell';
+    el.style.opacity=ok?'1':'.45';
+    el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
+    el.innerHTML=`<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span><span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">\u{1FA99} ${cost}</span>`;
+    grid.appendChild(el);
+  });
+}
+function renderShopAnimals(grid){
+  const adefs=farmData.animal_defs||{};
+  const level=farmData.level||1;
+  const coins=farmData.coins||0;
+  const ALL=[
+    {id:'cow',lvl:10,desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.'},
+    {id:'chicken',lvl:20,desc:'Pond des œufs tous les 8 reviews. Les œufs servent aux cookies et gâteaux.'},
+    {id:'pig',lvl:30,desc:'Produit du bacon tous les 15 reviews. Le bacon fait des burgers (le plus cher !).'},
+    {id:'sheep',lvl:60,desc:'Tond de la laine tous les 20 reviews. La laine se vend très cher.'},
+  ];
+  ALL.forEach(a=>{
+    const def=adefs[a.id]||{};
+    const name=def.name||animalName(a.id);
+    const cost=def.cost_coins||def.cost||100;
+    const unlocked=(farmData.unlocked_animals||[]).includes(a.id);
+    const owned=(farmData.animals||{})[a.id];
+    const count=owned?owned.count||0:0;
+    const maxN=def.max_owned||def.max||5;
+    const product=def.product||'';
+    const productEmoji=def.product_emoji||'';
+    const canBuy=unlocked&&coins>=cost&&count<maxN;
+    const landFree=(farmData.land_total||20)-(farmData.land_used||0);
+
+    const el=document.createElement('div');
+    el.className='item-cell';
+    el.style.minHeight='100px';
+    el.style.textAlign='left';
+    el.style.padding='8px';
+    el.style.opacity=canBuy?'1':unlocked?'.7':'.45';
+
+    if(canBuy&&landFree>=2){
+      el.onclick=()=>{pycmd(`farm:add_pasture:${a.id}`);SoundMgr.play('click')};
+    } else {
+      el.onclick=()=>{
+        if(!unlocked) showNotification(`🔒 ${name} se débloque au niveau ${a.lvl} (tu es ${level})`);
+        else if(landFree<2) showNotification('Pas assez de terrain ! Achète-en dans l\'onglet Terrain.');
+        else if(count>=maxN) showNotification(`Maximum de ${name} atteint (${maxN}) !`);
+        else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`);
+      };
+    }
+
+    const statusTag=!unlocked
+      ?`<span style="color:#e74c3c;font-weight:700">🔒 Niveau ${a.lvl} requis (tu es ${level})</span>`
+      :count>=maxN
+        ?`<span style="color:#888">✅ Max atteint (${count}/${maxN})</span>`
+        :`<span style="color:#4caf50">✅ Débloqué — ${count}/${maxN}</span>`;
+
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        ${animalLbl(a.id,40)||animalImg(a.id,40)}
+        <div>
+          <div style="font-weight:800;font-size:13px">${name}</div>
+          <div style="font-size:10px;color:#888">🪙 ${cost} pièces • 2 terrain</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#666;line-height:1.4;margin-bottom:4px">${a.desc}</div>
+      <div style="font-size:10px">${statusTag}</div>
+      <div style="font-size:9px;color:#888;margin-top:2px">Produit : ${productEmoji} ${product}</div>
+    `;
+    grid.appendChild(el);
+  });
+}
+function renderShopUpgrades(grid){
+  const d=farmData;
+  const inv=d.inventory||{};
+
+  function matStatus(matId, need) {
+    const have = inv[matId]||0;
+    const ok = have >= need;
+    const name = (ITEM_INFO[matId]||{}).desc ? matId.replace(/_/g,' ') : matId;
+    return `<span class="recipe-ingredient ${ok?'has':'need'}">${(d.item_catalog||{})[matId]?.emoji||''} ${have}/${need}</span>`;
+  }
+
+  const upgrades = [
+    {id:'barn', name:'Grange', emoji:'🏚️',
+     desc:'Stocke les matériaux (boulons, planches, etc). Plus de capacité = plus de matériaux gardés.',
+     level: d.barn_level||1, cap: d.barn_capacity||50, newCap: (d.barn_capacity||50)+25,
+     mats: [{id:'bolt',n:(d.barn_level||1)+1},{id:'plank',n:(d.barn_level||1)+1},{id:'duct_tape',n:(d.barn_level||1)+1}]},
+    {id:'silo', name:'Silo', emoji:'🏭',
+     desc:'Stocke les récoltes et produits transformés. Plus de capacité = plus de production possible.',
+     level: d.silo_level||1, cap: d.silo_capacity||50, newCap: (d.silo_capacity||50)+25,
+     mats: [{id:'nail',n:(d.silo_level||1)+1},{id:'screw',n:(d.silo_level||1)+1},{id:'paint',n:(d.silo_level||1)+1}]},
+  ];
+
+  upgrades.forEach(u => {
+    const canUpgrade = u.mats.every(m => (inv[m.id]||0) >= m.n);
+    const el=document.createElement('div');
+    el.className='item-cell';
+    el.style.cssText=`grid-column:1/-1;min-height:90px;text-align:left;padding:10px;opacity:${canUpgrade?'1':'.6'}`;
+    el.onclick=()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')};
+
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        ${buildingImg(u.id,40)}
+        <div>
+          <div style="font-weight:800;font-size:13px">${u.emoji} ${u.name} — Niv. ${u.level}</div>
+          <div style="font-size:10px;color:#4caf50;font-weight:700">Capacité : ${u.cap} → ${u.newCap}</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#666;margin-bottom:6px">${u.desc}</div>
+      <div style="font-size:11px;font-weight:700;margin-bottom:3px">Matériaux requis :</div>
+      <div class="recipe-ingredients">${u.mats.map(m=>matStatus(m.id,m.n)).join(' ')}</div>
+    `;
+    grid.appendChild(el);
+  });
+
+  // Explanation
+  const tip=document.createElement('div');
+  tip.style.cssText='grid-column:1/-1;font-size:10px;color:#999;padding:4px 8px;line-height:1.4';
+  tip.innerHTML='💡 Les <strong>matériaux</strong> (🔩 Boulon, 🪵 Planche, etc) tombent aléatoirement quand tu révises des cartes (~12% par review). Continue à réviser !';
+  grid.appendChild(tip);
+}
+function renderShopLand(grid){
+  const d=farmData;
+  const landTotal=d.land_total||20;
+  const landUsed=d.land_used||0;
+  const landFree=landTotal-landUsed;
+  const coins=d.coins||0;
+  const deeds=(d.inventory||{}).land_deed||0;
+  const permits=(d.inventory||{}).expansion_permit||0;
+  const cost=100*(landTotal/5|0);
+
+  // Status card
+  const status=document.createElement('div');
+  status.className='item-cell';
+  status.style.cssText='grid-column:1/-1;min-height:80px;text-align:left;padding:10px';
+  const usedPct=Math.round(landUsed/Math.max(1,landTotal)*100);
+  status.innerHTML=`
+    <div style="font-weight:800;font-size:14px;margin-bottom:6px">🗺️ Ton terrain</div>
+    <div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-bottom:6px">
+      <div style="height:100%;width:${usedPct}%;background:linear-gradient(90deg,#4caf50,#81c784);border-radius:4px"></div>
+    </div>
+    <div style="font-size:11px;color:#666">
+      <strong>${landUsed}/${landTotal}</strong> utilisé •
+      Champ = 1 terrain • Bâtiment = 2 • Enclos = 2
+    </div>
+    <div style="font-size:10px;color:#888;margin-top:4px">
+      Champs: ${(d.fields||[]).length} •
+      Bâtiments: ${(d.placed_buildings||[]).length} •
+      Enclos: ${(d.pastures||[]).length} •
+      Libre: <strong>${landFree}</strong>
+    </div>
+  `;
+  grid.appendChild(status);
+
+  // Buy land button
+  const canBuy=coins>=cost&&deeds>=1;
+  const el=document.createElement('div');
+  el.className='item-cell';
+  el.style.cssText=`grid-column:1/-1;min-height:80px;text-align:left;padding:10px;opacity:${canBuy?'1':'.5'}`;
+  el.onclick=()=>{
+    if(canBuy){pycmd('farm:buy_land');SoundMgr.play('click')}
+    else if(deeds<1) showNotification('Il te faut un Titre de propriété (📜). Drop rare en révisant !');
+    else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`);
+  };
+  el.innerHTML=`
+    <div style="font-weight:800;font-size:13px;margin-bottom:4px">🏗️ Agrandir le terrain (+5)</div>
+    <div style="font-size:11px;color:#666;margin-bottom:6px">
+      Plus de terrain = plus de champs, bâtiments et enclos.
+    </div>
+    <div style="font-size:11px">
+      <span style="font-weight:700">Coût :</span>
+      🪙 ${cost} pièces ${coins>=cost?'<span style="color:#4caf50">✓</span>':'<span style="color:#e74c3c">✗ ('+coins+')</span>'}
+      • 📜 Titre x1 ${deeds>=1?'<span style="color:#4caf50">✓</span>':'<span style="color:#e74c3c">✗ ('+deeds+')</span>'}
+    </div>
+  `;
+  grid.appendChild(el);
+
+  // Info text
+  const info=document.createElement('div');
+  info.style.cssText='grid-column:1/-1;font-size:10px;color:#999;padding:4px 8px;line-height:1.4';
+  info.innerHTML='💡 Les <strong>Titres de propriété</strong> 📜 sont des drops rares (~3%) obtenus en révisant des cartes. Continue à réviser pour en obtenir !';
+  grid.appendChild(info);
+}
 
 function renderSettings() {
   const stats = document.getElementById('farm-stats');

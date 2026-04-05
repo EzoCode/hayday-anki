@@ -31,16 +31,35 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Beaute** : utiliser de vrais sprites generes par Gemini, pas des emojis
 - **Progression visible** : les crops doivent passer par 5 stades visuels distincts
 
-## Prochaines etapes
-- [x] Fix: ferme se charge au lancement
-- [x] Fix: crop growth stages visibles (stade 0 = graine, pas crop adulte)
-- [x] Parcelles en grille 2-3 colonnes dans la zone champs
-- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, cloture, etc.)
-- [x] Montrer TOUS les batiments/animaux/crops dans les menus, meme verrouilles, avec prerequis
-- [x] Fix inventaire : affichage coherent des materiaux et items
-- [x] Fix persistance : sauvegardes fiables entre sessions
-- [x] Chaque unlock montre : nom, image, description, benefice, cout, niveau requis
+## Historique des corrections (2026-04-05)
+- [x] Fix: ferme se charge au lancement (bridge race condition)
+- [x] Fix: crop growth stages visibles (stade 0 = graine)
+- [x] Parcelles en grille 3 colonnes carrees (plus ecrasees)
+- [x] Montrer TOUS les batiments/animaux dans les menus, avec prerequis et descriptions
+- [x] 30+ descriptions d'items en francais (materiaux, crops, produits)
+- [x] Systeme d'info (i) sur chaque item d'inventaire
+- [x] Boutique animaux : niveaux requis, descriptions, produits
+- [x] Boutique terrain : barre de progression, cout detaille
+- [x] Boutique upgrades : materiaux avec compteurs (3/5 boulons)
+- [x] Commandes : explication du systeme, items avec statut couleur
+- [x] Overlay scrollable et fermable
+- [x] Parcelles max 120px (pas de pixelisation en grande fenetre)
+
+## Aussi corrige (session 2)
 - [x] Fix: add_plots ajoute au bon systeme (fields)
 - [x] Fix: buy_building/buy_animal ajoutent aux listes de rendu
 - [x] Fix: production avance 1x par session (pas 2x)
 - [x] Plant dialog montre reviews/stade, recolte, prix de vente, XP
+- [x] Boutique animaux complete : niveaux, descriptions, produits, status couleur
+- [x] Boutique upgrades : materiaux avec compteurs couleur (have/need)
+- [x] Boutique terrain : barre progression, cout detaille, tips
+- [x] Commandes : explication du systeme, items couleur
+- [x] Boutique decos : categories (Basique/Premium/Nature/Special)
+
+## Prochaines etapes
+- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
+- [ ] Ameliorer l'apparence des decorations dans la zone Village
+- [ ] Ajouter un tutorial/onboarding pour les nouveaux joueurs
+- [ ] Sons : feedback audio sur les actions (recolte, achat, level up)
+- [ ] Evenements saisonniers avec bonus temporaires
+- [ ] Systeme de quetes quotidiennes/hebdomadaires
