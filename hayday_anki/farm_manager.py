@@ -26,54 +26,54 @@ SAVE_SCHEMA_VERSION = 2
 
 ITEM_CATALOG = {
     # Raw materials (from reviews)
-    "wheat": {"name": "Wheat", "emoji": "\U0001F33E", "category": "crop", "sell_price": 2, "xp": 1},
-    "corn": {"name": "Corn", "emoji": "\U0001F33D", "category": "crop", "sell_price": 3, "xp": 2},
-    "carrot": {"name": "Carrot", "emoji": "\U0001F955", "category": "crop", "sell_price": 4, "xp": 2},
-    "tomato": {"name": "Tomato", "emoji": "\U0001F345", "category": "crop", "sell_price": 5, "xp": 3},
-    "potato": {"name": "Potato", "emoji": "\U0001F954", "category": "crop", "sell_price": 4, "xp": 2},
-    "strawberry": {"name": "Strawberry", "emoji": "\U0001F353", "category": "crop", "sell_price": 7, "xp": 4},
-    "apple": {"name": "Apple", "emoji": "\U0001F34E", "category": "crop", "sell_price": 6, "xp": 3},
-    "sugarcane": {"name": "Sugarcane", "emoji": "\U0001F33F", "category": "crop", "sell_price": 5, "xp": 3},
-    "soybean": {"name": "Soybean", "emoji": "\U0001FAD8", "category": "crop", "sell_price": 4, "xp": 2},
-    "pumpkin": {"name": "Pumpkin", "emoji": "\U0001F383", "category": "crop", "sell_price": 8, "xp": 5},
+    "wheat": {"name": "Ble", "emoji": "\U0001F33E", "category": "crop", "sell_price": 2, "xp": 1},
+    "corn": {"name": "Mais", "emoji": "\U0001F33D", "category": "crop", "sell_price": 3, "xp": 2},
+    "carrot": {"name": "Carotte", "emoji": "\U0001F955", "category": "crop", "sell_price": 4, "xp": 2},
+    "tomato": {"name": "Tomate", "emoji": "\U0001F345", "category": "crop", "sell_price": 5, "xp": 3},
+    "potato": {"name": "Patate", "emoji": "\U0001F954", "category": "crop", "sell_price": 4, "xp": 2},
+    "strawberry": {"name": "Fraise", "emoji": "\U0001F353", "category": "crop", "sell_price": 7, "xp": 4},
+    "apple": {"name": "Pomme", "emoji": "\U0001F34E", "category": "crop", "sell_price": 6, "xp": 3},
+    "sugarcane": {"name": "Canne a sucre", "emoji": "\U0001F33F", "category": "crop", "sell_price": 5, "xp": 3},
+    "soybean": {"name": "Soja", "emoji": "\U0001FAD8", "category": "crop", "sell_price": 4, "xp": 2},
+    "pumpkin": {"name": "Citrouille", "emoji": "\U0001F383", "category": "crop", "sell_price": 8, "xp": 5},
 
     # Animal products
-    "milk": {"name": "Milk", "emoji": "\U0001F95B", "category": "animal_product", "sell_price": 8, "xp": 4},
-    "egg": {"name": "Egg", "emoji": "\U0001F95A", "category": "animal_product", "sell_price": 6, "xp": 3},
-    "wool": {"name": "Wool", "emoji": "\U0001F9F6", "category": "animal_product", "sell_price": 10, "xp": 5},
+    "milk": {"name": "Lait", "emoji": "\U0001F95B", "category": "animal_product", "sell_price": 8, "xp": 4},
+    "egg": {"name": "Oeuf", "emoji": "\U0001F95A", "category": "animal_product", "sell_price": 6, "xp": 3},
+    "wool": {"name": "Laine", "emoji": "\U0001F9F6", "category": "animal_product", "sell_price": 10, "xp": 5},
     "bacon": {"name": "Bacon", "emoji": "\U0001F953", "category": "animal_product", "sell_price": 12, "xp": 6},
 
     # Processed goods
-    "bread": {"name": "Bread", "emoji": "\U0001F35E", "category": "processed", "sell_price": 10, "xp": 5},
-    "butter": {"name": "Butter", "emoji": "\U0001F9C8", "category": "processed", "sell_price": 12, "xp": 6},
-    "cheese": {"name": "Cheese", "emoji": "\U0001F9C0", "category": "processed", "sell_price": 15, "xp": 7},
-    "cake": {"name": "Cake", "emoji": "\U0001F370", "category": "processed", "sell_price": 25, "xp": 12},
+    "bread": {"name": "Pain", "emoji": "\U0001F35E", "category": "processed", "sell_price": 10, "xp": 5},
+    "butter": {"name": "Beurre", "emoji": "\U0001F9C8", "category": "processed", "sell_price": 12, "xp": 6},
+    "cheese": {"name": "Fromage", "emoji": "\U0001F9C0", "category": "processed", "sell_price": 15, "xp": 7},
+    "cake": {"name": "Gateau", "emoji": "\U0001F370", "category": "processed", "sell_price": 25, "xp": 12},
     "cookie": {"name": "Cookie", "emoji": "\U0001F36A", "category": "processed", "sell_price": 18, "xp": 8},
-    "sugar": {"name": "Sugar", "emoji": "\U0001F36C", "category": "processed", "sell_price": 8, "xp": 4},
-    "cream": {"name": "Cream", "emoji": "\U0001F95B", "category": "processed", "sell_price": 14, "xp": 6},
+    "sugar": {"name": "Sucre", "emoji": "\U0001F36C", "category": "processed", "sell_price": 8, "xp": 4},
+    "cream": {"name": "Creme", "emoji": "\U0001F95B", "category": "processed", "sell_price": 14, "xp": 6},
     "pizza": {"name": "Pizza", "emoji": "\U0001F355", "category": "processed", "sell_price": 30, "xp": 15},
     "burger": {"name": "Burger", "emoji": "\U0001F354", "category": "processed", "sell_price": 35, "xp": 18},
-    "pie": {"name": "Pie", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
-    "jam": {"name": "Jam", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
-    "juice": {"name": "Juice", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
+    "pie": {"name": "Tarte", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
+    "jam": {"name": "Confiture", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
+    "juice": {"name": "Jus", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
 
     # Upgrade materials (random drops)
-    "bolt": {"name": "Bolt", "emoji": "\U0001F529", "category": "material", "sell_price": 0, "xp": 0},
-    "plank": {"name": "Plank", "emoji": "\U0001FAB5", "category": "material", "sell_price": 0, "xp": 0},
-    "duct_tape": {"name": "Duct Tape", "emoji": "\U0001FA79", "category": "material", "sell_price": 0, "xp": 0},
-    "nail": {"name": "Nail", "emoji": "\U0001F4CC", "category": "material", "sell_price": 0, "xp": 0},
-    "screw": {"name": "Screw", "emoji": "\U0001FA9B", "category": "material", "sell_price": 0, "xp": 0},
-    "paint": {"name": "Paint", "emoji": "\U0001F3A8", "category": "material", "sell_price": 0, "xp": 0},
-    "land_deed": {"name": "Land Deed", "emoji": "\U0001F4DC", "category": "material", "sell_price": 0, "xp": 0},
-    "expansion_permit": {"name": "Expansion Permit", "emoji": "\U0001F3D7\uFE0F", "category": "material", "sell_price": 0, "xp": 0},
+    "bolt": {"name": "Boulon", "emoji": "\U0001F529", "category": "material", "sell_price": 0, "xp": 0},
+    "plank": {"name": "Planche", "emoji": "\U0001FAB5", "category": "material", "sell_price": 0, "xp": 0},
+    "duct_tape": {"name": "Ruban adhesif", "emoji": "\U0001FA79", "category": "material", "sell_price": 0, "xp": 0},
+    "nail": {"name": "Clou", "emoji": "\U0001F4CC", "category": "material", "sell_price": 0, "xp": 0},
+    "screw": {"name": "Vis", "emoji": "\U0001FA9B", "category": "material", "sell_price": 0, "xp": 0},
+    "paint": {"name": "Peinture", "emoji": "\U0001F3A8", "category": "material", "sell_price": 0, "xp": 0},
+    "land_deed": {"name": "Titre foncier", "emoji": "\U0001F4DC", "category": "material", "sell_price": 0, "xp": 0},
+    "expansion_permit": {"name": "Permis d'expansion", "emoji": "\U0001F3D7\uFE0F", "category": "material", "sell_price": 0, "xp": 0},
 
     # Decorations
-    "fence": {"name": "Fence", "emoji": "\U0001FAB5", "category": "decoration", "sell_price": 5, "xp": 2},
-    "flower_pot": {"name": "Flower Pot", "emoji": "\U0001FAB4", "category": "decoration", "sell_price": 10, "xp": 3},
-    "bench": {"name": "Bench", "emoji": "\U0001FA91", "category": "decoration", "sell_price": 15, "xp": 5},
-    "fountain": {"name": "Fountain", "emoji": "\u26F2", "category": "decoration", "sell_price": 50, "xp": 15},
-    "scarecrow": {"name": "Scarecrow", "emoji": "\U0001F383", "category": "decoration", "sell_price": 20, "xp": 7},
-    "windmill_deco": {"name": "Windmill", "emoji": "\U0001F3E1", "category": "decoration", "sell_price": 100, "xp": 25},
+    "fence": {"name": "Cloture", "emoji": "\U0001FAB5", "category": "decoration", "sell_price": 5, "xp": 2},
+    "flower_pot": {"name": "Pot de fleurs", "emoji": "\U0001FAB4", "category": "decoration", "sell_price": 10, "xp": 3},
+    "bench": {"name": "Banc", "emoji": "\U0001FA91", "category": "decoration", "sell_price": 15, "xp": 5},
+    "fountain": {"name": "Fontaine", "emoji": "\u26F2", "category": "decoration", "sell_price": 50, "xp": 15},
+    "scarecrow": {"name": "Epouvantail", "emoji": "\U0001F383", "category": "decoration", "sell_price": 20, "xp": 7},
+    "windmill_deco": {"name": "Moulin", "emoji": "\U0001F3E1", "category": "decoration", "sell_price": 100, "xp": 25},
 }
 
 
@@ -479,8 +479,10 @@ class FarmManager:
         }
 
         # Base rewards by ease
-        coin_map = {1: 1, 2: 3, 3: 2, 4: 1}
-        xp_map = {1: 2, 2: 5, 3: 3, 4: 2}
+        # Good (3) = standard reward, Hard (2) = slightly less, Easy (4) = mastery bonus
+        # Again (1) = minimal (encourages correct answers, not gaming ease)
+        coin_map = {1: 1, 2: 2, 3: 3, 4: 4}
+        xp_map = {1: 1, 2: 3, 3: 5, 4: 6}
 
         base_coins = coin_map.get(ease, 2)
         base_xp = xp_map.get(ease, 3)
@@ -552,9 +554,10 @@ class FarmManager:
             }
             self.state.mystery_boxes.append(box)
             rewards["mystery_box"] = box
+            box_size_fr = {"small": "petite", "medium": "moyenne", "large": "grande"}.get(box_size, box_size)
             rewards["notifications"].append({
                 "type": "mystery_box",
-                "message": f"A {box_size} mystery box appeared on your farm!",
+                "message": f"Une {box_size_fr} boite mystere est apparue !",
             })
 
         # Advance crop growth on plots
@@ -662,7 +665,7 @@ class FarmManager:
                 "new_level": new_level,
                 "gem_reward": gem_reward,
                 "unlocks": all_unlocks,
-                "message": f"Level Up! You are now level {new_level}!",
+                "message": f"Niveau superieur ! Vous etes niveau {new_level} !",
             }
         return None
 
@@ -999,15 +1002,15 @@ class FarmManager:
         self.state.wheel_spins += 1
 
         prizes = [
-            ({"coins": 25}, "25 Coins", 0.20),
-            ({"coins": 50}, "50 Coins", 0.15),
-            ({"coins": 100}, "100 Coins", 0.10),
-            ({"gems": 1}, "1 Gem", 0.15),
-            ({"gems": 3}, "3 Gems", 0.10),
-            ({"gems": 5}, "5 Gems", 0.05),
-            ({"item": "bolt", "qty": 3}, "3 Bolts", 0.10),
-            ({"item": "plank", "qty": 3}, "3 Planks", 0.10),
-            ({"item": "expansion_permit", "qty": 1}, "Expansion Permit", 0.05),
+            ({"coins": 25}, "25 pieces", 0.20),
+            ({"coins": 50}, "50 pieces", 0.15),
+            ({"coins": 100}, "100 pieces", 0.10),
+            ({"gems": 1}, "1 gemme", 0.15),
+            ({"gems": 3}, "3 gemmes", 0.10),
+            ({"gems": 5}, "5 gemmes", 0.05),
+            ({"item": "bolt", "qty": 3}, "3 boulons", 0.10),
+            ({"item": "plank", "qty": 3}, "3 planches", 0.10),
+            ({"item": "expansion_permit", "qty": 1}, "Permis d'expansion", 0.05),
         ]
 
         roll = random.random()
@@ -1056,7 +1059,7 @@ class FarmManager:
                 end = now.replace(hour=23, minute=59, second=59) + timedelta(days=days_until_monday - 1)
                 self.state.active_events.append({
                     "id": "weekend_bonus",
-                    "name": "Weekend Bonus!",
+                    "name": "Bonus Weekend !",
                     "emoji": "\U0001F389",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 2.0,
@@ -1068,7 +1071,7 @@ class FarmManager:
             end = now.replace(hour=9, minute=0, second=0).isoformat()
             self.state.active_events.append({
                 "id": "early_bird",
-                "name": "Early Bird!",
+                "name": "Leve-tot !",
                 "emoji": "\U0001F305",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
@@ -1080,7 +1083,7 @@ class FarmManager:
             end = (now.replace(hour=23, minute=59, second=59)).isoformat()
             self.state.active_events.append({
                 "id": "night_owl",
-                "name": "Night Owl!",
+                "name": "Couche-tard !",
                 "emoji": "\U0001F989",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
@@ -1092,7 +1095,7 @@ class FarmManager:
             end = now.replace(hour=14, minute=0, second=0).isoformat()
             self.state.active_events.append({
                 "id": "lunch_rush",
-                "name": "Lunch Rush!",
+                "name": "Pause dejeuner !",
                 "emoji": "\U0001F35C",
                 "coin_multiplier": 1.2,
                 "xp_multiplier": 1.3,
@@ -1106,7 +1109,7 @@ class FarmManager:
                 end = (now + timedelta(hours=24)).isoformat()
                 self.state.active_events.append({
                     "id": evt_id,
-                    "name": f"{self.state.current_streak}-Day Streak!",
+                    "name": f"Serie de {self.state.current_streak} jours !",
                     "emoji": "\U0001F525",
                     "coin_multiplier": 2.0,
                     "xp_multiplier": 2.0,
@@ -1120,7 +1123,7 @@ class FarmManager:
                 end = (now + timedelta(hours=12)).isoformat()
                 self.state.active_events.append({
                     "id": evt_id,
-                    "name": f"Level {self.state.level} Party!",
+                    "name": f"Niveau {self.state.level} !",
                     "emoji": "\U0001F38A",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 1.5,
@@ -1136,7 +1139,7 @@ class FarmManager:
                     end = (now + timedelta(minutes=30)).isoformat()
                     self.state.active_events.append({
                         "id": "first_session",
-                        "name": "Fresh Start!",
+                        "name": "Nouveau depart !",
                         "emoji": "\U0001F331",
                         "coin_multiplier": 1.25,
                         "xp_multiplier": 1.25,
@@ -1238,6 +1241,8 @@ class FarmManager:
 
     # --- Data for UI ---
 
+    _item_catalog_cache = None
+
     def get_farm_data(self) -> Dict:
         """Get complete farm data for UI rendering."""
         from . import progression
@@ -1246,6 +1251,10 @@ class FarmManager:
         xp_for_next = progression.get_xp_for_level(self.state.level + 1)
         xp_progress = self.state.xp - xp_for_current
         xp_needed = xp_for_next - xp_for_current
+
+        # Cache item catalog (it never changes at runtime)
+        if FarmManager._item_catalog_cache is None:
+            FarmManager._item_catalog_cache = {k: v for k, v in ITEM_CATALOG.items()}
 
         return {
             "level": self.state.level,
@@ -1279,7 +1288,7 @@ class FarmManager:
             "total_reviews": self.state.total_reviews,
             "lifetime_reviews": self.state.lifetime_reviews,
             "can_spin_wheel": self.can_spin_wheel(),
-            "item_catalog": {k: v for k, v in ITEM_CATALOG.items()},
+            "item_catalog": FarmManager._item_catalog_cache,
             "achievements": self.state.achievements,
             "session_reviews": self.state.session_reviews,
             "session_coins": self.state.session_coins_earned,

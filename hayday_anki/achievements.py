@@ -17,11 +17,11 @@ from typing import Dict, List, Optional, Tuple, Any
 # tiers: [(tier_name, target, gem_reward), ...]
 
 ACHIEVEMENT_DEFS: List[Dict] = [
-    # --- REVIEW MILESTONES ---
+    # --- JALONS DE REVISION ---
     {
         "id": "first_steps",
-        "name": "First Steps",
-        "desc": "Review {target} cards",
+        "name": "Premiers pas",
+        "desc": "Reviser {target} cartes",
         "category": "reviews",
         "icon": "\U0001F463",
         "tiers": [
@@ -32,8 +32,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "knowledge_seeker",
-        "name": "Knowledge Seeker",
-        "desc": "Review {target} cards total",
+        "name": "Chercheur de savoir",
+        "desc": "Reviser {target} cartes au total",
         "category": "reviews",
         "icon": "\U0001F4DA",
         "tiers": [
@@ -44,8 +44,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "memory_master",
-        "name": "Memory Master",
-        "desc": "Review {target} cards total",
+        "name": "Maitre de la memoire",
+        "desc": "Reviser {target} cartes au total",
         "category": "reviews",
         "icon": "\U0001F9E0",
         "tiers": [
@@ -56,8 +56,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "scholar",
-        "name": "Scholar",
-        "desc": "Complete {target} review sessions",
+        "name": "Erudit",
+        "desc": "Completer {target} sessions de revision",
         "category": "reviews",
         "icon": "\U0001F393",
         "tiers": [
@@ -67,11 +67,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- STREAK ACHIEVEMENTS ---
+    # --- SERIES ---
     {
         "id": "on_fire",
-        "name": "On Fire",
-        "desc": "Maintain a {target}-day streak",
+        "name": "En feu",
+        "desc": "Maintenir une serie de {target} jours",
         "category": "streaks",
         "icon": "\U0001F525",
         "tiers": [
@@ -82,8 +82,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "unstoppable",
-        "name": "Unstoppable",
-        "desc": "Maintain a {target}-day streak",
+        "name": "Inarretable",
+        "desc": "Maintenir une serie de {target} jours",
         "category": "streaks",
         "icon": "\U0001F4AA",
         "tiers": [
@@ -94,8 +94,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "iron_will",
-        "name": "Iron Will",
-        "desc": "Maintain a {target}-day streak",
+        "name": "Volonte de fer",
+        "desc": "Maintenir une serie de {target} jours",
         "category": "streaks",
         "icon": "\u2694\uFE0F",
         "tiers": [
@@ -105,11 +105,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- ACCURACY ACHIEVEMENTS ---
+    # --- PRECISION ---
     {
         "id": "sharp_mind",
-        "name": "Sharp Mind",
-        "desc": "Achieve {target}% accuracy in a session (20+ cards)",
+        "name": "Esprit vif",
+        "desc": "Atteindre {target}% de precision en session (20+ cartes)",
         "category": "accuracy",
         "icon": "\U0001F3AF",
         "tiers": [
@@ -120,8 +120,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "perfect_session",
-        "name": "Perfect Session",
-        "desc": "Score 100% accuracy on {target}+ cards in one session",
+        "name": "Session parfaite",
+        "desc": "100% de precision sur {target}+ cartes en une session",
         "category": "accuracy",
         "icon": "\U0001F31F",
         "tiers": [
@@ -132,8 +132,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "consistent_learner",
-        "name": "Consistent Learner",
-        "desc": "Maintain {target}%+ retention across all decks",
+        "name": "Apprenant constant",
+        "desc": "Maintenir {target}%+ de retention globale",
         "category": "accuracy",
         "icon": "\U0001F4C8",
         "tiers": [
@@ -143,11 +143,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- TIME-BASED ACHIEVEMENTS ---
+    # --- HORAIRES ---
     {
         "id": "early_bird",
-        "name": "Early Bird",
-        "desc": "Review before 7 AM {target} times",
+        "name": "Leve-tot",
+        "desc": "Reviser avant 7h {target} fois",
         "category": "time",
         "icon": "\U0001F426",
         "tiers": [
@@ -158,8 +158,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "night_owl",
-        "name": "Night Owl",
-        "desc": "Review after 11 PM {target} times",
+        "name": "Couche-tard",
+        "desc": "Reviser apres 23h {target} fois",
         "category": "time",
         "icon": "\U0001F989",
         "tiers": [
@@ -170,8 +170,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "weekend_warrior",
-        "name": "Weekend Warrior",
-        "desc": "Review on {target} weekends",
+        "name": "Guerrier du weekend",
+        "desc": "Reviser pendant {target} weekends",
         "category": "time",
         "icon": "\U0001F3D6\uFE0F",
         "tiers": [
@@ -182,8 +182,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "marathon_runner",
-        "name": "Marathon Runner",
-        "desc": "Study for {target}+ minutes in a single session",
+        "name": "Marathonien",
+        "desc": "Etudier pendant {target}+ minutes en une session",
         "category": "time",
         "icon": "\U0001F3C3",
         "tiers": [
@@ -194,8 +194,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "dedicated_hours",
-        "name": "Dedicated Hours",
-        "desc": "Spend {target} total hours studying",
+        "name": "Heures de devouement",
+        "desc": "Passer {target} heures a etudier",
         "category": "time",
         "icon": "\u23F0",
         "tiers": [
@@ -205,11 +205,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- FARMING ACHIEVEMENTS ---
+    # --- AGRICULTURE ---
     {
         "id": "first_harvest",
-        "name": "First Harvest",
-        "desc": "Harvest {target} crops",
+        "name": "Premiere recolte",
+        "desc": "Recolter {target} cultures",
         "category": "farming",
         "icon": "\U0001F33E",
         "tiers": [
@@ -220,8 +220,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "crop_variety",
-        "name": "Crop Variety",
-        "desc": "Grow {target} different crop types",
+        "name": "Variete de cultures",
+        "desc": "Cultiver {target} types differents",
         "category": "farming",
         "icon": "\U0001F33B",
         "tiers": [
@@ -232,8 +232,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "animal_lover",
-        "name": "Animal Lover",
-        "desc": "Own {target} animals",
+        "name": "Ami des animaux",
+        "desc": "Posseder {target} animaux",
         "category": "farming",
         "icon": "\U0001F43E",
         "tiers": [
@@ -244,8 +244,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "green_thumb",
-        "name": "Green Thumb",
-        "desc": "Have {target} plots active simultaneously",
+        "name": "Main verte",
+        "desc": "Avoir {target} parcelles actives",
         "category": "farming",
         "icon": "\U0001F44D",
         "tiers": [
@@ -255,11 +255,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- COLLECTION ACHIEVEMENTS ---
+    # --- COLLECTIONS ---
     {
         "id": "decorator",
-        "name": "Interior Decorator",
-        "desc": "Place {target} decorations on your farm",
+        "name": "Decorateur",
+        "desc": "Placer {target} decorations sur la ferme",
         "category": "collections",
         "icon": "\U0001F3A8",
         "tiers": [
@@ -270,8 +270,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "deco_collector",
-        "name": "Decoration Collector",
-        "desc": "Own {target} unique decoration types",
+        "name": "Collectionneur de deco",
+        "desc": "Posseder {target} types de decorations uniques",
         "category": "collections",
         "icon": "\U0001F3C6",
         "tiers": [
@@ -282,8 +282,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "achievement_hunter",
-        "name": "Achievement Hunter",
-        "desc": "Unlock {target} achievements",
+        "name": "Chasseur de succes",
+        "desc": "Debloquer {target} succes",
         "category": "collections",
         "icon": "\U0001F3C5",
         "tiers": [
@@ -293,11 +293,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- ECONOMY ACHIEVEMENTS ---
+    # --- ECONOMIE ---
     {
         "id": "coin_collector",
-        "name": "Coin Collector",
-        "desc": "Earn {target} total coins",
+        "name": "Collecteur de pieces",
+        "desc": "Gagner {target} pieces au total",
         "category": "economy",
         "icon": "\U0001FA99",
         "tiers": [
@@ -308,8 +308,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "big_spender",
-        "name": "Big Spender",
-        "desc": "Spend {target} coins total",
+        "name": "Grand depensier",
+        "desc": "Depenser {target} pieces au total",
         "category": "economy",
         "icon": "\U0001F4B0",
         "tiers": [
@@ -320,8 +320,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "gem_hoarder",
-        "name": "Gem Hoarder",
-        "desc": "Accumulate {target} gems",
+        "name": "Amasseur de gemmes",
+        "desc": "Accumuler {target} gemmes",
         "category": "economy",
         "icon": "\U0001F48E",
         "tiers": [
@@ -332,8 +332,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "merchant",
-        "name": "Merchant",
-        "desc": "Sell {target} items at the roadside shop",
+        "name": "Marchand",
+        "desc": "Vendre {target} articles",
         "category": "economy",
         "icon": "\U0001F4B5",
         "tiers": [
@@ -343,11 +343,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- ORDER ACHIEVEMENTS ---
+    # --- COMMANDES ---
     {
         "id": "trucker",
-        "name": "Trucker",
-        "desc": "Complete {target} truck orders",
+        "name": "Camionneur",
+        "desc": "Completer {target} commandes camion",
         "category": "orders",
         "icon": "\U0001F69A",
         "tiers": [
@@ -358,8 +358,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "sailor",
-        "name": "Sailor",
-        "desc": "Complete {target} boat orders",
+        "name": "Marin",
+        "desc": "Completer {target} commandes bateau",
         "category": "orders",
         "icon": "\u26F5",
         "tiers": [
@@ -369,11 +369,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- PRODUCTION ACHIEVEMENTS ---
+    # --- PRODUCTION ---
     {
         "id": "chef",
-        "name": "Chef",
-        "desc": "Produce {target} processed goods",
+        "name": "Chef cuisinier",
+        "desc": "Produire {target} produits transformes",
         "category": "production",
         "icon": "\U0001F468\u200D\U0001F373",
         "tiers": [
@@ -384,8 +384,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "baker",
-        "name": "Master Baker",
-        "desc": "Bake {target} bread loaves",
+        "name": "Maitre boulanger",
+        "desc": "Cuire {target} miches de pain",
         "category": "production",
         "icon": "\U0001F35E",
         "tiers": [
@@ -397,7 +397,7 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     {
         "id": "cheese_maker",
         "name": "Fromager",
-        "desc": "Produce {target} cheese wheels",
+        "desc": "Produire {target} fromages",
         "category": "production",
         "icon": "\U0001F9C0",
         "tiers": [
@@ -407,11 +407,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- MYSTERY & LUCK ACHIEVEMENTS ---
+    # --- MYSTERE & CHANCE ---
     {
         "id": "treasure_hunter",
-        "name": "Treasure Hunter",
-        "desc": "Open {target} mystery boxes",
+        "name": "Chasseur de tresor",
+        "desc": "Ouvrir {target} boites mystere",
         "category": "luck",
         "icon": "\U0001F381",
         "tiers": [
@@ -422,8 +422,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "lucky_spinner",
-        "name": "Lucky Spinner",
-        "desc": "Spin the wheel {target} times",
+        "name": "Chanceux",
+        "desc": "Tourner la roue {target} fois",
         "category": "luck",
         "icon": "\U0001F3B0",
         "tiers": [
@@ -434,8 +434,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "material_collector",
-        "name": "Material Collector",
-        "desc": "Collect {target} upgrade materials",
+        "name": "Collecteur de materiaux",
+        "desc": "Collecter {target} materiaux",
         "category": "luck",
         "icon": "\U0001F529",
         "tiers": [
@@ -445,11 +445,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- LEVEL ACHIEVEMENTS ---
+    # --- NIVEAUX ---
     {
         "id": "rising_star",
-        "name": "Rising Star",
-        "desc": "Reach level {target}",
+        "name": "Etoile montante",
+        "desc": "Atteindre le niveau {target}",
         "category": "levels",
         "icon": "\u2B50",
         "tiers": [
@@ -460,8 +460,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "veteran_farmer",
-        "name": "Veteran Farmer",
-        "desc": "Reach level {target}",
+        "name": "Fermier veteran",
+        "desc": "Atteindre le niveau {target}",
         "category": "levels",
         "icon": "\U0001F451",
         "tiers": [
@@ -471,11 +471,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- UPGRADE ACHIEVEMENTS ---
+    # --- AMELIORATIONS ---
     {
         "id": "barn_builder",
-        "name": "Barn Builder",
-        "desc": "Upgrade your barn {target} times",
+        "name": "Batisseur de grange",
+        "desc": "Ameliorer la grange {target} fois",
         "category": "upgrades",
         "icon": "\U0001F3DA\uFE0F",
         "tiers": [
@@ -486,8 +486,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "silo_master",
-        "name": "Silo Master",
-        "desc": "Upgrade your silo {target} times",
+        "name": "Maitre du silo",
+        "desc": "Ameliorer le silo {target} fois",
         "category": "upgrades",
         "icon": "\U0001F3ED",
         "tiers": [
@@ -498,8 +498,8 @@ ACHIEVEMENT_DEFS: List[Dict] = [
     },
     {
         "id": "land_baron",
-        "name": "Land Baron",
-        "desc": "Expand your farm to {target} plots",
+        "name": "Baron foncier",
+        "desc": "Agrandir la ferme a {target} parcelles",
         "category": "upgrades",
         "icon": "\U0001F30D",
         "tiers": [
@@ -509,11 +509,11 @@ ACHIEVEMENT_DEFS: List[Dict] = [
         ],
     },
 
-    # --- MULTI-DECK ACHIEVEMENTS ---
+    # --- DIVERSITE ---
     {
         "id": "polyglot",
-        "name": "Polyglot",
-        "desc": "Review cards from {target} different decks in one day",
+        "name": "Polyglotte",
+        "desc": "Reviser des cartes de {target} paquets differents en un jour",
         "category": "diversity",
         "icon": "\U0001F30E",
         "tiers": [

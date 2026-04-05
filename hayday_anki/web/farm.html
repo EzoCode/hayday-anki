@@ -63,6 +63,9 @@
       <div id="animals-area"></div>
     </div>
 
+    <!-- Farmer character -->
+    <div id="farmer-character"></div>
+
     <!-- Floating layers -->
     <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
@@ -215,11 +218,45 @@
   </div>
 </div>
 
+<div id="sell-overlay" class="overlay hidden">
+  <div class="overlay-card sell-card">
+    <h2>Vendre</h2>
+    <div id="sell-item-name" class="sell-item-name"></div>
+    <div id="sell-item-stock" class="sell-stock"></div>
+    <div id="sell-unit-price" class="sell-unit-price"></div>
+    <div id="sell-buttons" class="sell-buttons"></div>
+    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+  </div>
+</div>
+
 <div id="session-overlay" class="overlay hidden">
   <div class="overlay-card">
     <h2>🎉 Session terminée !</h2>
     <div id="session-stats"></div>
     <div id="session-items"></div>
     <button class="action-btn" onclick="hideOverlay()">Continuer !</button>
+  </div>
+</div>
+
+<div id="tutorial-overlay" class="overlay hidden">
+  <div class="overlay-card tutorial-card">
+    <div id="tutorial-farmer"></div>
+    <h2>Bienvenue, fermier !</h2>
+    <div id="tutorial-steps">
+      <div class="tutorial-step active" data-step="0">
+        <p>🌾 <strong>Revisez des cartes Anki</strong> pour gagner des pieces, de l'XP et faire pousser vos cultures !</p>
+      </div>
+      <div class="tutorial-step" data-step="1">
+        <p>🌱 <strong>Plantez des cultures</strong> en cliquant sur les parcelles vides. Elles poussent a chaque revision.</p>
+      </div>
+      <div class="tutorial-step" data-step="2">
+        <p>🏭 <strong>Construisez des batiments</strong> pour transformer vos recoltes en produits de valeur.</p>
+      </div>
+      <div class="tutorial-step" data-step="3">
+        <p>🚚 <strong>Livrez des commandes</strong> pour gagner des pieces et de l'XP bonus. Bonne chance !</p>
+      </div>
+    </div>
+    <div class="tutorial-dots" id="tutorial-dots"></div>
+    <button class="action-btn" id="tutorial-btn" onclick="nextTutorialStep()">Suivant</button>
   </div>
 </div>

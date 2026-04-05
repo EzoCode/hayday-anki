@@ -18,7 +18,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "bakery": [
         {
             "id": "bread",
-            "name": "Bread",
+            "name": "Pain",
             "emoji": "\U0001F35E",
             "ingredients": {"wheat": 3},
             "output": {"bread": 1},
@@ -38,7 +38,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "sugar_mill": [
         {
             "id": "sugar",
-            "name": "Sugar",
+            "name": "Sucre",
             "emoji": "\U0001F36C",
             "ingredients": {"sugarcane": 3},
             "output": {"sugar": 1},
@@ -49,7 +49,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "dairy": [
         {
             "id": "butter",
-            "name": "Butter",
+            "name": "Beurre",
             "emoji": "\U0001F9C8",
             "ingredients": {"milk": 2},
             "output": {"butter": 1},
@@ -58,7 +58,7 @@ RECIPES: Dict[str, List[Dict]] = {
         },
         {
             "id": "cheese",
-            "name": "Cheese",
+            "name": "Fromage",
             "emoji": "\U0001F9C0",
             "ingredients": {"milk": 3},
             "output": {"cheese": 1},
@@ -67,7 +67,7 @@ RECIPES: Dict[str, List[Dict]] = {
         },
         {
             "id": "cream",
-            "name": "Cream",
+            "name": "Creme",
             "emoji": "\U0001F95B",
             "ingredients": {"milk": 2},
             "output": {"cream": 1},
@@ -89,7 +89,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "pastry_shop": [
         {
             "id": "cake",
-            "name": "Cake",
+            "name": "Gateau",
             "emoji": "\U0001F370",
             "ingredients": {"bread": 1, "butter": 1, "egg": 1},
             "output": {"cake": 1},
@@ -98,7 +98,7 @@ RECIPES: Dict[str, List[Dict]] = {
         },
         {
             "id": "pie",
-            "name": "Pie",
+            "name": "Tarte",
             "emoji": "\U0001F967",
             "ingredients": {"wheat": 2, "apple": 2, "sugar": 1},
             "output": {"pie": 1},
@@ -109,7 +109,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "jam_maker": [
         {
             "id": "jam",
-            "name": "Jam",
+            "name": "Confiture",
             "emoji": "\U0001F36F",
             "ingredients": {"strawberry": 3, "sugar": 1},
             "output": {"jam": 1},
@@ -131,7 +131,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "juice_press": [
         {
             "id": "juice",
-            "name": "Juice",
+            "name": "Jus",
             "emoji": "\U0001F9C3",
             "ingredients": {"apple": 3},
             "output": {"juice": 1},
@@ -142,7 +142,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "pie_oven": [
         {
             "id": "pumpkin_pie",
-            "name": "Pumpkin Pie",
+            "name": "Tarte a la citrouille",
             "emoji": "\U0001F967",
             "ingredients": {"pumpkin": 2, "wheat": 2, "cream": 1},
             "output": {"pie": 1},
