@@ -15,6 +15,95 @@ let notificationsEnabled = true;
 // Called once on page load — caches static definitions that never change
 function initDefs(defs) {
   _staticDefs = defs || {};
+  // Apply real Hay Day background image if available
+  applyHayDayAssets();
+}
+
+function applyHayDayAssets() {
+  // Background
+  const bgSrc = S('hayday_background');
+  if (bgSrc) {
+    const world = document.getElementById('farm-world');
+    if (world) world.style.backgroundImage = `url(${bgSrc})`;
+  }
+  // HUD XP bar background
+  const xpBgSrc = S('hayday_xp_pbar_bg');
+  if (xpBgSrc) {
+    const xpEl = document.getElementById('xp-bar-bg-img');
+    if (xpEl) { xpEl.src = xpBgSrc; xpEl.style.display = 'block'; }
+  }
+  // Coin icon from sprite
+  const coinSrc = S('ui_coin');
+  const coinEl = document.getElementById('coin-icon');
+  if (coinSrc && coinEl) {
+    coinEl.innerHTML = `<img src="${coinSrc}" width="16" height="16" style="vertical-align:middle">`;
+  } else if (coinEl) {
+    coinEl.textContent = '\u{1FA99}';
+    coinEl.style.fontSize = '14px';
+  }
+  // Gem icon from sprite
+  const gemSrc = S('ui_gem');
+  const gemEl = document.getElementById('gem-icon');
+  if (gemSrc && gemEl) {
+    gemEl.innerHTML = `<img src="${gemSrc}" width="16" height="16" style="vertical-align:middle">`;
+  } else if (gemEl) {
+    gemEl.textContent = '\u{1F48E}';
+    gemEl.style.fontSize = '14px';
+  }
+  // Level up overlay background
+  const lvlBgSrc = S('hayday_new-level-bg');
+  if (lvlBgSrc) {
+    const lvlCard = document.querySelector('.levelup-card');
+    if (lvlCard) {
+      lvlCard.style.backgroundImage = `url(${lvlBgSrc})`;
+      lvlCard.style.backgroundSize = 'cover';
+      lvlCard.style.backgroundPosition = 'center';
+    }
+  }
+  // Level up stars with real sprite
+  const starSrc2 = S('hayday_star');
+  const starsEl = document.getElementById('levelup-stars');
+  if (starsEl && starSrc2) {
+    const starImg = `<img src="${starSrc2}" width="28" height="28" style="vertical-align:middle;filter:drop-shadow(0 1px 3px rgba(0,0,0,.2))">`;
+    starsEl.innerHTML = `${starImg} ${starImg} ${starImg}`;
+  } else if (starsEl) {
+    starsEl.textContent = '\u2B50\u2728\u2B50\u2728\u2B50';
+  }
+  // Toolbar icons — use sprites with emoji fallbacks
+  const toolbarIcons = {
+    'icon-farm': {sprite: 'hayday_wheat-icon', fallback: '\u{1F33E}'},
+    'icon-buildings': {sprite: 'hayday_barn', fallback: '\u{1F3ED}'},
+    'icon-inventory': {sprite: 'hayday_silo', fallback: '\u{1F4E6}'},
+    'icon-orders': {sprite: null, fallback: '\u{1F69A}'},
+    'icon-shop': {sprite: 'hayday_shop', fallback: '\u{1F3EA}'},
+    'icon-achievements': {sprite: 'hayday_star', fallback: '\u{1F3C6}'},
+    'icon-wheel': {sprite: null, fallback: '\u{1F3A1}'},
+  };
+  for (const [elId, cfg] of Object.entries(toolbarIcons)) {
+    const el = document.getElementById(elId);
+    if (!el) continue;
+    const src = cfg.sprite ? S(cfg.sprite) : null;
+    if (src) {
+      el.innerHTML = `<img src="${src}" width="24" height="24" style="object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))">`;
+    } else {
+      el.textContent = cfg.fallback;
+      el.style.fontSize = '20px';
+    }
+  }
+  // Zone title icons using Hay Day sprites
+  const zoneIcons = {
+    'zone-title-fields': ['hayday_wheat-icon', 'wheat-icon'],
+    'zone-title-workshop': ['hayday_barn', null],
+    'zone-title-pasture': ['hayday_cow', null],
+    'zone-title-village': ['hayday_scarecrow', null],
+  };
+  for (const [elId, [sprKey]] of Object.entries(zoneIcons)) {
+    const src = S(sprKey);
+    const el = document.getElementById(elId);
+    if (src && el) {
+      el.innerHTML = `<img src="${src}" width="18" height="18" style="vertical-align:middle;margin-right:4px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))"> ${el.textContent}`;
+    }
+  }
 }
 
 // --- Localization ---
@@ -312,7 +401,9 @@ function renderFields() {
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
-        el.innerHTML += '<div class="plot-empty-prompt"><span class="plot-plus">+</span><span class="plot-empty-label">Planter</span></div>';
+        const plusSrc = S('hayday_plus');
+        const plusIcon = plusSrc ? `<img src="${plusSrc}" width="24" height="24" style="opacity:.5">` : '<span class="plot-plus">+</span>';
+        el.innerHTML += `<div class="plot-empty-prompt">${plusIcon}<span class="plot-empty-label">Planter</span></div>`;
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
@@ -463,11 +554,17 @@ function renderVillage() {
   decos.forEach(deco => {
     const decoDef = (farmData.deco_defs||{})[deco.type] || {};
     const catFallback = (farmData.item_catalog||{})[deco.type] || {};
-    const emoji = decoDef.emoji || catFallback.emoji || DECO_EMOJI[deco.type] || '\u{1F33F}';
     const name = decoDef.name || catFallback.name || decoName(deco.type);
     const el = document.createElement('div');
     el.className = 'deco-tile';
-    el.innerHTML = `<span class="deco-emoji">${emoji}</span><span class="deco-name">${name}</span>`;
+    // Try to use Hay Day sprite for the decoration
+    const sprSrc = S(`hayday_${deco.type}`);
+    if (sprSrc) {
+      el.innerHTML = `<img src="${sprSrc}" width="44" height="44" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))"><span class="deco-name">${name}</span>`;
+    } else {
+      const emoji = decoDef.emoji || catFallback.emoji || DECO_EMOJI[deco.type] || '\u{1F33F}';
+      el.innerHTML = `<span class="deco-emoji">${emoji}</span><span class="deco-name">${name}</span>`;
+    }
     grid.appendChild(el);
   });
 }

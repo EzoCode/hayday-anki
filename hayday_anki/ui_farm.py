@@ -135,12 +135,10 @@ class FarmWebView:
             if name in skip_names:
                 continue
 
-            # Skip HayDay backgrounds, dark variants, dialogs (by path)
+            # Skip dark variants only (keep backgrounds for UI)
             rel_path = png_file.relative_to(SPRITES_DIR).as_posix()
             skip_paths = {
-                "hayday/background.png", "hayday/shop-bg.png",
-                "hayday/scoreboard-bg.png", "hayday/details-bg.png",
-                "hayday/new-level-bg.png",
+                "hayday/scoreboard-bg.png",
                 "hayday/barn-dark.png", "hayday/silo-dark.png",
                 "hayday/shop-dark.png", "hayday/chicken_coop-dark.png",
                 "hayday/pasture-dark.png", "hayday/field-dark.png",

@@ -11,7 +11,7 @@
       <img class="hud-star" id="hud-star-img" src="" alt=""><span class="level-num">1</span>
     </div>
     <div class="hud-xp">
-      <div class="xp-bar-bg" id="xp-bar-bg-img"></div>
+      <img class="xp-bar-bg" id="xp-bar-bg-img" src="" alt="">
       <div class="xp-bar-track">
         <div class="xp-bar-fill" id="hud-xp-bar" style="width:0%"></div>
       </div>
@@ -19,20 +19,22 @@
     </div>
   </div>
   <div class="hud-right">
-    <div class="hud-currency" id="hud-streak">
-      <span class="streak-fire">🔥</span>
+    <div class="hud-currency hud-streak" id="hud-streak">
+      <span class="streak-fire" id="streak-fire-icon">🔥</span>
       <span id="streak-count">0</span>
       <span class="streak-bonus" id="streak-bonus" style="display:none">+0%</span>
     </div>
     <div class="hud-currency hud-coins" id="hud-coins">
-      <span class="currency-icon" id="coin-icon">🪙</span>
+      <span class="currency-icon" id="coin-icon"></span>
       <span id="coin-count">50</span>
     </div>
     <div class="hud-currency hud-gems" id="hud-gems">
-      <span class="currency-icon" id="gem-icon">💎</span>
+      <span class="currency-icon" id="gem-icon"></span>
       <span id="gem-count">5</span>
     </div>
-    <button class="hud-settings" onclick="toggleSettings()" title="Settings">⚙️</button>
+    <button class="hud-settings" onclick="toggleSettings()" title="Settings">
+      <img id="hud-settings-img" src="" width="18" height="18" style="display:none"><span id="hud-settings-fallback">⚙️</span>
+    </button>
   </div>
 </div>
 
@@ -52,7 +54,7 @@
     <!-- Zone: Champs -->
     <div class="farm-zone zone-fields">
       <div class="zone-header">
-        <span class="zone-title">🌾 Champs</span>
+        <span class="zone-title" id="zone-title-fields">Champs</span>
         <span class="zone-count" id="fields-count">0</span>
         <button class="zone-add-btn harvest-all-btn" id="harvest-all-btn" style="display:none" onclick="pycmd('farm:harvest_all')">🌾 Tout récolter</button>
         <button class="zone-add-btn plant-all-btn" id="plant-all-btn" style="display:none" onclick="plantAllEmpty()">🌱 Tout planter</button>
@@ -64,7 +66,7 @@
     <!-- Zone: Atelier -->
     <div class="farm-zone zone-workshop" id="zone-workshop">
       <div class="zone-header">
-        <span class="zone-title">🏭 Atelier</span>
+        <span class="zone-title" id="zone-title-workshop">Atelier</span>
         <button class="zone-add-btn" onclick="showBuildMenu()">+ Construire</button>
       </div>
       <div class="zone-content" id="workshop-grid"></div>
@@ -73,7 +75,7 @@
     <!-- Zone: Paturage -->
     <div class="farm-zone zone-pasture" id="zone-pasture">
       <div class="zone-header">
-        <span class="zone-title">🐄 Pâturage</span>
+        <span class="zone-title" id="zone-title-pasture">Pâturage</span>
         <button class="zone-add-btn" onclick="showAnimalMenu()">+ Enclos</button>
       </div>
       <div class="zone-content" id="pasture-grid"></div>
@@ -82,7 +84,7 @@
     <!-- Zone: Village (decorations) -->
     <div class="farm-zone zone-village" id="zone-village">
       <div class="zone-header">
-        <span class="zone-title">🏡 Village</span>
+        <span class="zone-title" id="zone-title-village">Village</span>
         <button class="zone-add-btn" onclick="showTab('shop')">+ Décorer</button>
       </div>
       <div class="zone-content" id="deco-grid"></div>
@@ -108,32 +110,32 @@
 <!-- ===== BOTTOM TOOLBAR ===== -->
 <div id="toolbar">
   <button class="tool-btn active" onclick="showTab('farm')" id="tab-farm">
-    <span class="tool-icon">🌾</span><span class="tool-label">Ferme</span>
+    <span class="tool-icon" id="icon-farm"></span><span class="tool-label">Ferme</span>
   </button>
   <button class="tool-btn" onclick="showTab('buildings')" id="tab-buildings">
-    <span class="tool-icon">🏭</span><span class="tool-label">Bâtir</span>
+    <span class="tool-icon" id="icon-buildings"></span><span class="tool-label">Bâtir</span>
   </button>
   <button class="tool-btn" onclick="showTab('inventory')" id="tab-inventory">
-    <span class="tool-icon">📦</span><span class="tool-label">Sac</span>
+    <span class="tool-icon" id="icon-inventory"></span><span class="tool-label">Sac</span>
   </button>
   <button class="tool-btn" onclick="showTab('orders')" id="tab-orders">
-    <span class="tool-icon">🚚</span><span class="tool-label">Livrer</span>
+    <span class="tool-icon" id="icon-orders"></span><span class="tool-label">Livrer</span>
   </button>
   <button class="tool-btn" onclick="showTab('shop')" id="tab-shop">
-    <span class="tool-icon">🏪</span><span class="tool-label">Boutique</span>
+    <span class="tool-icon" id="icon-shop"></span><span class="tool-label">Boutique</span>
   </button>
   <button class="tool-btn" onclick="showTab('achievements')" id="tab-achievements">
-    <span class="tool-icon">🏆</span><span class="tool-label">Succès</span>
+    <span class="tool-icon" id="icon-achievements"></span><span class="tool-label">Succès</span>
   </button>
   <button class="tool-btn wheel-btn" onclick="spinWheel()" id="tab-wheel">
-    <span class="tool-icon">🎡</span><span class="tool-label">Roue</span>
+    <span class="tool-icon" id="icon-wheel"></span><span class="tool-label">Roue</span>
   </button>
 </div>
 
 <!-- ===== PANELS ===== -->
 <div id="panel-inventory" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>📦 Inventaire</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Inventaire</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="panel-subheader">
     <span id="barn-status">🏚️ Grange: 0/50</span>
     <span id="silo-status">🏭 Silo: 0/50</span>
@@ -143,19 +145,19 @@
 
 <div id="panel-buildings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏭 Bâtiments</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Bâtiments</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="buildings-list"></div>
 </div>
 
 <div id="panel-orders" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🚚 Commandes</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Commandes</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="orders-list"></div>
 </div>
 
 <div id="panel-shop" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏪 Boutique</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Boutique</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="shop-tabs">
     <button class="shop-tab active" onclick="showShopCategory('decorations')">Déco</button>
     <button class="shop-tab" onclick="showShopCategory('animals')">Animaux</button>
@@ -167,13 +169,13 @@
 
 <div id="panel-achievements" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏆 Succès</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Succès</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="achievements-list"></div>
 </div>
 
 <div id="panel-settings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>⚙️ Réglages</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Réglages</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="settings-list">
     <label class="setting-row"><span>🔊 Son</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
     <label class="setting-row"><span>🎵 Musique</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
@@ -212,7 +214,7 @@
 
 <div id="levelup-overlay" class="overlay hidden">
   <div class="overlay-card levelup-card">
-    <div class="levelup-stars">⭐✨⭐✨⭐</div>
+    <div class="levelup-stars" id="levelup-stars"></div>
     <h1>Niveau supérieur !</h1>
     <div id="levelup-level" class="levelup-number"></div>
     <div id="levelup-rewards"></div>
