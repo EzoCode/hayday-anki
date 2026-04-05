@@ -192,6 +192,13 @@ class FarmWebView:
             if action == "get_state":
                 self._send_state()
 
+            elif action == "clear_wilted":
+                plot_id = int(parts[2])
+                if self.manager.clear_wilted(plot_id):
+                    self._js("showNotification('Parcelle nettoyée !')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "harvest":
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)
@@ -214,8 +221,8 @@ class FarmWebView:
                 qty = int(parts[3]) if len(parts) > 3 else 1
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
-                    self._js(f"showFloatingReward('+{coins} coins', window.innerWidth/2, window.innerHeight/2)")
-                    self._js(f"showNotification('Sold for {coins} coins!')")
+                    self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
+                    self._js(f"showNotification('Vendu pour {coins} pièces !')")
                 self._send_state()
                 self.manager.save()
 
@@ -225,9 +232,9 @@ class FarmWebView:
                 x = random.randint(1, 8)
                 y = random.randint(1, 8)
                 if self.manager.buy_decoration(deco_type, x, y):
-                    self._js("showNotification('Decoration placed!')")
+                    self._js("showNotification('Décoration placée !')")
                 else:
-                    self._js("showNotification('Not enough coins!')")
+                    self._js("showNotification('Pas assez de pièces !')")
                 self._send_state()
                 self.manager.save()
 
@@ -246,7 +253,7 @@ class FarmWebView:
                 if result:
                     self._js(f"showWheelResult({json.dumps(result)})")
                 else:
-                    self._js("showNotification('Already spun today!')")
+                    self._js("showNotification('Déjà tourné aujourd\\'hui !')")
                 self._send_state()
                 self.manager.save()
 
@@ -256,7 +263,7 @@ class FarmWebView:
                 if result:
                     self._js(f"showBoxResult({json.dumps(result)})")
                 else:
-                    self._js("showNotification('Cannot open box!')")
+                    self._js("showNotification('Impossible d\\'ouvrir !')")
                 self._send_state()
                 self.manager.save()
 
@@ -266,10 +273,10 @@ class FarmWebView:
                 if result:
                     r_coins = result["coins"]
                     r_xp = result["xp"]
-                    self._js(f"showFloatingReward('+{r_coins} coins', window.innerWidth/2, window.innerHeight/3)")
-                    self._js(f"showNotification('Order delivered! +{r_coins} coins, +{r_xp} XP')")
+                    self._js(f"showFloatingReward('+{r_coins} pièces', window.innerWidth/2, window.innerHeight/3)")
+                    self._js(f"showNotification('Commande livrée ! +{r_coins} pièces, +{r_xp} XP')")
                 else:
-                    self._js("showNotification('Missing items!')")
+                    self._js("showNotification('Items manquants !')")
                 self._send_state()
                 self.manager.save()
 
@@ -284,16 +291,16 @@ class FarmWebView:
                     result = self.manager.upgrade_barn()
                     if result:
                         lvl = result["new_level"]
-                        self._js(f"showNotification('Barn upgraded to level {lvl}!')")
+                        self._js(f"showNotification('Grange améliorée au niveau {lvl} !')")
                     else:
-                        self._js("showNotification('Need more materials!')")
+                        self._js("showNotification('Matériaux insuffisants !')")
                 elif target == "silo":
                     result = self.manager.upgrade_silo()
                     if result:
                         lvl = result["new_level"]
-                        self._js(f"showNotification('Silo upgraded to level {lvl}!')")
+                        self._js(f"showNotification('Silo amélioré au niveau {lvl} !')")
                     else:
-                        self._js("showNotification('Need more materials!')")
+                        self._js("showNotification('Matériaux insuffisants !')")
                 self._send_state()
                 self.manager.save()
 
@@ -345,45 +352,47 @@ class FarmWebView:
         from . import progression
         animal_def = progression.ANIMAL_DEFINITIONS.get(animal_id)
         if not animal_def:
-            self._js("showNotification('Unknown animal!')")
+            self._js("showNotification('Animal inconnu !')")
             return
         if animal_id not in self.manager.state.unlocked_animals:
-            self._js("showNotification('Animal not unlocked yet!')")
+            self._js("showNotification('Animal pas encore débloqué !')")
             return
         cost = animal_def.get("cost_coins", 100)
         if self.manager.state.coins < cost:
-            self._js("showNotification('Not enough coins!')")
+            self._js("showNotification('Pas assez de pièces !')")
             return
         max_owned = animal_def.get("max_owned", 5)
         current = self.manager.state.animals.get(animal_id, {}).get("count", 0)
         if current >= max_owned:
             aname = animal_def["name"]
-            self._js(f"showNotification('Max {aname}s reached!')")
+            self._js(f"showNotification('Maximum de {aname} atteint !')")
             return
         self.manager.state.coins -= cost
+        self.manager.state.total_coins_spent += cost
         if animal_id not in self.manager.state.animals:
             self.manager.state.animals[animal_id] = {"count": 0, "reviews_since_last": 0}
         self.manager.state.animals[animal_id]["count"] = current + 1
         aname = animal_def["name"]
-        self._js(f"showNotification('Bought a {aname}!')")
+        self._js(f"showNotification('{aname} acheté(e) !')")
 
     def _buy_building(self, building_id: str):
         from . import progression
         building_def = progression.BUILDING_DEFINITIONS.get(building_id)
         if not building_def:
-            self._js("showNotification('Unknown building!')")
+            self._js("showNotification('Bâtiment inconnu !')")
             return
         if building_id in self.manager.state.buildings:
-            self._js("showNotification('Already built!')")
+            self._js("showNotification('Déjà construit !')")
             return
         cost = building_def.get("cost_coins", 100)
         if self.manager.state.coins < cost:
-            self._js("showNotification('Not enough coins!')")
+            self._js("showNotification('Pas assez de pièces !')")
             return
         self.manager.state.coins -= cost
+        self.manager.state.total_coins_spent += cost
         self.manager.state.buildings[building_id] = {"level": 1}
         bname = building_def["name"]
-        self._js(f"showNotification('Built {bname}!')")
+        self._js(f"showNotification('{bname} construit !')")
 
     def _send_building_detail(self, building_id: str):
         """Send building detail with recipes to JS for production dialog."""
@@ -433,21 +442,22 @@ class FarmWebView:
         cost_permit = 1
 
         if self.manager.state.coins < cost_coins:
-            self._js(f"showNotification('Need {cost_coins} coins to expand!')")
+            self._js(f"showNotification('Il faut {cost_coins} pièces pour agrandir !')")
             return
         if self.manager.state.inventory.get("land_deed", 0) < cost_deed:
-            self._js("showNotification('Need a Land Deed to expand!')")
+            self._js("showNotification('Titre de propriété requis !')")
             return
         if self.manager.state.inventory.get("expansion_permit", 0) < cost_permit:
-            self._js("showNotification('Need an Expansion Permit!')")
+            self._js("showNotification('Permis d\\'expansion requis !')")
             return
 
         self.manager.state.coins -= cost_coins
+        self.manager.state.total_coins_spent += cost_coins
         self.manager.state.remove_item("land_deed", cost_deed)
         self.manager.state.remove_item("expansion_permit", cost_permit)
         self.manager.state.add_plots(count)
         new_total = self.manager.state.num_plots
-        self._js(f"showNotification('Farm expanded! Now {new_total} plots!')")
+        self._js(f"showNotification('Ferme agrandie ! {new_total} parcelles !')")
 
     def _start_production(self, building_id: str, recipe_id: str):
         """Start production of a recipe in a building."""
@@ -456,7 +466,7 @@ class FarmWebView:
         result = prod_mgr.start_production(building_id, recipe_id)
         if result:
             r_name = result["name"]
-            self._js(f"showNotification('Started producing {r_name}!')")
+            self._js(f"showNotification('Production de {r_name} lancée !')")
         else:
             can, reason = prod_mgr.can_craft(building_id, recipe_id)
             self._js(f"showNotification('{reason}')")
@@ -469,7 +479,8 @@ class FarmWebView:
             i_emoji = item["emoji"]
             i_name = item["name"]
             i_xp = item["xp"]
-            self._js(f"showNotification('{i_emoji} {i_name} collected! +{i_xp} XP')")
+            self.manager.state.total_produced += 1
+            self._js(f"showNotification('{i_emoji} {i_name} récupéré ! +{i_xp} XP')")
 
     # --- JS execution ---
 

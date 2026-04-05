@@ -18,6 +18,9 @@ SAVE_FILE = DATA_DIR / "farm_save.json"
 
 DATA_DIR.mkdir(exist_ok=True)
 
+# Schema version — bump when FarmState structure changes
+SAVE_SCHEMA_VERSION = 2
+
 
 # --- Item Definitions ---
 
@@ -207,6 +210,17 @@ class FarmState:
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
 
+        # Lifetime tracking counters (for achievements)
+        self.total_harvests: int = 0
+        self.total_coins_earned: int = 0
+        self.total_coins_spent: int = 0
+        self.total_items_sold: int = 0
+        self.total_produced: int = 0
+        self.mystery_boxes_opened: int = 0
+        self.wheel_spins: int = 0
+        self.materials_collected: int = 0
+        self.total_sessions: int = 0
+
     def _init_plots(self):
         """Initialize farm plots."""
         self.plots = []
@@ -282,6 +296,7 @@ class FarmState:
     def to_dict(self) -> Dict:
         """Serialize state to dict."""
         return {
+            "_schema_version": SAVE_SCHEMA_VERSION,
             "coins": self.coins,
             "gems": self.gems,
             "xp": self.xp,
@@ -318,15 +333,42 @@ class FarmState:
             "active_events": self.active_events,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
+            "total_harvests": self.total_harvests,
+            "total_coins_earned": self.total_coins_earned,
+            "total_coins_spent": self.total_coins_spent,
+            "total_items_sold": self.total_items_sold,
+            "total_produced": self.total_produced,
+            "mystery_boxes_opened": self.mystery_boxes_opened,
+            "wheel_spins": self.wheel_spins,
+            "materials_collected": self.materials_collected,
+            "total_sessions": self.total_sessions,
         }
 
     @classmethod
     def from_dict(cls, data: Dict) -> "FarmState":
-        """Deserialize state from dict."""
+        """Deserialize state from dict with schema migration."""
         state = cls()
+        saved_version = data.pop("_schema_version", 1)
+
         for key, value in data.items():
             if hasattr(state, key):
                 setattr(state, key, value)
+
+        # --- Schema migrations ---
+        if saved_version < 2:
+            # v2: added total_harvests, total_coins_earned, total_items_sold,
+            #     total_produced, mystery_boxes_opened, wheel_spins,
+            #     materials_collected tracking counters
+            for attr, default in [
+                ("total_harvests", 0), ("total_coins_earned", 0),
+                ("total_items_sold", 0), ("total_produced", 0),
+                ("mystery_boxes_opened", 0), ("wheel_spins", 0),
+                ("materials_collected", 0), ("total_coins_spent", 0),
+                ("total_sessions", 0),
+            ]:
+                if not hasattr(state, attr) or not isinstance(getattr(state, attr, None), int):
+                    setattr(state, attr, default)
+
         return state
 
 
@@ -367,21 +409,57 @@ class FarmManager:
             print(f"[ADFarm] Error saving farm: {e}")
 
     def load(self):
-        """Load farm state from disk, with backup fallback."""
+        """Load farm state from disk, with backup fallback and validation."""
         for path in [SAVE_FILE, SAVE_FILE.with_suffix(".json.bak")]:
             try:
                 if path.exists():
                     with open(path, "r", encoding="utf-8") as f:
                         data = json.load(f)
+                    if not isinstance(data, dict):
+                        raise ValueError("Save file is not a valid dict")
                     self.state = FarmState.from_dict(data)
+                    self._validate_state()
                     if path != SAVE_FILE:
-                        print(f"[ADFarm] Recovered from backup save")
+                        print("[ADFarm] Recovered from backup save")
                     return
-            except (json.JSONDecodeError, Exception) as e:
+            except (json.JSONDecodeError, ValueError, Exception) as e:
                 print(f"[ADFarm] Error loading {path.name}: {e}")
                 continue
         print("[ADFarm] No valid save found, starting fresh")
         self.state = FarmState()
+
+    def _validate_state(self):
+        """Fix any corrupted or inconsistent state values."""
+        s = self.state
+        # Ensure non-negative currencies
+        s.coins = max(0, int(s.coins) if isinstance(s.coins, (int, float)) else 0)
+        s.gems = max(0, int(s.gems) if isinstance(s.gems, (int, float)) else 0)
+        s.xp = max(0, int(s.xp) if isinstance(s.xp, (int, float)) else 0)
+        s.level = max(1, int(s.level) if isinstance(s.level, (int, float)) else 1)
+
+        # Ensure inventory values are positive integers
+        if not isinstance(s.inventory, dict):
+            s.inventory = {}
+        s.inventory = {
+            k: max(0, int(v)) for k, v in s.inventory.items()
+            if isinstance(k, str) and isinstance(v, (int, float)) and v > 0
+        }
+
+        # Ensure plots list integrity
+        if not isinstance(s.plots, list):
+            s.plots = []
+            s._init_plots()
+        s.num_plots = len(s.plots)
+
+        # Ensure storage levels are valid
+        s.barn_level = max(1, int(s.barn_level) if isinstance(s.barn_level, (int, float)) else 1)
+        s.silo_level = max(1, int(s.silo_level) if isinstance(s.silo_level, (int, float)) else 1)
+        s.barn_capacity = max(50, int(s.barn_capacity) if isinstance(s.barn_capacity, (int, float)) else 50)
+        s.silo_capacity = max(50, int(s.silo_capacity) if isinstance(s.silo_capacity, (int, float)) else 50)
+
+        # Cap mystery boxes to prevent UI flooding
+        if isinstance(s.mystery_boxes, list) and len(s.mystery_boxes) > 20:
+            s.mystery_boxes = s.mystery_boxes[:20]
 
     # --- Review Processing ---
 
@@ -434,6 +512,7 @@ class FarmManager:
         self.state.xp += xp
         self.state.total_reviews += 1
         self.state.lifetime_reviews += 1
+        self.state.total_coins_earned += coins
         self.state.session_coins_earned += coins
         self.state.session_xp_earned += xp
         self.state.session_reviews += 1
@@ -457,6 +536,7 @@ class FarmManager:
                 rewards["items"][mat_id] = rewards["items"].get(mat_id, 0) + 1
                 self.state.session_items_earned[mat_id] = \
                     self.state.session_items_earned.get(mat_id, 0) + 1
+                self.state.materials_collected += 1
 
         # Mystery box chance (~1 in 20 reviews)
         if random.random() < 0.05:
@@ -509,7 +589,7 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance growth on planted plots."""
+        """Advance growth on planted plots. Ready crops wilt after too long."""
         for plot in self.state.plots:
             if plot["state"] in ("planted", "growing"):
                 plot["reviews_done"] += 1
@@ -518,12 +598,18 @@ class FarmManager:
                     plot["reviews_done"] = 0
                     if plot["growth_stage"] >= 4:
                         plot["state"] = "ready"
+                        plot["_ready_since"] = self.state.total_reviews
                     else:
                         plot["state"] = "growing"
                         plot["reviews_needed"] = max(2, plot["reviews_needed"] + 1)
+            elif plot["state"] == "ready":
+                # Wilt if left unharvested for 50+ reviews
+                ready_since = plot.get("_ready_since", 0)
+                if ready_since > 0 and self.state.total_reviews - ready_since > 50:
+                    plot["state"] = "wilted"
 
     def _get_event_multipliers(self) -> Tuple[float, float]:
-        """Get active event multipliers for coins and XP."""
+        """Get active event multipliers for coins and XP (capped at 5x)."""
         coin_mult = 1.0
         xp_mult = 1.0
         now = datetime.now()
@@ -535,7 +621,8 @@ class FarmManager:
                     xp_mult *= event.get("xp_multiplier", 1.0)
             except (ValueError, TypeError):
                 pass
-        return coin_mult, xp_mult
+        # Cap multipliers to prevent exponential stacking
+        return min(coin_mult, 5.0), min(xp_mult, 5.0)
 
     def _check_level_up(self) -> Optional[Dict]:
         """Check if player leveled up and process unlocks."""
@@ -581,6 +668,22 @@ class FarmManager:
 
     # --- Farm Actions ---
 
+    def clear_wilted(self, plot_id: int) -> bool:
+        """Clear a wilted plot so it can be replanted."""
+        if plot_id >= len(self.state.plots):
+            return False
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "wilted":
+            return False
+        plot["state"] = "empty"
+        plot["crop"] = None
+        plot["planted_at"] = None
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 0
+        plot["reviews_done"] = 0
+        plot.pop("_ready_since", None)
+        return True
+
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
         """Plant a crop on a plot."""
         if plot_id >= len(self.state.plots):
@@ -618,10 +721,16 @@ class FarmManager:
         if self.state.add_item(crop_id, qty):
             harvested[crop_id] = qty
         else:
-            # Storage full
-            return None
+            # Storage full — harvest anyway, overflow to give partial reward
+            overflow_qty = max(1, self.state.get_silo_space())
+            if overflow_qty > 0 and self.state.add_item(crop_id, overflow_qty):
+                harvested[crop_id] = overflow_qty
+                qty = overflow_qty
+            else:
+                return None
 
         self.state.xp += xp_gain
+        self.state.total_harvests += 1
 
         # Reset plot
         plot["state"] = "empty"
@@ -646,6 +755,8 @@ class FarmManager:
         self.state.remove_item(item_id, actual)
         coins = item["sell_price"] * actual
         self.state.coins += coins
+        self.state.total_coins_earned += coins
+        self.state.total_items_sold += actual
         return coins
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
@@ -656,6 +767,7 @@ class FarmManager:
             return False
 
         self.state.coins -= cost
+        self.state.total_coins_spent += cost
         self.state.decorations.append({
             "id": len(self.state.decorations),
             "type": deco_type,
@@ -752,6 +864,7 @@ class FarmManager:
 
         # Remove box
         self.state.mystery_boxes.pop(box_index)
+        self.state.mystery_boxes_opened += 1
         return result
 
     # --- Streak Management ---
@@ -883,6 +996,7 @@ class FarmManager:
             return None
 
         self.state.last_wheel_spin = date.today().isoformat()
+        self.state.wheel_spins += 1
 
         prizes = [
             ({"coins": 25}, "25 Coins", 0.20),
@@ -1089,6 +1203,7 @@ class FarmManager:
 
     def end_session(self) -> Dict:
         """End session and return summary."""
+        self.state.total_sessions += 1
         self.update_streak()
         self.generate_orders()
 

@@ -38,10 +38,16 @@ def on_profile_loaded():
     _farm_view = None
     _session_active = False
 
-    mgr = _get_manager()
-    mgr.generate_orders()
-    login_bonus = mgr.check_daily_login()
-    mgr.save()
+    try:
+        mgr = _get_manager()
+        mgr.generate_orders()
+        login_bonus = mgr.check_daily_login()
+        mgr.save()
+    except Exception as e:
+        print(f"[ADFarm] Error during profile load: {e}")
+        import traceback
+        traceback.print_exc()
+        return
 
     config = mw.addonManager.getConfig(__name__) or {}
     if config.get("show_farm_on_startup", True):
@@ -61,47 +67,52 @@ def on_profile_loaded():
 def on_reviewer_did_answer(reviewer, card, ease):
     global _session_active
 
-    mgr = _get_manager()
+    try:
+        mgr = _get_manager()
 
-    if not _session_active:
-        mgr.start_session()
-        _session_active = True
+        if not _session_active:
+            mgr.start_session()
+            _session_active = True
 
-    card_ivl = card.ivl if hasattr(card, "ivl") else 0
-    card_factor = card.factor if hasattr(card, "factor") else 2500
+        card_ivl = card.ivl if hasattr(card, "ivl") else 0
+        card_factor = card.factor if hasattr(card, "factor") else 2500
 
-    rewards = mgr.process_review(ease, card_ivl, card_factor)
+        rewards = mgr.process_review(ease, card_ivl, card_factor)
 
-    # Level up?
-    level_up_notif = None
-    for notif in rewards.get("notifications", []):
-        if notif.get("type") == "level_up":
-            level_up_notif = notif
-            break
+        # Level up?
+        level_up_notif = None
+        for notif in rewards.get("notifications", []):
+            if notif.get("type") == "level_up":
+                level_up_notif = notif
+                break
 
-    _process_animals(mgr)
-    _check_achievements(mgr)
+        _process_animals(mgr)
+        _check_achievements(mgr)
 
-    # Update farm view if open
-    view = _get_view()
-    if view.web:
-        view.on_review(rewards)
-        if level_up_notif:
-            view.on_level_up(level_up_notif)
-    else:
-        # Toast notification
-        from .ui_dialogs import NotificationToast
-        coins = rewards.get("coins", 0)
-        xp = rewards.get("xp", 0)
-        if coins > 0 or xp > 0:
-            NotificationToast.show(f"+{coins} coins  +{xp} XP")
-        if level_up_notif:
-            from .ui_dialogs import LevelUpDialog
-            dlg = LevelUpDialog(level_up_notif, mw)
-            dlg.exec()
+        # Update farm view if open
+        view = _get_view()
+        if view.web:
+            view.on_review(rewards)
+            if level_up_notif:
+                view.on_level_up(level_up_notif)
+        else:
+            # Toast notification
+            from .ui_dialogs import NotificationToast
+            coins = rewards.get("coins", 0)
+            xp = rewards.get("xp", 0)
+            if coins > 0 or xp > 0:
+                NotificationToast.show(f"+{coins} pièces  +{xp} XP")
+            if level_up_notif:
+                from .ui_dialogs import LevelUpDialog
+                dlg = LevelUpDialog(level_up_notif, mw)
+                dlg.exec()
 
-    if mgr.state.session_reviews % 10 == 0:
-        mgr.save()
+        if mgr.state.session_reviews % 10 == 0:
+            mgr.save()
+    except Exception as e:
+        print(f"[ADFarm] Error processing review: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def on_reviewer_will_end():
@@ -110,31 +121,40 @@ def on_reviewer_will_end():
         return
     _session_active = False
 
-    mgr = _get_manager()
-    summary = mgr.end_session()
+    try:
+        mgr = _get_manager()
+        summary = mgr.end_session()
 
-    if summary.get("reviews", 0) > 0:
-        view = _get_view()
-        if view.web:
-            view.on_session_end(summary)
-        else:
-            config = mw.addonManager.getConfig(__name__) or {}
-            if config.get("show_session_summary", True):
-                from .ui_dialogs import SessionSummaryDialog
-                dlg = SessionSummaryDialog(summary, mw)
-                dlg.exec()
+        if summary.get("reviews", 0) > 0:
+            view = _get_view()
+            if view.web:
+                view.on_session_end(summary)
+            else:
+                config = mw.addonManager.getConfig(__name__) or {}
+                if config.get("show_session_summary", True):
+                    from .ui_dialogs import SessionSummaryDialog
+                    dlg = SessionSummaryDialog(summary, mw)
+                    dlg.exec()
+    except Exception as e:
+        print(f"[ADFarm] Error ending session: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def on_main_window_close():
     global _farm_manager, _farm_view, _session_active
-    if _session_active:
-        on_reviewer_will_end()
-    if _farm_manager:
-        _farm_manager.save()
-    if _farm_view:
-        _farm_view.close()
-    _farm_manager = None
-    _farm_view = None
+    try:
+        if _session_active:
+            on_reviewer_will_end()
+        if _farm_manager:
+            _farm_manager.save()
+        if _farm_view:
+            _farm_view.close()
+    except Exception as e:
+        print(f"[ADFarm] Error during shutdown: {e}")
+    finally:
+        _farm_manager = None
+        _farm_view = None
 
 
 # =============================================================================

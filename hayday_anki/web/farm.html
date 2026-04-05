@@ -47,19 +47,19 @@
   <div id="farm-world">
     <!-- Isometric farm grid -->
     <div id="farm-fields">
-      <div class="section-label">🌾 Fields</div>
+      <div class="section-label">🌾 Champs</div>
       <div id="plots-grid"></div>
     </div>
 
     <!-- Buildings zone -->
     <div id="farm-buildings">
-      <div class="section-label">🏭 Workshop</div>
+      <div class="section-label">🏭 Atelier</div>
       <div id="buildings-area"></div>
     </div>
 
     <!-- Animals zone -->
     <div id="farm-animals">
-      <div class="section-label">🐄 Pasture</div>
+      <div class="section-label">🐄 Pâturage</div>
       <div id="animals-area"></div>
     </div>
 
@@ -76,32 +76,32 @@
 <!-- ===== BOTTOM TOOLBAR ===== -->
 <div id="toolbar">
   <button class="tool-btn active" onclick="showTab('farm')" id="tab-farm">
-    <span class="tool-icon">🌾</span><span class="tool-label">Farm</span>
+    <span class="tool-icon">🌾</span><span class="tool-label">Ferme</span>
   </button>
   <button class="tool-btn" onclick="showTab('buildings')" id="tab-buildings">
-    <span class="tool-icon">🏭</span><span class="tool-label">Build</span>
+    <span class="tool-icon">🏭</span><span class="tool-label">Bâtir</span>
   </button>
   <button class="tool-btn" onclick="showTab('inventory')" id="tab-inventory">
-    <span class="tool-icon">📦</span><span class="tool-label">Bag</span>
+    <span class="tool-icon">📦</span><span class="tool-label">Sac</span>
   </button>
   <button class="tool-btn" onclick="showTab('orders')" id="tab-orders">
-    <span class="tool-icon">🚚</span><span class="tool-label">Orders</span>
+    <span class="tool-icon">🚚</span><span class="tool-label">Livrer</span>
   </button>
   <button class="tool-btn" onclick="showTab('shop')" id="tab-shop">
-    <span class="tool-icon">🏪</span><span class="tool-label">Shop</span>
+    <span class="tool-icon">🏪</span><span class="tool-label">Boutique</span>
   </button>
   <button class="tool-btn" onclick="showTab('achievements')" id="tab-achievements">
-    <span class="tool-icon">🏆</span><span class="tool-label">Awards</span>
+    <span class="tool-icon">🏆</span><span class="tool-label">Succès</span>
   </button>
   <button class="tool-btn wheel-btn" onclick="spinWheel()" id="tab-wheel">
-    <span class="tool-icon">🎡</span><span class="tool-label">Wheel</span>
+    <span class="tool-icon">🎡</span><span class="tool-label">Roue</span>
   </button>
 </div>
 
 <!-- ===== PANELS ===== -->
 <div id="panel-inventory" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>📦 Inventory</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>📦 Inventaire</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="panel-subheader">
     <span id="barn-status">🏚️ Barn: 0/50</span>
     <span id="silo-status">🏭 Silo: 0/50</span>
@@ -111,40 +111,40 @@
 
 <div id="panel-buildings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏭 Buildings</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>🏭 Bâtiments</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="buildings-list"></div>
 </div>
 
 <div id="panel-orders" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🚚 Orders</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>🚚 Commandes</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="orders-list"></div>
 </div>
 
 <div id="panel-shop" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏪 Shop</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>🏪 Boutique</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="shop-tabs">
-    <button class="shop-tab active" onclick="showShopCategory('decorations')">Decor</button>
-    <button class="shop-tab" onclick="showShopCategory('animals')">Animals</button>
-    <button class="shop-tab" onclick="showShopCategory('upgrades')">Upgrade</button>
-    <button class="shop-tab" onclick="showShopCategory('land')">Land</button>
+    <button class="shop-tab active" onclick="showShopCategory('decorations')">Déco</button>
+    <button class="shop-tab" onclick="showShopCategory('animals')">Animaux</button>
+    <button class="shop-tab" onclick="showShopCategory('upgrades')">Améliorer</button>
+    <button class="shop-tab" onclick="showShopCategory('land')">Terrain</button>
   </div>
   <div id="shop-grid" class="item-grid"></div>
 </div>
 
 <div id="panel-achievements" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>🏆 Achievements</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>🏆 Succès</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div id="achievements-list"></div>
 </div>
 
 <div id="panel-settings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>⚙️ Settings</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>⚙️ Réglages</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
   <div class="settings-list">
-    <label class="setting-row"><span>🔊 Sound</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
-    <label class="setting-row"><span>🎵 Music</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
+    <label class="setting-row"><span>🔊 Son</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
+    <label class="setting-row"><span>🎵 Musique</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
     <label class="setting-row"><span>🔔 Notifications</span><input type="checkbox" id="setting-notifs" checked onchange="toggleNotifs(this.checked)"></label>
   </div>
   <div class="settings-info">
@@ -155,14 +155,14 @@
 <!-- ===== OVERLAYS ===== -->
 <div id="wheel-overlay" class="overlay hidden">
   <div class="overlay-card wheel-container">
-    <h2>🎡 Wheel of Fortune</h2>
+    <h2>🎡 Roue de la Fortune</h2>
     <div id="wheel-canvas-wrapper">
       <div class="wheel-border">
         <canvas id="wheel-canvas" width="280" height="280"></canvas>
       </div>
       <div id="wheel-pointer">▼</div>
     </div>
-    <button id="wheel-spin-btn" class="action-btn" onclick="doSpinWheel()">Spin!</button>
+    <button id="wheel-spin-btn" class="action-btn" onclick="doSpinWheel()">Tourner !</button>
     <div id="wheel-result" class="hidden"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
@@ -170,10 +170,10 @@
 
 <div id="mystery-box-overlay" class="overlay hidden">
   <div class="overlay-card">
-    <h2>🎁 Mystery Box</h2>
+    <h2>🎁 Boîte Mystère</h2>
     <div id="mystery-box-animation"><div class="box-icon" id="box-icon">📦</div></div>
     <div id="mystery-box-result" class="hidden"></div>
-    <button id="open-box-btn" class="action-btn" onclick="doOpenBox()">Open!</button>
+    <button id="open-box-btn" class="action-btn" onclick="doOpenBox()">Ouvrir !</button>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
 </div>
@@ -181,17 +181,17 @@
 <div id="levelup-overlay" class="overlay hidden">
   <div class="overlay-card levelup-card">
     <div class="levelup-stars">⭐✨⭐✨⭐</div>
-    <h1>Level Up!</h1>
+    <h1>Niveau supérieur !</h1>
     <div id="levelup-level" class="levelup-number"></div>
     <div id="levelup-rewards"></div>
     <div id="levelup-unlocks"></div>
-    <button class="action-btn" onclick="hideLevelUp()">Continue</button>
+    <button class="action-btn" onclick="hideLevelUp()">Continuer</button>
   </div>
 </div>
 
 <div id="plant-overlay" class="overlay hidden">
   <div class="overlay-card">
-    <h2>🌱 Plant a Crop</h2>
+    <h2>🌱 Planter une culture</h2>
     <div id="crop-choices"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
@@ -207,19 +207,19 @@
 
 <div id="login-bonus-overlay" class="overlay hidden">
   <div class="overlay-card login-bonus-card">
-    <h2>🌅 Daily Login Bonus!</h2>
+    <h2>🌅 Bonus quotidien !</h2>
     <div id="login-days-row" class="login-days-row"></div>
-    <div class="login-day-big">Day <span id="login-day">1</span></div>
+    <div class="login-day-big">Jour <span id="login-day">1</span></div>
     <div id="login-reward-detail" class="login-reward-detail"></div>
-    <button class="action-btn" onclick="hideLoginBonus()">Collect!</button>
+    <button class="action-btn" onclick="hideLoginBonus()">Récupérer !</button>
   </div>
 </div>
 
 <div id="session-overlay" class="overlay hidden">
   <div class="overlay-card">
-    <h2>🎉 Session Complete!</h2>
+    <h2>🎉 Session terminée !</h2>
     <div id="session-stats"></div>
     <div id="session-items"></div>
-    <button class="action-btn" onclick="hideOverlay()">Continue Farming!</button>
+    <button class="action-btn" onclick="hideOverlay()">Continuer !</button>
   </div>
 </div>

@@ -632,9 +632,10 @@ class AchievementManager:
             return len(state.get("unlocked_crops", [])) >= target
 
         if ach_id == "animal_lover":
+            animals = state.get("animals", {})
             total_animals = sum(
-                a.get("count", 0)
-                for a in state.get("animals", {}).values()
+                a.get("count", 0) if isinstance(a, dict) else 0
+                for a in animals.values()
             )
             return total_animals >= target
 
@@ -733,16 +734,45 @@ class AchievementManager:
             current = state.get("total_harvests", 0)
         elif ach_id == "crop_variety":
             current = len(state.get("unlocked_crops", []))
+        elif ach_id == "animal_lover":
+            animals = state.get("animals", {})
+            current = sum(a.get("count", 0) if isinstance(a, dict) else 0 for a in animals.values())
+        elif ach_id == "green_thumb":
+            current = state.get("num_plots", 6)
         elif ach_id == "decorator":
             current = len(state.get("decorations", []))
+        elif ach_id == "deco_collector":
+            current = len(set(d.get("type") for d in state.get("decorations", [])))
+        elif ach_id == "achievement_hunter":
+            current = len(state.get("achievements", {}))
         elif ach_id == "coin_collector":
             current = state.get("total_coins_earned", 0)
+        elif ach_id == "big_spender":
+            current = state.get("total_coins_spent", 0)
+        elif ach_id == "gem_hoarder":
+            current = state.get("gems", 0)
+        elif ach_id == "merchant":
+            current = state.get("total_items_sold", 0)
+        elif ach_id in ("trucker", "sailor"):
+            current = state.get("orders_completed", 0)
+        elif ach_id in ("chef", "baker", "cheese_maker"):
+            current = state.get("total_produced", 0)
+        elif ach_id == "treasure_hunter":
+            current = state.get("mystery_boxes_opened", 0)
+        elif ach_id == "lucky_spinner":
+            current = state.get("wheel_spins", 0)
+        elif ach_id == "material_collector":
+            current = state.get("materials_collected", 0)
         elif ach["category"] == "levels":
             current = state.get("level", 1)
+        elif ach_id == "barn_builder":
+            current = max(0, state.get("barn_level", 1) - 1)
+        elif ach_id == "silo_master":
+            current = max(0, state.get("silo_level", 1) - 1)
         elif ach_id == "land_baron":
             current = state.get("num_plots", 6)
         else:
-            current = 0  # Approximate
+            current = 0
 
         return (min(current, target), target)
 
