@@ -507,7 +507,8 @@ const ITEM_INFO = {
   burger: {desc: 'Fabriqué au BBQ (1 pain + 1 bacon → 2 sessions). Le plus cher !', usage: 'Vendre (35 pièces)'},
   jam: {desc: 'Fabriquée à la Confiturerie (3 fraises + 1 sucre → 1 session).', usage: 'Vendre (20 pièces)'},
   juice: {desc: 'Fabriqué au Pressoir (3 pommes → 1 session).', usage: 'Vendre (16 pièces)'},
-  pie: {desc: 'Fabriquée au Four (2 blé + 2 pommes + 1 sucre → 2 sessions).', usage: 'Vendre (28 pièces)'},
+  pie: {desc: 'Fabriquée à la Pâtisserie (2 blé + 2 pommes + 1 sucre → 2 sessions).', usage: 'Vendre (28 pièces)'},
+  pumpkin_pie: {desc: 'Fabriquée au Four à tartes (2 citrouilles + 2 blé + 1 crème → 2 sessions). La plus chère !', usage: 'Vendre (35 pièces)'},
   cream: {desc: 'Fabriquée à la Laiterie (2 lait → 1 session). Ingrédient de la tarte citrouille.', usage: 'Vendre ou Tarte citrouille'},
 };
 

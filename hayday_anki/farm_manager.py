@@ -54,6 +54,7 @@ ITEM_CATALOG = {
     "pizza": {"name": "Pizza", "emoji": "\U0001F355", "category": "processed", "sell_price": 30, "xp": 15},
     "burger": {"name": "Burger", "emoji": "\U0001F354", "category": "processed", "sell_price": 35, "xp": 18},
     "pie": {"name": "Tarte", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
+    "pumpkin_pie": {"name": "Tarte citrouille", "emoji": "\U0001F967", "category": "processed", "sell_price": 35, "xp": 18},
     "jam": {"name": "Confiture", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
     "juice": {"name": "Jus", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
 
@@ -902,6 +903,7 @@ class FarmManager:
         if deed_count < 1:
             return False
         self.state.coins -= cost_coins
+        self.state.total_coins_spent += cost_coins
         self.state.remove_item("land_deed", 1)
         self.state.land_total += amount
         return True
@@ -1072,6 +1074,7 @@ class FarmManager:
         result = {"reward": reward, "box_size": box["size"]}
         if "coins" in reward:
             self.state.coins += reward["coins"]
+            self.state.total_coins_earned += reward["coins"]
         if "gems" in reward:
             self.state.gems += reward["gems"]
         if "item" in reward:
@@ -1242,6 +1245,7 @@ class FarmManager:
         # Apply prize
         if "coins" in prize_data:
             self.state.coins += prize_data["coins"]
+            self.state.total_coins_earned += prize_data["coins"]
         if "gems" in prize_data:
             self.state.gems += prize_data["gems"]
         if "item" in prize_data:
@@ -1403,7 +1407,9 @@ class FarmManager:
         }
 
         reward = daily_rewards[day]
-        self.state.coins += reward.get("coins", 0)
+        coin_bonus = reward.get("coins", 0)
+        self.state.coins += coin_bonus
+        self.state.total_coins_earned += coin_bonus
         self.state.gems += reward.get("gems", 0)
 
         return {

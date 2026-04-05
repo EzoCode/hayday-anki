@@ -390,7 +390,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 
 /* ===== DECORATIONS & MYSTERY BOXES ===== */
 #decorations-layer{position:absolute;inset:0;pointer-events:none;z-index:3}
-.decoration-item{position:absolute;font-size:20px;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3));pointer-events:auto;cursor:grab}
 #mystery-boxes-layer{position:absolute;inset:0;pointer-events:none;z-index:4}
 .mystery-box{position:absolute;cursor:pointer;pointer-events:auto;animation:boxFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,215,0,.6));transition:transform .15s}
 .mystery-box:hover{transform:scale(1.2);filter:drop-shadow(0 0 14px rgba(255,215,0,.8))}
@@ -478,7 +477,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .order-items{display:flex;flex-wrap:wrap;gap:4px}
 .order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
 .order-item img{max-width:18px;max-height:18px}
-.order-item.fulfilled{text-decoration:line-through;opacity:.35}
+.order-item.fulfilled{opacity:.65;background:rgba(76,175,80,.08)}
 .order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,var(--orange),var(--orange-h));color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(244,146,42,.3),inset 0 1px 0 rgba(255,255,255,.25);transition:all .15s}
 .order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(244,146,42,.4)}
 .order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
@@ -673,7 +672,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .tutorial-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.12);transition:all .2s}
 .tutorial-dot.active{background:var(--orange);transform:scale(1.3)}
 
-/* ===== SCROLLBAR ===== */
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}

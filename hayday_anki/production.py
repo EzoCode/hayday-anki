@@ -145,7 +145,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Tarte à la citrouille",
             "emoji": "\U0001F967",
             "ingredients": {"pumpkin": 2, "wheat": 2, "cream": 1},
-            "output": {"pie": 1},
+            "output": {"pumpkin_pie": 1},
             "sessions_required": 2,
             "xp": 18,
         },
