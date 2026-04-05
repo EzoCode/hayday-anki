@@ -429,6 +429,72 @@ function showInfo(data) {
   document.getElementById('info-overlay').classList.remove('hidden');
 }
 
+// --- Item Info Database ---
+const ITEM_INFO = {
+  // Materials
+  bolt: {desc: 'Sert à améliorer la Grange. Obtenu aléatoirement en révisant des cartes (~12% par review).', usage: 'Améliorer Grange (+25 stockage)'},
+  plank: {desc: 'Sert à améliorer la Grange. Obtenu aléatoirement en révisant.', usage: 'Améliorer Grange (+25 stockage)'},
+  duct_tape: {desc: 'Sert à améliorer la Grange. Matériau rare obtenu en révisant.', usage: 'Améliorer Grange (+25 stockage)'},
+  nail: {desc: 'Sert à améliorer le Silo. Obtenu aléatoirement en révisant.', usage: 'Améliorer Silo (+25 stockage)'},
+  screw: {desc: 'Sert à améliorer le Silo. Matériau peu commun.', usage: 'Améliorer Silo (+25 stockage)'},
+  paint: {desc: 'Sert à améliorer le Silo. Matériau rare.', usage: 'Améliorer Silo (+25 stockage)'},
+  land_deed: {desc: 'Acte de propriété. Nécessaire pour agrandir ton terrain. Très rare (~3% des drops matériaux).', usage: 'Acheter du terrain (+5 unités)'},
+  expansion_permit: {desc: 'Permis d\'expansion. Ultra rare (~2% des drops). Nécessaire pour agrandir le terrain.', usage: 'Acheter du terrain (+5 unités)'},
+  // Crops
+  wheat: {desc: 'Céréale de base. Pousse vite (3 reviews/stade). Ingrédient du pain et des cookies.', usage: 'Vendre ou transformer en Pain/Cookie'},
+  corn: {desc: 'Céréale dorée. Pousse en 4 reviews/stade.', usage: 'Vendre ou utiliser dans des recettes'},
+  carrot: {desc: 'Légume-racine. Pousse en 5 reviews/stade.', usage: 'Vendre'},
+  tomato: {desc: 'Fruit juteux. Essentiel pour les pizzas ! Pousse en 6 reviews/stade.', usage: 'Vendre ou Pizza'},
+  potato: {desc: 'Tubercule nourrissant. Pousse en 5 reviews/stade.', usage: 'Vendre'},
+  sugarcane: {desc: 'Transformée en sucre au Moulin. Pousse en 7 reviews/stade.', usage: 'Vendre ou Sucre → Confiture/Gâteau'},
+  strawberry: {desc: 'Fruit délicat. Ingrédient de la confiture ! Pousse en 8 reviews/stade.', usage: 'Vendre ou Confiture'},
+  apple: {desc: 'Fruit polyvalent. Fait du jus et des tartes. Pousse en 10 reviews/stade.', usage: 'Vendre ou Jus/Tarte'},
+  pumpkin: {desc: 'Grosse cucurbitacée. Pousse lentement (12 reviews/stade) mais vaut cher.', usage: 'Vendre ou Tarte à la citrouille'},
+  soybean: {desc: 'Légumineuse. Pousse en 4 reviews/stade.', usage: 'Vendre'},
+  // Animal products
+  milk: {desc: 'Produit par les vaches (1 par vache tous les 10 reviews). Transformable en beurre, fromage, crème.', usage: 'Vendre ou Beurre/Fromage/Crème'},
+  egg: {desc: 'Pondu par les poules (1 par poule tous les 8 reviews). Ingrédient des cookies et gâteaux.', usage: 'Vendre ou Cookie/Gâteau'},
+  bacon: {desc: 'Produit par les cochons (1 par cochon tous les 15 reviews). Ingrédient du burger.', usage: 'Vendre ou Burger'},
+  wool: {desc: 'Tondue des moutons (1 par mouton tous les 20 reviews). Se vend cher.', usage: 'Vendre'},
+  // Processed
+  bread: {desc: 'Fabriqué à la Boulangerie (3 blé → 1 session). Base de nombreuses recettes.', usage: 'Vendre ou Burger/Pizza'},
+  butter: {desc: 'Fabriqué à la Laiterie (2 lait → 1 session). Ingrédient du gâteau.', usage: 'Vendre ou Gâteau'},
+  cheese: {desc: 'Fabriqué à la Laiterie (3 lait → 2 sessions). Ingrédient de la pizza.', usage: 'Vendre ou Pizza'},
+  sugar: {desc: 'Fabriqué au Moulin (3 canne → 1 session). Ingrédient confiture/gâteau.', usage: 'Vendre ou Confiture/Gâteau'},
+  cookie: {desc: 'Fabriqué à la Boulangerie (2 blé + 1 œuf → 1 session).', usage: 'Vendre'},
+  cake: {desc: 'Fabriqué à la Pâtisserie (1 pain + 1 beurre + 1 œuf → 2 sessions). Se vend très cher !', usage: 'Vendre (25 pièces)'},
+  pizza: {desc: 'Fabriquée à la Pizzeria (1 pain + 2 tomates + 1 fromage → 2 sessions). Top prix !', usage: 'Vendre (30 pièces)'},
+  burger: {desc: 'Fabriqué au BBQ (1 pain + 1 bacon → 2 sessions). Le plus cher !', usage: 'Vendre (35 pièces)'},
+  jam: {desc: 'Fabriquée à la Confiturerie (3 fraises + 1 sucre → 1 session).', usage: 'Vendre (20 pièces)'},
+  juice: {desc: 'Fabriqué au Pressoir (3 pommes → 1 session).', usage: 'Vendre (16 pièces)'},
+  pie: {desc: 'Fabriquée au Four (2 blé + 2 pommes + 1 sucre → 2 sessions).', usage: 'Vendre (28 pièces)'},
+  cream: {desc: 'Fabriquée à la Laiterie (2 lait → 1 session). Ingrédient de la tarte citrouille.', usage: 'Vendre ou Tarte citrouille'},
+};
+
+function showItemInfo(itemId) {
+  const cat = (farmData.item_catalog||{})[itemId] || {};
+  const info = ITEM_INFO[itemId] || {};
+  const qty = (farmData.inventory||{})[itemId] || 0;
+
+  const reqs = [];
+  if (cat.sell_price > 0) {
+    reqs.push({label: 'Prix de vente', value: `${cat.sell_price} pièces`, met: true});
+  }
+  if (info.usage) {
+    reqs.push({label: 'Utilisation', value: info.usage, met: true});
+  }
+  reqs.push({label: 'En stock', value: `${qty}`, met: qty > 0});
+
+  showInfo({
+    icon: cat.emoji || '❓',
+    title: cat.name || itemId,
+    desc: info.desc || `${cat.category || 'Item'} — ${cat.name || itemId}`,
+    requirements: reqs,
+    action_label: (cat.sell_price > 0 && qty > 0) ? `Vendre tout (${qty} × ${cat.sell_price} = ${qty * cat.sell_price} pièces)` : null,
+    action_cmd: (cat.sell_price > 0 && qty > 0) ? `pycmd('farm:sell:${itemId}:${qty}');hideOverlay()` : null,
+  });
+}
+
 function showBuildMenu() {
   // Show ALL buildings — built, available, and locked with requirements
   const unlocked = farmData.unlocked_buildings || [];
@@ -654,11 +720,13 @@ function renderInventory() {
   Object.entries(inv).forEach(([id,qty]) => {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
-    el.onclick = () => { if((it.sell_price||0)>0) sellItem(id); };
+    // Tap = show item info, info card has sell button
+    el.onclick = () => showItemInfo(id);
     let icon = ''; const lbl = S(`hayday_${id}-lbl`);
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}`;
+    // Add info button
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}<span class="item-info-btn">ⓘ</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;

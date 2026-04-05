@@ -244,16 +244,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
   font-weight: 600;
 }
 
-/* Info card */
+/* Info card — scrollable overlay with fixed close button */
 .info-card {
   text-align: left !important;
-  max-width: 340px;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-top: 36px !important;
 }
-.info-card .info-icon { font-size: 48px; text-align: center; margin-bottom: 8px; }
-.info-card h3 { font-size: 18px; margin-bottom: 4px; }
+.info-card .overlay-close {
+  position: fixed;
+  top: auto; right: auto;
+  z-index: 310;
+}
+.info-card .info-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
+.info-card h3 { font-size: 17px; margin-bottom: 4px; }
 .info-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 10px; }
 .req-section { margin-bottom: 10px; }
-.req-section h4 { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+.req-section h4 { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: .5px; }
 .req-row {
   display: flex;
   justify-content: space-between;
@@ -268,11 +276,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .req-miss { color: #e74c3c; font-weight: 700; }
 .produce-row { font-size: 11px; color: #555; padding: 2px 0; }
 
+/* Item info button */
+.item-info-btn {
+  position: absolute;
+  top: 3px; right: 3px;
+  font-size: 10px;
+  color: rgba(0,0,0,.2);
+  cursor: pointer;
+}
+.item-cell:hover .item-info-btn { color: rgba(0,0,0,.5); }
+.item-cell { position: relative; }
+
 /* ===== PLOTS — 3D Depth ===== */
-#fields-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;min-height:60px}
+#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(0,120px));gap:8px;padding:10px;min-height:60px;justify-content:center}
 #plots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px;margin:0 auto;padding:0 4px}
 
-.plot{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+.plot{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;max-width:120px;
   box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}
 .plot:hover{transform:translateY(-3px) scale(1.03);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
 .plot:active{transform:scale(.95)}
@@ -287,9 +306,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
 @keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
-.plot-crop img{image-rendering:pixelated}
+.plot-crop img{image-rendering:auto;max-width:52px;max-height:52px}
 .plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
