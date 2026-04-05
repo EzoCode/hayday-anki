@@ -143,7 +143,6 @@ class FarmWebView:
                 "hayday/shop-dark.png", "hayday/chicken_coop-dark.png",
                 "hayday/pasture-dark.png", "hayday/field-dark.png",
                 "hayday/wheat-field-dark.png", "hayday/alfalfa-field-dark.png",
-                "hayday/mill-dark.png",
             }
             if rel_path in skip_paths:
                 continue
@@ -506,9 +505,11 @@ class FarmWebView:
         for item in collected:
             i_emoji = item["emoji"]
             i_name = item["name"]
-            i_xp = item["xp"]
-            self.manager.state.total_produced += 1
-            self._js(f"showNotification('{i_emoji} {i_name} récupéré ! +{i_xp} XP')")
+            if item.get("storage_full"):
+                self._js(f"showNotification({json.dumps(f'Silo plein ! {i_name} reste en attente.')})")
+            else:
+                i_xp = item["xp"]
+                self._js(f"showNotification({json.dumps(f'{i_emoji} {i_name} récupéré ! +{i_xp} XP')})")
 
     def _check_and_show_level_up(self):
         """Check if XP earned outside reviews triggered a level-up."""

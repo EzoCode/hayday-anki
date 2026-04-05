@@ -68,7 +68,7 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "cream",
             "name": "Crème",
-            "emoji": "\U0001F95B",
+            "emoji": "\U0001F36E",
             "ingredients": {"milk": 2},
             "output": {"cream": 1},
             "sessions_required": 1,
@@ -257,6 +257,7 @@ class ProductionManager:
         for item in queue:
             if item.get("ready", False):
                 # Add output to inventory
+                all_added = True
                 for output_id, qty in item["output"].items():
                     if self.state.add_item(output_id, qty):
                         collected.append({
@@ -265,12 +266,23 @@ class ProductionManager:
                             "name": item["name"],
                             "emoji": item["emoji"],
                             "xp": item["xp"],
+                            "storage_full": False,
                         })
                         self.state.xp += item["xp"]
                         self.state.session_xp_earned += item["xp"]
+                        self.state.total_produced += 1
                     else:
-                        # Storage full — keep in queue
+                        # Storage full — keep in queue and notify
                         remaining.append(item)
+                        collected.append({
+                            "item": output_id,
+                            "qty": 0,
+                            "name": item["name"],
+                            "emoji": item["emoji"],
+                            "xp": 0,
+                            "storage_full": True,
+                        })
+                        all_added = False
             else:
                 remaining.append(item)
 

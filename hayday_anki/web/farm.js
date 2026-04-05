@@ -699,18 +699,7 @@ const DECO_EMOJI = {
   pond:'\u{1F4A7}',swing:'\u{1F3A0}',fountain:'\u26F2',statue_chicken:'\u{1F414}',
   tree_cherry:'\u{1F338}',arch_flowers:'\u{1F490}',statue_cow:'\u{1F404}',windmill_deco:'\u{1F3E1}'
 };
-function renderDecorations() {
-  const layer = document.getElementById('decorations-layer'); layer.innerHTML = '';
-  (farmData.decorations||[]).forEach(d => {
-    const el = document.createElement('div'); el.className = 'decoration-item';
-    const src = S(`hayday_${d.type}`) || S(`decorations_${d.type}`);
-    if (src) el.innerHTML = `<img src="${src}" width="28" height="28">`;
-    else el.textContent = DECO_EMOJI[d.type] || '\u{1F3E1}';
-    el.style.left = `${(d.x||1)*10+2}%`; el.style.top = `${(d.y||1)*10+5}%`;
-    el.style.animationDelay = `${Math.random()*2}s`;
-    layer.appendChild(el);
-  });
-}
+// Decorations are rendered in the Village zone grid via renderVillage()
 
 // --- Weather System ---
 let currentWeather = null;

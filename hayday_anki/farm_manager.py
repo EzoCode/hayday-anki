@@ -50,7 +50,7 @@ ITEM_CATALOG = {
     "cake": {"name": "Gâteau", "emoji": "\U0001F370", "category": "processed", "sell_price": 25, "xp": 12},
     "cookie": {"name": "Cookie", "emoji": "\U0001F36A", "category": "processed", "sell_price": 18, "xp": 8},
     "sugar": {"name": "Sucre", "emoji": "\U0001F36C", "category": "processed", "sell_price": 8, "xp": 4},
-    "cream": {"name": "Crème", "emoji": "\U0001F95B", "category": "processed", "sell_price": 14, "xp": 6},
+    "cream": {"name": "Crème", "emoji": "\U0001F36E", "category": "processed", "sell_price": 14, "xp": 6},
     "pizza": {"name": "Pizza", "emoji": "\U0001F355", "category": "processed", "sell_price": 30, "xp": 15},
     "burger": {"name": "Burger", "emoji": "\U0001F354", "category": "processed", "sell_price": 35, "xp": 18},
     "pie": {"name": "Tarte", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
@@ -1530,6 +1530,7 @@ class FarmManager:
                 "product": adef.get("product", ""),
                 "product_emoji": ITEM_CATALOG.get(adef.get("product", ""), {}).get("emoji", ""),
                 "produce_every_n_reviews": adef.get("produce_every_n_reviews", 10),
+                "max_owned": adef.get("max_owned", 5),
                 "max": adef.get("max_owned", 5),
             }
             for aid, adef in progression.ANIMAL_DEFINITIONS.items()

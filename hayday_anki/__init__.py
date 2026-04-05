@@ -167,6 +167,7 @@ def on_main_window_close():
 
 def _process_animals(mgr):
     """Process animal production using pastures list as source of truth."""
+    import json
     from . import progression
     from .farm_manager import ITEM_CATALOG
     collected_products = []
@@ -183,22 +184,30 @@ def _process_animals(mgr):
         produce_every = animal_def.get("produce_every_n_reviews", 10)
         if reviews_since >= produce_every:
             product = animal_def.get("product")
-            if product and mgr.state.add_item(product, count):
-                pasture["reviews_since_last"] = 0
-                item_info = ITEM_CATALOG.get(product, {})
-                collected_products.append({
-                    "product": product,
-                    "name": item_info.get("name", product),
-                    "emoji": item_info.get("emoji", ""),
-                    "qty": count,
-                })
+            if product:
+                if mgr.state.add_item(product, count):
+                    pasture["reviews_since_last"] = 0
+                    item_info = ITEM_CATALOG.get(product, {})
+                    collected_products.append({
+                        "product": product,
+                        "name": item_info.get("name", product),
+                        "emoji": item_info.get("emoji", ""),
+                        "qty": count,
+                    })
+                else:
+                    # Silo full — notify but DON'T reset counter (retry next review)
+                    item_info = ITEM_CATALOG.get(product, {})
+                    product_name = item_info.get("name", product)
+                    view = _get_view()
+                    if view.web:
+                        msg = f"Silo plein ! {product_name} perdu(e). Vendez ou améliorez le silo."
+                        view._js(f"showNotification({json.dumps(msg)})")
     # Sync animals dict from pastures (single source of truth)
     mgr._sync_animals_from_pastures()
     # Show notifications for collected animal products
     if collected_products:
         view = _get_view()
         if view.web:
-            import json
             for p in collected_products:
                 msg = f"{p['emoji']} +{p['qty']} {p['name']}"
                 view._js(f"showNotification({json.dumps(msg)}, 'reward')")
