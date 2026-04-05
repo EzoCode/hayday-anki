@@ -227,8 +227,8 @@ function renderPlots() {
   for (let i = 0; i < locked; i++) {
     const el = document.createElement('div'); el.className = 'plot-locked';
     const next = getNextExpansionLevel(level);
-    el.innerHTML = `${lockImg(24)}<span class="lock-label">${next?`Lvl ${next}`:'Max'}</span>`;
-    el.onclick = () => { if (next && level >= next) pycmd('farm:expand:2'); else showNotification(`Reach level ${next||'?'} to expand!`); };
+    el.innerHTML = `${lockImg(24)}<span class="lock-label">${next?`Niv. ${next}`:'Max'}</span>`;
+    el.onclick = () => { if (next && level >= next) pycmd('farm:expand:2'); else showNotification(`Atteignez le niveau ${next||'?'} pour agrandir !`); };
     grid.appendChild(el);
   }
 }
@@ -317,8 +317,8 @@ function renderDecorations() {
   const layer = document.getElementById('decorations-layer'); layer.innerHTML = '';
   (farmData.decorations||[]).forEach(d => {
     const el = document.createElement('div'); el.className = 'decoration-item';
-    const src = S(`hayday_scarecrow`);
-    if (d.type === 'scarecrow' && src) el.innerHTML = `<img src="${src}" width="28" height="28">`;
+    const src = S(`hayday_${d.type}`) || S(`decorations_${d.type}`);
+    if (src) el.innerHTML = `<img src="${src}" width="28" height="28">`;
     else el.textContent = DECO_EMOJI[d.type] || '\u{1F3E1}';
     el.style.left = `${(d.x||1)*10+2}%`; el.style.top = `${(d.y||1)*10+5}%`;
     el.style.animationDelay = `${Math.random()*2}s`;
@@ -547,7 +547,7 @@ function showDailyLoginBonus(d){
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
-function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${id} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
+function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{const cat=(farmData.item_catalog||{})[id]||{};const name=cat.name||id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const emoji=cat.emoji||'';items+=`<span class="session-item-tag">${emoji} ${name} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
 function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.style.color='#ffd700';el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
@@ -567,7 +567,7 @@ function showProductionDialog(data){
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 
-function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000)return Math.round(n/1000)+'k';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}
 // --- Farmer Character ---
 function renderFarmer() {
   const el = document.getElementById('farmer-character');

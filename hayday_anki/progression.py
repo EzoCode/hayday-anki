@@ -71,26 +71,57 @@ _BASE_XP_TABLE = {
 }
 
 
+_xp_cache: dict = {}  # level -> cumulative XP
+
+
 def get_xp_for_level(level: int) -> int:
-    """Get total XP required to reach a given level."""
+    """Get total XP required to reach a given level (cached)."""
     if level <= 1:
         return 0
+    if level in _xp_cache:
+        return _xp_cache[level]
     if level in _BASE_XP_TABLE:
-        return _BASE_XP_TABLE[level]
+        _xp_cache[level] = _BASE_XP_TABLE[level]
+        return _xp_cache[level]
     # After level 50: each level adds 11,000 more than previous
-    base = _BASE_XP_TABLE[50]
+    base = get_xp_for_level(50)
     for lvl in range(51, level + 1):
         base += 11000 + (lvl - 50) * 500  # slight acceleration
+        _xp_cache[lvl] = base
     return base
 
 
+# Pre-built sorted list for binary search in get_level_for_xp
+_level_thresholds: list = []  # [(xp, level), ...] sorted by xp
+
+
+def _ensure_level_thresholds():
+    """Build threshold list up to level 200 for fast lookup."""
+    if _level_thresholds:
+        return
+    for lvl in range(1, 201):
+        _level_thresholds.append((get_xp_for_level(lvl), lvl))
+
+
 def get_level_for_xp(xp: int) -> int:
-    """Get the level for a given amount of XP."""
+    """Get the level for a given amount of XP (binary search, then linear for extremes)."""
+    _ensure_level_thresholds()
+    # Binary search in pre-built thresholds (covers levels 1-200)
+    lo, hi = 0, len(_level_thresholds) - 1
     level = 1
-    while get_xp_for_level(level + 1) <= xp:
-        level += 1
-        if level > 9999:
-            break
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if _level_thresholds[mid][0] <= xp:
+            level = _level_thresholds[mid][1]
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    # If beyond level 200, continue linearly from there
+    if level >= 200:
+        while get_xp_for_level(level + 1) <= xp:
+            level += 1
+            if level > 9999:
+                break
     return level
 
 
@@ -165,8 +196,8 @@ def get_gem_reward_for_level(level: int) -> int:
 # Each entry: level -> list of unlocks
 UNLOCK_TABLE: Dict[int, List[Dict]] = {
     1: [
-        {"type": "crop", "id": "wheat", "name": "Ble", "emoji": "\U0001F33E"},
-        {"type": "crop", "id": "corn", "name": "Mais", "emoji": "\U0001F33D"},
+        {"type": "crop", "id": "wheat", "name": "Blé", "emoji": "\U0001F33E"},
+        {"type": "crop", "id": "corn", "name": "Maïs", "emoji": "\U0001F33D"},
     ],
     3: [
         {"type": "crop", "id": "carrot", "name": "Carotte", "emoji": "\U0001F955"},
@@ -177,7 +208,7 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 2, "id": "plots_5", "name": "+2 Parcelles"},
     ],
     7: [
-        {"type": "feature", "id": "roadside_shop", "name": "Echoppe", "emoji": "\U0001F3EA"},
+        {"type": "feature", "id": "roadside_shop", "name": "Échoppe", "emoji": "\U0001F3EA"},
     ],
     10: [
         {"type": "crop", "id": "tomato", "name": "Tomate", "emoji": "\U0001F345"},
@@ -193,7 +224,7 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
     15: [
         {"type": "crop", "id": "potato", "name": "Patate", "emoji": "\U0001F954"},
         {"type": "building", "id": "sugar_mill", "name": "Sucrerie", "emoji": "\U0001F3ED"},
-        {"type": "crop", "id": "sugarcane", "name": "Canne a sucre", "emoji": "\U0001F33F"},
+        {"type": "crop", "id": "sugarcane", "name": "Canne à sucre", "emoji": "\U0001F33F"},
         {"type": "plots", "count": 2, "id": "plots_15", "name": "+2 Parcelles"},
     ],
     17: [
@@ -215,7 +246,7 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 2, "id": "plots_25", "name": "+2 Parcelles"},
     ],
     27: [
-        {"type": "feature", "id": "fishing", "name": "Etang de peche", "emoji": "\U0001F3A3"},
+        {"type": "feature", "id": "fishing", "name": "Étang de pêche", "emoji": "\U0001F3A3"},
     ],
     30: [
         {"type": "crop", "id": "apple", "name": "Pomme", "emoji": "\U0001F34E"},
@@ -230,7 +261,7 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 2, "id": "plots_35", "name": "+2 Parcelles"},
     ],
     40: [
-        {"type": "building", "id": "pastry_shop", "name": "Patisserie", "emoji": "\U0001F370"},
+        {"type": "building", "id": "pastry_shop", "name": "Pâtisserie", "emoji": "\U0001F370"},
         {"type": "crop", "id": "pumpkin", "name": "Citrouille", "emoji": "\U0001F383"},
         {"type": "plots", "count": 2, "id": "plots_40", "name": "+2 Parcelles"},
     ],
@@ -249,11 +280,11 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 1, "id": "plots_60", "name": "+1 Parcelle"},
     ],
     70: [
-        {"type": "building", "id": "pie_oven", "name": "Four a tartes", "emoji": "\U0001F967"},
+        {"type": "building", "id": "pie_oven", "name": "Four à tartes", "emoji": "\U0001F967"},
         {"type": "plots", "count": 1, "id": "plots_70", "name": "+1 Parcelle"},
     ],
     80: [
-        {"type": "building", "id": "candy_machine", "name": "Machine a bonbons", "emoji": "\U0001F36C"},
+        {"type": "building", "id": "candy_machine", "name": "Machine à bonbons", "emoji": "\U0001F36C"},
         {"type": "plots", "count": 1, "id": "plots_80", "name": "+1 Parcelle"},
     ],
     90: [
@@ -287,7 +318,7 @@ def get_all_unlocks_up_to(level: int) -> List[Dict]:
 
 CROP_DEFINITIONS = {
     "wheat": {
-        "name": "Ble",
+        "name": "Blé",
         "emoji": "\U0001F33E",
         "unlock_level": 1,
         "growth_reviews": 3,    # Reviews per growth stage
@@ -297,7 +328,7 @@ CROP_DEFINITIONS = {
         "xp_per_harvest": 3,
     },
     "corn": {
-        "name": "Mais",
+        "name": "Maïs",
         "emoji": "\U0001F33D",
         "unlock_level": 1,
         "growth_reviews": 4,
@@ -337,7 +368,7 @@ CROP_DEFINITIONS = {
         "xp_per_harvest": 5,
     },
     "sugarcane": {
-        "name": "Canne a sucre",
+        "name": "Canne à sucre",
         "emoji": "\U0001F33F",
         "unlock_level": 15,
         "growth_reviews": 7,
@@ -400,7 +431,7 @@ BUILDING_DEFINITIONS = {
         "unlock_level": 5,
         "cost_coins": 50,
         "max_queue": 3,
-        "description": "Pain et cookies a partir de ble et d'oeufs.",
+        "description": "Pain et cookies à partir de blé et d'œufs.",
     },
     "sugar_mill": {
         "name": "Sucrerie",
@@ -408,7 +439,7 @@ BUILDING_DEFINITIONS = {
         "unlock_level": 15,
         "cost_coins": 200,
         "max_queue": 2,
-        "description": "Transforme la canne a sucre en sucre.",
+        "description": "Transforme la canne à sucre en sucre.",
     },
     "dairy": {
         "name": "Laiterie",
@@ -416,7 +447,7 @@ BUILDING_DEFINITIONS = {
         "unlock_level": 25,
         "cost_coins": 500,
         "max_queue": 3,
-        "description": "Beurre, fromage et creme a partir de lait.",
+        "description": "Beurre, fromage et crème à partir de lait.",
     },
     "bbq": {
         "name": "Barbecue",
@@ -427,12 +458,12 @@ BUILDING_DEFINITIONS = {
         "description": "Grille des burgers avec du pain et du bacon.",
     },
     "pastry_shop": {
-        "name": "Patisserie",
+        "name": "Pâtisserie",
         "emoji": "\U0001F370",
         "unlock_level": 40,
         "cost_coins": 2000,
         "max_queue": 3,
-        "description": "Gateaux, cookies et patisseries.",
+        "description": "Gâteaux, cookies et pâtisseries.",
     },
     "jam_maker": {
         "name": "Confiturerie",
@@ -440,7 +471,7 @@ BUILDING_DEFINITIONS = {
         "unlock_level": 45,
         "cost_coins": 1500,
         "max_queue": 2,
-        "description": "Confitures a partir de fruits et de sucre.",
+        "description": "Confitures à partir de fruits et de sucre.",
     },
     "pizzeria": {
         "name": "Pizzeria",
@@ -456,15 +487,15 @@ BUILDING_DEFINITIONS = {
         "unlock_level": 55,
         "cost_coins": 3000,
         "max_queue": 2,
-        "description": "Jus frais a partir de fruits.",
+        "description": "Jus frais à partir de fruits.",
     },
     "pie_oven": {
-        "name": "Four a tartes",
+        "name": "Four à tartes",
         "emoji": "\U0001F967",
         "unlock_level": 70,
         "cost_coins": 8000,
         "max_queue": 3,
-        "description": "Tartes delicieuses aux fruits.",
+        "description": "Tartes délicieuses aux fruits.",
     },
 }
 
@@ -545,10 +576,10 @@ DECORATION_COSTS = {
 }
 
 DECORATION_CATALOG = {
-    "fence": {"name": "Cloture en bois", "emoji": "\U0001FAB5", "cost": 10, "category": "basic"},
+    "fence": {"name": "Clôture en bois", "emoji": "\U0001FAB5", "cost": 10, "category": "basic"},
     "flower_pot": {"name": "Pot de fleurs", "emoji": "\U0001FAB4", "cost": 25, "category": "basic"},
     "bench": {"name": "Banc", "emoji": "\U0001FA91", "cost": 50, "category": "basic"},
-    "scarecrow": {"name": "Epouvantail", "emoji": "\U0001F383", "cost": 75, "category": "basic"},
+    "scarecrow": {"name": "Épouvantail", "emoji": "\U0001F383", "cost": 75, "category": "basic"},
     "hay_bale": {"name": "Botte de foin", "emoji": "\U0001F33E", "cost": 15, "category": "basic"},
     "mailbox": {"name": "Boite aux lettres", "emoji": "\U0001F4EA", "cost": 30, "category": "basic"},
     "lamp_post": {"name": "Lampadaire", "emoji": "\U0001F4A1", "cost": 40, "category": "basic"},
@@ -573,11 +604,11 @@ DECORATION_CATALOG = {
 # =============================================================================
 
 GROWTH_STAGES = {
-    0: {"name": "Graine", "emoji": "\U0001F331", "description": "Vient d'etre plante"},
-    1: {"name": "Pousse", "emoji": "\U0001F33F", "description": "Commence a pousser"},
+    0: {"name": "Graine", "emoji": "\U0001F331", "description": "Vient d'être planté"},
+    1: {"name": "Pousse", "emoji": "\U0001F33F", "description": "Commence à pousser"},
     2: {"name": "Croissance", "emoji": "\U0001F33E", "description": "Pousse bien"},
-    3: {"name": "Floraison", "emoji": "\U0001F33C", "description": "Bientot pret"},
-    4: {"name": "Pret", "emoji": "\u2705", "description": "Pret a recolter !"},
+    3: {"name": "Floraison", "emoji": "\U0001F33C", "description": "Bientôt prêt"},
+    4: {"name": "Prêt", "emoji": "\u2705", "description": "Prêt à récolter !"},
 }
 
-WILTED_STAGE = {"name": "Fane", "emoji": "\U0001F342", "description": "A besoin d'attention"}
+WILTED_STAGE = {"name": "Fané", "emoji": "\U0001F342", "description": "A besoin d'attention"}

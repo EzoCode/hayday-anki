@@ -368,6 +368,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.55) 100%)}
 .weather-night .section-label{color:rgba(180,200,255,.5)}
 .weather-night .building-name{color:rgba(200,210,255,.8)}
+.weather-night .farm-sky::before{content:'✦';position:absolute;top:12px;left:20%;font-size:6px;color:rgba(255,255,255,.7);text-shadow:0 0 4px rgba(200,220,255,.8);animation:starTwinkle 3s ease-in-out infinite}
+.weather-night .farm-sky::after{content:'★  ✦  ·  ★  ·  ✦  ★  ·  ✦';position:absolute;top:8px;right:10%;font-size:5px;letter-spacing:8px;color:rgba(255,255,255,.5);text-shadow:0 0 6px rgba(200,220,255,.6);animation:starTwinkle 4s ease-in-out infinite .5s}
+@keyframes starTwinkle{0%,100%{opacity:.4;filter:brightness(1)}50%{opacity:1;filter:brightness(1.6)}}
 
 .weather-sunset .farm-sky{background:linear-gradient(180deg,#ff6b35 0%,#ff8c42 30%,#ffc947 60%,rgba(255,201,71,0) 100%)}
 .weather-sunset .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(180,80,20,.2) 100%)}

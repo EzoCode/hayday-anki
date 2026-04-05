@@ -10,6 +10,7 @@ from aqt.qt import QAction, QKeySequence
 _farm_manager = None
 _farm_view = None
 _session_active = False
+_achievement_manager = None
 
 
 def _get_manager():
@@ -33,10 +34,11 @@ def _get_view():
 # =============================================================================
 
 def on_profile_loaded():
-    global _farm_manager, _farm_view, _session_active
+    global _farm_manager, _farm_view, _session_active, _achievement_manager
     _farm_manager = None
     _farm_view = None
     _session_active = False
+    _achievement_manager = None
 
     try:
         mgr = _get_manager()
@@ -163,6 +165,8 @@ def on_main_window_close():
 
 def _process_animals(mgr):
     from . import progression
+    from .farm_manager import ITEM_CATALOG
+    collected_products = []
     for animal_id, animal_data in mgr.state.animals.items():
         animal_def = progression.ANIMAL_DEFINITIONS.get(animal_id)
         if not animal_def:
@@ -177,12 +181,29 @@ def _process_animals(mgr):
             product = animal_def.get("product")
             if product and mgr.state.add_item(product, count):
                 animal_data["reviews_since_last"] = 0
+                item_info = ITEM_CATALOG.get(product, {})
+                collected_products.append({
+                    "product": product,
+                    "name": item_info.get("name", product),
+                    "emoji": item_info.get("emoji", ""),
+                    "qty": count,
+                })
+    # Show notifications for collected animal products
+    if collected_products:
+        view = _get_view()
+        if view.web:
+            for p in collected_products:
+                import json
+                view._js(f"showNotification('{p['emoji']} +{p['qty']} {p['name']}', 'reward')")
 
 
 def _check_achievements(mgr):
+    global _achievement_manager
     from . import achievements as ach_mod
     from datetime import datetime
-    ach_mgr = ach_mod.AchievementManager()
+    if _achievement_manager is None:
+        _achievement_manager = ach_mod.AchievementManager()
+    ach_mgr = _achievement_manager
     state_dict = mgr.state.to_dict()
     state_dict["num_plots"] = mgr.state.num_plots
     session_data = {

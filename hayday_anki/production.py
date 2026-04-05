@@ -67,7 +67,7 @@ RECIPES: Dict[str, List[Dict]] = {
         },
         {
             "id": "cream",
-            "name": "Creme",
+            "name": "Crème",
             "emoji": "\U0001F95B",
             "ingredients": {"milk": 2},
             "output": {"cream": 1},
@@ -89,7 +89,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "pastry_shop": [
         {
             "id": "cake",
-            "name": "Gateau",
+            "name": "Gâteau",
             "emoji": "\U0001F370",
             "ingredients": {"bread": 1, "butter": 1, "egg": 1},
             "output": {"cake": 1},
@@ -142,7 +142,7 @@ RECIPES: Dict[str, List[Dict]] = {
     "pie_oven": [
         {
             "id": "pumpkin_pie",
-            "name": "Tarte a la citrouille",
+            "name": "Tarte à la citrouille",
             "emoji": "\U0001F967",
             "ingredients": {"pumpkin": 2, "wheat": 2, "cream": 1},
             "output": {"pie": 1},
