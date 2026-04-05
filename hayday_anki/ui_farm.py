@@ -212,6 +212,7 @@ class FarmWebView:
                     self._js(f"showReward({json.dumps(result)})")
                     xp_val = result.get("xp", 0)
                     self._js(f"showFloatingReward('+{xp_val} XP', window.innerWidth/2, window.innerHeight/3)")
+                    self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
 
@@ -245,7 +246,15 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "buy_building":
-                self._buy_building(parts[2])
+                # Redirect to unified build path (same as farm:build)
+                building_id = parts[2] if len(parts) > 2 else ""
+                if self.manager.build_building(building_id):
+                    from . import progression
+                    bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
+                    bname = bdef.get("name", building_id)
+                    self._js(f"showNotification('{bname} construit !')")
+                else:
+                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
                 self._send_state()
                 self.manager.save()
 
@@ -276,6 +285,7 @@ class FarmWebView:
                     r_xp = result["xp"]
                     self._js(f"showFloatingReward('+{r_coins} pièces', window.innerWidth/2, window.innerHeight/3)")
                     self._js(f"showNotification('Commande livrée ! +{r_coins} pièces, +{r_xp} XP')")
+                    self._check_and_show_level_up()
                 else:
                     self._js("showNotification('Items manquants !')")
                 self._send_state()
@@ -283,6 +293,7 @@ class FarmWebView:
 
             elif action == "collect":
                 self._collect_building(parts[2])
+                self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
 
@@ -313,12 +324,6 @@ class FarmWebView:
                 building_id = parts[2]
                 recipe_id = parts[3]
                 self._start_production(building_id, recipe_id)
-                self._send_state()
-                self.manager.save()
-
-            elif action == "expand":
-                count = int(parts[2]) if len(parts) > 2 else 2
-                self._expand_farm(count)
                 self._send_state()
                 self.manager.save()
 
@@ -394,35 +399,6 @@ class FarmWebView:
 
     # --- Shop helpers ---
 
-    def _buy_building(self, building_id: str):
-        from . import progression
-        building_def = progression.BUILDING_DEFINITIONS.get(building_id)
-        if not building_def:
-            self._js("showNotification('Bâtiment inconnu !')")
-            return
-        if building_id not in self.manager.state.unlocked_buildings:
-            self._js("showNotification('Bâtiment pas encore débloqué !')")
-            return
-        if building_id in self.manager.state.buildings:
-            self._js("showNotification('Déjà construit !')")
-            return
-        # Check land availability (buildings use 2 land)
-        if self.manager.get_land_used() + 2 > self.manager.state.land_total:
-            self._js("showNotification('Pas assez de terrain !')")
-            return
-        cost = building_def.get("cost_coins", 100)
-        if self.manager.state.coins < cost:
-            self._js("showNotification('Pas assez de pièces !')")
-            return
-        self.manager.state.coins -= cost
-        self.manager.state.total_coins_spent += cost
-        self.manager.state.buildings[building_id] = {"level": 1}
-        # Add to placed_buildings so it renders on the farm
-        place_id = max([b["id"] for b in self.manager.state.placed_buildings], default=-1) + 1
-        self.manager.state.placed_buildings.append({"id": place_id, "building_type": building_id})
-        bname = building_def["name"]
-        self._js(f"showNotification('{bname} construit !')")
-
     def _send_building_detail(self, building_id: str):
         """Send building detail with recipes to JS for production dialog."""
         from . import production, progression
@@ -464,28 +440,6 @@ class FarmWebView:
         }
         self._js(f"updateBuildingDetail({json.dumps(data)})")
 
-    def _expand_farm(self, count: int):
-        """Expand farm by adding field plots (costs coins + land_deed)."""
-        num_fields = len(self.manager.state.fields)
-        cost_coins = 50 * num_fields
-        cost_deed = 1
-
-        if self.manager.state.coins < cost_coins:
-            self._js(f"showNotification('Il faut {cost_coins} pièces !')")
-            return
-        if self.manager.state.inventory.get("land_deed", 0) < cost_deed:
-            self._js("showNotification('Titre de propriété requis !')")
-            return
-
-        self.manager.state.coins -= cost_coins
-        self.manager.state.total_coins_spent += cost_coins
-        self.manager.state.remove_item("land_deed", cost_deed)
-        # Add new fields (not legacy plots)
-        for _ in range(count):
-            self.manager.add_field()
-        new_total = len(self.manager.state.fields)
-        self._js(f"showNotification('Ferme agrandie ! {new_total} parcelles !')")
-
     def _start_production(self, building_id: str, recipe_id: str):
         """Start production of a recipe in a building."""
         from . import production
@@ -508,6 +462,14 @@ class FarmWebView:
             i_xp = item["xp"]
             self.manager.state.total_produced += 1
             self._js(f"showNotification('{i_emoji} {i_name} récupéré ! +{i_xp} XP')")
+
+    def _check_and_show_level_up(self):
+        """Check if XP earned outside reviews triggered a level-up."""
+        level_up = self.manager._check_level_up()
+        if level_up:
+            self.manager.save()
+            if self.web:
+                self._js(f"showLevelUp({json.dumps(level_up)})")
 
     # --- JS execution ---
 

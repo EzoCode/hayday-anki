@@ -166,23 +166,25 @@ def on_main_window_close():
 # =============================================================================
 
 def _process_animals(mgr):
+    """Process animal production using pastures list as source of truth."""
     from . import progression
     from .farm_manager import ITEM_CATALOG
     collected_products = []
-    for animal_id, animal_data in mgr.state.animals.items():
+    for pasture in mgr.state.pastures:
+        animal_id = pasture.get("animal_type")
         animal_def = progression.ANIMAL_DEFINITIONS.get(animal_id)
         if not animal_def:
             continue
-        count = animal_data.get("count", 0)
+        count = pasture.get("count", 0)
         if count <= 0:
             continue
-        reviews_since = animal_data.get("reviews_since_last", 0) + 1
-        animal_data["reviews_since_last"] = reviews_since
+        reviews_since = pasture.get("reviews_since_last", 0) + 1
+        pasture["reviews_since_last"] = reviews_since
         produce_every = animal_def.get("produce_every_n_reviews", 10)
         if reviews_since >= produce_every:
             product = animal_def.get("product")
             if product and mgr.state.add_item(product, count):
-                animal_data["reviews_since_last"] = 0
+                pasture["reviews_since_last"] = 0
                 item_info = ITEM_CATALOG.get(product, {})
                 collected_products.append({
                     "product": product,
@@ -190,6 +192,15 @@ def _process_animals(mgr):
                     "emoji": item_info.get("emoji", ""),
                     "qty": count,
                 })
+    # Sync animals dict from pastures (keep dict in sync for backward compat)
+    mgr.state.animals = {}
+    for pasture in mgr.state.pastures:
+        aid = pasture.get("animal_type")
+        if aid:
+            mgr.state.animals[aid] = {
+                "count": pasture.get("count", 0),
+                "reviews_since_last": pasture.get("reviews_since_last", 0),
+            }
     # Show notifications for collected animal products
     if collected_products:
         view = _get_view()

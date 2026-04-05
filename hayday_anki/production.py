@@ -274,18 +274,6 @@ class ProductionManager:
         self.state.production_queues[building_id] = remaining
         return collected
 
-    def advance_all_queues(self):
-        """
-        Advance all production queues by one session.
-        Called at the end of each review session.
-        """
-        for building_id, queue in self.state.production_queues.items():
-            for item in queue:
-                if not item.get("ready", False):
-                    item["sessions_waited"] = item.get("sessions_waited", 0) + 1
-                    if item["sessions_waited"] >= item.get("sessions_required", 1):
-                        item["ready"] = True
-
     def get_all_queues_status(self) -> Dict[str, List[Dict]]:
         """Get status of all production queues for UI display."""
         result = {}

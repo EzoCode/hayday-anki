@@ -759,7 +759,8 @@ class FarmManager:
         return True
 
     def add_pasture(self, animal_type: str) -> bool:
-        """Add an animal. Increments existing pasture or creates new one."""
+        """Add an animal. Increments existing pasture or creates new one.
+        Pastures list is the source of truth for animal data."""
         from . import progression
         animal_def = progression.ANIMAL_DEFINITIONS.get(animal_type)
         if not animal_def:
@@ -769,13 +770,13 @@ class FarmManager:
         cost = animal_def.get("cost_coins", 100)
         if self.state.coins < cost:
             return False
-        # Check max owned
+        # Check max owned (use pastures as source of truth)
         max_owned = animal_def.get("max_owned", 5)
-        current_count = self.state.animals.get(animal_type, {}).get("count", 0)
+        existing_pasture = next((p for p in self.state.pastures if p["animal_type"] == animal_type), None)
+        current_count = existing_pasture["count"] if existing_pasture else 0
         if current_count >= max_owned:
             return False
         # Check land: only charge 2 land for NEW pasture, not for adding to existing
-        existing_pasture = next((p for p in self.state.pastures if p["animal_type"] == animal_type), None)
         if not existing_pasture and self.get_land_used() + 2 > self.state.land_total:
             return False
         self.state.coins -= cost
@@ -791,11 +792,20 @@ class FarmManager:
                 "count": 1,
                 "reviews_since_last": 0,
             })
-        # Keep old animals dict in sync
-        if animal_type not in self.state.animals:
-            self.state.animals[animal_type] = {"count": 0, "reviews_since_last": 0}
-        self.state.animals[animal_type]["count"] = current_count + 1
+        # Sync animals dict from pastures
+        self._sync_animals_from_pastures()
         return True
+
+    def _sync_animals_from_pastures(self):
+        """Rebuild animals dict from pastures list (single source of truth)."""
+        self.state.animals = {}
+        for pasture in self.state.pastures:
+            aid = pasture.get("animal_type")
+            if aid:
+                self.state.animals[aid] = {
+                    "count": pasture.get("count", 0),
+                    "reviews_since_last": pasture.get("reviews_since_last", 0),
+                }
 
     def build_building(self, building_id: str) -> bool:
         """Build a building. Costs 2 land + building price."""
