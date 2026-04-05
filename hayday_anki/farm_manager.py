@@ -401,8 +401,8 @@ class FarmManager:
         }
 
         # Base rewards by ease
-        coin_map = {1: 1, 2: 3, 3: 2, 4: 1}
-        xp_map = {1: 2, 2: 5, 3: 3, 4: 2}
+        coin_map = {1: 1, 2: 2, 3: 3, 4: 2}
+        xp_map = {1: 1, 2: 3, 3: 4, 4: 3}
 
         base_coins = coin_map.get(ease, 2)
         base_xp = xp_map.get(ease, 3)
@@ -632,6 +632,21 @@ class FarmManager:
         plot["reviews_done"] = 0
 
         return {"items": harvested, "xp": xp_gain}
+
+    def clear_wilted(self, plot_id: int) -> bool:
+        """Clear a wilted plot so it can be replanted."""
+        if plot_id >= len(self.state.plots):
+            return False
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "wilted":
+            return False
+        plot["state"] = "empty"
+        plot["crop"] = None
+        plot["planted_at"] = None
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 0
+        plot["reviews_done"] = 0
+        return True
 
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""
@@ -1018,6 +1033,18 @@ class FarmManager:
         self.state.session_reviews = 0
         self._pending_notifications = []
         self.check_events()
+
+        # Wilt check: if last session was > 3 days ago, wilt unharvested ready plots
+        if self.state.last_session:
+            try:
+                last = datetime.fromisoformat(self.state.last_session)
+                days_since = (datetime.now() - last).days
+                if days_since >= 3:
+                    for plot in self.state.plots:
+                        if plot["state"] == "ready":
+                            plot["state"] = "wilted"
+            except (ValueError, TypeError):
+                pass
 
     def end_session(self) -> Dict:
         """End session and return summary."""

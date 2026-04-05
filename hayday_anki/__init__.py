@@ -159,10 +159,15 @@ def _process_animals(mgr):
                 animal_data["reviews_since_last"] = 0
 
 
+_achievement_manager = None
+
+
 def _check_achievements(mgr):
+    global _achievement_manager
     from . import achievements as ach_mod
     from datetime import datetime
-    ach_mgr = ach_mod.AchievementManager()
+    if _achievement_manager is None:
+        _achievement_manager = ach_mod.AchievementManager()
     state_dict = mgr.state.to_dict()
     state_dict["num_plots"] = mgr.state.num_plots
     session_data = {
@@ -170,7 +175,7 @@ def _check_achievements(mgr):
         "correct_count": mgr.state.total_correct,
         "total_elapsed": 0,
     }
-    newly_unlocked = ach_mgr.check_all(state_dict, session_data)
+    newly_unlocked = _achievement_manager.check_all(state_dict, session_data)
     for ach in newly_unlocked:
         mgr.state.achievements[ach["key"]] = {
             "unlocked_at": datetime.now().isoformat(),

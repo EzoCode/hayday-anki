@@ -121,7 +121,8 @@ function renderPlots() {
       el.innerHTML += `<div class="plot-crop">${cropImg(plot.crop, 4, 40)}</div><span class="plot-label">Harvest!</span>`;
       el.onclick = () => harvestPlot(plot.id);
     } else if (plot.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(plot.crop, 0, 32)}</div><span class="plot-label">Wilted</span>`;
+      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(plot.crop, 0, 32)}</div><span class="plot-label">Tap to clear</span>`;
+      el.onclick = () => pycmd('farm:clear_wilted:' + plot.id);
     } else {
       const stage = plot.growth_stage||0, needed = plot.reviews_needed||1, done = plot.reviews_done||0;
       const pct = Math.min(100, (done/needed)*100);
@@ -138,7 +139,7 @@ function renderPlots() {
     grid.appendChild(el);
   }
 }
-function getLockedCount(level) { let c=0; for (const e of EXPANSION_LEVELS) { if (level<e.lvl) c+=e.plots; if (c>=6) return 6; } return Math.max(c,3); }
+function getLockedCount(level) { let c=0; for (const e of EXPANSION_LEVELS) { if (level<e.lvl) c+=e.plots; if (c>=6) return 6; } return c; }
 function getNextExpansionLevel(level) { for (const e of EXPANSION_LEVELS) { if (level<e.lvl) return e.lvl; } return null; }
 
 function renderBuildings() {
@@ -241,7 +242,7 @@ function renderInventory() {
   Object.entries(inv).forEach(([id,qty]) => {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
-    el.onclick = () => { if((it.sell_price||0)>0) sellItem(id); };
+    el.onclick = () => { if((it.sell_price||0)>0) { if(el.classList.contains('sell-confirm')){sellItem(id);el.classList.remove('sell-confirm')} else {el.classList.add('sell-confirm');showNotification(`Tap again to sell ${it.name||id} for ${it.sell_price} coins`);setTimeout(()=>el.classList.remove('sell-confirm'),3000)} } };
     let icon = ''; const lbl = S(`hayday_${id}-lbl`);
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
@@ -272,7 +273,7 @@ function renderOrders() {
   orders.forEach((order,i) => {
     const card = document.createElement('div'); card.className = 'order-card';
     const inv = farmData.inventory||{}; let canDo=true, items='';
-    Object.entries(order.items_needed||{}).forEach(([id,qty]) => { const have=inv[id]||0; if(have<qty) canDo=false; const it=(farmData.item_catalog||{})[id]||{}; items+=`<div class="order-item ${have>=qty?'fulfilled':''}">${cropPortrait(id,16)||''} ${it.name||id} ${have}/${qty}</div>`; });
+    Object.entries(order.items_needed||{}).forEach(([id,qty]) => { const have=inv[id]||0; if(have<qty) canDo=false; const it=(farmData.item_catalog||{})[id]||{}; items+=`<div class="order-item ${have>=qty?'has':'need'}">${have>=qty?'\u2705 ':''}${cropPortrait(id,16)||''} ${it.name||id} ${have}/${qty}</div>`; });
     card.innerHTML = `<div class="order-header"><span class="order-type">${order.type==='boat'?'\u26F5':'\u{1F69A}'}</span><span class="order-reward">\u{1FA99} ${order.coin_reward} +${order.xp_reward}XP</span></div><div class="order-items">${items}</div><button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">${canDo?'Deliver!':'Missing items'}</button>`;
     list.appendChild(card);
   });
@@ -293,7 +294,7 @@ function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(f
 function renderAchievements(){pycmd('farm:get_achievements')}
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);card.innerHTML=`<span class="achievement-icon">${a.icon||'\u{1F3C6}'}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:'<p style="font-size:8px;color:#4caf50">Done!</p>'}</div>${a.gems>0?`<span class="achievement-gem-reward">\u{1F48E} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay()};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span>Review cards to grow</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay()};const cropInfo=(farmData.item_catalog||{})[id]||{};const totalReviews=(3+4+5+6);const sellPrice=cropInfo.sell_price||0;const xpReward=cropInfo.xp||3;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span>~${totalReviews} reviews | Sells for ${sellPrice} coins | +${xpReward} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){pycmd(`farm:harvest:${id}`)}
 function sellItem(id){pycmd(`farm:sell:${id}:1`)}
@@ -370,5 +371,6 @@ function showProductionDialog(data){
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 
-function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+function formatNum(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(1)+'k':String(n)}
 document.addEventListener('DOMContentLoaded',()=>{document.getElementById('tab-farm').classList.add('active');drawWheel();pycmd('farm:get_state')});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){hideOverlay();hidePanel()}});

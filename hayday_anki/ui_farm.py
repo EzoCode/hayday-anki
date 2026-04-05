@@ -172,6 +172,13 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "clear_wilted":
+                plot_id = int(parts[2])
+                if self.manager.clear_wilted(plot_id):
+                    self._js("showNotification('Plot cleared!')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "plant":
                 plot_id = int(parts[2])
                 crop_id = parts[3]
