@@ -88,7 +88,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-ready{background:linear-gradient(145deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 18px rgba(255,215,0,.5);border:2px solid var(--gold);animation:readyGlow 2s ease-in-out infinite}
 .plot-ready::after{content:'✨';position:absolute;top:2px;right:4px;font-size:10px;animation:sparkle 1.5s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:14px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
-.plot-wilted{filter:saturate(.3) brightness(.7);opacity:.7}
+.plot-wilted{filter:saturate(.3) brightness(.7);opacity:.7;cursor:pointer;border:2px dashed rgba(139,69,19,.3)}
+.plot-wilted:hover{opacity:.9;border-color:rgba(231,76,60,.5)}
 
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
@@ -130,7 +131,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 
 /* ===== DECORATIONS & MYSTERY BOXES ===== */
 #decorations-layer{position:absolute;inset:0;pointer-events:none;z-index:3}
-.decoration-item{position:absolute;font-size:20px;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3));pointer-events:auto;cursor:grab}
+.decoration-item{position:absolute;font-size:20px;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3));pointer-events:auto;cursor:grab;transition:transform .2s;animation:decoIdle 4s ease-in-out infinite}
+.decoration-item:hover{transform:scale(1.2)}
+@keyframes decoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 #mystery-boxes-layer{position:absolute;inset:0;pointer-events:none;z-index:4}
 .mystery-box{position:absolute;cursor:pointer;pointer-events:auto;animation:boxFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,215,0,.6));transition:transform .15s}
 .mystery-box:hover{transform:scale(1.2);filter:drop-shadow(0 0 14px rgba(255,215,0,.8))}
@@ -172,7 +175,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 4px}
 .panel-header h2{font-size:16px;color:var(--text-d);font-weight:800}
-.panel-subheader{display:flex;gap:14px;padding:0 16px 6px;font-size:11px;color:#888;font-weight:700}
+.panel-subheader{display:flex;gap:14px;padding:0 16px 6px;font-size:11px;color:#888;font-weight:700;flex-wrap:wrap}
 .close-btn{background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;color:#999;padding:3px 7px;border-radius:50%;transition:all .15s}
 .close-btn:hover{background:rgba(0,0,0,.12);transform:scale(1.1)}
 
@@ -342,6 +345,63 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(244,146,42,.45),inset 0 1px 0 rgba(255,255,255,.25)}
 .action-btn:active{transform:translateY(1px)}
 .action-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ===== HARVEST ANIMATION ===== */
+@keyframes harvestPop{0%{transform:scale(1)}20%{transform:scale(1.2)}40%{transform:scale(.8) translateY(-10px)}100%{transform:scale(0) translateY(-40px);opacity:0}}
+.plot-ready:active .plot-crop{animation:harvestPop .5s ease-out forwards}
+
+/* ===== ANIMAL PRODUCTION INDICATOR ===== */
+.animal-tile.producing::after{content:'\u{1F4AB}';position:absolute;top:-2px;right:-2px;font-size:10px;animation:sparkle 1.5s ease-in-out infinite}
+
+/* ===== SMOOTH PAGE TRANSITIONS ===== */
+.panel{will-change:transform,opacity}
+.overlay-card{will-change:transform,opacity}
+
+/* ===== INVENTORY CATEGORY TABS ===== */
+.inv-tabs{display:flex;gap:2px;padding:4px 14px 0;overflow-x:auto}
+.inv-tab{flex:1;padding:5px 3px;background:rgba(0,0,0,.04);border:none;border-radius:8px 8px 0 0;font-size:10px;font-weight:800;cursor:pointer;color:#999;transition:all .15s;white-space:nowrap}
+.inv-tab.active{background:rgba(255,255,255,.5);color:var(--text-d);box-shadow:0 -2px 4px rgba(0,0,0,.05)}
+
+/* ===== SELL ALL BUTTON ===== */
+.sell-all-btn{background:linear-gradient(180deg,var(--red),#c0392b);color:#fff;border:none;padding:2px 6px;border-radius:6px;font-size:8px;font-weight:800;cursor:pointer;margin-top:2px;transition:all .12s;box-shadow:0 1px 3px rgba(231,76,60,.3)}
+.sell-all-btn:hover{transform:scale(1.05);box-shadow:0 2px 6px rgba(231,76,60,.5)}
+
+/* ===== CONFIRM DIALOG ===== */
+.confirm-card{max-width:300px}
+.confirm-card p{font-size:14px;color:var(--text-d);margin:8px 0 16px;line-height:1.4}
+.confirm-buttons{display:flex;gap:10px;justify-content:center}
+.confirm-yes{background:linear-gradient(180deg,var(--xp),#388e3c)!important;flex:1}
+.confirm-no{background:linear-gradient(180deg,#999,#777)!important;flex:1}
+
+/* ===== TUTORIAL ===== */
+.tutorial-card{max-width:340px;text-align:left}
+.tutorial-card h2{text-align:center}
+.tutorial-steps{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.tutorial-step{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.5);padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,.04)}
+.tutorial-icon{font-size:24px;flex-shrink:0}
+.tutorial-step p{font-size:12px;color:var(--text-d);margin:0;line-height:1.3}
+.tutorial-step strong{color:var(--orange)}
+.tutorial-card .action-btn{display:block;margin:10px auto 0;width:80%}
+
+/* ===== CROP STATS IN PLANT DIALOG ===== */
+.crop-stats{font-size:9px;color:#888;display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+
+/* ===== UPGRADE COST ===== */
+.upgrade-cost{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;justify-content:center}
+.upgrade-card{grid-column:span 2}
+
+/* ===== BUILDING COST/DESC ===== */
+.building-cost{font-size:10px;color:var(--orange);font-weight:800;margin-left:4px}
+.building-desc{font-size:9px;color:#888;font-style:italic}
+
+/* ===== STATS GRID IN SETTINGS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.stat-item{background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.25));border-radius:10px;padding:8px;text-align:center;border:1px solid rgba(0,0,0,.04)}
+.stat-val{display:block;font-size:18px;font-weight:900;color:var(--orange)}
+.stat-lbl{font-size:9px;color:#888;font-weight:700}
+
+/* ===== NIGHT SKY STARS (dynamic) ===== */
+.farm-sky.night::before{background:rgba(255,255,255,.9);width:3px;height:3px;border-radius:50%;box-shadow:40px 15px 0 rgba(255,255,255,.7),80px 30px 0 rgba(255,255,255,.5),120px 10px 0 rgba(255,255,255,.6),160px 25px 0 rgba(255,255,255,.4),200px 8px 0 rgba(255,255,255,.8),240px 20px 0 rgba(255,255,255,.6)}
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px}

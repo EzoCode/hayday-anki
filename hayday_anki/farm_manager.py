@@ -509,7 +509,8 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance growth on planted plots."""
+        """Advance growth on planted plots. Crops wilt if left ready too long."""
+        from . import progression
         for plot in self.state.plots:
             if plot["state"] in ("planted", "growing"):
                 plot["reviews_done"] += 1
@@ -518,9 +519,17 @@ class FarmManager:
                     plot["reviews_done"] = 0
                     if plot["growth_stage"] >= 4:
                         plot["state"] = "ready"
+                        plot["ready_since_reviews"] = self.state.total_reviews
                     else:
                         plot["state"] = "growing"
-                        plot["reviews_needed"] = max(2, plot["reviews_needed"] + 1)
+                        crop_def = progression.CROP_DEFINITIONS.get(plot["crop"], {})
+                        base = crop_def.get("growth_reviews", 3)
+                        plot["reviews_needed"] = base + plot["growth_stage"]
+            elif plot["state"] == "ready":
+                # Wilt after 50 reviews without harvesting
+                ready_since = plot.get("ready_since_reviews", self.state.total_reviews)
+                if self.state.total_reviews - ready_since > 50:
+                    plot["state"] = "wilted"
 
     def _get_event_multipliers(self) -> Tuple[float, float]:
         """Get active event multipliers for coins and XP."""
@@ -591,11 +600,15 @@ class FarmManager:
         if crop_id not in self.state.unlocked_crops:
             return False
 
+        from . import progression
+        crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+        growth_reviews = crop_def.get("growth_reviews", 3)
+
         plot["state"] = "planted"
         plot["crop"] = crop_id
         plot["planted_at"] = datetime.now().isoformat()
         plot["growth_stage"] = 0
-        plot["reviews_needed"] = 3  # Reviews to advance first stage
+        plot["reviews_needed"] = growth_reviews
         plot["reviews_done"] = 0
         return True
 
@@ -633,6 +646,21 @@ class FarmManager:
 
         return {"items": harvested, "xp": xp_gain}
 
+    def clear_wilted_plot(self, plot_id: int) -> bool:
+        """Clear a wilted plot so it can be replanted."""
+        if plot_id >= len(self.state.plots):
+            return False
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "wilted":
+            return False
+        plot["state"] = "empty"
+        plot["crop"] = None
+        plot["planted_at"] = None
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 0
+        plot["reviews_done"] = 0
+        return True
+
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""
         item = ITEM_CATALOG.get(item_id)
@@ -647,6 +675,13 @@ class FarmManager:
         coins = item["sell_price"] * actual
         self.state.coins += coins
         return coins
+
+    def sell_all(self, item_id: str) -> int:
+        """Sell all of an item. Returns coins earned."""
+        qty = self.state.inventory.get(item_id, 0)
+        if qty <= 0:
+            return 0
+        return self.sell_item(item_id, qty)
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
         """Buy and place a decoration."""
@@ -1132,6 +1167,48 @@ class FarmManager:
         xp_progress = self.state.xp - xp_for_current
         xp_needed = xp_for_next - xp_for_current
 
+        # Crop info for planting dialog
+        crop_info = {}
+        for crop_id in self.state.unlocked_crops:
+            cdef = progression.CROP_DEFINITIONS.get(crop_id, {})
+            crop_info[crop_id] = {
+                "name": cdef.get("name", crop_id),
+                "emoji": cdef.get("emoji", ""),
+                "growth_reviews": cdef.get("growth_reviews", 3),
+                "total_reviews": cdef.get("growth_reviews", 3) * 4,
+                "harvest_min": cdef.get("harvest_min", 2),
+                "harvest_max": cdef.get("harvest_max", 4),
+                "sell_price": cdef.get("sell_price", 2),
+                "xp_per_harvest": cdef.get("xp_per_harvest", 3),
+            }
+
+        # Building costs for shop
+        building_info = {}
+        for bid in self.state.unlocked_buildings:
+            bdef = progression.BUILDING_DEFINITIONS.get(bid, {})
+            building_info[bid] = {
+                "name": bdef.get("name", bid),
+                "emoji": bdef.get("emoji", ""),
+                "cost_coins": bdef.get("cost_coins", 100),
+                "description": bdef.get("description", ""),
+                "owned": bid in self.state.buildings,
+            }
+
+        # Upgrade costs
+        barn_upgrade_cost = {
+            "bolt": self.state.barn_level + 1,
+            "plank": self.state.barn_level + 1,
+            "duct_tape": self.state.barn_level + 1,
+        }
+        silo_upgrade_cost = {
+            "nail": self.state.silo_level + 1,
+            "screw": self.state.silo_level + 1,
+            "paint": self.state.silo_level + 1,
+        }
+
+        # Time of day for dynamic sky
+        hour = datetime.now().hour
+
         return {
             "level": self.state.level,
             "xp": self.state.xp,
@@ -1170,6 +1247,12 @@ class FarmManager:
             "session_coins": self.state.session_coins_earned,
             "session_xp": self.state.session_xp_earned,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
+            "crop_info": crop_info,
+            "building_info": building_info,
+            "barn_upgrade_cost": barn_upgrade_cost,
+            "silo_upgrade_cost": silo_upgrade_cost,
+            "hour_of_day": hour,
+            "is_first_time": self.state.lifetime_reviews == 0 and self.state.level == 1,
             "active_events": [
                 {"name": e.get("name", ""), "emoji": e.get("emoji", "")}
                 for e in self.state.active_events

@@ -219,6 +219,23 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "sell_all":
+                item_id = parts[2]
+                coins = self.manager.sell_all(item_id)
+                if coins > 0:
+                    self._js(f"showFloatingReward('+{coins} coins', window.innerWidth/2, window.innerHeight/2)")
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/2, 8)")
+                    self._js(f"showNotification('Sold all for {coins} coins!')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "clear_wilted":
+                plot_id = int(parts[2])
+                if self.manager.clear_wilted_plot(plot_id):
+                    self._js("showNotification('Cleared wilted crop.')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "buy_deco":
                 deco_type = parts[2]
                 import random

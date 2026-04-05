@@ -106,6 +106,7 @@
     <span id="barn-status">🏚️ Barn: 0/50</span>
     <span id="silo-status">🏭 Silo: 0/50</span>
   </div>
+  <div id="inv-category-tabs" class="inv-tabs"></div>
   <div id="inventory-grid" class="item-grid"></div>
 </div>
 
@@ -221,5 +222,51 @@
     <div id="session-stats"></div>
     <div id="session-items"></div>
     <button class="action-btn" onclick="hideOverlay()">Continue Farming!</button>
+  </div>
+</div>
+
+<!-- ===== CONFIRM DIALOG ===== -->
+<div id="confirm-overlay" class="overlay hidden">
+  <div class="overlay-card confirm-card">
+    <h2>⚠️ Confirm</h2>
+    <p id="confirm-message"></p>
+    <div class="confirm-buttons">
+      <button class="action-btn confirm-yes" onclick="doConfirm()">Yes</button>
+      <button class="action-btn confirm-no" onclick="cancelConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TUTORIAL OVERLAY ===== -->
+<div id="tutorial-overlay" class="overlay hidden">
+  <div class="overlay-card tutorial-card">
+    <h2>🌾 Welcome to ADFarm!</h2>
+    <div class="tutorial-steps">
+      <div class="tutorial-step">
+        <span class="tutorial-icon">📚</span>
+        <p><strong>Review cards</strong> to earn coins, XP, and items</p>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-icon">🌱</span>
+        <p><strong>Plant crops</strong> on empty plots — they grow as you review</p>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-icon">🏭</span>
+        <p><strong>Build factories</strong> to craft valuable goods from your harvest</p>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-icon">🐄</span>
+        <p><strong>Buy animals</strong> that produce milk, eggs, and more</p>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-icon">🚚</span>
+        <p><strong>Fill orders</strong> for big coin and XP rewards</p>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-icon">🔥</span>
+        <p><strong>Keep your streak</strong> — daily reviews give bonus multipliers!</p>
+      </div>
+    </div>
+    <button class="action-btn" onclick="closeTutorial()">Start Farming!</button>
   </div>
 </div>

@@ -190,6 +190,7 @@ function renderPlots() {
       el.onclick = () => harvestPlot(plot.id);
     } else if (plot.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(plot.crop, 0, 32)}</div><span class="plot-label">Wilted</span>`;
+      el.onclick = () => pycmd(`farm:clear_wilted:${plot.id}`);
     } else {
       const stage = plot.growth_stage||0, needed = plot.reviews_needed||1, done = plot.reviews_done||0;
       const pct = Math.min(100, (done/needed)*100);
@@ -297,37 +298,47 @@ function showTab(tab) {
 }
 function hidePanel() { currentPanel=null; document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden')); document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active')); document.getElementById('tab-farm')?.classList.add('active'); }
 
+let currentInvCategory = 'all';
 function renderInventory() {
   const grid = document.getElementById('inventory-grid'); grid.innerHTML = '';
   const inv = farmData.inventory||{}, cat = farmData.item_catalog||{};
-  document.getElementById('barn-status').textContent = `Barn: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
-  document.getElementById('silo-status').textContent = `Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
-  Object.entries(inv).forEach(([id,qty]) => {
-    if (qty<=0) return; const it = cat[id]||{};
+  document.getElementById('barn-status').textContent = `\u{1F3DA}\u{FE0F} Barn: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
+  document.getElementById('silo-status').textContent = `\u{1F3ED} Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
+
+  // Render category tabs
+  const tabsEl = document.getElementById('inv-category-tabs');
+  if (tabsEl) {
+    const cats = [['all','All'],['crop','Crops'],['animal_product','Animal'],['processed','Goods'],['material','Materials']];
+    tabsEl.innerHTML = cats.map(([k,l]) => `<button class="inv-tab ${currentInvCategory===k?'active':''}" onclick="currentInvCategory='${k}';renderInventory()">${l}</button>`).join('');
+  }
+
+  const entries = Object.entries(inv).filter(([id,qty]) => {
+    if (qty <= 0) return false;
+    if (currentInvCategory === 'all') return true;
+    const c = (cat[id]||{}).category||'';
+    return c === currentInvCategory;
+  });
+
+  entries.forEach(([id,qty]) => {
+    const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
-    el.onclick = () => { if((it.sell_price||0)>0) sellItem(id); };
+    const canSell = (it.sell_price||0) > 0;
+    el.onclick = () => { if(canSell) showConfirm(`Sell 1 ${it.name||id} for ${it.sell_price} coins?`, () => sellItem(id)); };
     let icon = ''; const lbl = S(`hayday_${id}-lbl`);
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
-    el.innerHTML = `${icon}<span class="item-name">${it.name||id}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}`;
+    let sellHTML = '';
+    if (canSell) {
+      sellHTML = `<span class="item-price">\u{1FA99} ${it.sell_price}</span>`;
+      if (qty > 1) sellHTML += `<button class="sell-all-btn" onclick="event.stopPropagation();showConfirm('Sell all ${qty} ${it.name||id} for ${it.sell_price*qty} coins?',()=>pycmd('farm:sell_all:${id}'))">Sell All</button>`;
+    }
+    el.innerHTML = `${icon}<span class="item-name">${it.name||id}</span><span class="item-qty">x${qty}</span>${sellHTML}`;
     grid.appendChild(el);
   });
-  if (!Object.keys(inv).length) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">Review cards to earn items!</div>';
+  if (!entries.length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${currentInvCategory==='all'?'Review cards to earn items!':'No items in this category.'}</div>`;
 }
 
-function renderBuildingsPanel() {
-  const list = document.getElementById('buildings-list'); list.innerHTML = '';
-  (farmData.unlocked_buildings||[]).forEach(bid => {
-    const name = bid.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    const owned = bid in (farmData.buildings||{}), queue = (farmData.production_queues||{})[bid]||[];
-    const card = document.createElement('div'); card.className = 'building-card';
-    let qHTML = '';
-    if (owned) { qHTML = '<div class="building-queue">'; queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; }); for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>'; qHTML+='</div>'; }
-    card.innerHTML = `<div class="building-card-icon">${buildingImg(bid,52)}</div><div class="building-card-info"><h3>${name}</h3><p>${owned?'Tap to produce':'Not built'}</p>${qHTML}</div>`;
-    card.onclick = () => owned ? pycmd(`farm:building_detail:${bid}`) : pycmd(`farm:buy_building:${bid}`);
-    list.appendChild(card);
-  });
-}
+// renderBuildingsPanel moved to end of file with enhancements
 
 function renderOrders() {
   const list = document.getElementById('orders-list'); list.innerHTML = '';
@@ -349,23 +360,16 @@ function renderShop() {
   else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
 }
 function showShopCategory(cat){currentShopCategory=cat;renderShop()}
-function renderShopDeco(grid){[{id:'fence',n:'Fence',c:10},{id:'flower_pot',n:'Flower Pot',c:25},{id:'bench',n:'Bench',c:50},{id:'scarecrow',n:'Scarecrow',c:75},{id:'hay_bale',n:'Hay Bale',c:15},{id:'tree_oak',n:'Oak',c:100},{id:'pond',n:'Pond',c:150},{id:'fountain',n:'Fountain',c:200},{id:'windmill_deco',n:'Windmill',c:500}].forEach(d=>{const ok=(farmData.coins||0)>=d.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${d.id}`);SoundMgr.play('click')}};el.innerHTML=`<span class="item-name">${d.n}</span><span class="item-price">\u{1FA99} ${d.c}</span>`;grid.appendChild(el)})}
-function renderShopAnimals(grid){[{id:'cow',n:'Cow',c:100,l:10},{id:'chicken',n:'Chicken',c:50,l:20},{id:'pig',n:'Pig',c:200,l:30},{id:'sheep',n:'Sheep',c:500,l:60}].forEach(a=>{const unlocked=(farmData.unlocked_animals||[]).includes(a.id);const ok=unlocked&&(farmData.coins||0)>=a.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){pycmd(`farm:buy_animal:${a.id}`);SoundMgr.play('click')}};el.innerHTML=`${animalLbl(a.id,36)||animalImg(a.id,36)}<span class="item-name">${a.n}</span><span class="item-price">${unlocked?`\u{1FA99} ${a.c}`:`Lvl ${a.l}`}</span>`;grid.appendChild(el)})}
-function renderShopUpgrades(grid){const d=farmData;[{id:'barn',n:'Barn',desc:`Lv${d.barn_level||1}\u2192${(d.barn_level||1)+1}`,info:`${d.barn_capacity||50}\u2192${(d.barn_capacity||50)+25}`},{id:'silo',n:'Silo',desc:`Lv${d.silo_level||1}\u2192${(d.silo_level||1)+1}`,info:`${d.silo_capacity||50}\u2192${(d.silo_capacity||50)+25}`}].forEach(u=>{const el=document.createElement('div');el.className='item-cell';el.style.minHeight='80px';el.onclick=()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')};el.innerHTML=`${buildingImg(u.id,44)}<span class="item-name">${u.n}</span><span class="item-price">${u.desc}</span><span class="item-price" style="font-size:8px">${u.info}</span>`;grid.appendChild(el)})}
-function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(farmData.inventory||{}).land_deed||0,permits=(farmData.inventory||{}).expansion_permit||0;const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.style.gridColumn='1/-1';const ok=(farmData.coins||0)>=cost&&deeds>=1&&permits>=1;el.style.opacity=ok?'1':'.5';el.onclick=()=>{if(ok){pycmd('farm:expand:2');SoundMgr.play('click')}else showNotification(`Need ${cost} coins + Land Deed + Expansion Permit`)};el.innerHTML=`${lockImg(32)}<span class="item-name">Expand Farm (+2 plots)</span><span class="item-price">\u{1FA99} ${cost} + \u{1F4DC}x1 + \u{1F3D7}\u{FE0F}x1</span><span class="item-price" style="font-size:8px">Current: ${np} plots | Deeds: ${deeds} | Permits: ${permits}</span>`;grid.appendChild(el)}
+function renderShopDeco(grid){[{id:'fence',n:'Fence',c:10,e:'\u{1FAB5}'},{id:'flower_pot',n:'Flower Pot',c:25,e:'\u{1FAB4}'},{id:'bench',n:'Bench',c:50,e:'\u{1FA91}'},{id:'scarecrow',n:'Scarecrow',c:75,e:'\u{1F383}'},{id:'hay_bale',n:'Hay Bale',c:15,e:'\u{1F33E}'},{id:'tree_oak',n:'Oak',c:100,e:'\u{1F333}'},{id:'pond',n:'Pond',c:150,e:'\u{1F4A7}'},{id:'fountain',n:'Fountain',c:200,e:'\u26F2'},{id:'windmill_deco',n:'Windmill',c:500,e:'\u{1F3E1}'}].forEach(d=>{const ok=(farmData.coins||0)>=d.c;const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';el.onclick=()=>{if(ok){showConfirm(`Buy ${d.n} for ${d.c} coins?`,()=>{pycmd(`farm:buy_deco:${d.id}`);SoundMgr.play('click')})}};el.innerHTML=`<span class="item-emoji">${d.e}</span><span class="item-name">${d.n}</span><span class="item-price">\u{1FA99} ${d.c}</span>`;grid.appendChild(el)})}
+// renderShopAnimals and renderShopUpgrades defined at end of file
+function renderShopLand(grid){const np=farmData.num_plots||6,cost=50*np,deeds=(farmData.inventory||{}).land_deed||0,permits=(farmData.inventory||{}).expansion_permit||0;const el=document.createElement('div');el.className='item-cell';el.style.minHeight='90px';el.style.gridColumn='1/-1';const ok=(farmData.coins||0)>=cost&&deeds>=1&&permits>=1;el.style.opacity=ok?'1':'.5';el.onclick=()=>{if(ok){showConfirm(`Expand farm for ${cost} coins + materials?`,()=>{pycmd('farm:expand:2');SoundMgr.play('click')})}else showNotification(`Need ${cost} coins + Land Deed + Expansion Permit`)};el.innerHTML=`${lockImg(32)}<span class="item-name">Expand Farm (+2 plots)</span><span class="item-price">\u{1FA99} ${cost} + \u{1F4DC}x1 + \u{1F3D7}\u{FE0F}x1</span><span class="item-price" style="font-size:8px">Current: ${np} plots | Deeds: ${deeds} | Permits: ${permits}</span>`;grid.appendChild(el)}
 
-function renderSettings() {
-  const stats = document.getElementById('farm-stats');
-  if (stats && farmData) {
-    const d = farmData;
-    stats.innerHTML = `Level ${d.level||1} \u2022 ${formatNum(d.total_reviews||0)} reviews \u2022 ${formatNum(d.lifetime_reviews||0)} lifetime \u2022 Best streak: ${d.best_streak||0} days`;
-  }
-}
+// renderSettings moved to end of file with enhancements
 
 function renderAchievements(){pycmd('farm:get_achievements')}
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);card.innerHTML=`<span class="achievement-icon">${a.icon||'\u{1F3C6}'}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:'<p style="font-size:8px;color:#4caf50">Done!</p>'}</div>${a.gems>0?`<span class="achievement-gem-reward">\u{1F48E} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span>Review cards to grow</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';const ci=farmData.crop_info||{};(farmData.unlocked_crops||[]).forEach(id=>{const info=ci[id]||{};const name=info.name||id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());const totalRev=info.total_reviews||12;const sellPrice=info.sell_price||2;const harvestMin=info.harvest_min||2;const harvestMax=info.harvest_max||4;const xpH=info.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-stats">\u{1F4DA} ${totalRev} reviews \u00B7 \u{1FA99} ${sellPrice}/ea \u00B7 \u{1F4E6} ${harvestMin}-${harvestMax} \u00B7 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){SoundMgr.play('click');pycmd(`farm:harvest:${id}`)}
 function sellItem(id){SoundMgr.play('click');pycmd(`farm:sell:${id}:1`)}
@@ -453,4 +457,178 @@ function showProductionDialog(data){
 }
 
 function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+
+// --- Confirmation Dialog ---
+let _confirmCb = null;
+function showConfirm(message, onConfirm) {
+  _confirmCb = onConfirm;
+  document.getElementById('confirm-message').textContent = message;
+  document.getElementById('confirm-overlay').classList.remove('hidden');
+  SoundMgr.play('click');
+}
+function doConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  if (_confirmCb) { _confirmCb(); _confirmCb = null; }
+  SoundMgr.play('click');
+}
+function cancelConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  _confirmCb = null;
+}
+
+// --- Dynamic Sky ---
+function updateSky() {
+  const hour = farmData.hour_of_day;
+  if (hour === undefined) return;
+  const sky = document.querySelector('.farm-sky');
+  const world = document.getElementById('farm-world');
+  if (!sky) return;
+  let skyTop, skyBot, ambientOverlay;
+  if (hour >= 6 && hour < 8) { // Dawn
+    skyTop = '#ffb347'; skyBot = '#ffcc80'; ambientOverlay = 'rgba(255,179,71,.08)';
+  } else if (hour >= 8 && hour < 17) { // Day
+    skyTop = '#87ceeb'; skyBot = '#b0d4e8'; ambientOverlay = 'transparent';
+  } else if (hour >= 17 && hour < 20) { // Sunset
+    skyTop = '#ff7043'; skyBot = '#ffab91'; ambientOverlay = 'rgba(255,112,67,.06)';
+  } else { // Night
+    skyTop = '#1a237e'; skyBot = '#283593'; ambientOverlay = 'rgba(26,35,126,.15)';
+  }
+  sky.style.background = `linear-gradient(180deg, ${skyTop} 0%, ${skyBot} 60%, rgba(176,212,232,0) 100%)`;
+  const atm = document.querySelector('.farm-atmosphere');
+  if (atm) atm.style.background = `radial-gradient(ellipse at center, ${ambientOverlay} 50%, rgba(0,0,0,.25) 100%)`;
+}
+
+// --- Decorations Rendering ---
+function renderDecorations() {
+  const layer = document.getElementById('decorations-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  (farmData.decorations || []).forEach(deco => {
+    const el = document.createElement('div');
+    el.className = 'decoration-item';
+    const cat = (farmData.item_catalog||{})[deco.type]||{};
+    el.textContent = cat.emoji || '\u{1F333}';
+    el.style.left = `${(deco.x||1)*10}%`;
+    el.style.top = `${(deco.y||1)*10}%`;
+    el.title = cat.name || deco.type;
+    layer.appendChild(el);
+  });
+}
+
+// --- Tutorial Overlay ---
+function checkTutorial() {
+  if (farmData.is_first_time) {
+    document.getElementById('tutorial-overlay').classList.remove('hidden');
+  }
+}
+function closeTutorial() {
+  document.getElementById('tutorial-overlay').classList.add('hidden');
+  SoundMgr.play('click');
+}
+
+// --- Enhanced Settings ---
+function renderSettings() {
+  const stats = document.getElementById('farm-stats');
+  if (stats && farmData) {
+    const d = farmData;
+    const plotsPlanted = (d.plots||[]).filter(p=>p.state!=='empty').length;
+    const plotsTotal = (d.plots||[]).length;
+    const buildingsOwned = Object.keys(d.buildings||{}).length;
+    const animalsOwned = Object.values(d.animals||{}).reduce((s,a)=>s+(a.count||0),0);
+    const decoCount = (d.decorations||[]).length;
+    const achCount = Object.keys(d.achievements||{}).length;
+    stats.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-item"><span class="stat-val">${d.level||1}</span><span class="stat-lbl">Level</span></div>
+        <div class="stat-item"><span class="stat-val">${formatNum(d.lifetime_reviews||0)}</span><span class="stat-lbl">Total Reviews</span></div>
+        <div class="stat-item"><span class="stat-val">${d.best_streak||0}</span><span class="stat-lbl">Best Streak</span></div>
+        <div class="stat-item"><span class="stat-val">${formatNum(d.coins||0)}</span><span class="stat-lbl">Coins</span></div>
+        <div class="stat-item"><span class="stat-val">${plotsPlanted}/${plotsTotal}</span><span class="stat-lbl">Plots Used</span></div>
+        <div class="stat-item"><span class="stat-val">${buildingsOwned}</span><span class="stat-lbl">Buildings</span></div>
+        <div class="stat-item"><span class="stat-val">${animalsOwned}</span><span class="stat-lbl">Animals</span></div>
+        <div class="stat-item"><span class="stat-val">${decoCount}</span><span class="stat-lbl">Decorations</span></div>
+        <div class="stat-item"><span class="stat-val">${achCount}</span><span class="stat-lbl">Achievements</span></div>
+        <div class="stat-item"><span class="stat-val">${d.orders_completed||0}</span><span class="stat-lbl">Orders Done</span></div>
+      </div>`;
+  }
+}
+
+// --- Enhanced Shop ---
+function renderShopUpgrades(grid) {
+  const d = farmData;
+  const barnCost = d.barn_upgrade_cost||{};
+  const siloCost = d.silo_upgrade_cost||{};
+  const inv = d.inventory||{};
+
+  function costHTML(cost) {
+    return Object.entries(cost).map(([id,qty]) => {
+      const have = inv[id]||0;
+      const it = (d.item_catalog||{})[id]||{};
+      return `<span class="recipe-ingredient ${have>=qty?'has':'need'}">${it.emoji||''} ${it.name||id} ${have}/${qty}</span>`;
+    }).join('');
+  }
+
+  [{id:'barn',n:'Barn',desc:`Lv${d.barn_level||1}\u2192${(d.barn_level||1)+1}`,info:`${d.barn_capacity||50}\u2192${(d.barn_capacity||50)+25} slots`,cost:barnCost},
+   {id:'silo',n:'Silo',desc:`Lv${d.silo_level||1}\u2192${(d.silo_level||1)+1}`,info:`${d.silo_capacity||50}\u2192${(d.silo_capacity||50)+25} slots`,cost:siloCost}
+  ].forEach(u => {
+    const canAfford = Object.entries(u.cost).every(([id,qty]) => (inv[id]||0)>=qty);
+    const el = document.createElement('div');
+    el.className = 'item-cell upgrade-card';
+    el.style.minHeight = '90px';
+    el.style.opacity = canAfford ? '1' : '.5';
+    el.onclick = () => { if(canAfford) showConfirm(`Upgrade ${u.n} to level ${(d[u.id+'_level']||1)+1}?`, ()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')}); else SoundMgr.play('error'); };
+    el.innerHTML = `${buildingImg(u.id,44)}<span class="item-name">${u.n} ${u.desc}</span><span class="item-price">${u.info}</span><div class="upgrade-cost">${costHTML(u.cost)}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+// --- Enhanced Shop Buildings ---
+function renderBuildingsPanel() {
+  const list = document.getElementById('buildings-list'); list.innerHTML = '';
+  const bi = farmData.building_info||{};
+  (farmData.unlocked_buildings||[]).forEach(bid => {
+    const info = bi[bid]||{};
+    const name = info.name || bid.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    const owned = info.owned || bid in (farmData.buildings||{}), queue = (farmData.production_queues||{})[bid]||[];
+    const card = document.createElement('div'); card.className = 'building-card';
+    let qHTML = '';
+    if (owned) { qHTML = '<div class="building-queue">'; queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; }); for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>'; qHTML+='</div>'; }
+    const costStr = !owned ? `<span class="building-cost">\u{1FA99} ${info.cost_coins||100}</span>` : '';
+    const descStr = info.description ? `<p class="building-desc">${info.description}</p>` : '';
+    card.innerHTML = `<div class="building-card-icon">${buildingImg(bid,52)}</div><div class="building-card-info"><h3>${name} ${costStr}</h3>${owned?'<p>Tap to produce</p>':descStr}${qHTML}</div>`;
+    if (owned) {
+      card.onclick = () => pycmd(`farm:building_detail:${bid}`);
+    } else {
+      const cost = info.cost_coins||100;
+      card.onclick = () => showConfirm(`Build ${name} for ${cost} coins?`, () => pycmd(`farm:buy_building:${bid}`));
+      if ((farmData.coins||0) < cost) card.style.opacity = '.5';
+    }
+    list.appendChild(card);
+  });
+}
+
+// --- Enhanced Animals Shop ---
+function renderShopAnimals(grid){
+  const animalDefs = [{id:'cow',n:'Cow',c:100,l:10,prod:'Milk',every:10},{id:'chicken',n:'Chicken',c:50,l:20,prod:'Egg',every:8},{id:'pig',n:'Pig',c:200,l:30,prod:'Bacon',every:15},{id:'sheep',n:'Sheep',c:500,l:60,prod:'Wool',every:20}];
+  animalDefs.forEach(a=>{
+    const unlocked=(farmData.unlocked_animals||[]).includes(a.id);
+    const owned=(farmData.animals||{})[a.id]||{};
+    const count=owned.count||0;
+    const ok=unlocked&&(farmData.coins||0)>=a.c;
+    const el=document.createElement('div');el.className='item-cell';el.style.opacity=ok?'1':'.45';
+    el.onclick=()=>{if(ok){showConfirm(`Buy ${a.n} for ${a.c} coins? (You have ${count})`,()=>{pycmd(`farm:buy_animal:${a.id}`);SoundMgr.play('click')});}};
+    el.innerHTML=`${animalLbl(a.id,36)||animalImg(a.id,36)}<span class="item-name">${a.n} ${count>0?`(x${count})`:''}</span><span class="item-price">${unlocked?`\u{1FA99} ${a.c}`:`\u{1F512} Lvl ${a.l}`}</span><span style="font-size:8px;color:#888">Produces ${a.prod} / ${a.every} reviews</span>`;
+    grid.appendChild(el);
+  });
+}
+
+// --- Update farm with decorations + sky ---
+const _origUpdateFarm = updateFarm;
+updateFarm = function(data) {
+  _origUpdateFarm(data);
+  updateSky();
+  renderDecorations();
+  if (data.is_first_time) checkTutorial();
+};
+
 document.addEventListener('DOMContentLoaded',()=>{document.getElementById('tab-farm').classList.add('active');drawWheel();pycmd('farm:get_state');SoundMgr.playMusic()});
