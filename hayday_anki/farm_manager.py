@@ -167,7 +167,7 @@ class FarmState:
 
         # Unlocked content
         self.unlocked_crops: List[str] = ["wheat", "corn"]
-        self.unlocked_buildings: List[str] = ["bakery"]
+        self.unlocked_buildings: List[str] = []
         self.unlocked_animals: List[str] = []
 
         # Streaks
@@ -478,9 +478,8 @@ class FarmManager:
             "notifications": [],
         }
 
-        # Base rewards by ease
-        # Good (3) = standard reward, Hard (2) = slightly less, Easy (4) = mastery bonus
-        # Again (1) = minimal (encourages correct answers, not gaming ease)
+        # Base rewards by ease — reward correct SRS behavior
+        # Again(1)=minimal, Hard(2)=less, Good(3)=standard, Easy(4)=mastery bonus
         coin_map = {1: 1, 2: 2, 3: 3, 4: 4}
         xp_map = {1: 1, 2: 3, 3: 5, 4: 6}
 
@@ -592,21 +591,29 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance growth on planted plots. Ready crops wilt after too long."""
+        """Advance ONE random growing plot per review. Ready crops wilt after too long."""
+        from . import progression
+
+        # Pick one random active plot to advance
+        active = [p for p in self.state.plots if p["state"] in ("planted", "growing")]
+        if active:
+            plot = random.choice(active)
+            plot["reviews_done"] += 1
+            if plot["reviews_done"] >= plot["reviews_needed"]:
+                plot["growth_stage"] += 1
+                plot["reviews_done"] = 0
+                if plot["growth_stage"] >= 4:
+                    plot["state"] = "ready"
+                    plot["_ready_since"] = self.state.total_reviews
+                else:
+                    plot["state"] = "growing"
+                    # Keep reviews_needed consistent from crop definition
+                    crop_def = progression.CROP_DEFINITIONS.get(plot.get("crop", ""), {})
+                    plot["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3) // 4)
+
+        # Wilt check on all ready plots
         for plot in self.state.plots:
-            if plot["state"] in ("planted", "growing"):
-                plot["reviews_done"] += 1
-                if plot["reviews_done"] >= plot["reviews_needed"]:
-                    plot["growth_stage"] += 1
-                    plot["reviews_done"] = 0
-                    if plot["growth_stage"] >= 4:
-                        plot["state"] = "ready"
-                        plot["_ready_since"] = self.state.total_reviews
-                    else:
-                        plot["state"] = "growing"
-                        plot["reviews_needed"] = max(2, plot["reviews_needed"] + 1)
-            elif plot["state"] == "ready":
-                # Wilt if left unharvested for 50+ reviews
+            if plot["state"] == "ready":
                 ready_since = plot.get("_ready_since", 0)
                 if ready_since > 0 and self.state.total_reviews - ready_since > 50:
                     plot["state"] = "wilted"
@@ -697,11 +704,15 @@ class FarmManager:
         if crop_id not in self.state.unlocked_crops:
             return False
 
+        from . import progression
+        crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+        reviews_per_stage = max(1, crop_def.get("growth_reviews", 3) // 4)
+
         plot["state"] = "planted"
         plot["crop"] = crop_id
         plot["planted_at"] = datetime.now().isoformat()
         plot["growth_stage"] = 0
-        plot["reviews_needed"] = 3  # Reviews to advance first stage
+        plot["reviews_needed"] = reviews_per_stage
         plot["reviews_done"] = 0
         return True
 
@@ -714,11 +725,12 @@ class FarmManager:
             return None
 
         crop_id = plot["crop"]
-        item = ITEM_CATALOG.get(crop_id, {})
+        from . import progression
+        crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
 
-        # Harvest quantity based on crop
-        qty = random.randint(2, 4)
-        xp_gain = item.get("xp", 1) * qty
+        # Harvest quantity from crop definitions
+        qty = random.randint(crop_def.get("harvest_min", 2), crop_def.get("harvest_max", 4))
+        xp_gain = crop_def.get("xp_per_harvest", 3)
 
         harvested = {}
         if self.state.add_item(crop_id, qty):

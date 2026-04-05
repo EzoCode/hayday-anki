@@ -86,12 +86,17 @@ function img(key, w, h, cls) {
   return `<img src="${src}" width="${w||48}" height="${h||48}" class="${cls||''}" draggable="false">`;
 }
 
-function cropImg(id, stage, w) { return img(`crops_${id}_${stage}`, w||44, w||44, 'plot-crop'); }
-function cropPortrait(id, w) { return img(`crops_${id}_portrait`, w||28, w||28); }
+const CROP_SPRITE_MAP = {
+  wheat:'wheat', corn:'corn', carrot:'turnip', tomato:'tomato',
+  potato:'potato', sugarcane:'rice', soybean:'cassava',
+  strawberry:'strawberry', apple:'orange', pumpkin:'melon',
+};
+function cropImg(id, stage, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_${stage}`, w||44, w||44, 'plot-crop'); }
+function cropPortrait(id, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_portrait`, w||28, w||28); }
 
 const HD_BUILDINGS = {
   bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_mill-dark', dairy:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'hayday_shop', dairy:'hayday_silo',
   chicken_coop:'hayday_chicken_coop', bbq:'hayday_barn', pastry_shop:'hayday_shop',
   pizzeria:'hayday_shop', jam_maker:'hayday_barn', juice_press:'hayday_silo',
   pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',

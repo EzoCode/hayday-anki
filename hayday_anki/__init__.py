@@ -125,6 +125,12 @@ def on_reviewer_will_end():
 
     try:
         mgr = _get_manager()
+
+        # Advance production queues at session end
+        from . import production
+        prod_mgr = production.ProductionManager(mgr.state)
+        prod_mgr.advance_all_queues()
+
         summary = mgr.end_session()
 
         if summary.get("reviews", 0) > 0:
