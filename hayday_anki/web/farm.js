@@ -830,117 +830,113 @@ function renderShopDeco(grid){
     grid.appendChild(el);
   });
 }
+const ANIMAL_INFO_DB = {
+  cow: {lvl:10, desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.', produces:'🥛 Lait → Beurre, Fromage, Crème'},
+  chicken: {lvl:20, desc:'Pond des œufs tous les 8 reviews. Les œufs servent aux cookies et gâteaux.', produces:'🥚 Œuf → Cookie, Gâteau'},
+  pig: {lvl:30, desc:'Produit du bacon tous les 15 reviews. Le bacon fait des burgers (le plus cher !).', produces:'🥓 Bacon → Burger (35🪙)'},
+  sheep: {lvl:60, desc:'Tond de la laine tous les 20 reviews. La laine se vend très cher.', produces:'🧶 Laine (10🪙)'},
+};
+
+function showAnimalShopInfo(aid) {
+  const def = (farmData.animal_defs||{})[aid]||{};
+  const info = ANIMAL_INFO_DB[aid]||{};
+  const level = farmData.level||1;
+  const count = (farmData.animals||{})[aid]?.count||0;
+  const maxN = def.max_owned||def.max||5;
+  const cost = def.cost_coins||def.cost||100;
+  const unlocked = (farmData.unlocked_animals||[]).includes(aid);
+  const reqs = [
+    {label: `⭐ Niveau ${info.lvl}`, value: level >= info.lvl ? `✓ (${level})` : `✗ (${level})`, met: level >= info.lvl},
+    {label: `🪙 ${cost} pièces`, value: (farmData.coins||0) >= cost ? '✓' : `✗ (${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
+    {label: '🗺️ 2 terrain', value: ((farmData.land_total||20)-(farmData.land_used||0)) >= 2 ? '✓' : '✗', met: ((farmData.land_total||20)-(farmData.land_used||0)) >= 2},
+    {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
+  ];
+  showInfo({
+    icon: def.emoji || '🐄',
+    title: def.name || aid,
+    desc: info.desc || '',
+    requirements: reqs,
+    produces: [info.produces || ''],
+    action_label: unlocked && count < maxN ? `Acheter (🪙${cost})` : null,
+    action_cmd: unlocked && count < maxN ? `pycmd('farm:add_pasture:${aid}');hideOverlay()` : null,
+  });
+}
+
 function renderShopAnimals(grid){
   const adefs=farmData.animal_defs||{};
   const level=farmData.level||1;
   const coins=farmData.coins||0;
-  const ALL=[
-    {id:'cow',lvl:10,desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.'},
-    {id:'chicken',lvl:20,desc:'Pond des œufs tous les 8 reviews. Les œufs servent aux cookies et gâteaux.'},
-    {id:'pig',lvl:30,desc:'Produit du bacon tous les 15 reviews. Le bacon fait des burgers (le plus cher !).'},
-    {id:'sheep',lvl:60,desc:'Tond de la laine tous les 20 reviews. La laine se vend très cher.'},
-  ];
-  ALL.forEach(a=>{
-    const def=adefs[a.id]||{};
-    const name=def.name||animalName(a.id);
+
+  ['cow','chicken','pig','sheep'].forEach(aid=>{
+    const def=adefs[aid]||{};
+    const info=ANIMAL_INFO_DB[aid]||{};
+    const name=def.name||animalName(aid);
     const cost=def.cost_coins||def.cost||100;
-    const unlocked=(farmData.unlocked_animals||[]).includes(a.id);
-    const owned=(farmData.animals||{})[a.id];
-    const count=owned?owned.count||0:0;
-    const maxN=def.max_owned||def.max||5;
-    const product=def.product||'';
-    const productEmoji=def.product_emoji||'';
-    const canBuy=unlocked&&coins>=cost&&count<maxN;
-    const landFree=(farmData.land_total||20)-(farmData.land_used||0);
+    const unlocked=(farmData.unlocked_animals||[]).includes(aid);
+    const count=(farmData.animals||{})[aid]?.count||0;
+    const canBuy=unlocked&&coins>=cost;
 
     const el=document.createElement('div');
     el.className='item-cell';
-    el.style.minHeight='100px';
-    el.style.textAlign='left';
-    el.style.padding='8px';
-    el.style.opacity=canBuy?'1':unlocked?'.7':'.45';
-
-    if(canBuy&&landFree>=2){
-      el.onclick=()=>{pycmd(`farm:add_pasture:${a.id}`);SoundMgr.play('click')};
-    } else {
-      el.onclick=()=>{
-        if(!unlocked) showNotification(`🔒 ${name} se débloque au niveau ${a.lvl} (tu es ${level})`);
-        else if(landFree<2) showNotification('Pas assez de terrain ! Achète-en dans l\'onglet Terrain.');
-        else if(count>=maxN) showNotification(`Maximum de ${name} atteint (${maxN}) !`);
-        else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`);
-      };
-    }
-
-    const statusTag=!unlocked
-      ?`<span style="color:#e74c3c;font-weight:700">🔒 Niveau ${a.lvl} requis (tu es ${level})</span>`
-      :count>=maxN
-        ?`<span style="color:#888">✅ Max atteint (${count}/${maxN})</span>`
-        :`<span style="color:#4caf50">✅ Débloqué — ${count}/${maxN}</span>`;
+    el.style.opacity=canBuy?'1':unlocked?'.7':'.4';
+    el.onclick=()=>{if(canBuy){pycmd(`farm:add_pasture:${aid}`);SoundMgr.play('click')}else showAnimalShopInfo(aid)};
 
     el.innerHTML=`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        ${animalLbl(a.id,40)||animalImg(a.id,40)}
-        <div>
-          <div style="font-weight:800;font-size:13px">${name}</div>
-          <div style="font-size:10px;color:#888">🪙 ${cost} pièces • 2 terrain</div>
-        </div>
-      </div>
-      <div style="font-size:10px;color:#666;line-height:1.4;margin-bottom:4px">${a.desc}</div>
-      <div style="font-size:10px">${statusTag}</div>
-      <div style="font-size:9px;color:#888;margin-top:2px">Produit : ${productEmoji} ${product}</div>
+      ${animalLbl(aid,36)||animalImg(aid,36)}
+      <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
+      <span class="item-price">${unlocked?`🪙 ${cost}`:`🔒 Niv.${info.lvl}`}</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
     `;
     grid.appendChild(el);
   });
 }
+function showUpgradeInfo(uid) {
+  const d = farmData, inv = d.inventory||{};
+  const defs = {
+    barn: {name:'Grange',emoji:'🏚️',desc:'Stocke les matériaux (boulons, planches, etc). Plus de capacité = plus de matériaux gardés.',
+      level:d.barn_level||1, cap:d.barn_capacity||50, newCap:(d.barn_capacity||50)+25,
+      mats:[{id:'bolt',e:'🔩',n:(d.barn_level||1)+1},{id:'plank',e:'🪵',n:(d.barn_level||1)+1},{id:'duct_tape',e:'🩹',n:(d.barn_level||1)+1}]},
+    silo: {name:'Silo',emoji:'🏭',desc:'Stocke les récoltes et produits transformés. Plus de capacité = plus de production.',
+      level:d.silo_level||1, cap:d.silo_capacity||50, newCap:(d.silo_capacity||50)+25,
+      mats:[{id:'nail',e:'📌',n:(d.silo_level||1)+1},{id:'screw',e:'🪛',n:(d.silo_level||1)+1},{id:'paint',e:'🎨',n:(d.silo_level||1)+1}]},
+  };
+  const u = defs[uid]; if (!u) return;
+  const reqs = u.mats.map(m => ({
+    label: `${m.e} ${m.id.replace(/_/g,' ')} x${m.n}`,
+    value: `${inv[m.id]||0}/${m.n}`,
+    met: (inv[m.id]||0) >= m.n,
+  }));
+  const canUp = u.mats.every(m => (inv[m.id]||0) >= m.n);
+  showInfo({
+    icon: u.emoji, title: `${u.name} — Niv. ${u.level}`,
+    desc: `${u.desc}\n\nCapacité actuelle : ${u.cap} → ${u.newCap} après amélioration.\n\n💡 Les matériaux tombent aléatoirement (~12%) quand tu révises des cartes.`,
+    requirements: reqs,
+    action_label: canUp ? `Améliorer → Niv. ${u.level+1}` : null,
+    action_cmd: canUp ? `pycmd('farm:upgrade:${uid}');hideOverlay()` : null,
+  });
+}
+
 function renderShopUpgrades(grid){
-  const d=farmData;
-  const inv=d.inventory||{};
+  const d=farmData, inv=d.inventory||{};
 
-  function matStatus(matId, need) {
-    const have = inv[matId]||0;
-    const ok = have >= need;
-    const name = (ITEM_INFO[matId]||{}).desc ? matId.replace(/_/g,' ') : matId;
-    return `<span class="recipe-ingredient ${ok?'has':'need'}">${(d.item_catalog||{})[matId]?.emoji||''} ${have}/${need}</span>`;
-  }
-
-  const upgrades = [
-    {id:'barn', name:'Grange', emoji:'🏚️',
-     desc:'Stocke les matériaux (boulons, planches, etc). Plus de capacité = plus de matériaux gardés.',
-     level: d.barn_level||1, cap: d.barn_capacity||50, newCap: (d.barn_capacity||50)+25,
-     mats: [{id:'bolt',n:(d.barn_level||1)+1},{id:'plank',n:(d.barn_level||1)+1},{id:'duct_tape',n:(d.barn_level||1)+1}]},
-    {id:'silo', name:'Silo', emoji:'🏭',
-     desc:'Stocke les récoltes et produits transformés. Plus de capacité = plus de production possible.',
-     level: d.silo_level||1, cap: d.silo_capacity||50, newCap: (d.silo_capacity||50)+25,
-     mats: [{id:'nail',n:(d.silo_level||1)+1},{id:'screw',n:(d.silo_level||1)+1},{id:'paint',n:(d.silo_level||1)+1}]},
-  ];
-
-  upgrades.forEach(u => {
-    const canUpgrade = u.mats.every(m => (inv[m.id]||0) >= m.n);
+  [{id:'barn',name:'Grange',emoji:'🏚️',level:d.barn_level||1,cap:d.barn_capacity||50,newCap:(d.barn_capacity||50)+25,
+    mats:[{id:'bolt',n:(d.barn_level||1)+1},{id:'plank',n:(d.barn_level||1)+1},{id:'duct_tape',n:(d.barn_level||1)+1}]},
+   {id:'silo',name:'Silo',emoji:'🏭',level:d.silo_level||1,cap:d.silo_capacity||50,newCap:(d.silo_capacity||50)+25,
+    mats:[{id:'nail',n:(d.silo_level||1)+1},{id:'screw',n:(d.silo_level||1)+1},{id:'paint',n:(d.silo_level||1)+1}]}
+  ].forEach(u=>{
+    const canUp=u.mats.every(m=>(inv[m.id]||0)>=m.n);
     const el=document.createElement('div');
     el.className='item-cell';
-    el.style.cssText=`grid-column:1/-1;min-height:90px;text-align:left;padding:10px;opacity:${canUpgrade?'1':'.6'}`;
-    el.onclick=()=>{pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')};
-
+    el.style.opacity=canUp?'1':'.55';
+    el.onclick=()=>{if(canUp){pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')}else showUpgradeInfo(u.id)};
     el.innerHTML=`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        ${buildingImg(u.id,40)}
-        <div>
-          <div style="font-weight:800;font-size:13px">${u.emoji} ${u.name} — Niv. ${u.level}</div>
-          <div style="font-size:10px;color:#4caf50;font-weight:700">Capacité : ${u.cap} → ${u.newCap}</div>
-        </div>
-      </div>
-      <div style="font-size:10px;color:#666;margin-bottom:6px">${u.desc}</div>
-      <div style="font-size:11px;font-weight:700;margin-bottom:3px">Matériaux requis :</div>
-      <div class="recipe-ingredients">${u.mats.map(m=>matStatus(m.id,m.n)).join(' ')}</div>
+      ${buildingImg(u.id,40)}
+      <span class="item-name">${u.emoji} ${u.name} Niv.${u.level}</span>
+      <span class="item-price">${u.cap}→${u.newCap}</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
     `;
     grid.appendChild(el);
   });
-
-  // Explanation
-  const tip=document.createElement('div');
-  tip.style.cssText='grid-column:1/-1;font-size:10px;color:#999;padding:4px 8px;line-height:1.4';
-  tip.innerHTML='💡 Les <strong>matériaux</strong> (🔩 Boulon, 🪵 Planche, etc) tombent aléatoirement quand tu révises des cartes (~12% par review). Continue à réviser !';
-  grid.appendChild(tip);
 }
 function renderShopLand(grid){
   const d=farmData;
