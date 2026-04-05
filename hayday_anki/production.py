@@ -183,10 +183,12 @@ class ProductionManager:
         if not recipe:
             return False, "Recipe not found"
 
-        # Check queue capacity
+        # Check queue capacity (building level increases max queue)
         from . import progression
         building_def = progression.BUILDING_DEFINITIONS.get(building_id, {})
-        max_queue = building_def.get("max_queue", 2)
+        base_queue = building_def.get("max_queue", 2)
+        building_level = self.state.buildings.get(building_id, {}).get("level", 1)
+        max_queue = base_queue + (building_level - 1)  # +1 slot per upgrade
 
         current_queue = self.state.production_queues.get(building_id, [])
         if len(current_queue) >= max_queue:
@@ -223,13 +225,19 @@ class ProductionManager:
         if building_id not in self.state.production_queues:
             self.state.production_queues[building_id] = []
 
+        # Higher building level reduces production time
+        building_level = self.state.buildings.get(building_id, {}).get("level", 1)
+        sessions_req = recipe["sessions_required"]
+        if building_level >= 3:
+            sessions_req = max(1, sessions_req - 1)  # level 3+: -1 session
+
         production_item = {
             "recipe_id": recipe_id,
             "name": recipe["name"],
             "emoji": recipe["emoji"],
             "output": recipe["output"],
             "xp": recipe["xp"],
-            "sessions_required": recipe["sessions_required"],
+            "sessions_required": sessions_req,
             "sessions_waited": 0,
             "ready": False,
         }

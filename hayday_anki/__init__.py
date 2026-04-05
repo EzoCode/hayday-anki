@@ -40,6 +40,7 @@ def on_profile_loaded():
 
     mgr = _get_manager()
     mgr.generate_orders()
+    mgr.generate_daily_quests()
     login_bonus = mgr.check_daily_login()
     mgr.save()
 
@@ -155,8 +156,12 @@ def _process_animals(mgr):
         produce_every = animal_def.get("produce_every_n_reviews", 10)
         if reviews_since >= produce_every:
             product = animal_def.get("product")
-            if product and mgr.state.add_item(product, count):
-                animal_data["reviews_since_last"] = 0
+            if product:
+                if mgr.state.add_item(product, count):
+                    animal_data["reviews_since_last"] = 0
+                else:
+                    # Cap counter so it retries next review (don't keep incrementing)
+                    animal_data["reviews_since_last"] = produce_every
 
 
 def _check_achievements(mgr):

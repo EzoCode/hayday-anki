@@ -207,6 +207,14 @@ class FarmState:
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
 
+        # Daily quests
+        self.daily_quests: List[Dict] = []
+        self.last_quest_date: Optional[str] = None
+        self.quests_completed_total: int = 0
+
+        # Session history
+        self.session_history: List[Dict] = []  # last 30 sessions
+
     def _init_plots(self):
         """Initialize farm plots."""
         self.plots = []
@@ -318,6 +326,10 @@ class FarmState:
             "active_events": self.active_events,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
+            "daily_quests": self.daily_quests,
+            "last_quest_date": self.last_quest_date,
+            "quests_completed_total": self.quests_completed_total,
+            "session_history": self.session_history,
         }
 
     @classmethod
@@ -440,6 +452,9 @@ class FarmManager:
 
         if ease > 1:
             self.state.total_correct += 1
+            self.update_quest_progress("correct", 1)
+
+        self.update_quest_progress("reviews", 1)
 
         # Determine crop drop based on level
         crop_drop = self._roll_crop_drop()
@@ -509,7 +524,7 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance growth on planted plots."""
+        """Advance growth on planted plots. Also wilt crops left too long after ready."""
         for plot in self.state.plots:
             if plot["state"] in ("planted", "growing"):
                 plot["reviews_done"] += 1
@@ -518,9 +533,15 @@ class FarmManager:
                     plot["reviews_done"] = 0
                     if plot["growth_stage"] >= 4:
                         plot["state"] = "ready"
+                        plot["ready_reviews"] = 0  # track how long it stays ready
                     else:
                         plot["state"] = "growing"
                         plot["reviews_needed"] = max(2, plot["reviews_needed"] + 1)
+            elif plot["state"] == "ready":
+                # Crops wilt after 50 reviews unharvested (generous window)
+                plot["ready_reviews"] = plot.get("ready_reviews", 0) + 1
+                if plot["ready_reviews"] >= 50:
+                    plot["state"] = "wilted"
 
     def _get_event_multipliers(self) -> Tuple[float, float]:
         """Get active event multipliers for coins and XP."""
@@ -597,6 +618,7 @@ class FarmManager:
         plot["growth_stage"] = 0
         plot["reviews_needed"] = 3  # Reviews to advance first stage
         plot["reviews_done"] = 0
+        self.update_quest_progress("plants", 1)
         return True
 
     def harvest_plot(self, plot_id: int) -> Optional[Dict]:
@@ -622,6 +644,7 @@ class FarmManager:
             return None
 
         self.state.xp += xp_gain
+        self.update_quest_progress("harvests", 1)
 
         # Reset plot
         plot["state"] = "empty"
@@ -632,6 +655,22 @@ class FarmManager:
         plot["reviews_done"] = 0
 
         return {"items": harvested, "xp": xp_gain}
+
+    def clear_wilted(self, plot_id: int) -> bool:
+        """Clear a wilted crop. Returns True if cleared."""
+        if plot_id < 0 or plot_id >= len(self.state.plots):
+            return False
+        plot = self.state.plots[plot_id]
+        if plot["state"] != "wilted":
+            return False
+        plot["state"] = "empty"
+        plot["crop"] = None
+        plot["planted_at"] = None
+        plot["growth_stage"] = 0
+        plot["reviews_needed"] = 0
+        plot["reviews_done"] = 0
+        plot.pop("ready_reviews", None)
+        return True
 
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""
@@ -646,6 +685,7 @@ class FarmManager:
         self.state.remove_item(item_id, actual)
         coins = item["sell_price"] * actual
         self.state.coins += coins
+        self.update_quest_progress("sells", actual)
         return coins
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
@@ -710,25 +750,31 @@ class FarmManager:
 
     def open_mystery_box(self, box_index: int) -> Optional[Dict]:
         """Open a mystery box. Returns rewards."""
-        if box_index >= len(self.state.mystery_boxes):
+        if box_index < 0 or box_index >= len(self.state.mystery_boxes):
             return None
 
         box = self.state.mystery_boxes[box_index]
         box_def = MYSTERY_BOX_REWARDS.get(box["size"], MYSTERY_BOX_REWARDS["small"])
+        gem_cost = box_def["cost_gems"]
 
-        # Check gem cost
-        if box_def["cost_gems"] > self.state.gems:
-            # Free open check (2 per day)
-            today = date.today().isoformat()
-            if self.state.last_mystery_box_date != today:
-                self.state.daily_mystery_boxes_opened = 0
-                self.state.last_mystery_box_date = today
-            if self.state.daily_mystery_boxes_opened >= 2 and box_def["cost_gems"] > 0:
+        # Reset daily counter if new day
+        today = date.today().isoformat()
+        if self.state.last_mystery_box_date != today:
+            self.state.daily_mystery_boxes_opened = 0
+            self.state.last_mystery_box_date = today
+
+        if gem_cost > 0:
+            if self.state.gems >= gem_cost:
+                # Pay with gems
+                self.state.gems -= gem_cost
+            elif self.state.daily_mystery_boxes_opened < 2:
+                # Free open (2 per day for paid boxes)
+                self.state.daily_mystery_boxes_opened += 1
+            else:
                 return None
-            self.state.daily_mystery_boxes_opened += 1
         else:
-            if box_def["cost_gems"] > 0:
-                self.state.gems -= box_def["cost_gems"]
+            # Free box, always openable
+            pass
 
         # Roll reward
         rewards_table = box_def["rewards"]
@@ -808,7 +854,13 @@ class FarmManager:
                     if output_id not in order_items:
                         order_items.append(output_id)
 
-        while len(self.state.active_orders) < 3 and order_items:
+        if not order_items:
+            return
+
+        max_attempts = 10
+        attempts = 0
+        while len(self.state.active_orders) < 3 and attempts < max_attempts:
+            attempts += 1
             items_needed = {}
             num_items = random.randint(1, min(3, self.state.level // 5 + 1))
             for _ in range(num_items):
@@ -857,6 +909,7 @@ class FarmManager:
         self.state.coins += order["coin_reward"]
         self.state.xp += order["xp_reward"]
         self.state.orders_completed += 1
+        self.update_quest_progress("orders", 1)
 
         result = {
             "coins": order["coin_reward"],
@@ -1076,6 +1129,114 @@ class FarmManager:
             "message": f"Day {self.state.login_streak} login bonus: {reward['desc']}!",
         }
 
+    # --- Daily Quests ---
+
+    def generate_daily_quests(self):
+        """Generate 3 daily quests if it's a new day."""
+        today = date.today().isoformat()
+        if self.state.last_quest_date == today and self.state.daily_quests:
+            return
+
+        self.state.last_quest_date = today
+        quest_pool = [
+            {"id": "review_10", "name": "Study Session", "desc": "Review 10 cards",
+             "type": "reviews", "target": 10, "reward_coins": 30, "reward_xp": 15, "icon": "\U0001F4DA"},
+            {"id": "review_25", "name": "Deep Focus", "desc": "Review 25 cards",
+             "type": "reviews", "target": 25, "reward_coins": 75, "reward_xp": 40, "icon": "\U0001F9E0"},
+            {"id": "review_50", "name": "Marathon", "desc": "Review 50 cards",
+             "type": "reviews", "target": 50, "reward_coins": 150, "reward_xp": 80, "icon": "\U0001F3C3"},
+            {"id": "harvest_3", "name": "Farmer", "desc": "Harvest 3 crops",
+             "type": "harvests", "target": 3, "reward_coins": 40, "reward_xp": 20, "icon": "\U0001F33E"},
+            {"id": "harvest_6", "name": "Golden Harvest", "desc": "Harvest 6 crops",
+             "type": "harvests", "target": 6, "reward_coins": 80, "reward_xp": 40, "icon": "\U0001F33D"},
+            {"id": "sell_5", "name": "Merchant", "desc": "Sell 5 items",
+             "type": "sells", "target": 5, "reward_coins": 50, "reward_xp": 25, "icon": "\U0001F4B0"},
+            {"id": "order_1", "name": "Delivery Driver", "desc": "Complete 1 order",
+             "type": "orders", "target": 1, "reward_coins": 60, "reward_xp": 30, "icon": "\U0001F69A"},
+            {"id": "produce_2", "name": "Chef", "desc": "Start 2 productions",
+             "type": "productions", "target": 2, "reward_coins": 50, "reward_xp": 25, "icon": "\U0001F373"},
+            {"id": "plant_4", "name": "Green Thumb", "desc": "Plant 4 crops",
+             "type": "plants", "target": 4, "reward_coins": 35, "reward_xp": 18, "icon": "\U0001F331"},
+            {"id": "correct_15", "name": "Accuracy", "desc": "Answer 15 cards correctly",
+             "type": "correct", "target": 15, "reward_coins": 45, "reward_xp": 22, "icon": "\u2705"},
+        ]
+
+        chosen = random.sample(quest_pool, min(3, len(quest_pool)))
+        self.state.daily_quests = []
+        for q in chosen:
+            self.state.daily_quests.append({
+                **q,
+                "progress": 0,
+                "completed": False,
+                "claimed": False,
+            })
+
+    def update_quest_progress(self, quest_type: str, amount: int = 1):
+        """Update progress on daily quests of a given type."""
+        for quest in self.state.daily_quests:
+            if quest["type"] == quest_type and not quest["completed"]:
+                quest["progress"] = min(quest["target"], quest["progress"] + amount)
+                if quest["progress"] >= quest["target"]:
+                    quest["completed"] = True
+
+    def claim_quest(self, quest_index: int) -> Optional[Dict]:
+        """Claim a completed daily quest reward."""
+        if quest_index < 0 or quest_index >= len(self.state.daily_quests):
+            return None
+        quest = self.state.daily_quests[quest_index]
+        if not quest["completed"] or quest["claimed"]:
+            return None
+        quest["claimed"] = True
+        self.state.coins += quest.get("reward_coins", 0)
+        self.state.xp += quest.get("reward_xp", 0)
+        self.state.quests_completed_total += 1
+        return {
+            "coins": quest["reward_coins"],
+            "xp": quest["reward_xp"],
+            "quest_name": quest["name"],
+        }
+
+    # --- Building Upgrades ---
+
+    def upgrade_building(self, building_id: str) -> Optional[Dict]:
+        """Upgrade a production building (faster production, bigger queue)."""
+        if building_id not in self.state.buildings:
+            return None
+
+        from . import progression
+        building_def = progression.BUILDING_DEFINITIONS.get(building_id)
+        if not building_def:
+            return None
+
+        current_level = self.state.buildings[building_id].get("level", 1)
+        if current_level >= 5:  # max level
+            return None
+
+        # Upgrade costs scale with level
+        cost_coins = building_def.get("cost_coins", 100) * current_level
+        cost_materials = {
+            "bolt": current_level,
+            "plank": current_level,
+        }
+
+        if self.state.coins < cost_coins:
+            return None
+        for mat_id, qty in cost_materials.items():
+            if self.state.inventory.get(mat_id, 0) < qty:
+                return None
+
+        # Consume resources
+        self.state.coins -= cost_coins
+        for mat_id, qty in cost_materials.items():
+            self.state.remove_item(mat_id, qty)
+
+        self.state.buildings[building_id]["level"] = current_level + 1
+        return {
+            "building_id": building_id,
+            "new_level": current_level + 1,
+            "name": building_def.get("name", building_id),
+        }
+
     # --- Session Management ---
 
     def start_session(self):
@@ -1086,6 +1247,7 @@ class FarmManager:
         self.state.session_reviews = 0
         self._pending_notifications = []
         self.check_events()
+        self.generate_daily_quests()
 
     def end_session(self) -> Dict:
         """End session and return summary."""
@@ -1106,6 +1268,17 @@ class FarmManager:
             "streak": self.state.current_streak,
             "notifications": list(self._pending_notifications),
         }
+
+        # Save session to history (keep last 30)
+        self.state.session_history.append({
+            "date": datetime.now().isoformat(),
+            "reviews": summary["reviews"],
+            "coins": summary["coins_earned"],
+            "xp": summary["xp_earned"],
+            "streak": summary["streak"],
+        })
+        if len(self.state.session_history) > 30:
+            self.state.session_history = self.state.session_history[-30:]
 
         self.state.last_session = datetime.now().isoformat()
         self.save()
@@ -1175,6 +1348,9 @@ class FarmManager:
                 for e in self.state.active_events
                 if datetime.fromisoformat(e.get("ends_at", "2000-01-01")) > datetime.now()
             ],
+            "daily_quests": self.state.daily_quests,
+            "quests_completed_total": self.state.quests_completed_total,
+            "session_history": self.state.session_history[-7:],  # last 7 for UI
         }
 
     def get_notifications(self) -> List[Dict]:

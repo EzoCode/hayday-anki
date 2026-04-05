@@ -188,12 +188,18 @@ class FarmWebView:
         parts = cmd.split(":")
         action = parts[1] if len(parts) > 1 else ""
 
+        def safe_int(val, default=0):
+            try:
+                return int(val)
+            except (ValueError, TypeError):
+                return default
+
         try:
             if action == "get_state":
                 self._send_state()
 
             elif action == "harvest":
-                plot_id = int(parts[2])
+                plot_id = safe_int(parts[2] if len(parts) > 2 else 0)
                 result = self.manager.harvest_plot(plot_id)
                 if result:
                     self._js(f"showReward({json.dumps(result)})")
@@ -203,15 +209,15 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "plant":
-                plot_id = int(parts[2])
-                crop_id = parts[3]
+                plot_id = safe_int(parts[2] if len(parts) > 2 else 0)
+                crop_id = parts[3] if len(parts) > 3 else ""
                 self.manager.plant_crop(plot_id, crop_id)
                 self._send_state()
                 self.manager.save()
 
             elif action == "sell":
-                item_id = parts[2]
-                qty = int(parts[3]) if len(parts) > 3 else 1
+                item_id = parts[2] if len(parts) > 2 else ""
+                qty = safe_int(parts[3] if len(parts) > 3 else 1, 1)
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
                     self._js(f"showFloatingReward('+{coins} coins', window.innerWidth/2, window.innerHeight/2)")
@@ -251,7 +257,7 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "open_box":
-                box_index = int(parts[2])
+                box_index = safe_int(parts[2] if len(parts) > 2 else -1, -1)
                 result = self.manager.open_mystery_box(box_index)
                 if result:
                     self._js(f"showBoxResult({json.dumps(result)})")
@@ -261,7 +267,7 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "fulfill_order":
-                order_index = int(parts[2])
+                order_index = safe_int(parts[2] if len(parts) > 2 else -1, -1)
                 result = self.manager.fulfill_order(order_index)
                 if result:
                     r_coins = result["coins"]
@@ -311,6 +317,37 @@ class FarmWebView:
             elif action == "expand":
                 count = int(parts[2]) if len(parts) > 2 else 2
                 self._expand_farm(count)
+                self._send_state()
+                self.manager.save()
+
+            elif action == "clear_wilted":
+                plot_id = int(parts[2])
+                if self.manager.clear_wilted(plot_id):
+                    self._js("showNotification('Wilted crop cleared.')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "claim_quest":
+                quest_idx = int(parts[2])
+                result = self.manager.claim_quest(quest_idx)
+                if result:
+                    qname = result["quest_name"]
+                    qcoins = result["coins"]
+                    qxp = result["xp"]
+                    self._js(f"showNotification('Quest complete: {qname}! +{qcoins} coins, +{qxp} XP')")
+                    self._js(f"showFloatingReward('+{qcoins}', window.innerWidth/2, window.innerHeight/3)")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "upgrade_building":
+                building_id = parts[2]
+                result = self.manager.upgrade_building(building_id)
+                if result:
+                    bname = result["name"]
+                    blvl = result["new_level"]
+                    self._js(f"showNotification('{bname} upgraded to level {blvl}!')")
+                else:
+                    self._js("showNotification('Need more coins and materials!')")
                 self._send_state()
                 self.manager.save()
 
@@ -457,6 +494,7 @@ class FarmWebView:
         if result:
             r_name = result["name"]
             self._js(f"showNotification('Started producing {r_name}!')")
+            self.manager.update_quest_progress("productions", 1)
         else:
             can, reason = prod_mgr.can_craft(building_id, recipe_id)
             self._js(f"showNotification('{reason}')")

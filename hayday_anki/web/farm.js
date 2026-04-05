@@ -125,7 +125,7 @@ function createConfetti() {
 // --- Core State Update ---
 function updateFarm(data) {
   farmData = data;
-  updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections(); checkStorageWarnings();
+  updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); checkExpansionPrompt();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -133,6 +133,7 @@ function updateFarm(data) {
     if (currentPanel === 'shop') renderShop();
     if (currentPanel === 'achievements') renderAchievements();
     if (currentPanel === 'settings') renderSettings();
+    if (currentPanel === 'quests') renderQuests();
   }
 }
 
@@ -190,6 +191,7 @@ function renderPlots() {
       el.onclick = () => harvestPlot(plot.id);
     } else if (plot.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(plot.crop, 0, 32)}</div><span class="plot-label">Wilted</span>`;
+      el.onclick = () => { pycmd(`farm:clear_wilted:${plot.id}`); SoundMgr.play('click'); };
     } else {
       const stage = plot.growth_stage||0, needed = plot.reviews_needed||1, done = plot.reviews_done||0;
       const pct = Math.min(100, (done/needed)*100);
@@ -253,6 +255,8 @@ function updateTabBadges() {
   setBadge('tab-buildings', readyCount);
   setBadge('tab-farm', (d.mystery_boxes||[]).length);
   setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
+  const claimableQuests = (d.daily_quests||[]).filter(q => q.completed && !q.claimed).length;
+  setBadge('tab-quests', claimableQuests);
 }
 
 function setBadge(tabId, count) {
@@ -292,6 +296,7 @@ function showTab(tab) {
     if(tab==='inventory')renderInventory();if(tab==='buildings')renderBuildingsPanel();
     if(tab==='orders')renderOrders();if(tab==='shop')renderShop();
     if(tab==='achievements')renderAchievements();if(tab==='settings')renderSettings();
+    if(tab==='quests')renderQuests();
   }
   SoundMgr.play('click');
 }
@@ -320,10 +325,15 @@ function renderBuildingsPanel() {
   (farmData.unlocked_buildings||[]).forEach(bid => {
     const name = bid.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     const owned = bid in (farmData.buildings||{}), queue = (farmData.production_queues||{})[bid]||[];
+    const bLevel = owned ? ((farmData.buildings||{})[bid]?.level || 1) : 0;
     const card = document.createElement('div'); card.className = 'building-card';
     let qHTML = '';
-    if (owned) { qHTML = '<div class="building-queue">'; queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; }); for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>'; qHTML+='</div>'; }
-    card.innerHTML = `<div class="building-card-icon">${buildingImg(bid,52)}</div><div class="building-card-info"><h3>${name}</h3><p>${owned?'Tap to produce':'Not built'}</p>${qHTML}</div>`;
+    if (owned) {
+      qHTML = '<div class="building-queue">'; queue.forEach(q => { qHTML += `<div class="queue-slot ${q.ready?'ready':''}">${q.emoji||'?'}</div>`; }); for(let i=queue.length;i<3;i++) qHTML+='<div class="queue-slot">+</div>'; qHTML+='</div>';
+    }
+    const levelBadge = owned ? `<span class="building-level-badge">Lv${bLevel}</span>` : '';
+    const upgradeBtn = owned && bLevel < 5 ? `<button class="building-upgrade-btn" onclick="event.stopPropagation();pycmd('farm:upgrade_building:${bid}');SoundMgr.play('click')" title="Upgrade">\u2B06</button>` : '';
+    card.innerHTML = `<div class="building-card-icon">${buildingImg(bid,52)}${levelBadge}</div><div class="building-card-info"><h3>${name}</h3><p>${owned?'Tap to produce':'Not built'}</p>${qHTML}</div>${upgradeBtn}`;
     card.onclick = () => owned ? pycmd(`farm:building_detail:${bid}`) : pycmd(`farm:buy_building:${bid}`);
     list.appendChild(card);
   });
@@ -358,7 +368,68 @@ function renderSettings() {
   const stats = document.getElementById('farm-stats');
   if (stats && farmData) {
     const d = farmData;
-    stats.innerHTML = `Level ${d.level||1} \u2022 ${formatNum(d.total_reviews||0)} reviews \u2022 ${formatNum(d.lifetime_reviews||0)} lifetime \u2022 Best streak: ${d.best_streak||0} days`;
+    stats.innerHTML = `Level ${d.level||1} \u2022 ${formatNum(d.total_reviews||0)} reviews \u2022 ${formatNum(d.lifetime_reviews||0)} lifetime \u2022 Best streak: ${d.best_streak||0} days \u2022 Quests done: ${d.quests_completed_total||0}`;
+  }
+  renderSessionHistory();
+}
+
+function renderSessionHistory() {
+  const chart = document.getElementById('session-history-chart');
+  if (!chart || !farmData) return;
+  const history = farmData.session_history || [];
+  if (history.length === 0) { chart.innerHTML = '<p style="font-size:11px;color:#999;text-align:center">No session history yet</p>'; return; }
+  let maxR = 1;
+  history.forEach(s => { if ((s.reviews||0) > maxR) maxR = s.reviews; });
+  let bars = '<div style="display:flex;align-items:flex-end;gap:3px;height:60px;padding:4px 0">';
+  history.forEach(s => {
+    const h = Math.max(4, ((s.reviews||0) / maxR) * 50);
+    const dt = s.date ? new Date(s.date) : null;
+    const label = dt ? `${dt.getMonth()+1}/${dt.getDate()}` : '';
+    bars += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px"><div style="width:100%;height:${h}px;background:linear-gradient(180deg,var(--orange),var(--orange-h));border-radius:3px 3px 0 0;min-width:8px" title="${s.reviews||0} reviews"></div><span style="font-size:7px;color:#aaa">${label}</span></div>`;
+  });
+  bars += '</div>';
+  chart.innerHTML = `<p style="font-size:10px;color:#888;font-weight:700;margin-bottom:4px">Recent Sessions</p>${bars}`;
+}
+
+function renderQuests() {
+  const list = document.getElementById('quests-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const quests = farmData.daily_quests || [];
+  if (!quests.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#999;font-size:12px">Review cards to unlock daily quests!</div>'; return; }
+  quests.forEach((q, i) => {
+    const pct = Math.min(100, (q.progress / Math.max(1, q.target)) * 100);
+    const card = document.createElement('div');
+    card.className = `quest-card ${q.completed ? (q.claimed ? 'claimed' : 'complete') : ''}`;
+    card.innerHTML = `
+      <span class="quest-icon">${q.icon||'\u{1F4CB}'}</span>
+      <div class="quest-info">
+        <strong>${q.name}</strong>
+        <span>${q.desc}</span>
+        <div class="quest-progress"><div class="quest-progress-fill" style="width:${pct}%"></div></div>
+        <span class="quest-counter">${q.progress}/${q.target}</span>
+      </div>
+      <div class="quest-reward">
+        ${q.claimed ? '<span class="quest-claimed-badge">\u2713</span>' :
+          q.completed ? `<button class="quest-claim-btn" onclick="claimQuest(${i})">Claim!</button>` :
+          `<span class="quest-reward-text">\u{1FA99}${q.reward_coins}</span>`}
+      </div>`;
+    list.appendChild(card);
+  });
+}
+function claimQuest(i) { SoundMgr.play('click'); pycmd(`farm:claim_quest:${i}`); }
+
+let _lastExpansionPrompt = 0;
+function checkExpansionPrompt() {
+  const now = Date.now();
+  if (now - _lastExpansionPrompt < 60000) return;
+  const d = farmData;
+  const deeds = (d.inventory||{}).land_deed || 0;
+  const permits = (d.inventory||{}).expansion_permit || 0;
+  const cost = 50 * (d.num_plots || 6);
+  if (deeds >= 1 && permits >= 1 && (d.coins||0) >= cost) {
+    showNotification('\u{1F331} You have materials to expand your farm! Check the Shop > Land tab.');
+    _lastExpansionPrompt = now;
   }
 }
 
