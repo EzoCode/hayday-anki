@@ -56,10 +56,15 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - [x] Commandes : explication du systeme, items couleur
 - [x] Boutique decos : categories (Basique/Premium/Nature/Special)
 
+## Bugs corriges (2026-04-05, session 3)
+1. **Window close crash** : fermer la fenetre farm via X ne nettoyait pas la reference webview — les reviews suivantes crashaient en essayant d'executer du JS sur un webview detruit. Corrige avec callback on_close.
+2. **Village decorations invisible** : renderVillage() cherchait dans item_catalog au lieu de deco_defs — la plupart des decorations (hay_bale, mailbox, lamp_post, etc.) n'affichaient ni emoji ni nom. Corrige pour utiliser deco_defs avec fallback.
+3. **Achat animal bloque** : le JS bloquait l'achat d'un animal supplementaire (ex: 2e vache) en exigeant 2 terrains, alors que le backend Python sait que l'enclos existe deja. Corrige pour verifier si un enclos existe.
+4. **AchievementManager duplique** : _send_achievements() creait un nouveau manager a chaque appel au lieu de reutiliser l'instance. Corrige avec cache sur l'instance.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Ameliorer l'apparence des decorations dans la zone Village
-- [ ] Ajouter un tutorial/onboarding pour les nouveaux joueurs
 - [ ] Sons : feedback audio sur les actions (recolte, achat, level up)
 - [ ] Evenements saisonniers avec bonus temporaires
 - [ ] Systeme de quetes quotidiennes/hebdomadaires

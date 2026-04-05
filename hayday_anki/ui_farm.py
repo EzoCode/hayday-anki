@@ -27,8 +27,9 @@ SOUNDS_DIR = ADDON_DIR / "sounds"
 class FarmWindow(QDialog):
     """Standalone resizable farm window."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, on_close=None):
         super().__init__(parent)
+        self._on_close = on_close
         self.setWindowTitle("ADFarm")
         self.setMinimumSize(QSize(420, 600))
         # Start at a good size
@@ -41,6 +42,8 @@ class FarmWindow(QDialog):
         )
 
     def closeEvent(self, evt):
+        if self._on_close:
+            self._on_close()
         super().closeEvent(evt)
 
 
@@ -61,9 +64,14 @@ class FarmWebView:
             return
         self._create_window()
 
+    def _on_window_closed(self):
+        """Called when the farm window is closed by user."""
+        self.web = None
+        self._window = None
+
     def _create_window(self):
         """Create standalone farm window."""
-        self._window = FarmWindow(mw)
+        self._window = FarmWindow(mw, on_close=self._on_window_closed)
 
         layout = QVBoxLayout(self._window)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -407,9 +415,11 @@ class FarmWebView:
     def _send_achievements(self):
         """Push achievements data to JS."""
         from . import achievements as ach_mod
-        mgr = ach_mod.AchievementManager()
+        # Reuse single instance — AchievementManager is stateless lookup
+        if not hasattr(self, '_ach_mgr'):
+            self._ach_mgr = ach_mod.AchievementManager()
         state_dict = self.manager.state.to_dict()
-        all_ach = mgr.get_all_with_status(state_dict)
+        all_ach = self._ach_mgr.get_all_with_status(state_dict)
         self._js(f"updateAchievements({json.dumps(all_ach)})")
 
     # --- Shop helpers ---

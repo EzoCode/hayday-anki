@@ -394,10 +394,13 @@ function renderVillage() {
   zone.style.display = '';
 
   decos.forEach(deco => {
-    const cat = (farmData.item_catalog||{})[deco.type] || {};
+    const decoDef = (farmData.deco_defs||{})[deco.type] || {};
+    const catFallback = (farmData.item_catalog||{})[deco.type] || {};
+    const emoji = decoDef.emoji || catFallback.emoji || DECO_EMOJI[deco.type] || '\u{1F33F}';
+    const name = decoDef.name || catFallback.name || decoName(deco.type);
     const el = document.createElement('div');
     el.className = 'deco-tile';
-    el.innerHTML = `<span class="deco-emoji">${cat.emoji||'\u{1F33F}'}</span><span class="deco-name">${cat.name||deco.type}</span>`;
+    el.innerHTML = `<span class="deco-emoji">${emoji}</span><span class="deco-name">${name}</span>`;
     grid.appendChild(el);
   });
 }
@@ -617,11 +620,14 @@ function showAnimalMenu() {
     availAnimals.forEach(a => {
       const def = defs[a.id]||{};
       const cost = def.cost_coins||0;
-      const canBuy = coins >= cost && landFree >= 2;
+      const hasPasture = (farmData.pastures||[]).some(p => p.animal_type === a.id);
+      const needsLand = !hasPasture;
+      const canBuy = coins >= cost && (!needsLand || landFree >= 2);
+      const landNote = needsLand ? ' + 2 terrain' : '';
       html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:add_pasture:${a.id}');hideOverlay()`:''}">
         <div class="recipe-header">${animalLbl(a.id,28)||`<span class="recipe-emoji">${def.emoji||''}</span>`}
         <div class="recipe-info"><strong>${def.name||a.id}</strong>
-        <span class="recipe-time">\u{1FA99} ${cost} + 2 terrain \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
+        <span class="recipe-time">\u{1FA99} ${cost}${landNote} \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
     });
     html += '</div>';
   }
@@ -901,10 +907,13 @@ function showAnimalShopInfo(aid) {
   const maxN = def.max_owned||def.max||5;
   const cost = def.cost_coins||def.cost||100;
   const unlocked = (farmData.unlocked_animals||[]).includes(aid);
+  const hasPasture = (farmData.pastures||[]).some(p => p.animal_type === animalType);
+  const needsLand = !hasPasture;
+  const landFree = (farmData.land_total||20) - (farmData.land_used||0);
   const reqs = [
     {label: `⭐ Niveau ${info.lvl}`, value: level >= info.lvl ? `✓ (${level})` : `✗ (${level})`, met: level >= info.lvl},
     {label: `🪙 ${cost} pièces`, value: (farmData.coins||0) >= cost ? '✓' : `✗ (${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
-    {label: '🗺️ 2 terrain', value: ((farmData.land_total||20)-(farmData.land_used||0)) >= 2 ? '✓' : '✗', met: ((farmData.land_total||20)-(farmData.land_used||0)) >= 2},
+    {label: '🗺️ Terrain', value: needsLand ? (landFree >= 2 ? `✓ (2 requis)` : `✗ (${landFree} libre)`) : '✓ (enclos existant)', met: !needsLand || landFree >= 2},
     {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
@@ -930,7 +939,10 @@ function renderShopAnimals(grid){
     const cost=def.cost_coins||def.cost||100;
     const unlocked=(farmData.unlocked_animals||[]).includes(aid);
     const count=(farmData.animals||{})[aid]?.count||0;
-    const canBuy=unlocked&&coins>=cost;
+    const hasPasture=(farmData.pastures||[]).some(p=>p.animal_type===aid);
+    const needsLand=!hasPasture;
+    const landFree=(farmData.land_total||20)-(farmData.land_used||0);
+    const canBuy=unlocked&&coins>=cost&&(!needsLand||landFree>=2);
 
     const el=document.createElement('div');
     el.className='item-cell';
