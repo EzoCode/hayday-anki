@@ -115,27 +115,33 @@ class FarmWebView:
         for png_file in SPRITES_DIR.rglob("*.png"):
             # Skip spritesheets and walk files (keep individual extracted sprites)
             name = png_file.name
+            # Skip large spritesheets and source files
             skip_names = {
                 "Crop_Spritesheet.png", "farm_spritesheet.png",
                 "chests_32x32.png", "cow_walk.png", "chicken_walk.png",
                 "pig_walk.png", "sheep_walk.png", "coin_anim.png",
                 "farmland.png", "plants.png",
-                # HayDay — skip backgrounds, dark variants, dialogs
-                "background.png", "shop-bg.png", "scoreboard-bg.png",
-                "details-bg.png", "new-level-bg.png",
-                "barn-dark.png", "silo-dark.png", "shop-dark.png",
-                "chicken_coop-dark.png", "pasture-dark.png",
-                "field-dark.png", "wheat-field-dark.png",
-                "alfalfa-field-dark.png", "mill-dark.png",
-                # Old generated sprites replaced by HayDay ones
-                "barn.png", "silo.png", "windmill.png", "coop.png",
             }
-            # Also skip files from buildings/ folder (replaced by hayday/)
-            if png_file.parent.name == "buildings" and name in (
-                "bakery.png", "dairy.png", "bbq.png", "sugar_mill.png",
-            ):
-                continue
             if name in skip_names:
+                continue
+
+            # Skip HayDay backgrounds, dark variants, dialogs (by path)
+            rel_path = png_file.relative_to(SPRITES_DIR).as_posix()
+            skip_paths = {
+                "hayday/background.png", "hayday/shop-bg.png",
+                "hayday/scoreboard-bg.png", "hayday/details-bg.png",
+                "hayday/new-level-bg.png",
+                "hayday/barn-dark.png", "hayday/silo-dark.png",
+                "hayday/shop-dark.png", "hayday/chicken_coop-dark.png",
+                "hayday/pasture-dark.png", "hayday/field-dark.png",
+                "hayday/wheat-field-dark.png", "hayday/alfalfa-field-dark.png",
+                "hayday/mill-dark.png",
+            }
+            if rel_path in skip_paths:
+                continue
+
+            # Skip old generated building sprites (replaced by hayday/)
+            if png_file.parent.name == "buildings":
                 continue
 
             rel = png_file.relative_to(SPRITES_DIR).as_posix()
@@ -318,6 +324,48 @@ class FarmWebView:
             elif action == "expand":
                 count = int(parts[2]) if len(parts) > 2 else 2
                 self._expand_farm(count)
+                self._send_state()
+                self.manager.save()
+
+            elif action == "add_field":
+                if self.manager.add_field():
+                    self._js("showNotification('Nouveau champ ajouté !')")
+                else:
+                    used = self.manager.get_land_used()
+                    total = self.manager.state.land_total
+                    self._js(f"showNotification('Terrain plein ({used}/{total}) ! Achète du terrain.')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "add_pasture":
+                animal_type = parts[2] if len(parts) > 2 else ""
+                if self.manager.add_pasture(animal_type):
+                    self._js("showNotification('Nouvel enclos ajouté !')")
+                else:
+                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "build":
+                building_id = parts[2] if len(parts) > 2 else ""
+                if self.manager.build_building(building_id):
+                    from . import progression
+                    bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
+                    bname = bdef.get("name", building_id)
+                    self._js(f"showNotification('{bname} construit !')")
+                else:
+                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "buy_land":
+                if self.manager.buy_land():
+                    total = self.manager.state.land_total
+                    self._js(f"showNotification('Terrain agrandi ! Total: {total}')")
+                else:
+                    cost = 100 * (self.manager.state.land_total // 5)
+                    deeds = self.manager.state.inventory.get("land_deed", 0)
+                    self._js(f"showNotification('Besoin de {cost} pièces + Land Deed ({deeds}/1)')")
                 self._send_state()
                 self.manager.save()
 

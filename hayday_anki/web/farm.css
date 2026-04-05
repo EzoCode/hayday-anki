@@ -74,7 +74,202 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .section-label{color:rgba(255,255,255,.75);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:4px 12px;margin-bottom:6px;text-shadow:0 1px 3px rgba(0,0,0,.4);position:relative;z-index:1}
 #farm-fields,#farm-buildings,#farm-animals{position:relative;z-index:1;margin-bottom:14px}
 
+/* ===== ZONES ===== */
+.farm-zone {
+  margin: 8px 6px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.zone-fields {
+  background:
+    linear-gradient(145deg, rgba(109,184,68,0.3), rgba(77,140,50,0.2)),
+    linear-gradient(180deg, #4c8c32, #3a7025);
+}
+.zone-workshop {
+  background:
+    linear-gradient(145deg, rgba(180,130,70,0.3), rgba(139,94,60,0.2)),
+    linear-gradient(180deg, #8b5e3c, #6b4520);
+}
+.zone-pasture {
+  background:
+    linear-gradient(145deg, rgba(120,190,80,0.3), rgba(90,160,50,0.2)),
+    linear-gradient(180deg, #5da33a, #4c8c32);
+}
+.zone-village {
+  background:
+    linear-gradient(145deg, rgba(200,170,120,0.3), rgba(180,150,100,0.2)),
+    linear-gradient(180deg, #c9a66b, #a0854a);
+}
+
+.zone-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.zone-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  flex: 1;
+}
+
+.zone-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.zone-add-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px dashed rgba(255,255,255,0.35);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.8);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.zone-add-btn:hover {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.zone-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  justify-content: center;
+  min-height: 60px;
+}
+
+.zone-empty-msg {
+  width: 100%;
+  text-align: center;
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  font-style: italic;
+  padding: 10px;
+}
+
+/* Land bar */
+.land-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  margin: 8px 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+#land-status {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.land-buy-btn {
+  background: linear-gradient(180deg, var(--orange), var(--orange-h));
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(244,146,42,0.3);
+}
+
+/* Deco tiles in village zone */
+.deco-tile {
+  width: 68px;
+  height: 68px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.12s;
+}
+.deco-tile:hover { transform: translateY(-2px); }
+.deco-tile img { max-width: 44px; max-height: 44px; }
+.deco-emoji { font-size: 28px; }
+.deco-name { font-size: 7px; color: rgba(255,255,255,0.5); font-weight: 600; margin-top: 1px; }
+
+/* Pasture tile */
+.pasture-tile {
+  width: 100px;
+  height: 90px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+  position: relative;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.pasture-tile:hover { transform: translateY(-2px); }
+.pasture-tile img { max-width: 55px; max-height: 50px; }
+.pasture-count {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.pasture-name {
+  font-size: 8px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 600;
+}
+
+/* Info card */
+.info-card {
+  text-align: left !important;
+  max-width: 340px;
+}
+.info-card .info-icon { font-size: 48px; text-align: center; margin-bottom: 8px; }
+.info-card h3 { font-size: 18px; margin-bottom: 4px; }
+.info-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 10px; }
+.req-section { margin-bottom: 10px; }
+.req-section h4 { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+.req-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin: 2px 0;
+  background: rgba(0,0,0,0.03);
+}
+.req-ok { color: #4caf50; font-weight: 700; }
+.req-miss { color: #e74c3c; font-weight: 700; }
+.produce-row { font-size: 11px; color: #555; padding: 2px 0; }
+
 /* ===== PLOTS — 3D Depth ===== */
+#fields-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px;min-height:60px}
 #plots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px;margin:0 auto;padding:0 4px}
 
 .plot{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:2/1;display:flex;align-items:center;justify-content:center;

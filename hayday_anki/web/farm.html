@@ -45,29 +45,50 @@
 <div id="farm-container">
   <div class="farm-sky"></div>
   <div id="farm-world">
-    <!-- Isometric farm grid -->
-    <div id="farm-fields">
-      <div class="section-label">🌾 Champs</div>
-      <div id="plots-grid"></div>
+    <!-- Zone: Champs -->
+    <div class="farm-zone zone-fields">
+      <div class="zone-header">
+        <span class="zone-title">🌾 Champs</span>
+        <span class="zone-count" id="fields-count">0</span>
+        <button class="zone-add-btn" onclick="pycmd('farm:add_field')">+ Champ</button>
+      </div>
+      <div class="zone-content" id="fields-grid"></div>
     </div>
 
-    <!-- Buildings zone -->
-    <div id="farm-buildings">
-      <div class="section-label">🏭 Atelier</div>
-      <div id="buildings-area"></div>
+    <!-- Zone: Atelier -->
+    <div class="farm-zone zone-workshop" id="zone-workshop">
+      <div class="zone-header">
+        <span class="zone-title">🏭 Atelier</span>
+        <button class="zone-add-btn" onclick="showBuildMenu()">+ Construire</button>
+      </div>
+      <div class="zone-content" id="workshop-grid"></div>
     </div>
 
-    <!-- Animals zone -->
-    <div id="farm-animals">
-      <div class="section-label">🐄 Pâturage</div>
-      <div id="animals-area"></div>
+    <!-- Zone: Paturage -->
+    <div class="farm-zone zone-pasture" id="zone-pasture">
+      <div class="zone-header">
+        <span class="zone-title">🐄 Pâturage</span>
+        <button class="zone-add-btn" onclick="showAnimalMenu()">+ Enclos</button>
+      </div>
+      <div class="zone-content" id="pasture-grid"></div>
     </div>
 
-    <!-- Farmer character -->
-    <div id="farmer-character"></div>
+    <!-- Zone: Village (decorations) -->
+    <div class="farm-zone zone-village" id="zone-village">
+      <div class="zone-header">
+        <span class="zone-title">🏡 Village</span>
+        <button class="zone-add-btn" onclick="showTab('shop')">+ Décorer</button>
+      </div>
+      <div class="zone-content" id="deco-grid"></div>
+    </div>
+
+    <!-- Land status bar -->
+    <div class="land-bar" id="land-bar">
+      <span id="land-status">🗺️ Terrain: 0/20</span>
+      <button class="land-buy-btn" onclick="pycmd('farm:buy_land')">Acheter terrain</button>
+    </div>
 
     <!-- Floating layers -->
-    <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
     <div id="reward-layer"></div>
   </div>
@@ -225,6 +246,18 @@
     <div id="sell-item-stock" class="sell-stock"></div>
     <div id="sell-unit-price" class="sell-unit-price"></div>
     <div id="sell-buttons" class="sell-buttons"></div>
+    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+  </div>
+</div>
+
+<div id="info-overlay" class="overlay hidden">
+  <div class="overlay-card info-card">
+    <div class="info-icon" id="info-icon"></div>
+    <h3 id="info-title"></h3>
+    <p class="info-desc" id="info-desc"></p>
+    <div id="info-requirements"></div>
+    <div id="info-produces"></div>
+    <div id="info-actions"></div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
   </div>
 </div>

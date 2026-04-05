@@ -210,6 +210,12 @@ class FarmState:
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
 
+        # Land system (new)
+        self.land_total: int = 20      # Total land units available
+        self.fields: List[Dict] = []   # Crop fields [{id, crop, state, growth_stage, reviews_needed, reviews_done, planted_at}]
+        self.placed_buildings: List[Dict] = []  # [{id, building_type}]
+        self.pastures: List[Dict] = []  # [{id, animal_type, count, reviews_since_last}]
+
         # Lifetime tracking counters (for achievements)
         self.total_harvests: int = 0
         self.total_coins_earned: int = 0
@@ -333,6 +339,10 @@ class FarmState:
             "active_events": self.active_events,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
+            "land_total": self.land_total,
+            "fields": self.fields,
+            "placed_buildings": self.placed_buildings,
+            "pastures": self.pastures,
             "total_harvests": self.total_harvests,
             "total_coins_earned": self.total_coins_earned,
             "total_coins_spent": self.total_coins_spent,
@@ -368,6 +378,33 @@ class FarmState:
             ]:
                 if not hasattr(state, attr) or not isinstance(getattr(state, attr, None), int):
                     setattr(state, attr, default)
+
+        # Migrate old plots to fields if needed
+        if not state.fields and state.plots:
+            for i, plot in enumerate(state.plots):
+                if plot.get("state") != "empty":
+                    state.fields.append({
+                        "id": i,
+                        "crop": plot.get("crop"),
+                        "state": plot.get("state", "empty"),
+                        "growth_stage": plot.get("growth_stage", 0),
+                        "reviews_needed": plot.get("reviews_needed", 0),
+                        "reviews_done": plot.get("reviews_done", 0),
+                        "planted_at": plot.get("planted_at"),
+                    })
+            # Add some empty fields too
+            if not state.fields:
+                for i in range(3):
+                    state.fields.append({"id": i, "crop": None, "state": "empty", "growth_stage": 0, "reviews_needed": 0, "reviews_done": 0, "planted_at": None})
+        # Migrate old buildings dict to placed_buildings
+        if not state.placed_buildings and state.buildings:
+            for bid, bdata in state.buildings.items():
+                state.placed_buildings.append({"id": len(state.placed_buildings), "building_type": bid})
+        # Migrate old animals dict to pastures
+        if not state.pastures and state.animals:
+            for aid, adata in state.animals.items():
+                if adata.get("count", 0) > 0:
+                    state.pastures.append({"id": len(state.pastures), "animal_type": aid, "count": adata["count"], "reviews_since_last": adata.get("reviews_since_last", 0)})
 
         return state
 
@@ -591,32 +628,32 @@ class FarmManager:
         return "bolt"  # fallback
 
     def _advance_plots(self):
-        """Advance ONE random growing plot per review. Ready crops wilt after too long."""
+        """Advance ONE random growing field per review. Ready crops wilt after too long."""
         from . import progression
 
-        # Pick one random active plot to advance
-        active = [p for p in self.state.plots if p["state"] in ("planted", "growing")]
+        # Pick one random active field to advance
+        active = [f for f in self.state.fields if f["state"] in ("planted", "growing")]
         if active:
-            plot = random.choice(active)
-            plot["reviews_done"] += 1
-            if plot["reviews_done"] >= plot["reviews_needed"]:
-                plot["growth_stage"] += 1
-                plot["reviews_done"] = 0
-                if plot["growth_stage"] >= 4:
-                    plot["state"] = "ready"
-                    plot["_ready_since"] = self.state.total_reviews
+            field = random.choice(active)
+            field["reviews_done"] += 1
+            if field["reviews_done"] >= field["reviews_needed"]:
+                field["growth_stage"] += 1
+                field["reviews_done"] = 0
+                if field["growth_stage"] >= 4:
+                    field["state"] = "ready"
+                    field["_ready_since"] = self.state.total_reviews
                 else:
-                    plot["state"] = "growing"
+                    field["state"] = "growing"
                     # Keep reviews_needed consistent from crop definition
-                    crop_def = progression.CROP_DEFINITIONS.get(plot.get("crop", ""), {})
-                    plot["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3) // 4)
+                    crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
+                    field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3) // 4)
 
-        # Wilt check on all ready plots
-        for plot in self.state.plots:
-            if plot["state"] == "ready":
-                ready_since = plot.get("_ready_since", 0)
+        # Wilt check on all ready fields
+        for field in self.state.fields:
+            if field["state"] == "ready":
+                ready_since = field.get("_ready_since", 0)
                 if ready_since > 0 and self.state.total_reviews - ready_since > 50:
-                    plot["state"] = "wilted"
+                    field["state"] = "wilted"
 
     def _get_event_multipliers(self) -> Tuple[float, float]:
         """Get active event multipliers for coins and XP (capped at 5x)."""
@@ -695,11 +732,12 @@ class FarmManager:
         return True
 
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
-        """Plant a crop on a plot."""
-        if plot_id >= len(self.state.plots):
+        """Plant a crop on a field (identified by ID)."""
+        # Look up field by ID in the new fields list
+        field = next((f for f in self.state.fields if f["id"] == plot_id), None)
+        if field is None:
             return False
-        plot = self.state.plots[plot_id]
-        if plot["state"] != "empty":
+        if field["state"] != "empty":
             return False
         if crop_id not in self.state.unlocked_crops:
             return False
@@ -708,23 +746,109 @@ class FarmManager:
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
         reviews_per_stage = max(1, crop_def.get("growth_reviews", 3) // 4)
 
-        plot["state"] = "planted"
-        plot["crop"] = crop_id
-        plot["planted_at"] = datetime.now().isoformat()
-        plot["growth_stage"] = 0
-        plot["reviews_needed"] = reviews_per_stage
-        plot["reviews_done"] = 0
+        field["state"] = "planted"
+        field["crop"] = crop_id
+        field["planted_at"] = datetime.now().isoformat()
+        field["growth_stage"] = 0
+        field["reviews_needed"] = reviews_per_stage
+        field["reviews_done"] = 0
         return True
 
+    def add_field(self) -> bool:
+        """Add a new empty field. Costs 1 land unit."""
+        if self.get_land_used() >= self.state.land_total:
+            return False
+        field_id = max([f["id"] for f in self.state.fields], default=-1) + 1
+        self.state.fields.append({
+            "id": field_id,
+            "crop": None,
+            "state": "empty",
+            "growth_stage": 0,
+            "reviews_needed": 0,
+            "reviews_done": 0,
+            "planted_at": None,
+        })
+        return True
+
+    def add_pasture(self, animal_type: str) -> bool:
+        """Add a new animal pasture. Costs 2 land + animal purchase price."""
+        if self.get_land_used() + 2 > self.state.land_total:
+            return False
+        from . import progression
+        animal_def = progression.ANIMAL_DEFINITIONS.get(animal_type)
+        if not animal_def:
+            return False
+        if animal_type not in self.state.unlocked_animals:
+            return False
+        cost = animal_def.get("cost_coins", 100)
+        if self.state.coins < cost:
+            return False
+        self.state.coins -= cost
+        pasture_id = max([p["id"] for p in self.state.pastures], default=-1) + 1
+        self.state.pastures.append({
+            "id": pasture_id,
+            "animal_type": animal_type,
+            "count": 1,
+            "reviews_since_last": 0,
+        })
+        # Keep old animals dict in sync
+        if animal_type not in self.state.animals:
+            self.state.animals[animal_type] = {"count": 0, "reviews_since_last": 0}
+        self.state.animals[animal_type]["count"] += 1
+        return True
+
+    def build_building(self, building_id: str) -> bool:
+        """Build a building. Costs 2 land + building price."""
+        if self.get_land_used() + 2 > self.state.land_total:
+            return False
+        from . import progression
+        building_def = progression.BUILDING_DEFINITIONS.get(building_id)
+        if not building_def:
+            return False
+        if building_id not in self.state.unlocked_buildings:
+            return False
+        # Check if already built
+        if building_id in self.state.buildings:
+            return False
+        cost = building_def.get("cost_coins", 100)
+        if self.state.coins < cost:
+            return False
+        self.state.coins -= cost
+        self.state.buildings[building_id] = {"level": 1}
+        place_id = max([b["id"] for b in self.state.placed_buildings], default=-1) + 1
+        self.state.placed_buildings.append({"id": place_id, "building_type": building_id})
+        return True
+
+    def buy_land(self, amount: int = 5) -> bool:
+        """Buy more land. Costs coins + land_deed."""
+        cost_coins = 100 * (self.state.land_total // 5)
+        if self.state.coins < cost_coins:
+            return False
+        deed_count = self.state.inventory.get("land_deed", 0)
+        if deed_count < 1:
+            return False
+        self.state.coins -= cost_coins
+        self.state.remove_item("land_deed", 1)
+        self.state.land_total += amount
+        return True
+
+    def get_land_used(self) -> int:
+        """Calculate total land units used."""
+        fields = len(self.state.fields)
+        buildings = len(self.state.placed_buildings) * 2
+        pastures = len(self.state.pastures) * 2
+        return fields + buildings + pastures
+
     def harvest_plot(self, plot_id: int) -> Optional[Dict]:
-        """Harvest a ready crop. Returns harvested items."""
-        if plot_id >= len(self.state.plots):
+        """Harvest a ready crop from a field (identified by ID). Returns harvested items."""
+        # Look up field by ID in the new fields list
+        field = next((f for f in self.state.fields if f["id"] == plot_id), None)
+        if field is None:
             return None
-        plot = self.state.plots[plot_id]
-        if plot["state"] != "ready":
+        if field["state"] != "ready":
             return None
 
-        crop_id = plot["crop"]
+        crop_id = field["crop"]
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
 
@@ -747,13 +871,13 @@ class FarmManager:
         self.state.xp += xp_gain
         self.state.total_harvests += 1
 
-        # Reset plot
-        plot["state"] = "empty"
-        plot["crop"] = None
-        plot["planted_at"] = None
-        plot["growth_stage"] = 0
-        plot["reviews_needed"] = 0
-        plot["reviews_done"] = 0
+        # Reset field
+        field["state"] = "empty"
+        field["crop"] = None
+        field["planted_at"] = None
+        field["growth_stage"] = 0
+        field["reviews_needed"] = 0
+        field["reviews_done"] = 0
 
         return {"items": harvested, "xp": xp_gain}
 
@@ -1299,6 +1423,12 @@ class FarmManager:
             "best_streak": self.state.best_streak,
             "plots": self.state.plots,
             "num_plots": self.state.num_plots,
+            "fields": self.state.fields,
+            "placed_buildings": self.state.placed_buildings,
+            "pastures": self.state.pastures,
+            "land_total": self.state.land_total,
+            "land_used": self.get_land_used(),
+            "land_available": self.state.land_total - self.get_land_used(),
             "buildings": self.state.buildings,
             "animals": self.state.animals,
             "decorations": self.state.decorations,

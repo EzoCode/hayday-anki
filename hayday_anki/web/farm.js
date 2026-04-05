@@ -171,7 +171,7 @@ function createConfetti() {
 // --- Core State Update ---
 function updateFarm(data) {
   farmData = data;
-  updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderDecorations(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderDecorations(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -221,68 +221,106 @@ function updateHUD() {
   }
 }
 
-function renderPlots() {
-  const grid = document.getElementById('plots-grid'); grid.innerHTML = '';
-  (farmData.plots || []).forEach(plot => {
+function renderFields() {
+  const grid = document.getElementById('fields-grid');
+  grid.innerHTML = '';
+  const fields = farmData.fields || farmData.plots || [];
+
+  document.getElementById('fields-count').textContent = fields.length;
+
+  if (fields.length === 0) {
+    grid.innerHTML = '<div class="zone-empty-msg">Aucun champ. Ajoute-en un !</div>';
+    return;
+  }
+
+  fields.forEach(field => {
     const el = document.createElement('div');
-    el.className = `plot plot-${plot.state}`;
-    const bg = fieldBg(plot.state);
+    el.className = `plot plot-${field.state}`;
+
+    const bg = fieldBg(field.state);
     if (bg) el.innerHTML = `<img src="${bg}" class="field-img">`;
-    if (plot.state === 'empty') {
+
+    if (field.state === 'empty') {
       el.innerHTML += '<span class="plot-plus">+</span>';
-      el.onclick = () => showPlantDialog(plot.id);
-    } else if (plot.state === 'ready') {
-      el.innerHTML += `<div class="plot-crop">${cropImg(plot.crop, 4, 40)}</div><span class="plot-label">${LANG.harvest}</span>`;
-      el.onclick = () => harvestPlot(plot.id);
-    } else if (plot.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(plot.crop, 0, 32)}</div><span class="plot-label">\u{1F342} ${LANG.wilted}</span>`;
-      el.onclick = () => { pycmd(`farm:clear_wilted:${plot.id}`); SoundMgr.play('click'); };
+      el.onclick = () => showPlantDialog(field.id);
+    } else if (field.state === 'ready') {
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, 4, 40)}</div><span class="plot-label">Récolter !</span>`;
+      el.onclick = () => harvestPlot(field.id);
+    } else if (field.state === 'wilted') {
+      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
+      el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
-      const stage = plot.growth_stage||0, needed = plot.reviews_needed||1, done = plot.reviews_done||0;
+      const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
       const pct = Math.min(100, (done/needed)*100);
-      el.innerHTML += `<div class="plot-crop">${cropImg(plot.crop, stage, 36)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
     }
     grid.appendChild(el);
   });
-  const level = farmData.level||1, locked = getLockedCount(level);
-  for (let i = 0; i < locked; i++) {
-    const el = document.createElement('div'); el.className = 'plot-locked';
-    const next = getNextExpansionLevel(level);
-    el.innerHTML = `${lockImg(24)}<span class="lock-label">${next?`Niv. ${next}`:'Max'}</span>`;
-    el.onclick = () => { if (next && level >= next) pycmd('farm:expand:2'); else showNotification(`Atteignez le niveau ${next||'?'} pour agrandir !`); };
-    grid.appendChild(el);
-  }
 }
 function getLockedCount(level) { let c=0; for (const e of EXPANSION_LEVELS) { if (level<e.lvl) c+=e.plots; if (c>=6) return 6; } return Math.max(c,3); }
 function getNextExpansionLevel(level) { for (const e of EXPANSION_LEVELS) { if (level<e.lvl) return e.lvl; } return null; }
 
-function renderBuildings() {
-  const area = document.getElementById('buildings-area'); area.innerHTML = '';
-  Object.keys(farmData.buildings||{}).forEach(bid => {
+function renderWorkshop() {
+  const grid = document.getElementById('workshop-grid');
+  grid.innerHTML = '';
+  const placed = farmData.placed_buildings || [];
+  const zone = document.getElementById('zone-workshop');
+
+  if (placed.length === 0 && Object.keys(farmData.unlocked_buildings||{}).length === 0) {
+    zone.style.display = 'none';
+    return;
+  }
+  zone.style.display = '';
+
+  if (placed.length === 0) {
+    grid.innerHTML = '<div class="zone-empty-msg">Construis ton premier bâtiment !</div>';
+    return;
+  }
+
+  placed.forEach(b => {
+    const bid = b.building_type;
     const name = buildingName(bid);
-    const el = document.createElement('div'); el.className = 'building-tile';
-    el.onclick = () => pycmd(`farm:building_detail:${bid}`);
-    const queue = (farmData.production_queues||{})[bid]||[], ready = queue.filter(q=>q.ready).length;
-    el.innerHTML = `${buildingImg(bid,110)}<span class="building-name">${name}</span>${ready>0?`<span class="building-badge">${ready}</span>`:''}`;
-    area.appendChild(el);
+    const el = document.createElement('div');
+    el.className = 'building-tile';
+    el.onclick = () => pycmd('farm:building_detail:' + bid);
+    const queue = (farmData.production_queues||{})[bid]||[];
+    const ready = queue.filter(q=>q.ready).length;
+    el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${ready>0?`<span class="building-badge">${ready}</span>`:''}`;
+    grid.appendChild(el);
   });
 }
 
-function renderAnimals() {
-  const area = document.getElementById('animals-area'); area.innerHTML = '';
-  Object.entries(farmData.animals||{}).forEach(([aid,info]) => {
-    const count = info.count||1, el = document.createElement('div');
-    el.className = 'animal-tile'; el.style.animationDelay = `${Math.random()*2}s`;
-    const lbl = S(`hayday_${aid}-lbl`);
-    if (lbl) el.innerHTML = `<img src="${lbl}" class="animal-lbl" width="50" height="50"><span class="animal-count">x${count}</span>`;
-    else el.innerHTML = `${animalImg(aid,50)}<span class="animal-count">x${count}</span>`;
-    area.appendChild(el);
+function renderPastures() {
+  const grid = document.getElementById('pasture-grid');
+  grid.innerHTML = '';
+  const pastures = farmData.pastures || [];
+  const zone = document.getElementById('zone-pasture');
+
+  if (pastures.length === 0 && (farmData.unlocked_animals||[]).length === 0) {
+    zone.style.display = 'none';
+    return;
+  }
+  zone.style.display = '';
+
+  if (pastures.length === 0) {
+    grid.innerHTML = '<div class="zone-empty-msg">Adopte ton premier animal !</div>';
+    return;
+  }
+
+  pastures.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'pasture-tile';
+    el.style.animationDelay = `${Math.random()*2}s`;
+    const lbl = S(`hayday_${p.animal_type}-lbl`);
+    const name = (p.animal_type||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    if (lbl) el.innerHTML = `<img src="${lbl}" width="50" height="50"><span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span>`;
+    else el.innerHTML = `${animalImg(p.animal_type,45)}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span>`;
+    el.onclick = () => showAnimalInfo(p.animal_type);
+    grid.appendChild(el);
   });
 }
 
 function updateSections() {
-  document.getElementById('farm-buildings').style.display = Object.keys(farmData.buildings||{}).length ? '' : 'none';
-  document.getElementById('farm-animals').style.display = Object.keys(farmData.animals||{}).length ? '' : 'none';
   updateTabBadges();
 }
 
@@ -323,6 +361,147 @@ function renderMysteryBoxes() {
     const src = S(`ui_chest_${idx}_closed`);
     if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else el.textContent = '\u{1F381}';
     el.onclick = () => showMysteryBox(i); layer.appendChild(el);
+  });
+}
+
+// --- Village / Deco Zone Rendering ---
+function renderVillage() {
+  const grid = document.getElementById('deco-grid');
+  grid.innerHTML = '';
+  const decos = farmData.decorations || [];
+  const zone = document.getElementById('zone-village');
+
+  if (decos.length === 0) {
+    zone.style.display = 'none';
+    return;
+  }
+  zone.style.display = '';
+
+  decos.forEach(deco => {
+    const cat = (farmData.item_catalog||{})[deco.type] || {};
+    const el = document.createElement('div');
+    el.className = 'deco-tile';
+    el.innerHTML = `<span class="deco-emoji">${cat.emoji||'\u{1F33F}'}</span><span class="deco-name">${cat.name||deco.type}</span>`;
+    grid.appendChild(el);
+  });
+}
+
+// --- Land Bar ---
+function updateLandBar() {
+  const used = farmData.land_used || 0;
+  const total = farmData.land_total || 20;
+  document.getElementById('land-status').textContent = `\u{1F5FA}\u{FE0F} Terrain: ${used}/${total} utilisé`;
+}
+
+// --- Info Overlay ---
+function showInfo(data) {
+  document.getElementById('info-icon').innerHTML = data.icon || '';
+  document.getElementById('info-title').textContent = data.title || '';
+  document.getElementById('info-desc').textContent = data.desc || '';
+
+  const reqDiv = document.getElementById('info-requirements');
+  reqDiv.innerHTML = '';
+  if (data.requirements && data.requirements.length > 0) {
+    let html = '<div class="req-section"><h4>Requis :</h4>';
+    data.requirements.forEach(r => {
+      const cls = r.met ? 'req-ok' : 'req-miss';
+      html += `<div class="req-row"><span>${r.label}</span><span class="${cls}">${r.value}</span></div>`;
+    });
+    html += '</div>';
+    reqDiv.innerHTML = html;
+  }
+
+  const prodDiv = document.getElementById('info-produces');
+  prodDiv.innerHTML = '';
+  if (data.produces && data.produces.length > 0) {
+    let html = '<div class="req-section"><h4>Produit :</h4>';
+    data.produces.forEach(p => { html += `<div class="produce-row">${p}</div>`; });
+    html += '</div>';
+    prodDiv.innerHTML = html;
+  }
+
+  const actDiv = document.getElementById('info-actions');
+  actDiv.innerHTML = '';
+  if (data.action_label && data.action_cmd) {
+    actDiv.innerHTML = `<button class="action-btn" onclick="${data.action_cmd}">${data.action_label}</button>`;
+  }
+
+  document.getElementById('info-overlay').classList.remove('hidden');
+}
+
+function showBuildMenu() {
+  // Show available buildings to build
+  const unlocked = farmData.unlocked_buildings || [];
+  const built = Object.keys(farmData.buildings || {});
+  const available = unlocked.filter(b => !built.includes(b));
+
+  if (available.length === 0) {
+    showNotification('Aucun bâtiment disponible !');
+    return;
+  }
+
+  // Use info overlay as a building selection menu
+  const defs = farmData.building_defs || {};
+  let html = '<div class="req-section"><h4>Bâtiments disponibles :</h4>';
+  available.forEach(bid => {
+    const def = defs[bid] || {};
+    const name = def.name || buildingName(bid);
+    const cost = def.cost_coins || 0;
+    html += `<div class="recipe-card" onclick="pycmd('farm:build:${bid}');hideOverlay()">
+      <div class="recipe-header">
+        <span class="recipe-emoji">${def.emoji || '\u{1F3ED}'}</span>
+        <div class="recipe-info"><strong>${name}</strong><span class="recipe-time">\u{1FA99} ${cost} pièces</span></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  showInfo({
+    icon: '\u{1F3D7}\u{FE0F}',
+    title: 'Construire',
+    desc: 'Choisis un bâtiment à construire (2 terrains)',
+  });
+  document.getElementById('info-requirements').innerHTML = html;
+}
+
+function showAnimalMenu() {
+  const unlocked = farmData.unlocked_animals || [];
+  if (unlocked.length === 0) {
+    showNotification('Aucun animal disponible !');
+    return;
+  }
+
+  const defs = farmData.animal_defs || {};
+  let html = '<div class="req-section"><h4>Animaux disponibles :</h4>';
+  unlocked.forEach(aid => {
+    const def = defs[aid] || {};
+    const name = def.name || aid;
+    const cost = def.cost_coins || 0;
+    html += `<div class="recipe-card" onclick="pycmd('farm:add_pasture:${aid}');hideOverlay()">
+      <div class="recipe-header">
+        ${animalLbl(aid, 32) || `<span class="recipe-emoji">${def.emoji || '\u{1F404}'}</span>`}
+        <div class="recipe-info"><strong>${name}</strong><span class="recipe-time">\u{1FA99} ${cost} pièces \u2022 Produit: ${def.product_emoji||''} ${def.product||''}</span></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  showInfo({
+    icon: '\u{1F404}',
+    title: 'Nouvel enclos',
+    desc: 'Adopte un animal (2 terrains)',
+  });
+  document.getElementById('info-requirements').innerHTML = html;
+}
+
+function showAnimalInfo(animalType) {
+  const defs = farmData.animal_defs || {};
+  const def = defs[animalType] || {};
+  showInfo({
+    icon: def.emoji || '\u{1F404}',
+    title: def.name || animalType,
+    desc: `Produit ${def.product_emoji||''} ${def.product||''} tous les ${def.produce_every_n_reviews||10} reviews.`,
+    produces: [`${def.product_emoji||''} ${def.product||''} (${def.produce_every_n_reviews||10} reviews)`],
   });
 }
 
