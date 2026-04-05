@@ -169,8 +169,16 @@ function createConfetti() {
 }
 
 // --- Core State Update ---
+let _tutorialChecked = false;
 function updateFarm(data) {
   farmData = data;
+  // Show tutorial on first state load if not yet completed
+  if (!_tutorialChecked && !data.tutorial_done) {
+    _tutorialChecked = true;
+    setTimeout(showTutorial, 800);
+  } else {
+    _tutorialChecked = true;
+  }
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
@@ -720,10 +728,9 @@ function renderInventory() {
   Object.entries(inv).forEach(([id,qty]) => {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
-    // Tap = show item info, info card has sell button
-    // Click tile = sell if sellable, otherwise show info
+    // Tap = show sell dialog (if sellable) or item info
     if ((it.sell_price||0) > 0 && qty > 0) {
-      el.onclick = () => { pycmd(`farm:sell:${id}:${qty}`); SoundMgr.play('click'); };
+      el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
     } else {
       el.onclick = () => showItemInfo(id);
     }
@@ -1183,7 +1190,7 @@ function nextTutorialStep() {
   tutorialStep++;
   if (tutorialStep >= TUTORIAL_STEPS) {
     document.getElementById('tutorial-overlay').classList.add('hidden');
-    localStorage.setItem('adfarm_tutorial_done', '1');
+    pycmd('farm:tutorial_done');
     return;
   }
   updateTutorialStep();
@@ -1200,8 +1207,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderFarmer();
   pycmd('farm:get_state');
   SoundMgr.playMusic();
-  // Show tutorial on first visit
-  if (!localStorage.getItem('adfarm_tutorial_done')) {
-    setTimeout(showTutorial, 800);
-  }
+  // Tutorial is shown after first state update if tutorial_done is false
 });

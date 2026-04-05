@@ -245,6 +245,7 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "buy_animal":
+                # Legacy bridge — redirects to _buy_animal for error messages
                 self._buy_animal(parts[2])
                 self._send_state()
                 self.manager.save()
@@ -369,6 +370,10 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "tutorial_done":
+                self.manager.state.tutorial_done = True
+                self.manager.save()
+
             elif action == "get_achievements":
                 self._send_achievements()
 
@@ -405,7 +410,6 @@ class FarmWebView:
         if animal_id not in self.manager.state.unlocked_animals:
             self._js("showNotification('Animal pas encore débloqué !')")
             return
-        # Check land availability (animals use 2 land)
         if self.manager.get_land_used() + 2 > self.manager.state.land_total:
             self._js("showNotification('Pas assez de terrain !')")
             return
@@ -419,26 +423,12 @@ class FarmWebView:
             aname = animal_def["name"]
             self._js(f"showNotification('Maximum de {aname} atteint !')")
             return
-        self.manager.state.coins -= cost
-        self.manager.state.total_coins_spent += cost
-        if animal_id not in self.manager.state.animals:
-            self.manager.state.animals[animal_id] = {"count": 0, "reviews_since_last": 0}
-        self.manager.state.animals[animal_id]["count"] = current + 1
-        # Add to pastures so it renders on the farm
-        pasture_id = max([p["id"] for p in self.manager.state.pastures], default=-1) + 1
-        # Check if there's already a pasture for this animal type — increment count instead
-        existing = next((p for p in self.manager.state.pastures if p["animal_type"] == animal_id), None)
-        if existing:
-            existing["count"] = current + 1
+        # Use centralized manager method
+        if self.manager.add_pasture(animal_id):
+            aname = animal_def["name"]
+            self._js(f"showNotification('{aname} acheté(e) !')")
         else:
-            self.manager.state.pastures.append({
-                "id": pasture_id,
-                "animal_type": animal_id,
-                "count": 1,
-                "reviews_since_last": 0,
-            })
-        aname = animal_def["name"]
-        self._js(f"showNotification('{aname} acheté(e) !')")
+            self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
 
     def _buy_building(self, building_id: str):
         from . import progression
@@ -452,7 +442,6 @@ class FarmWebView:
         if building_id in self.manager.state.buildings:
             self._js("showNotification('Déjà construit !')")
             return
-        # Check land availability (buildings use 2 land)
         if self.manager.get_land_used() + 2 > self.manager.state.land_total:
             self._js("showNotification('Pas assez de terrain !')")
             return
@@ -460,14 +449,12 @@ class FarmWebView:
         if self.manager.state.coins < cost:
             self._js("showNotification('Pas assez de pièces !')")
             return
-        self.manager.state.coins -= cost
-        self.manager.state.total_coins_spent += cost
-        self.manager.state.buildings[building_id] = {"level": 1}
-        # Add to placed_buildings so it renders on the farm
-        place_id = max([b["id"] for b in self.manager.state.placed_buildings], default=-1) + 1
-        self.manager.state.placed_buildings.append({"id": place_id, "building_type": building_id})
-        bname = building_def["name"]
-        self._js(f"showNotification('{bname} construit !')")
+        # Use centralized manager method
+        if self.manager.build_building(building_id):
+            bname = building_def["name"]
+            self._js(f"showNotification('{bname} construit !')")
+        else:
+            self._js("showNotification('Impossible de construire !')")
 
     def _send_building_detail(self, building_id: str):
         """Send building detail with recipes to JS for production dialog."""
