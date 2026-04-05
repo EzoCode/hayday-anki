@@ -723,7 +723,7 @@ function renderInventory() {
     // Tap = show item info, info card has sell button
     // Click tile = sell if sellable, otherwise show info
     if ((it.sell_price||0) > 0 && qty > 0) {
-      el.onclick = () => { pycmd(`farm:sell:${id}:${qty}`); SoundMgr.play('click'); };
+      el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
     } else {
       el.onclick = () => showItemInfo(id);
     }

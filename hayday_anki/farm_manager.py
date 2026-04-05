@@ -151,9 +151,9 @@ class FarmState:
         self.silo_capacity: int = 50
         self.silo_level: int = 1
 
-        # Farm grid (plots)
+        # Farm grid (legacy — kept for save compat, not used)
         self.plots: List[Dict] = []
-        self.num_plots: int = 3  # Starting plots
+        self.num_plots: int = 3
 
         # Buildings owned: building_id -> {level, queue, ...}
         self.buildings: Dict[str, Dict] = {}
@@ -235,23 +235,8 @@ class FarmState:
         self.materials_collected: int = 0
         self.total_sessions: int = 0
 
-    def _init_plots(self):
-        """Initialize farm plots."""
-        self.plots = []
-        for i in range(self.num_plots):
-            self.plots.append({
-                "id": i,
-                "state": "empty",  # empty, planted, growing, ready, wilted
-                "crop": None,
-                "planted_at": None,
-                "growth_stage": 0,  # 0-4 (seed, sprout, growing, flowering, ready)
-                "reviews_needed": 0,  # Reviews needed to advance stage
-                "reviews_done": 0,
-            })
-
     def add_plots(self, count: int):
-        """Add new plots/fields to the farm."""
-        # Add to the new fields system (used by UI)
+        """Add new fields to the farm (called by level-up unlocks)."""
         field_id = max([f["id"] for f in self.fields], default=-1) + 1
         for i in range(count):
             self.fields.append({
@@ -263,19 +248,7 @@ class FarmState:
                 "reviews_done": 0,
                 "planted_at": None,
             })
-        # Keep legacy plots in sync
-        start_id = len(self.plots)
-        for i in range(count):
-            self.plots.append({
-                "id": start_id + i,
-                "state": "empty",
-                "crop": None,
-                "planted_at": None,
-                "growth_stage": 0,
-                "reviews_needed": 0,
-                "reviews_done": 0,
-            })
-        self.num_plots = len(self.plots)
+        self.num_plots = len(self.fields)
 
     def get_inventory_count(self) -> int:
         """Get total items in inventory."""
@@ -336,7 +309,6 @@ class FarmState:
             "barn_level": self.barn_level,
             "silo_capacity": self.silo_capacity,
             "silo_level": self.silo_level,
-            "plots": self.plots,
             "num_plots": self.num_plots,
             "buildings": self.buildings,
             "animals": self.animals,
@@ -498,11 +470,10 @@ class FarmManager:
             if isinstance(k, str) and isinstance(v, (int, float)) and v > 0
         }
 
-        # Ensure plots list integrity (legacy)
-        if not isinstance(s.plots, list):
-            s.plots = []
-        # num_plots should reflect fields (authoritative), not legacy plots
-        s.num_plots = max(len(s.fields), len(s.plots))
+        # Ensure fields list integrity
+        if not isinstance(s.fields, list):
+            s.fields = []
+        s.num_plots = len(s.fields)
 
         # Ensure storage levels are valid
         s.barn_level = max(1, int(s.barn_level) if isinstance(s.barn_level, (int, float)) else 1)
@@ -625,8 +596,9 @@ class FarmManager:
         return rewards
 
     def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
-        """Roll for a crop drop based on unlocked crops."""
-        if random.random() < 0.35:  # 35% chance to get a crop
+        """Roll for a crop drop based on unlocked crops.
+        Low chance (10%) — farming fields should be the primary crop source."""
+        if random.random() < 0.10:
             available = self.state.unlocked_crops
             if available:
                 crop = random.choice(available)
@@ -787,9 +759,7 @@ class FarmManager:
         return True
 
     def add_pasture(self, animal_type: str) -> bool:
-        """Add a new animal pasture. Costs 2 land + animal purchase price."""
-        if self.get_land_used() + 2 > self.state.land_total:
-            return False
+        """Add an animal. Increments existing pasture or creates new one."""
         from . import progression
         animal_def = progression.ANIMAL_DEFINITIONS.get(animal_type)
         if not animal_def:
@@ -799,19 +769,32 @@ class FarmManager:
         cost = animal_def.get("cost_coins", 100)
         if self.state.coins < cost:
             return False
+        # Check max owned
+        max_owned = animal_def.get("max_owned", 5)
+        current_count = self.state.animals.get(animal_type, {}).get("count", 0)
+        if current_count >= max_owned:
+            return False
+        # Check land: only charge 2 land for NEW pasture, not for adding to existing
+        existing_pasture = next((p for p in self.state.pastures if p["animal_type"] == animal_type), None)
+        if not existing_pasture and self.get_land_used() + 2 > self.state.land_total:
+            return False
         self.state.coins -= cost
         self.state.total_coins_spent += cost
-        pasture_id = max([p["id"] for p in self.state.pastures], default=-1) + 1
-        self.state.pastures.append({
-            "id": pasture_id,
-            "animal_type": animal_type,
-            "count": 1,
-            "reviews_since_last": 0,
-        })
+        # Increment existing pasture or create new one
+        if existing_pasture:
+            existing_pasture["count"] = current_count + 1
+        else:
+            pasture_id = max([p["id"] for p in self.state.pastures], default=-1) + 1
+            self.state.pastures.append({
+                "id": pasture_id,
+                "animal_type": animal_type,
+                "count": 1,
+                "reviews_since_last": 0,
+            })
         # Keep old animals dict in sync
         if animal_type not in self.state.animals:
             self.state.animals[animal_type] = {"count": 0, "reviews_since_last": 0}
-        self.state.animals[animal_type]["count"] += 1
+        self.state.animals[animal_type]["count"] = current_count + 1
         return True
 
     def build_building(self, building_id: str) -> bool:
@@ -1464,7 +1447,6 @@ class FarmManager:
             "gems": self.state.gems,
             "streak": self.state.current_streak,
             "best_streak": self.state.best_streak,
-            "plots": self.state.plots,
             "num_plots": self.state.num_plots,
             "fields": self.state.fields,
             "placed_buildings": self.state.placed_buildings,

@@ -244,11 +244,6 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "buy_animal":
-                self._buy_animal(parts[2])
-                self._send_state()
-                self.manager.save()
-
             elif action == "buy_building":
                 self._buy_building(parts[2])
                 self._send_state()
@@ -340,9 +335,12 @@ class FarmWebView:
             elif action == "add_pasture":
                 animal_type = parts[2] if len(parts) > 2 else ""
                 if self.manager.add_pasture(animal_type):
-                    self._js("showNotification('Nouvel enclos ajouté !')")
+                    from . import progression
+                    adef = progression.ANIMAL_DEFINITIONS.get(animal_type, {})
+                    aname = adef.get("name", animal_type)
+                    self._js(f"showNotification('{aname} acheté(e) !')")
                 else:
-                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau.')")
+                    self._js("showNotification('Impossible ! Vérifie terrain/pièces/niveau/max.')")
                 self._send_state()
                 self.manager.save()
 
@@ -395,50 +393,6 @@ class FarmWebView:
         self._js(f"updateAchievements({json.dumps(all_ach)})")
 
     # --- Shop helpers ---
-
-    def _buy_animal(self, animal_id: str):
-        from . import progression
-        animal_def = progression.ANIMAL_DEFINITIONS.get(animal_id)
-        if not animal_def:
-            self._js("showNotification('Animal inconnu !')")
-            return
-        if animal_id not in self.manager.state.unlocked_animals:
-            self._js("showNotification('Animal pas encore débloqué !')")
-            return
-        # Check land availability (animals use 2 land)
-        if self.manager.get_land_used() + 2 > self.manager.state.land_total:
-            self._js("showNotification('Pas assez de terrain !')")
-            return
-        cost = animal_def.get("cost_coins", 100)
-        if self.manager.state.coins < cost:
-            self._js("showNotification('Pas assez de pièces !')")
-            return
-        max_owned = animal_def.get("max_owned", 5)
-        current = self.manager.state.animals.get(animal_id, {}).get("count", 0)
-        if current >= max_owned:
-            aname = animal_def["name"]
-            self._js(f"showNotification('Maximum de {aname} atteint !')")
-            return
-        self.manager.state.coins -= cost
-        self.manager.state.total_coins_spent += cost
-        if animal_id not in self.manager.state.animals:
-            self.manager.state.animals[animal_id] = {"count": 0, "reviews_since_last": 0}
-        self.manager.state.animals[animal_id]["count"] = current + 1
-        # Add to pastures so it renders on the farm
-        pasture_id = max([p["id"] for p in self.manager.state.pastures], default=-1) + 1
-        # Check if there's already a pasture for this animal type — increment count instead
-        existing = next((p for p in self.manager.state.pastures if p["animal_type"] == animal_id), None)
-        if existing:
-            existing["count"] = current + 1
-        else:
-            self.manager.state.pastures.append({
-                "id": pasture_id,
-                "animal_type": animal_id,
-                "count": 1,
-                "reviews_since_last": 0,
-            })
-        aname = animal_def["name"]
-        self._js(f"showNotification('{aname} acheté(e) !')")
 
     def _buy_building(self, building_id: str):
         from . import progression
