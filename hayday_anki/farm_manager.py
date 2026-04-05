@@ -369,6 +369,12 @@ class FarmState:
                 if not hasattr(state, attr) or not isinstance(getattr(state, attr, None), int):
                     setattr(state, attr, default)
 
+            # Initialize _ready_since for ready plots from old saves
+            # so the wilting mechanic can start tracking them
+            for plot in state.plots:
+                if plot.get("state") == "ready" and "_ready_since" not in plot:
+                    plot["_ready_since"] = state.total_reviews
+
         return state
 
 
@@ -936,7 +942,9 @@ class FarmManager:
                     if output_id not in order_items:
                         order_items.append(output_id)
 
-        while len(self.state.active_orders) < 3 and order_items:
+        if not order_items:
+            return
+        while len(self.state.active_orders) < 3:
             items_needed = {}
             num_items = random.randint(1, min(3, self.state.level // 5 + 1))
             for _ in range(num_items):
@@ -1215,6 +1223,8 @@ class FarmManager:
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
         self._pending_notifications = []
+        # Update streak at session start so bonus is correct from the first review
+        self.update_streak()
         self.check_events()
 
     def end_session(self) -> Dict:

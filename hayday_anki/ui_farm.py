@@ -187,38 +187,46 @@ class FarmWebView:
 
         parts = cmd.split(":")
         action = parts[1] if len(parts) > 1 else ""
+        nparts = len(parts)
+
+        # Helper to safely read parts with bounds check
+        def p(index, default=""):
+            return parts[index] if index < nparts else default
 
         try:
             if action == "get_state":
                 self._send_state()
 
-            elif action == "clear_wilted":
-                plot_id = int(parts[2])
+            elif action == "clear_wilted" and nparts > 2:
+                plot_id = int(p(2))
                 if self.manager.clear_wilted(plot_id):
                     self._js("showNotification('Parcelle nettoyée !')")
                 self._send_state()
                 self.manager.save()
 
-            elif action == "harvest":
-                plot_id = int(parts[2])
+            elif action == "harvest" and nparts > 2:
+                plot_id = int(p(2))
                 result = self.manager.harvest_plot(plot_id)
                 if result:
                     self._js(f"showReward({json.dumps(result)})")
                     xp_val = result.get("xp", 0)
                     self._js(f"showFloatingReward('+{xp_val} XP', window.innerWidth/2, window.innerHeight/3)")
+                else:
+                    # Storage full — tell the user
+                    self._js("showNotification('Silo plein ! Vendez ou améliorez votre silo.')")
                 self._send_state()
                 self.manager.save()
 
-            elif action == "plant":
-                plot_id = int(parts[2])
-                crop_id = parts[3]
+            elif action == "plant" and nparts > 3:
+                plot_id = int(p(2))
+                crop_id = p(3)
                 self.manager.plant_crop(plot_id, crop_id)
                 self._send_state()
                 self.manager.save()
 
-            elif action == "sell":
-                item_id = parts[2]
-                qty = int(parts[3]) if len(parts) > 3 else 1
+            elif action == "sell" and nparts > 2:
+                item_id = p(2)
+                qty = int(p(3, "1"))
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
                     self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
@@ -226,8 +234,8 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "buy_deco":
-                deco_type = parts[2]
+            elif action == "buy_deco" and nparts > 2:
+                deco_type = p(2)
                 import random
                 x = random.randint(1, 8)
                 y = random.randint(1, 8)
@@ -238,13 +246,13 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "buy_animal":
-                self._buy_animal(parts[2])
+            elif action == "buy_animal" and nparts > 2:
+                self._buy_animal(p(2))
                 self._send_state()
                 self.manager.save()
 
-            elif action == "buy_building":
-                self._buy_building(parts[2])
+            elif action == "buy_building" and nparts > 2:
+                self._buy_building(p(2))
                 self._send_state()
                 self.manager.save()
 
@@ -257,8 +265,8 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "open_box":
-                box_index = int(parts[2])
+            elif action == "open_box" and nparts > 2:
+                box_index = int(p(2))
                 result = self.manager.open_mystery_box(box_index)
                 if result:
                     self._js(f"showBoxResult({json.dumps(result)})")
@@ -267,8 +275,8 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "fulfill_order":
-                order_index = int(parts[2])
+            elif action == "fulfill_order" and nparts > 2:
+                order_index = int(p(2))
                 result = self.manager.fulfill_order(order_index)
                 if result:
                     r_coins = result["coins"]
@@ -280,13 +288,13 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "collect":
-                self._collect_building(parts[2])
+            elif action == "collect" and nparts > 2:
+                self._collect_building(p(2))
                 self._send_state()
                 self.manager.save()
 
-            elif action == "upgrade":
-                target = parts[2]
+            elif action == "upgrade" and nparts > 2:
+                target = p(2)
                 if target == "barn":
                     result = self.manager.upgrade_barn()
                     if result:
@@ -304,19 +312,19 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "building_detail":
-                building_id = parts[2]
+            elif action == "building_detail" and nparts > 2:
+                building_id = p(2)
                 self._send_building_detail(building_id)
 
-            elif action == "start_production":
-                building_id = parts[2]
-                recipe_id = parts[3]
+            elif action == "start_production" and nparts > 3:
+                building_id = p(2)
+                recipe_id = p(3)
                 self._start_production(building_id, recipe_id)
                 self._send_state()
                 self.manager.save()
 
             elif action == "expand":
-                count = int(parts[2]) if len(parts) > 2 else 2
+                count = int(p(2, "2"))
                 self._expand_farm(count)
                 self._send_state()
                 self.manager.save()
