@@ -721,12 +721,17 @@ function renderInventory() {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
     // Tap = show item info, info card has sell button
-    el.onclick = () => showItemInfo(id);
+    // Click tile = sell if sellable, otherwise show info
+    if ((it.sell_price||0) > 0 && qty > 0) {
+      el.onclick = () => { pycmd(`farm:sell:${id}:${qty}`); SoundMgr.play('click'); };
+    } else {
+      el.onclick = () => showItemInfo(id);
+    }
     let icon = ''; const lbl = S(`hayday_${id}-lbl`);
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}<span class="item-info-btn">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;

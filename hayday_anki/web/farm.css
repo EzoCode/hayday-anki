@@ -276,15 +276,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .req-miss { color: #e74c3c; font-weight: 700; }
 .produce-row { font-size: 11px; color: #555; padding: 2px 0; }
 
-/* Item info button */
+/* Item info button — small circle, precise hitbox */
 .item-info-btn {
   position: absolute;
-  top: 3px; right: 3px;
-  font-size: 10px;
-  color: rgba(0,0,0,.2);
+  top: 2px; right: 2px;
+  width: 18px; height: 18px;
+  font-size: 11px; line-height: 18px;
+  text-align: center;
+  color: #fff;
+  background: rgba(0,0,0,.25);
+  border-radius: 50%;
   cursor: pointer;
+  z-index: 5;
+  transition: background .15s;
+  /* prevent button from stretching to fill cell */
+  pointer-events: auto;
 }
-.item-cell:hover .item-info-btn { color: rgba(0,0,0,.5); }
+.item-info-btn:hover { background: rgba(0,0,0,.5); }
 .item-cell { position: relative; }
 
 /* ===== PLOTS — 3D Depth ===== */
