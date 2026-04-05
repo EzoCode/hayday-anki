@@ -224,6 +224,24 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "harvest_all":
+                from .farm_manager import ITEM_CATALOG as _IC
+                result = self.manager.harvest_all()
+                if result["count"] > 0:
+                    total_xp = result["xp"]
+                    items_text = ", ".join(
+                        f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
+                        for iid, qty in result["items"].items()
+                    )
+                    self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
+                    msg = f"{result['count']} récoltes : {items_text}"
+                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                    self._check_and_show_level_up()
+                else:
+                    self._js("showNotification('Aucune récolte prête !')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "plant":
                 plot_id = int(parts[2])
                 crop_id = parts[3]
@@ -232,7 +250,8 @@ class FarmWebView:
                     crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
                     crop_name = crop_def.get("name", crop_id)
                     total_reviews = crop_def.get("growth_reviews", 3) * 4
-                    self._js(f"showNotification('🌱 {crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)')")
+                    msg = f"\U0001F331 {crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
+                    self._js(f"showNotification({json.dumps(msg)})")
                 else:
                     self._js("showNotification('Impossible de planter ici !')")
                 self._send_state()
@@ -267,7 +286,7 @@ class FarmWebView:
                     from . import progression
                     bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
                     bname = bdef.get("name", building_id)
-                    self._js(f"showNotification('{bname} construit !')")
+                    self._js(f"showNotification({json.dumps(f'{bname} construit !')})")
                 else:
                     reason = self.manager.get_build_fail_reason(building_id)
                     self._js(f"showNotification({json.dumps(reason)})")
@@ -367,7 +386,7 @@ class FarmWebView:
                     from . import progression
                     adef = progression.ANIMAL_DEFINITIONS.get(animal_type, {})
                     aname = adef.get("name", animal_type)
-                    self._js(f"showNotification('{aname} acheté(e) !')")
+                    self._js(f"showNotification({json.dumps(f'{aname} acheté(e) !')})")
                 else:
                     reason = self.manager.get_pasture_fail_reason(animal_type)
                     self._js(f"showNotification({json.dumps(reason)})")
@@ -380,7 +399,7 @@ class FarmWebView:
                     from . import progression
                     bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
                     bname = bdef.get("name", building_id)
-                    self._js(f"showNotification('{bname} construit !')")
+                    self._js(f"showNotification({json.dumps(f'{bname} construit !')})")
                 else:
                     reason = self.manager.get_build_fail_reason(building_id)
                     self._js(f"showNotification({json.dumps(reason)})")

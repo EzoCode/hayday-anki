@@ -723,12 +723,14 @@ class FarmManager:
             return False
         if field["state"] != "wilted":
             return False
+        last_crop = field.get("crop")
         field["state"] = "empty"
         field["crop"] = None
         field["planted_at"] = None
         field["growth_stage"] = 0
         field["reviews_needed"] = 0
         field["reviews_done"] = 0
+        field["last_crop"] = last_crop
         field.pop("_ready_since", None)
         return True
 
@@ -948,16 +950,34 @@ class FarmManager:
         self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
 
-        # Reset field
+        # Reset field — remember last crop for quick replant
+        last_crop = field["crop"]
         field["state"] = "empty"
         field["crop"] = None
         field["planted_at"] = None
         field["growth_stage"] = 0
         field["reviews_needed"] = 0
         field["reviews_done"] = 0
+        field["last_crop"] = last_crop
         field.pop("_ready_since", None)
 
         return {"items": harvested, "xp": xp_gain}
+
+    def harvest_all(self) -> Dict:
+        """Harvest all ready crops. Returns combined results."""
+        total_items = {}
+        total_xp = 0
+        count = 0
+        for field in list(self.state.fields):
+            if field["state"] != "ready":
+                continue
+            result = self.harvest_plot(field["id"])
+            if result:
+                count += 1
+                total_xp += result.get("xp", 0)
+                for item_id, qty in result.get("items", {}).items():
+                    total_items[item_id] = total_items.get(item_id, 0) + qty
+        return {"items": total_items, "xp": total_xp, "count": count}
 
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""

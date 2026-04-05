@@ -173,7 +173,7 @@ class ProductionManager:
         """
         recipes = RECIPES.get(building_id)
         if not recipes:
-            return False, "Building not found"
+            return False, "Bâtiment introuvable."
 
         recipe = None
         for r in recipes:
@@ -181,7 +181,7 @@ class ProductionManager:
                 recipe = r
                 break
         if not recipe:
-            return False, "Recipe not found"
+            return False, "Recette introuvable."
 
         # Check queue capacity
         from . import progression
@@ -190,14 +190,16 @@ class ProductionManager:
 
         current_queue = self.state.production_queues.get(building_id, [])
         if len(current_queue) >= max_queue:
-            return False, "Production queue is full"
+            return False, "File de production pleine !"
 
         # Check ingredients
+        from .farm_manager import ITEM_CATALOG
         for item_id, qty in recipe["ingredients"].items():
-            if self.state.inventory.get(item_id, 0) < qty:
-                item_name = item_id.replace("_", " ").title()
-                have = self.state.inventory.get(item_id, 0)
-                return False, f"Need {qty} {item_name} (have {have})"
+            have = self.state.inventory.get(item_id, 0)
+            if have < qty:
+                item_info = ITEM_CATALOG.get(item_id, {})
+                item_name = item_info.get("name", item_id.replace("_", " ").title())
+                return False, f"Il faut {qty} {item_name} (tu en as {have})"
 
         return True, "OK"
 

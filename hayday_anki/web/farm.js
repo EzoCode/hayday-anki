@@ -180,7 +180,7 @@ function createConfetti() {
 // --- Core State Update ---
 function updateFarm(data) {
   farmData = data;
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); renderDecorations(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -252,6 +252,18 @@ function renderFields() {
   const addBtn = document.getElementById('add-field-btn');
   if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (🪙${fieldCost})` : '+ Champ';
 
+  // Show/hide harvest all button
+  const readyCount = fields.filter(f => f.state === 'ready').length;
+  const harvestAllBtn = document.getElementById('harvest-all-btn');
+  if (harvestAllBtn) {
+    if (readyCount >= 2) {
+      harvestAllBtn.style.display = '';
+      harvestAllBtn.textContent = `🌾 Tout récolter (${readyCount})`;
+    } else {
+      harvestAllBtn.style.display = 'none';
+    }
+  }
+
   if (fields.length === 0) {
     grid.innerHTML = '<div class="zone-empty-msg">Aucun champ. Ajoute-en un !</div>';
     return;
@@ -265,8 +277,16 @@ function renderFields() {
     if (bg) el.innerHTML = `<img src="${bg}" class="field-img">`;
 
     if (field.state === 'empty') {
-      el.innerHTML += '<span class="plot-plus">+</span>';
-      el.onclick = () => showPlantDialog(field.id);
+      if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
+        const lcName = cropName(field.last_crop);
+        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 24) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
+        el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
+        // Long press / right-click for other crop choices
+        el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
+      } else {
+        el.innerHTML += '<span class="plot-plus">+</span>';
+        el.onclick = () => showPlantDialog(field.id);
+      }
     } else if (field.state === 'ready') {
       const name = cropName(field.crop);
       el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, 4, 40)}</div><span class="plot-label">${name} — Récolter !</span>`;
