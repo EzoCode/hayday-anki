@@ -621,7 +621,8 @@ class AchievementManager:
             return session_minutes >= target
 
         if ach_id == "dedicated_hours":
-            total_hours = state.get("total_time_spent", 0) / 3600
+            # Approximate: ~15 seconds per review average
+            total_hours = state.get("lifetime_reviews", 0) * 15 / 3600
             return total_hours >= target
 
         # --- Farming ---

@@ -54,6 +54,7 @@ class FarmWebView:
         self.manager = farm_manager
         self.web: Optional[AnkiWebView] = None
         self._window: Optional[FarmWindow] = None
+        self._defs_sent: bool = False
 
     def show(self):
         """Show or raise the farm window."""
@@ -68,6 +69,7 @@ class FarmWebView:
         """Called when the farm window is closed by user."""
         self.web = None
         self._window = None
+        self._defs_sent = False
 
     def _create_window(self):
         """Create standalone farm window."""
@@ -256,6 +258,15 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "plant_all_empty":
+                count = self.manager.plant_all_empty()
+                if count > 0:
+                    self._js(f"showNotification({json.dumps(f'🌱 {count} cultures plantées !')})")
+                else:
+                    self._js("showNotification('Aucune parcelle à replanter !')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "sell":
                 item_id = parts[2]
                 qty = int(parts[3]) if len(parts) > 3 else 1
@@ -275,20 +286,6 @@ class FarmWebView:
                     self._js("showNotification('Décoration placée !')")
                 else:
                     self._js("showNotification('Pas assez de pièces !')")
-                self._send_state()
-                self.manager.save()
-
-            elif action == "buy_building":
-                # Redirect to unified build path (same as farm:build)
-                building_id = parts[2] if len(parts) > 2 else ""
-                if self.manager.build_building(building_id):
-                    from . import progression
-                    bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
-                    bname = bdef.get("name", building_id)
-                    self._js(f"showNotification({json.dumps(f'{bname} construit !')})")
-                else:
-                    reason = self.manager.get_build_fail_reason(building_id)
-                    self._js(f"showNotification({json.dumps(reason)})")
                 self._send_state()
                 self.manager.save()
 
@@ -429,7 +426,12 @@ class FarmWebView:
     # --- Data senders ---
 
     def _send_state(self):
-        """Push current farm state to JS."""
+        """Push current farm state to JS.
+        Static definitions are sent once via initDefs() and merged client-side."""
+        if not hasattr(self, '_defs_sent') or not self._defs_sent:
+            defs = self.manager.get_static_defs()
+            self._js(f"initDefs({json.dumps(defs)})")
+            self._defs_sent = True
         data = self.manager.get_farm_data()
         self._js(f"updateFarm({json.dumps(data)})")
 
@@ -534,6 +536,7 @@ class FarmWebView:
             self._window.close()
             self._window = None
             self.web = None
+            self._defs_sent = False
 
     def refresh(self):
         """Refresh farm state in the UI."""

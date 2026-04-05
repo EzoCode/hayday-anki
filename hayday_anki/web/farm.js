@@ -4,12 +4,18 @@
    ============================================================= */
 
 let farmData = {};
+let _staticDefs = {};  // Cached static definitions (item_catalog, building_defs, etc.)
 let currentPanel = null;
 let currentShopCategory = 'decorations';
 let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
 let notificationsEnabled = true;
+
+// Called once on page load — caches static definitions that never change
+function initDefs(defs) {
+  _staticDefs = defs || {};
+}
 
 // --- Localization ---
 const LANG = {
@@ -179,7 +185,8 @@ function createConfetti() {
 
 // --- Core State Update ---
 function updateFarm(data) {
-  farmData = data;
+  // Merge cached static definitions into dynamic state for backward-compat access
+  farmData = Object.assign({}, _staticDefs, data);
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
@@ -215,10 +222,19 @@ function updateHUD() {
   document.getElementById('streak-count').textContent = d.streak || 0;
   document.getElementById('coin-count').textContent = formatNum(d.coins || 0);
   document.getElementById('gem-count').textContent = formatNum(d.gems || 0);
-  // Streak bonus indicator
+  // Streak bonus indicator — show percentage when active
   const streakEl = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
-  streakEl.title = bonus > 0 ? `Streak bonus: +${bonus}%` : 'Review daily to build streak!';
+  streakEl.title = bonus > 0 ? `Streak bonus: +${bonus}% pièces et XP` : 'Révisez chaque jour pour construire votre série !';
+  const streakBonusEl = document.getElementById('streak-bonus');
+  if (streakBonusEl) {
+    if (bonus > 0) {
+      streakBonusEl.textContent = `+${bonus}%`;
+      streakBonusEl.style.display = '';
+    } else {
+      streakBonusEl.style.display = 'none';
+    }
+  }
   // Next unlock preview
   const nextEl = document.getElementById('next-unlock-hint');
   if (nextEl && d.next_unlock) {
@@ -264,6 +280,18 @@ function renderFields() {
     }
   }
 
+  // Show/hide plant-all-empty button (only if there are empty fields with last_crop)
+  const emptyWithLastCrop = fields.filter(f => f.state === 'empty' && f.last_crop && (farmData.unlocked_crops||[]).includes(f.last_crop));
+  const plantAllBtn = document.getElementById('plant-all-btn');
+  if (plantAllBtn) {
+    if (emptyWithLastCrop.length >= 2) {
+      plantAllBtn.style.display = '';
+      plantAllBtn.textContent = `🌱 Tout planter (${emptyWithLastCrop.length})`;
+    } else {
+      plantAllBtn.style.display = 'none';
+    }
+  }
+
   if (fields.length === 0) {
     grid.innerHTML = '<div class="zone-empty-msg">Aucun champ. Ajoute-en un !</div>';
     return;
@@ -284,12 +312,12 @@ function renderFields() {
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
-        el.innerHTML += '<span class="plot-plus">+</span>';
+        el.innerHTML += '<div class="plot-empty-prompt"><span class="plot-plus">+</span><span class="plot-empty-label">Planter</span></div>';
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
       const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, 4, 40)}</div><span class="plot-label">${name} — Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 40)}</div><span class="plot-label plot-ready-label">${name} — Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
@@ -1109,6 +1137,7 @@ function updateAchievements(achs){const list=document.getElementById('achievemen
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail">\u{1F4DA} ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail">\u{1F33E} ${harvestMin}-${harvestMax} \u2022 \u{1FA99} ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){SoundMgr.play('click');pycmd(`farm:harvest:${id}`)}
+function plantAllEmpty(){SoundMgr.play('click');pycmd('farm:plant_all_empty')}
 function sellItem(id){
   SoundMgr.play('click');
   const qty = (farmData.inventory||{})[id]||0;

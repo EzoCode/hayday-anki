@@ -37,6 +37,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .hud-settings{background:none;border:none;font-size:16px;cursor:pointer;padding:2px;opacity:.6;transition:opacity .2s}
 .hud-settings:hover{opacity:1}
 @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.25) translateY(-1px);filter:brightness(1.4)}}
+.streak-bonus{font-size:8px;font-weight:900;color:#ff6;background:rgba(255,100,0,.4);padding:0 4px;border-radius:6px;margin-left:2px;letter-spacing:.3px}
 
 /* ===== NEXT UNLOCK HINT ===== */
 #next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 8px;font-size:10px;font-weight:700;color:rgba(255,215,0,.9);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(0,0,0,.15),rgba(0,0,0,.25),rgba(0,0,0,.15));letter-spacing:.3px;overflow:hidden}
@@ -157,6 +158,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
   animation: harvestPulse 2s ease-in-out infinite;
 }
 @keyframes harvestPulse { 0%,100%{box-shadow:0 0 4px rgba(76,175,80,0.3)} 50%{box-shadow:0 0 10px rgba(76,175,80,0.6)} }
+.plant-all-btn {
+  background: rgba(139,69,19,0.35) !important;
+  border: 1px solid rgba(139,69,19,0.6) !important;
+  border-style: solid !important;
+  color: #fff !important;
+  animation: plantPulse 2s ease-in-out infinite;
+}
+@keyframes plantPulse { 0%,100%{box-shadow:0 0 4px rgba(139,69,19,0.3)} 50%{box-shadow:0 0 10px rgba(139,69,19,0.6)} }
 
 .zone-content {
   display: flex;
@@ -365,6 +374,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.2);font-weight:200;position:relative;z-index:1}
+.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:2px;opacity:.6;transition:opacity .2s}
+.plot-empty-prompt:hover{opacity:1}
+.plot-empty-label{font-size:9px;color:rgba(255,255,255,.5);font-weight:600}
 .plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.6;transition:opacity .2s}
 .plot-replant-label{font-size:8px;color:rgba(255,255,255,.7);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .plot-empty:hover .plot-replant{opacity:1}
@@ -709,6 +721,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 /* ===== PLOT GROWING ANIMATION ===== */
 .plot-planted .plot-crop,.plot-growing .plot-crop{animation:growPulse 3s ease-in-out infinite}
 @keyframes growPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ===== READY CROP BOUNCE ===== */
+.plot-crop-bounce{animation:readyBounce 1.5s ease-in-out infinite !important}
+@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}30%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
+.plot-ready-label{font-weight:800;color:var(--gold) !important;text-shadow:0 1px 3px rgba(0,0,0,.6) !important}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}

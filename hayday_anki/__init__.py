@@ -222,7 +222,6 @@ def _check_achievements(mgr):
         _achievement_manager = ach_mod.AchievementManager()
     ach_mgr = _achievement_manager
     state_dict = mgr.state.to_dict()
-    state_dict["num_plots"] = mgr.state.num_plots
     session_data = {
         "cards_reviewed": mgr.state.session_reviews,
         "correct_count": mgr.state.total_correct,

@@ -235,6 +235,9 @@ class FarmState:
         self.wheel_spins: int = 0
         self.materials_collected: int = 0
         self.total_sessions: int = 0
+        self.early_bird_count: int = 0   # Reviews before 7 AM
+        self.night_owl_count: int = 0    # Reviews after 11 PM
+        self.weekend_review_count: int = 0  # Weekend review sessions
 
     def add_plots(self, count: int):
         """Add new fields to the farm (called by level-up unlocks)."""
@@ -346,15 +349,78 @@ class FarmState:
             "wheel_spins": self.wheel_spins,
             "materials_collected": self.materials_collected,
             "total_sessions": self.total_sessions,
+            "early_bird_count": self.early_bird_count,
+            "night_owl_count": self.night_owl_count,
+            "weekend_review_count": self.weekend_review_count,
         }
 
     @classmethod
     def from_dict(cls, data: Dict) -> "FarmState":
         """Deserialize state from dict with schema migration."""
-        state = cls()
-        saved_version = data.pop("_schema_version", 1)
+        state = cls.__new__(cls)
+        # Initialize ALL defaults first (same as __init__ but without starter fields)
+        state.coins = 50
+        state.gems = 5
+        state.xp = 0
+        state.level = 1
+        state.total_reviews = 0
+        state.total_correct = 0
+        state.lifetime_reviews = 0
+        state.inventory = {}
+        state.barn_capacity = 50
+        state.barn_level = 1
+        state.silo_capacity = 50
+        state.silo_level = 1
+        state.plots = []
+        state.num_plots = 3
+        state.buildings = {}
+        state.animals = {}
+        state.decorations = []
+        state.unlocked_crops = ["wheat", "corn"]
+        state.unlocked_buildings = []
+        state.unlocked_animals = []
+        state.current_streak = 0
+        state.best_streak = 0
+        state.last_review_date = None
+        state.last_wheel_spin = None
+        state.daily_mystery_boxes_opened = 0
+        state.last_mystery_box_date = None
+        state.created_at = datetime.now().isoformat()
+        state.last_session = None
+        state.mystery_boxes = []
+        state.session_coins_earned = 0
+        state.session_xp_earned = 0
+        state.session_items_earned = {}
+        state.session_reviews = 0
+        state.production_queues = {}
+        state.achievements = {}
+        state.last_login_date = None
+        state.login_streak = 0
+        state.active_events = []
+        state.active_orders = []
+        state.orders_completed = 0
+        state.land_total = 20
+        state.fields = []  # Empty — will be populated from save or migration
+        state.placed_buildings = []
+        state.pastures = []
+        state.total_harvests = 0
+        state.total_coins_earned = 0
+        state.total_coins_spent = 0
+        state.total_items_sold = 0
+        state.total_produced = 0
+        state.mystery_boxes_opened = 0
+        state.wheel_spins = 0
+        state.materials_collected = 0
+        state.total_sessions = 0
+        state.early_bird_count = 0
+        state.night_owl_count = 0
+        state.weekend_review_count = 0
+
+        saved_version = data.get("_schema_version", 1)
 
         for key, value in data.items():
+            if key == "_schema_version":
+                continue
             if hasattr(state, key):
                 setattr(state, key, value)
 
@@ -385,6 +451,14 @@ class FarmState:
                     "reviews_done": plot.get("reviews_done", 0),
                     "planted_at": plot.get("planted_at"),
                 })
+        # Brand new save (no fields AND no plots) — create starter fields
+        if not state.fields and not state.plots:
+            for i in range(3):
+                state.fields.append({
+                    "id": i, "crop": None, "state": "empty",
+                    "growth_stage": 0, "reviews_needed": 0,
+                    "reviews_done": 0, "planted_at": None,
+                })
         # Migrate old buildings dict to placed_buildings
         if not state.placed_buildings and state.buildings:
             for bid, bdata in state.buildings.items():
@@ -395,6 +469,7 @@ class FarmState:
                 if adata.get("count", 0) > 0:
                     state.pastures.append({"id": len(state.pastures), "animal_type": aid, "count": adata["count"], "reviews_since_last": adata.get("reviews_since_last", 0)})
 
+        state.num_plots = len(state.fields)
         return state
 
 
@@ -545,6 +620,15 @@ class FarmManager:
 
         if ease > 1:
             self.state.total_correct += 1
+
+        # Track time-based achievement counters
+        now = datetime.now()
+        if now.hour < 7:
+            self.state.early_bird_count += 1
+        if now.hour >= 23:
+            self.state.night_owl_count += 1
+        if now.weekday() >= 5:  # Saturday=5, Sunday=6
+            self.state.weekend_review_count += 1
 
         # Determine crop drop based on level
         crop_drop = self._roll_crop_drop()
@@ -963,6 +1047,19 @@ class FarmManager:
 
         return {"items": harvested, "xp": xp_gain}
 
+    def plant_all_empty(self) -> int:
+        """Plant last_crop on all empty fields that have one. Returns count planted."""
+        count = 0
+        for field in self.state.fields:
+            if field["state"] != "empty":
+                continue
+            last_crop = field.get("last_crop")
+            if not last_crop or last_crop not in self.state.unlocked_crops:
+                continue
+            if self.plant_crop(field["id"], last_crop):
+                count += 1
+        return count
+
     def harvest_all(self) -> Dict:
         """Harvest all ready crops. Returns combined results."""
         total_items = {}
@@ -1143,17 +1240,20 @@ class FarmManager:
         # Build pool of orderable items based on unlocked content
         order_items = list(self.state.unlocked_crops)
 
-        # Add animal products if player owns any animals
+        # Add animal products if player owns any animals (use pastures as source of truth)
         animal_products = {
             "cow": "milk", "chicken": "egg", "pig": "bacon", "sheep": "wool"
         }
-        for animal_id, product in animal_products.items():
-            if self.state.animals.get(animal_id, {}).get("count", 0) > 0:
-                order_items.append(product)
+        for pasture in self.state.pastures:
+            product = animal_products.get(pasture.get("animal_type"))
+            if product and pasture.get("count", 0) > 0:
+                if product not in order_items:
+                    order_items.append(product)
 
-        # Add processed goods from owned buildings
+        # Add processed goods from owned buildings (use placed_buildings as source of truth)
         from . import production
-        for building_id in self.state.buildings:
+        for pb in self.state.placed_buildings:
+            building_id = pb.get("building_type", "")
             for recipe in production.RECIPES.get(building_id, []):
                 for output_id in recipe["output"]:
                     if output_id not in order_items:
@@ -1164,7 +1264,7 @@ class FarmManager:
             num_items = random.randint(1, min(3, self.state.level // 5 + 1))
             for _ in range(num_items):
                 item = random.choice(order_items)
-                qty = random.randint(1, max(1, self.state.level // 3))
+                qty = random.randint(1, max(1, min(self.state.level // 3, 10)))
                 items_needed[item] = items_needed.get(item, 0) + qty
 
             # Boat orders are harder but more rewarding
@@ -1488,6 +1588,7 @@ class FarmManager:
     # --- Data for UI ---
 
     _item_catalog_cache = None
+    _static_defs_cache = None
 
     @staticmethod
     def _is_event_active(event: Dict) -> bool:
@@ -1497,20 +1598,15 @@ class FarmManager:
         except (ValueError, TypeError):
             return False
 
-    def get_farm_data(self) -> Dict:
-        """Get complete farm data for UI rendering."""
+    @staticmethod
+    def get_static_defs() -> Dict:
+        """Get static definitions (items, buildings, crops, animals, decos).
+        These never change at runtime — sent once on page load."""
+        if FarmManager._static_defs_cache is not None:
+            return FarmManager._static_defs_cache
+
         from . import progression
 
-        xp_for_current = progression.get_xp_for_level(self.state.level)
-        xp_for_next = progression.get_xp_for_level(self.state.level + 1)
-        xp_progress = self.state.xp - xp_for_current
-        xp_needed = xp_for_next - xp_for_current
-
-        # Cache item catalog (it never changes at runtime)
-        if FarmManager._item_catalog_cache is None:
-            FarmManager._item_catalog_cache = {k: v for k, v in ITEM_CATALOG.items()}
-
-        # Build definitions dicts for JS (French names, costs, etc.)
         building_defs = {
             bid: {
                 "name": bdef.get("name", bid),
@@ -1552,6 +1648,25 @@ class FarmManager:
             for did, ddef in progression.DECORATION_CATALOG.items()
         }
 
+        FarmManager._static_defs_cache = {
+            "item_catalog": {k: v for k, v in ITEM_CATALOG.items()},
+            "building_defs": building_defs,
+            "animal_defs": animal_defs,
+            "crop_defs": crop_defs,
+            "deco_defs": deco_defs,
+        }
+        return FarmManager._static_defs_cache
+
+    def get_farm_data(self) -> Dict:
+        """Get dynamic farm state for UI rendering.
+        Static definitions are sent separately via get_static_defs()."""
+        from . import progression
+
+        xp_for_current = progression.get_xp_for_level(self.state.level)
+        xp_for_next = progression.get_xp_for_level(self.state.level + 1)
+        xp_progress = self.state.xp - xp_for_current
+        xp_needed = xp_for_next - xp_for_current
+
         return {
             "level": self.state.level,
             "xp": self.state.xp,
@@ -1589,7 +1704,6 @@ class FarmManager:
             "total_reviews": self.state.total_reviews,
             "lifetime_reviews": self.state.lifetime_reviews,
             "can_spin_wheel": self.can_spin_wheel(),
-            "item_catalog": FarmManager._item_catalog_cache,
             "achievements": self.state.achievements,
             "session_reviews": self.state.session_reviews,
             "session_coins": self.state.session_coins_earned,
@@ -1600,10 +1714,6 @@ class FarmManager:
                 for e in self.state.active_events
                 if self._is_event_active(e)
             ],
-            "building_defs": building_defs,
-            "animal_defs": animal_defs,
-            "crop_defs": crop_defs,
-            "deco_defs": deco_defs,
             "total_harvests": self.state.total_harvests,
             "total_coins_earned": self.state.total_coins_earned,
             "total_items_sold": self.state.total_items_sold,

@@ -68,9 +68,25 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 3. **Harvest overflow** : `max(1, get_silo_space())` quand silo plein renvoyait 1 au lieu de 0, tentant un ajout impossible. Corrige : utilise directement `get_silo_space()` avec verification > 0.
 4. **unlocked_buildings type** : `Object.keys(farmData.unlocked_buildings||{})` traitait un tableau comme un objet. Corrige pour `(farmData.unlocked_buildings||[]).length`.
 
+## Bugs corriges (2026-04-05, session 5 — fondations solides)
+1. **from_dict mutait le dict d'entree** : `data.pop("_schema_version")` detruisait les donnees source. Corrige : utilise `data.get()` + skip dans la boucle.
+2. **Migration plots→fields cassee** : `FarmState.__init__` creait 3 starter fields, bloquant la migration des anciens `plots`. Corrige : `from_dict` utilise `__new__` pour eviter les starter fields, puis les cree seulement si aucune donnee existante.
+3. **Generations de commandes utilisait l'ancien dict `animals`** au lieu de `pastures` (source de verite). Corrige : parcourt `pastures` et `placed_buildings` directement.
+4. **Quantite de commandes illimitee** : a haut niveau, les commandes pouvaient demander 30+ items. Corrige : cap a 10 max.
+5. **4 achievements impossibles a debloquer** : `early_bird_count`, `night_owl_count`, `weekend_review_count` n'etaient jamais incrementes. `dedicated_hours` utilisait un compteur inexistant. Corrige : ajout des compteurs dans FarmState + increment dans process_review.
+6. **Code mort `buy_building`** : handler Python jamais appele depuis JS. Supprime.
+7. **Redundance `num_plots`** : override inutile dans `__init__.py`. Supprime.
+
+## Ameliorations (session 5)
+- **Performance** : definitions statiques (item_catalog, building_defs, crop_defs, animal_defs, deco_defs) envoyees 1 seule fois au chargement de la page via `initDefs()`, plus a chaque `updateFarm()`. Reduit la taille des mises a jour de ~60%.
+- **Replanter tout** : bouton "Tout planter" qui replante automatiquement toutes les parcelles vides avec leur derniere culture. Cycle recolte→replante en 2 clics.
+- **Champs vides invitants** : les parcelles vides sans derniere culture affichent "Planter" au lieu d'un simple "+".
+- **Bonus de serie visible** : badge "+X%" affiche dans le HUD a cote du compteur de serie.
+- **Crops pretes animees** : les cultures pretes a recolter rebondissent avec un label dore pour attirer l'attention.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Ameliorer l'apparence des decorations dans la zone Village
-- [ ] Sons : feedback audio sur les actions (recolte, achat, level up)
 - [ ] Evenements saisonniers avec bonus temporaires
 - [ ] Systeme de quetes quotidiennes/hebdomadaires
+- [ ] Tutoriel ameliore avec guidage contextuel
