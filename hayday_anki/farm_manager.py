@@ -209,6 +209,22 @@ class FarmState:
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
 
+        # Lifetime stat counters (for achievements)
+        self.total_coins_earned: int = 0
+        self.total_coins_spent: int = 0
+        self.total_items_sold: int = 0
+        self.total_harvests: int = 0
+        self.total_produced: int = 0
+        self.total_sessions: int = 0
+        self.total_time_spent: float = 0.0  # seconds
+        self.mystery_boxes_opened: int = 0
+        self.wheel_spins: int = 0
+        self.materials_collected: int = 0
+        self.early_bird_count: int = 0
+        self.night_owl_count: int = 0
+        self.weekend_review_count: int = 0
+        self.session_start_time: Optional[float] = None
+
     def _init_plots(self):
         """Initialize farm plots."""
         self.plots = []
@@ -320,6 +336,19 @@ class FarmState:
             "active_events": self.active_events,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
+            "total_coins_earned": self.total_coins_earned,
+            "total_coins_spent": self.total_coins_spent,
+            "total_items_sold": self.total_items_sold,
+            "total_harvests": self.total_harvests,
+            "total_produced": self.total_produced,
+            "total_sessions": self.total_sessions,
+            "total_time_spent": self.total_time_spent,
+            "mystery_boxes_opened": self.mystery_boxes_opened,
+            "wheel_spins": self.wheel_spins,
+            "materials_collected": self.materials_collected,
+            "early_bird_count": self.early_bird_count,
+            "night_owl_count": self.night_owl_count,
+            "weekend_review_count": self.weekend_review_count,
         }
 
     @classmethod
@@ -440,6 +469,7 @@ class FarmManager:
         self.state.session_coins_earned += coins
         self.state.session_xp_earned += xp
         self.state.session_reviews += 1
+        self.state.total_coins_earned += coins
 
         if ease > 1:
             self.state.total_correct += 1
@@ -460,6 +490,7 @@ class FarmManager:
                 rewards["items"][mat_id] = rewards["items"].get(mat_id, 0) + 1
                 self.state.session_items_earned[mat_id] = \
                     self.state.session_items_earned.get(mat_id, 0) + 1
+                self.state.materials_collected += 1
 
         # Mystery box chance (~1 in 20 reviews)
         if random.random() < 0.05:
@@ -628,6 +659,7 @@ class FarmManager:
             return None
 
         self.state.xp += xp_gain
+        self.state.total_harvests += 1
 
         # Reset plot
         plot["state"] = "empty"
@@ -652,6 +684,8 @@ class FarmManager:
         self.state.remove_item(item_id, actual)
         coins = item["sell_price"] * actual
         self.state.coins += coins
+        self.state.total_coins_earned += coins
+        self.state.total_items_sold += actual
         return coins
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
@@ -662,6 +696,7 @@ class FarmManager:
             return False
 
         self.state.coins -= cost
+        self.state.total_coins_spent += cost
         self.state.decorations.append({
             "id": len(self.state.decorations),
             "type": deco_type,
@@ -758,6 +793,7 @@ class FarmManager:
 
         # Remove box
         self.state.mystery_boxes.pop(box_index)
+        self.state.mystery_boxes_opened += 1
         return result
 
     # --- Streak Management ---
@@ -889,6 +925,7 @@ class FarmManager:
             return None
 
         self.state.last_wheel_spin = date.today().isoformat()
+        self.state.wheel_spins += 1
 
         prizes = [
             ({"coins": 25}, "25 Coins", 0.20),
@@ -1022,14 +1059,31 @@ class FarmManager:
         self.state.session_xp_earned = 0
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
+        self.state.session_start_time = time.time()
         self._pending_notifications = []
         self.update_streak()
         self.check_events()
+
+        # Track time-of-day stats
+        hour = datetime.now().hour
+        if hour < 7:
+            self.state.early_bird_count += 1
+        if hour >= 23:
+            self.state.night_owl_count += 1
+        if datetime.now().weekday() >= 5:
+            self.state.weekend_review_count += 1
 
     def end_session(self) -> Dict:
         """End session and return summary."""
         self.update_streak()
         self.generate_orders()
+        self.state.total_sessions += 1
+
+        # Track session duration
+        if self.state.session_start_time:
+            elapsed = time.time() - self.state.session_start_time
+            self.state.total_time_spent += elapsed
+            self.state.session_start_time = None
 
         # Process production queues
         self._process_production()
@@ -1126,6 +1180,19 @@ class FarmManager:
             "session_reviews": self.state.session_reviews,
             "session_coins": self.state.session_coins_earned,
             "session_xp": self.state.session_xp_earned,
+            "total_coins_earned": self.state.total_coins_earned,
+            "total_coins_spent": self.state.total_coins_spent,
+            "total_items_sold": self.state.total_items_sold,
+            "total_harvests": self.state.total_harvests,
+            "total_produced": self.state.total_produced,
+            "total_sessions": self.state.total_sessions,
+            "total_time_spent": self.state.total_time_spent,
+            "mystery_boxes_opened": self.state.mystery_boxes_opened,
+            "wheel_spins": self.state.wheel_spins,
+            "materials_collected": self.state.materials_collected,
+            "early_bird_count": self.state.early_bird_count,
+            "night_owl_count": self.state.night_owl_count,
+            "weekend_review_count": self.state.weekend_review_count,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
             "active_events": [
                 {"name": e.get("name", ""), "emoji": e.get("emoji", "")}

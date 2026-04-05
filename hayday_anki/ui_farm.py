@@ -331,6 +331,7 @@ class FarmWebView:
             self._js(f"showNotification('Max {aname}s reached!')")
             return
         self.manager.state.coins -= cost
+        self.manager.state.total_coins_spent += cost
         if animal_id not in self.manager.state.animals:
             self.manager.state.animals[animal_id] = {"count": 0, "reviews_since_last": 0}
         self.manager.state.animals[animal_id]["count"] = current + 1
@@ -351,6 +352,7 @@ class FarmWebView:
             self._js("showNotification('Not enough coins!')")
             return
         self.manager.state.coins -= cost
+        self.manager.state.total_coins_spent += cost
         self.manager.state.buildings[building_id] = {"level": 1}
         bname = building_def["name"]
         self._js(f"showNotification('Built {bname}!')")
@@ -413,6 +415,7 @@ class FarmWebView:
             return
 
         self.manager.state.coins -= cost_coins
+        self.manager.state.total_coins_spent += cost_coins
         self.manager.state.remove_item("land_deed", cost_deed)
         self.manager.state.remove_item("expansion_permit", cost_permit)
         self.manager.state.add_plots(count)

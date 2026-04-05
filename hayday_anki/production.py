@@ -283,6 +283,7 @@ class ProductionManager:
                             "xp": item["xp"],
                         })
                         self.state.xp += item["xp"]
+                        self.state.total_produced += qty
                     else:
                         # Storage full — keep in queue
                         remaining.append(item)

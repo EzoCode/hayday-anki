@@ -165,10 +165,14 @@ def _check_achievements(mgr):
     ach_mgr = ach_mod.AchievementManager()
     state_dict = mgr.state.to_dict()
     state_dict["num_plots"] = mgr.state.num_plots
+    elapsed = 0.0
+    if mgr.state.session_start_time:
+        import time
+        elapsed = time.time() - mgr.state.session_start_time
     session_data = {
         "cards_reviewed": mgr.state.session_reviews,
         "correct_count": mgr.state.total_correct,
-        "total_elapsed": 0,
+        "total_elapsed": elapsed,
     }
     newly_unlocked = ach_mgr.check_all(state_dict, session_data)
     for ach in newly_unlocked:

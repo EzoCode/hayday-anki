@@ -56,9 +56,11 @@ const EXPANSION_LEVELS = [
   {lvl:60,plots:1},{lvl:70,plots:1},{lvl:80,plots:1},{lvl:90,plots:1},{lvl:100,plots:1}
 ];
 
+let _firstUpdate = true;
 function updateFarm(data) {
   farmData = data;
   updateHUD(); renderPlots(); renderBuildings(); renderAnimals(); renderMysteryBoxes(); updateSections(); checkStorageWarnings();
+  if (_firstUpdate) { _firstUpdate = false; checkTutorial(); }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -448,28 +450,123 @@ function showProductionDialog(data){
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 
-function renderStats(){
-  const d=farmData, grid=document.getElementById('stats-grid');
-  if(!grid) return;
-  const achCount=Object.keys(d.achievements||{}).length;
-  const itemCount=Object.values(d.inventory||{}).reduce((a,b)=>a+b,0);
-  const buildCount=Object.keys(d.buildings||{}).length;
-  const animalCount=Object.values(d.animals||{}).reduce((a,v)=>a+(v.count||0),0);
-  grid.innerHTML=`
-    <div class="stat-card"><div class="stat-value">${formatNum(d.lifetime_reviews||0)}</div><div class="stat-label">Total Reviews</div></div>
-    <div class="stat-card"><div class="stat-value">Lv ${d.level||1}</div><div class="stat-label">Current Level</div></div>
-    <div class="stat-card"><div class="stat-value">${formatNum(d.coins||0)}</div><div class="stat-label">Coins</div></div>
-    <div class="stat-card"><div class="stat-value">${formatNum(d.gems||0)}</div><div class="stat-label">Gems</div></div>
-    <div class="stat-card"><div class="stat-value">\u{1F525} ${d.streak||0}</div><div class="stat-label">Current Streak</div></div>
-    <div class="stat-card"><div class="stat-value">\u{1F525} ${d.best_streak||0}</div><div class="stat-label">Best Streak</div></div>
-    <div class="stat-card"><div class="stat-value">${d.num_plots||6}</div><div class="stat-label">Farm Plots</div></div>
-    <div class="stat-card"><div class="stat-value">${buildCount}</div><div class="stat-label">Buildings</div></div>
-    <div class="stat-card"><div class="stat-value">${animalCount}</div><div class="stat-label">Animals</div></div>
-    <div class="stat-card"><div class="stat-value">${itemCount}</div><div class="stat-label">Items Owned</div></div>
-    <div class="stat-card"><div class="stat-value">${d.orders_completed||0}</div><div class="stat-label">Orders Done</div></div>
-    <div class="stat-card"><div class="stat-value">${achCount}</div><div class="stat-label">Achievements</div></div>
+function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+
+// --- Stats Panel ---
+function renderStats() {
+  const d = farmData, g = document.getElementById('stats-grid');
+  if (!g) return;
+  const hours = Math.floor((d.total_time_spent||0)/3600);
+  const mins = Math.floor(((d.total_time_spent||0)%3600)/60);
+  g.innerHTML = `
+    <div class="stats-section-title">Progression</div>
+    <div class="stat-card"><span class="stat-icon">\u2B50</span><div class="stat-value">${d.level||1}</div><div class="stat-label">Level</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F525}</span><div class="stat-value">${d.best_streak||0}</div><div class="stat-label">Best Streak</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1FA99}</span><div class="stat-value">${formatNum(d.coins||0)}</div><div class="stat-label">Coins</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F48E}</span><div class="stat-value">${d.gems||0}</div><div class="stat-label">Gems</div></div>
+    <div class="stats-section-title">Reviews</div>
+    <div class="stat-card"><span class="stat-icon">\u{1F4DA}</span><div class="stat-value">${formatNum(d.lifetime_reviews||0)}</div><div class="stat-label">Total Reviews</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F393}</span><div class="stat-value">${d.total_sessions||0}</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-card wide"><span class="stat-icon">\u23F0</span><div class="stat-value">${hours}h ${mins}m</div><div class="stat-label">Time Studied</div></div>
+    <div class="stats-section-title">Economy</div>
+    <div class="stat-card"><span class="stat-icon">\u{1FA99}</span><div class="stat-value">${formatNum(d.total_coins_earned||0)}</div><div class="stat-label">Coins Earned</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F4B0}</span><div class="stat-value">${formatNum(d.total_coins_spent||0)}</div><div class="stat-label">Coins Spent</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F33E}</span><div class="stat-value">${d.total_harvests||0}</div><div class="stat-label">Harvests</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F69A}</span><div class="stat-value">${d.orders_completed||0}</div><div class="stat-label">Orders Done</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F3ED}</span><div class="stat-value">${d.total_produced||0}</div><div class="stat-label">Goods Made</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F381}</span><div class="stat-value">${d.mystery_boxes_opened||0}</div><div class="stat-label">Boxes Opened</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F3B0}</span><div class="stat-value">${d.wheel_spins||0}</div><div class="stat-label">Wheel Spins</div></div>
+    <div class="stat-card"><span class="stat-icon">\u{1F529}</span><div class="stat-value">${d.materials_collected||0}</div><div class="stat-label">Materials</div></div>
   `;
 }
 
-function formatNum(n){return n>=1000?(n/1000).toFixed(1)+'k':String(n)}
-document.addEventListener('DOMContentLoaded',()=>{document.getElementById('tab-farm').classList.add('active');drawWheel();pycmd('farm:get_state')});
+// --- Particle System ---
+let _particleInterval = null;
+function startParticles() {
+  if (_particleInterval) return;
+  const layer = document.getElementById('particles-layer');
+  if (!layer) return;
+  _particleInterval = setInterval(() => {
+    if (layer.children.length > 15) return; // limit particles
+    const types = ['leaf', 'sparkle', 'petal'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const el = document.createElement('div');
+    el.className = `particle particle-${type}`;
+    el.style.left = Math.random() * 100 + '%';
+    const dur = 6 + Math.random() * 8;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay = Math.random() * 2 + 's';
+    layer.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, (dur + 3) * 1000);
+  }, 2000);
+}
+
+// --- Weather System ---
+let _weatherInterval = null;
+let _currentWeather = 'clear';
+function setWeather(type) {
+  _currentWeather = type;
+  if (_weatherInterval) { clearInterval(_weatherInterval); _weatherInterval = null; }
+  const layer = document.getElementById('particles-layer');
+  // Clear existing weather particles
+  layer.querySelectorAll('.rain-drop,.snow-flake').forEach(e => e.remove());
+
+  if (type === 'rain') {
+    _weatherInterval = setInterval(() => {
+      if (layer.querySelectorAll('.rain-drop').length > 40) return;
+      const drop = document.createElement('div');
+      drop.className = 'rain-drop';
+      drop.style.left = Math.random() * 100 + '%';
+      drop.style.height = (15 + Math.random() * 20) + 'px';
+      drop.style.animation = `rainFall ${0.5 + Math.random() * 0.5}s linear forwards`;
+      layer.appendChild(drop);
+      setTimeout(() => { if (drop.parentNode) drop.remove(); }, 1200);
+    }, 50);
+  } else if (type === 'snow') {
+    _weatherInterval = setInterval(() => {
+      if (layer.querySelectorAll('.snow-flake').length > 30) return;
+      const flake = document.createElement('div');
+      flake.className = 'snow-flake';
+      flake.style.left = Math.random() * 100 + '%';
+      flake.style.width = flake.style.height = (3 + Math.random() * 4) + 'px';
+      flake.style.animation = `snowFall ${3 + Math.random() * 4}s linear forwards`;
+      layer.appendChild(flake);
+      setTimeout(() => { if (flake.parentNode) flake.remove(); }, 8000);
+    }, 200);
+  }
+  // Update sky color based on weather
+  const sky = document.getElementById('sky-layer');
+  if (sky) {
+    if (type === 'rain') {
+      document.body.style.background = 'linear-gradient(180deg,#6b7b8d 0%,#8a9bab 30%,#a0adb8 50%,#5a8a3a 50%,#4a7a32 60%,#3d6c28 100%)';
+      sky.querySelector('.sun-rays').style.opacity = '0';
+    } else if (type === 'snow') {
+      document.body.style.background = 'linear-gradient(180deg,#8899aa 0%,#b0bfcc 30%,#cdd8e0 50%,#e8eee8 50%,#d0ddd0 60%,#b8ccb8 100%)';
+      sky.querySelector('.sun-rays').style.opacity = '0.3';
+    } else {
+      document.body.style.background = '';
+      sky.querySelector('.sun-rays').style.opacity = '';
+    }
+  }
+}
+
+// --- Tutorial ---
+function checkTutorial() {
+  if (!farmData.lifetime_reviews && !farmData.total_reviews) {
+    document.getElementById('tutorial-overlay').classList.remove('hidden');
+  }
+}
+function dismissTutorial() {
+  document.getElementById('tutorial-overlay').classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('tab-farm').classList.add('active');
+  drawWheel();
+  startParticles();
+  // Random weather chance (10% rain, 5% snow, 85% clear)
+  const r = Math.random();
+  if (r < 0.10) setWeather('rain');
+  else if (r < 0.15) setWeather('snow');
+  pycmd('farm:get_state');
+});

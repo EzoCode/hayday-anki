@@ -1,3 +1,15 @@
+<!-- ===== SKY BACKGROUND ===== -->
+<div id="sky-layer">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+  <div class="cloud cloud-4"></div>
+  <div class="sun-rays"></div>
+</div>
+
+<!-- ===== AMBIENT PARTICLES ===== -->
+<div id="particles-layer"></div>
+
 <!-- ===== HUD BAR ===== -->
 <div id="hud">
   <div class="hud-left">
@@ -218,5 +230,43 @@
       <button class="action-btn sell-all-btn" onclick="doSellAll()">Sell All</button>
     </div>
     <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+  </div>
+</div>
+
+<!-- ===== TUTORIAL OVERLAY ===== -->
+<div id="tutorial-overlay" class="overlay hidden">
+  <div class="overlay-card tutorial-card">
+    <h2>🌾 Welcome to ADFarm!</h2>
+    <div class="tutorial-steps">
+      <div class="tutorial-step">
+        <span class="tutorial-num">1</span>
+        <div class="tutorial-text">
+          <strong>Review your Anki cards</strong>
+          <p>Every review earns coins, XP, and crops!</p>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-num">2</span>
+        <div class="tutorial-text">
+          <strong>Grow your farm</strong>
+          <p>Plant crops on empty plots. They grow as you study.</p>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-num">3</span>
+        <div class="tutorial-text">
+          <strong>Build & produce</strong>
+          <p>Unlock buildings to craft goods and fulfill orders.</p>
+        </div>
+      </div>
+      <div class="tutorial-step">
+        <span class="tutorial-num">4</span>
+        <div class="tutorial-text">
+          <strong>Daily streaks = bonuses</strong>
+          <p>Study every day for streak multipliers up to +50%!</p>
+        </div>
+      </div>
+    </div>
+    <button class="action-btn" onclick="dismissTutorial()">Let's Farm! 🚜</button>
   </div>
 </div>
