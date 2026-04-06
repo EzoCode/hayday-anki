@@ -394,8 +394,8 @@ function createConfetti() {
   const layer = document.getElementById('confetti-layer');
   if (!layer) return;
   layer.innerHTML = '';
-  const colors = ['#f44336','#e91e63','#9c27b0','#2196f3','#4caf50','#ff9800','#ffd700'];
-  for (let i = 0; i < 60; i++) {
+  const colors = ['#f44336','#e91e63','#9c27b0','#2196f3','#4caf50','#ff9800','#ffd700','#00bcd4','#ff5722'];
+  for (let i = 0; i < 80; i++) {
     const c = document.createElement('div');
     c.className = 'confetti-piece';
     c.style.left = (40 + Math.random() * 20) + '%';
@@ -462,8 +462,21 @@ function updateHUD() {
   document.getElementById('hud-xp-bar').style.width = (d.xp_percent || 0) + '%';
   document.getElementById('hud-xp-text').textContent = `${d.xp_progress||0}/${d.xp_needed||20}`;
   document.getElementById('streak-count').textContent = d.streak || 0;
-  document.getElementById('coin-count').textContent = formatNum(d.coins || 0);
-  document.getElementById('gem-count').textContent = formatNum(d.gems || 0);
+  // Animate coin/gem counters when values change
+  const coinEl = document.getElementById('coin-count');
+  const gemEl = document.getElementById('gem-count');
+  const newCoins = formatNum(d.coins || 0);
+  const newGems = formatNum(d.gems || 0);
+  if (coinEl.textContent !== newCoins) {
+    coinEl.textContent = newCoins;
+    coinEl.parentElement.style.transform = 'scale(1.15)';
+    setTimeout(()=>{coinEl.parentElement.style.transform = '';},200);
+  }
+  if (gemEl.textContent !== newGems) {
+    gemEl.textContent = newGems;
+    gemEl.parentElement.style.transform = 'scale(1.15)';
+    setTimeout(()=>{gemEl.parentElement.style.transform = '';},200);
+  }
   // Streak bonus indicator — show percentage when active
   const streakEl = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
@@ -1450,32 +1463,32 @@ function harvestPlot(id){
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
   const portrait = cropPortrait(cropId, 22) || itemIcon(cropId, 20);
-  // Main crop burst (8 particles fanning out)
-  for (let i = 0; i < 8; i++) {
+  // Main crop burst (10 particles fanning out in a satisfying arc)
+  for (let i = 0; i < 10; i++) {
     const el = document.createElement('div');
     el.className = 'harvest-particle';
     el.innerHTML = portrait;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    const angle = (i / 8) * Math.PI * 2;
-    const dist = 60 + Math.random() * 50;
+    const angle = (i / 10) * Math.PI * 2;
+    const dist = 50 + Math.random() * 60;
     el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-    el.style.setProperty('--dy', (Math.sin(angle) * dist - 40) + 'px');
-    el.style.animationDelay = (i * 40) + 'ms';
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 50) + 'px');
+    el.style.animationDelay = (i * 30) + 'ms';
     layer.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1100);
   }
-  // Gold sparkles around the harvest
-  for (let i = 0; i < 5; i++) {
+  // Gold sparkles around the harvest (more sparkles = more satisfying)
+  for (let i = 0; i < 8; i++) {
     const sp = document.createElement('div');
     sp.className = 'harvest-sparkle';
     sp.style.left = x + 'px';
     sp.style.top = y + 'px';
-    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
-    sp.style.setProperty('--dy', (-(Math.random() * 60 + 20)) + 'px');
-    sp.style.animationDelay = (100 + i * 50) + 'ms';
+    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 100) + 'px');
+    sp.style.setProperty('--dy', (-(Math.random() * 70 + 20)) + 'px');
+    sp.style.animationDelay = (80 + i * 40) + 'ms';
     layer.appendChild(sp);
-    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 1000);
   }
 }
 function plantAllEmpty(){SoundMgr.play('click');pycmd('farm:plant_all_empty')}
@@ -1602,47 +1615,75 @@ function showFloatingReward(text,x,y){const layer=document.getElementById('rewar
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');
   const coinSrc=S('ui_coin');
-  for(let i=0;i<(n||5);i++){
+  const count = Math.min(12, n || 5);
+  for(let i=0;i<count;i++){
     const el=document.createElement('div');
     el.className='coin-particle';
     if(coinSrc)el.innerHTML=`<img src="${coinSrc}" width="16" height="16">`;
     else el.innerHTML='<span class="css-coin" style="width:12px;height:12px"></span>';
     el.style.left=(x||window.innerWidth/2)+'px';
     el.style.top=(y||window.innerHeight/2)+'px';
-    el.style.setProperty('--dx',((Math.random()-.5)*80)+'px');
-    el.style.setProperty('--dy',(-(Math.random()*60+20))+'px');
-    el.style.animationDelay=(i*50)+'ms';
+    // Fan coins out in a pleasing arc (like Hay Day coin collect)
+    const angle = (i / count) * Math.PI + Math.PI; // upper semi-circle
+    const dist = 40 + Math.random() * 50;
+    el.style.setProperty('--dx',(Math.cos(angle)*dist)+'px');
+    el.style.setProperty('--dy',(Math.sin(angle)*dist - 30)+'px');
+    el.style.animationDelay=(i*40)+'ms';
     layer.appendChild(el);
-    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1000);
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1100);
   }
-  // Fly a coin to HUD (satisfying collection feel)
+  // Fly coins to HUD (satisfying collection feel — staggered for drama)
   const hudCoins=document.getElementById('hud-coins');
-  if(hudCoins&&(n||5)>0){
-    const coinFly=document.createElement('div');
-    coinFly.className='coin-fly-to-hud';
-    if(coinSrc)coinFly.innerHTML=`<img src="${coinSrc}" width="20" height="20">`;
-    else coinFly.innerHTML='<span class="css-coin" style="width:16px;height:16px"></span>';
-    coinFly.style.left=(x||window.innerWidth/2)+'px';
-    coinFly.style.top=(y||window.innerHeight/2)+'px';
-    const rect=hudCoins.getBoundingClientRect();
-    coinFly.style.setProperty('--target-x',(rect.left+rect.width/2-(x||window.innerWidth/2))+'px');
-    coinFly.style.setProperty('--target-y',(rect.top+rect.height/2-(y||window.innerHeight/2))+'px');
-    layer.appendChild(coinFly);
-    setTimeout(()=>{hudCoins.style.transform='scale(1.2)';setTimeout(()=>{hudCoins.style.transform='';},200)},500);
-    setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
+  if(hudCoins&&count>0){
+    const flyCount = Math.min(3, count);
+    for(let f=0; f<flyCount; f++){
+      const coinFly=document.createElement('div');
+      coinFly.className='coin-fly-to-hud';
+      if(coinSrc)coinFly.innerHTML=`<img src="${coinSrc}" width="20" height="20">`;
+      else coinFly.innerHTML='<span class="css-coin" style="width:16px;height:16px"></span>';
+      coinFly.style.left=(x||window.innerWidth/2)+'px';
+      coinFly.style.top=(y||window.innerHeight/2)+'px';
+      const rect=hudCoins.getBoundingClientRect();
+      coinFly.style.setProperty('--target-x',(rect.left+rect.width/2-(x||window.innerWidth/2))+'px');
+      coinFly.style.setProperty('--target-y',(rect.top+rect.height/2-(y||window.innerHeight/2))+'px');
+      coinFly.style.animationDelay=(200 + f*120)+'ms';
+      layer.appendChild(coinFly);
+      setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},900 + f*120);
+    }
+    // HUD bounce on coin arrival
+    setTimeout(()=>{
+      hudCoins.style.transform='scale(1.25)';
+      setTimeout(()=>{hudCoins.style.transform='scale(1.05)';
+        setTimeout(()=>{hudCoins.style.transform='';},150);
+      },120);
+    },450);
   }
 }
 function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
-    const cx=window.innerWidth/2, cy=window.innerHeight/2;
+    const cx=window.innerWidth/2, cy=window.innerHeight*0.45;
     showFloatingReward(`+${d.coins}`,cx,cy-20);
-    showCoinBurst(cx,cy,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
+    showCoinBurst(cx,cy,Math.min(10,Math.max(3,Math.floor(d.coins/2))));
   }
-  // XP: subtle text float
-  if(d.xp) showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);
-  // Material/item drops: individual notifications
-  if(d.items) Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});
+  // XP: subtle text float (offset from coins so they don't overlap)
+  if(d.xp) {
+    const xpEl = document.getElementById('hud-xp-bar');
+    if (xpEl) {
+      // Brief pulse on XP bar
+      xpEl.style.boxShadow = '0 0 12px rgba(76,175,80,.8)';
+      setTimeout(()=>{xpEl.style.boxShadow='';},600);
+    }
+    showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+50,window.innerHeight*0.45+15);
+  }
+  // Material/item drops: individual notifications with slight delay for drama
+  if(d.items) {
+    let delay = 0;
+    Object.entries(d.items).forEach(([id,qty])=>{
+      setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'), delay);
+      delay += 300;
+    });
+  }
   // Mystery box appearance
   if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}
 }
