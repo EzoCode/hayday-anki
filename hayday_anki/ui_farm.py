@@ -107,9 +107,12 @@ class FarmWebView:
         # Build sound data URIs for audio elements
         sound_setup_js = self._build_sound_setup()
 
+        # Build embedded @font-face CSS for game font
+        font_css = self._build_font_css()
+
         # Wrap CSS + body + sprite atlas + crop SVGs + sounds + JS into one blob
         full_body = (
-            f"<style>\n{css}\n</style>\n"
+            f"<style>\n{font_css}\n{css}\n</style>\n"
             f"{body_html}\n"
             f"<script>\n{sprite_atlas_js}\n{crop_sprites_js}\n{sound_setup_js}\n{js}\n</script>"
         )
@@ -121,6 +124,35 @@ class FarmWebView:
             context=self,
             default_css=False,
         )
+
+    def _build_font_css(self) -> str:
+        """Embed game font (Nunito) as base64 @font-face rules."""
+        fonts_dir = WEB_DIR / "fonts"
+        if not fonts_dir.exists():
+            return ""
+        rules = []
+        font_files = [
+            ("nunito-bold.woff2", 700),
+            ("nunito-extrabold.woff2", 800),
+        ]
+        for filename, weight in font_files:
+            filepath = fonts_dir / filename
+            if filepath.exists():
+                try:
+                    data = filepath.read_bytes()
+                    b64 = base64.b64encode(data).decode("ascii")
+                    rules.append(
+                        f"@font-face {{\n"
+                        f"  font-family: 'Nunito';\n"
+                        f"  font-weight: {weight};\n"
+                        f"  font-style: normal;\n"
+                        f"  font-display: swap;\n"
+                        f"  src: url('data:font/woff2;base64,{b64}') format('woff2');\n"
+                        f"}}"
+                    )
+                except Exception:
+                    pass
+        return "\n".join(rules)
 
     def _build_sprite_atlas(self) -> str:
         """Convert all sprites to base64 and return as JS object."""
@@ -153,13 +185,8 @@ class FarmWebView:
             if rel_path in skip_paths:
                 continue
 
-            # Skip old generated building sprites (replaced by hayday/)
-            if png_file.parent.name == "buildings":
-                continue
-
-            # Skip old generated crop sprites (replaced by SVG crop_sprites.js)
-            if png_file.parent.name == "crops":
-                continue
+            # Keep building PNGs (high-quality 80x80 isometric sprites)
+            # Keep crop PNGs as fallback (48x48 pixel art)
 
             rel = png_file.relative_to(SPRITES_DIR).as_posix()
             key = rel.replace("/", "_").replace(".png", "")

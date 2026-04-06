@@ -313,25 +313,28 @@ const BUILDING_SVGS = {
 // Get building icon <img> tag (small, for menus/lists)
 function buildingIcon(id, w) {
   w = w || 28;
-  if (BUILDING_SVGS[id]) return `<img src="${BUILDING_SVGS[id]}" width="${w}" height="${w}" style="object-fit:contain">`;
+  // Prefer real PNG sprites over SVG fallbacks
   const sprSrc = S(HD_BUILDINGS[id]) || S(`buildings_${id}`);
   if (sprSrc) return `<img src="${sprSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
+  if (BUILDING_SVGS[id]) return `<img src="${BUILDING_SVGS[id]}" width="${w}" height="${w}" style="object-fit:contain">`;
   return '';
 }
 
 const HD_BUILDINGS = {
-  bakery:'_bld_bakery', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'_bld_sugar_mill', dairy:'_bld_dairy',
-  chicken_coop:'hayday_chicken_coop', bbq:'_bld_bbq', pastry_shop:'_bld_pastry_shop',
-  pizzeria:'_bld_pizzeria', jam_maker:'_bld_jam_maker', juice_press:'_bld_juice_press',
-  pie_oven:'_bld_pie_oven', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  bakery:'buildings_bakery', barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'buildings_sugar_mill', dairy:'buildings_dairy',
+  chicken_coop:'hayday_chicken_coop', bbq:'buildings_bbq', pastry_shop:'buildings_bakery',
+  pizzeria:'buildings_bakery', jam_maker:'buildings_dairy', juice_press:'buildings_windmill',
+  pie_oven:'buildings_bbq', windmill:'buildings_windmill', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
-  // Try custom SVG first
+  // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
+  const key = HD_BUILDINGS[id] || `buildings_${id}`;
+  const sprSrc = S(key);
+  if (sprSrc) return `<img src="${sprSrc}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
   if (BUILDING_SVGS[id]) {
     return `<img src="${BUILDING_SVGS[id]}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
   }
-  const key = HD_BUILDINGS[id] || `buildings_${id}`;
   return img(key, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
 }
 
