@@ -191,7 +191,12 @@ function toggleNotifs(on) { notificationsEnabled = on; }
 function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
-function S(key) { return (typeof SPRITES !== 'undefined' && SPRITES[key]) ? SPRITES[key] : null; }
+function S(key) {
+  // Check high-quality SVG crops first, then PNG atlas
+  if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
+  if (typeof SPRITES !== 'undefined' && SPRITES[key]) return SPRITES[key];
+  return null;
+}
 function img(key, w, h, cls) {
   const src = S(key);
   if (!src) return '';
@@ -272,7 +277,7 @@ function itemIcon(id, w) {
   if (cp) return cp;
   // Try mature crop sprite (stage 4 = ready) as icon — real game feel
   const cropReady = S(`crops_${id}_4`);
-  if (cropReady) return `<img src="${cropReady}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  if (cropReady) return `<img src="${cropReady}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try inline SVG icon (handcrafted per item)
   const svgSrc = ITEM_ICONS[id];
   if (svgSrc) return `<img src="${svgSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
@@ -536,7 +541,7 @@ function renderFields() {
 
   if (fields.length === 0) {
     const wheatSrc = S('crops_wheat_portrait') || S('crops_wheat_4');
-    const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="28" height="28" style="image-rendering:pixelated;vertical-align:middle;margin-right:4px">` : '';
+    const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="28" height="28" style="vertical-align:middle;margin-right:4px">` : '';
     grid.innerHTML = `<div class="zone-empty-msg">${wheatIcon}Ajoute ton premier champ pour commencer !</div>`;
     return;
   }
@@ -563,7 +568,7 @@ function renderFields() {
       }
     } else if (field.state === 'ready') {
       const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 44)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
@@ -579,7 +584,8 @@ function renderFields() {
       const pctRound = Math.round(pct);
       const name = cropName(field.crop);
       const reviewsLeft = totalNeeded - totalDone;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      const cropSize = stage <= 1 ? 36 : 44;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
     }
     grid.appendChild(el);
   });

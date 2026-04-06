@@ -798,6 +798,13 @@ class FarmManager:
                     crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
                     field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
 
+        # Wilt check on all ready fields (crops wilt after 50 reviews unharvested)
+        for field in self.state.fields:
+            if field["state"] == "ready":
+                ready_since = field.get("_ready_since", 0)
+                if ready_since > 0 and self.state.total_reviews - ready_since > 50:
+                    field["state"] = "wilted"
+
         # Build notifications for newly ready crops
         notifs = []
         if newly_ready:
@@ -812,13 +819,6 @@ class FarmManager:
                     "message": msg,
                 })
         return notifs
-
-        # Wilt check on all ready fields
-        for field in self.state.fields:
-            if field["state"] == "ready":
-                ready_since = field.get("_ready_since", 0)
-                if ready_since > 0 and self.state.total_reviews - ready_since > 50:
-                    field["state"] = "wilted"
 
     def _get_event_multipliers(self) -> Tuple[float, float]:
         """Get active event multipliers for coins and XP (capped at 5x)."""

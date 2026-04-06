@@ -402,9 +402,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
 @keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto}
+.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:14px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
-.plot-crop img{image-rendering:pixelated;max-width:56px;max-height:56px;width:auto;height:auto}
+.plot-crop img{max-width:56px;max-height:56px;width:auto;height:auto}
 .plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
@@ -619,7 +619,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .crop-choice:hover{background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateX(5px);box-shadow:0 4px 12px rgba(106,191,71,.2)}
 .crop-choice:active{transform:scale(.98)}
 .crop-choice-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-.crop-choice-icon img{image-rendering:pixelated;max-width:36px;max-height:36px}
+.crop-choice-icon img{max-width:36px;max-height:36px}
 .crop-choice-info{flex:1}
 .crop-choice-info strong{font-size:13px;color:var(--text-d)}
 .crop-choice-info span{font-size:9px;color:#888;display:block}

@@ -98,14 +98,20 @@ class FarmWebView:
         # Build sprite atlas as base64 data URIs
         sprite_atlas_js = self._build_sprite_atlas()
 
+        # Load SVG crop sprites (high-quality replacements)
+        crop_sprites_js = ""
+        crop_sprites_file = WEB_DIR / "crop_sprites.js"
+        if crop_sprites_file.exists():
+            crop_sprites_js = crop_sprites_file.read_text(encoding="utf-8")
+
         # Build sound data URIs for audio elements
         sound_setup_js = self._build_sound_setup()
 
-        # Wrap CSS + body + sprite atlas + sounds + JS into one blob
+        # Wrap CSS + body + sprite atlas + crop SVGs + sounds + JS into one blob
         full_body = (
             f"<style>\n{css}\n</style>\n"
             f"{body_html}\n"
-            f"<script>\n{sprite_atlas_js}\n{sound_setup_js}\n{js}\n</script>"
+            f"<script>\n{sprite_atlas_js}\n{crop_sprites_js}\n{sound_setup_js}\n{js}\n</script>"
         )
 
         self.web.stdHtml(
@@ -149,6 +155,10 @@ class FarmWebView:
 
             # Skip old generated building sprites (replaced by hayday/)
             if png_file.parent.name == "buildings":
+                continue
+
+            # Skip old generated crop sprites (replaced by SVG crop_sprites.js)
+            if png_file.parent.name == "crops":
                 continue
 
             rel = png_file.relative_to(SPRITES_DIR).as_posix()
