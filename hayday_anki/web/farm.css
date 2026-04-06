@@ -476,7 +476,14 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .coin-fly-to-hud{position:absolute;pointer-events:none;z-index:160;animation:coinFlyHud .6s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes coinFlyHud{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:1}100%{opacity:0;transform:translate(var(--target-x),var(--target-y)) scale(.4)}}
 .hud-coins,.hud-gems,.hud-streak{transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
+.hud-coins.hud-bump,.hud-gems.hud-bump,.hud-streak.hud-bump{animation:hudBump .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes hudBump{0%{transform:scale(1)}30%{transform:scale(1.25)}60%{transform:scale(.95)}100%{transform:scale(1)}}
 .hud-xp .xp-bar-fill{transition:width .6s cubic-bezier(.25,.46,.45,.94)}
+.xp-bar-flash .xp-bar-fill{box-shadow:0 0 12px rgba(76,175,80,.8),0 0 4px rgba(255,255,255,.5) !important}
+.xp-bar-flash{animation:xpFlash .7s ease-out}
+@keyframes xpFlash{0%{filter:brightness(1)}30%{filter:brightness(1.4)}100%{filter:brightness(1)}}
+.hud-level.level-bump{animation:levelBump .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes levelBump{0%{transform:scale(1)}40%{transform:scale(1.3) rotate(-5deg)}70%{transform:scale(.95) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
 
 /* ===== SPARKLE & CONFETTI LAYERS ===== */
 #sparkle-layer,#confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
@@ -560,6 +567,14 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(74,158,47,.4)}
 .order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.order-btn-ready{animation:orderReadyPulse 1.5s ease-in-out infinite}
+@keyframes orderReadyPulse{0%,100%{box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a}50%{box-shadow:0 3px 12px rgba(74,158,47,.6),inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 #2d6e1a,0 0 16px rgba(74,158,47,.3)}}
+.order-progress-wrap{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.order-prog-bar{flex:1;height:5px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden}
+.order-prog-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:3px;transition:width .4s}
+.order-prog-fill.almost{background:linear-gradient(90deg,#ffb74d,#ff9800);animation:almostPulse 2s ease-in-out infinite}
+@keyframes almostPulse{0%,100%{opacity:.8}50%{opacity:1}}
+.order-prog-text{font-size:9px;font-weight:800;color:#888;min-width:28px;text-align:right}
 
 /* ===== SHOP ===== */
 .shop-tabs{display:flex;gap:3px;padding:6px 14px 0}
@@ -805,16 +820,18 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes growPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
 /* Growth feedback — triggered when a plot advances after review */
-.plot-grew{animation:plotGrew .8s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew .plot-crop{animation:cropGrew .6s cubic-bezier(.34,1.56,.64,1) !important}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}30%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 0 20px rgba(106,191,71,.6),0 6px 12px rgba(0,0,0,.3)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}}
-@keyframes cropGrew{0%{transform:scale(1)}30%{transform:scale(1.2)}100%{transform:scale(1)}}
+.plot-grew{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew .plot-crop{animation:cropGrew .8s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew::after{content:'';position:absolute;inset:-4px;border-radius:16px;background:radial-gradient(circle,rgba(106,191,71,.5),transparent 70%);animation:growGlow 1s ease-out forwards;pointer-events:none;z-index:10}
+@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}20%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.35),inset -2px -2px 6px rgba(0,0,0,.2),0 0 24px rgba(106,191,71,.7),0 4px 8px rgba(0,0,0,.2);transform:scale(1.06)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}20%{transform:scale(1.25);filter:brightness(1.3)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes growGlow{0%{opacity:1;transform:scale(.8)}100%{opacity:0;transform:scale(1.3)}}
 
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.5s ease-in-out infinite !important}
-@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}30%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:900;color:var(--gold) !important;text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 8px rgba(255,215,0,.4) !important;font-size:9px !important;letter-spacing:.3px;animation:labelPulse 2s ease-in-out infinite}
-@keyframes labelPulse{0%,100%{opacity:.9}50%{opacity:1;text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 12px rgba(255,215,0,.6)}}
+@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}30%{transform:scale(1.12) translateY(-4px)}60%{transform:scale(1) translateY(0)}}
+.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(255,215,0,.95),rgba(244,146,42,.95));padding:2px 8px;border-radius:8px;font-size:10px !important;letter-spacing:.4px;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.3);box-shadow:0 2px 6px rgba(255,215,0,.5),0 0 10px rgba(255,215,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.4) !important;bottom:4px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
+@keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(255,215,0,.4),0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 2px 8px rgba(255,215,0,.7),0 0 16px rgba(255,215,0,.5)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}

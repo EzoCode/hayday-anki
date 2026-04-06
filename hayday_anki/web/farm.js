@@ -456,21 +456,71 @@ function checkStorageWarnings() {
   else if (siloPct >= 0.9) { showNotification(LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
 }
 
+// --- Animated Counter ---
+function animateCount(el, newVal, duration) {
+  const formatted = formatNum(newVal);
+  const old = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+  if (old === newVal || isNaN(newVal)) { el.textContent = formatted; return; }
+  const diff = newVal - old;
+  if (Math.abs(diff) < 2 || duration <= 0) { el.textContent = formatted; return; }
+  const steps = Math.min(Math.abs(diff), 15);
+  const stepDur = Math.max(20, Math.floor((duration || 400) / steps));
+  let current = old, step = 0;
+  const inc = diff / steps;
+  const timer = setInterval(() => {
+    step++;
+    current = step >= steps ? newVal : Math.round(old + inc * step);
+    el.textContent = formatNum(current);
+    if (step >= steps) clearInterval(timer);
+  }, stepDur);
+}
+function hudBump(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.classList.remove('hud-bump');
+  void el.offsetWidth;
+  el.classList.add('hud-bump');
+  setTimeout(() => el.classList.remove('hud-bump'), 500);
+}
+let _prevHud = { coins: 0, gems: 0, streak: 0, level: 0, xp_percent: 0 };
+
 function updateHUD() {
   const d = farmData;
   const starSrc = S('hayday_star');
   const starEl = document.getElementById('hud-star-img');
   if (starSrc && starEl) starEl.src = starSrc;
-  document.getElementById('hud-level').querySelector('.level-num').textContent = d.level || 1;
-  document.getElementById('hud-xp-bar').style.width = (d.xp_percent || 0) + '%';
+
+  const newLevel = d.level || 1;
+  document.getElementById('hud-level').querySelector('.level-num').textContent = newLevel;
+  if (_prevHud.level > 0 && newLevel > _prevHud.level) {
+    document.getElementById('hud-level').classList.add('level-bump');
+    setTimeout(() => document.getElementById('hud-level')?.classList.remove('level-bump'), 600);
+  }
+
+  const xpPct = d.xp_percent || 0;
+  document.getElementById('hud-xp-bar').style.width = xpPct + '%';
   document.getElementById('hud-xp-text').textContent = `${d.xp_progress||0}/${d.xp_needed||20}`;
-  document.getElementById('streak-count').textContent = d.streak || 0;
-  document.getElementById('coin-count').textContent = formatNum(d.coins || 0);
-  document.getElementById('gem-count').textContent = formatNum(d.gems || 0);
+  if (xpPct > (_prevHud.xp_percent || 0)) {
+    const xpTrack = document.querySelector('.xp-bar-track');
+    if (xpTrack) { xpTrack.classList.add('xp-bar-flash'); setTimeout(() => xpTrack.classList.remove('xp-bar-flash'), 700); }
+  }
+
+  const newCoins = d.coins || 0, newGems = d.gems || 0, newStreak = d.streak || 0;
+  const coinEl = document.getElementById('coin-count');
+  const gemEl = document.getElementById('gem-count');
+  const streakCountEl = document.getElementById('streak-count');
+  if (newCoins !== _prevHud.coins && _prevHud.coins > 0) { animateCount(coinEl, newCoins, 400); hudBump('hud-coins'); }
+  else coinEl.textContent = formatNum(newCoins);
+  if (newGems !== _prevHud.gems && _prevHud.gems > 0) { animateCount(gemEl, newGems, 300); hudBump('hud-gems'); }
+  else gemEl.textContent = formatNum(newGems);
+  if (newStreak !== _prevHud.streak && _prevHud.streak > 0) { streakCountEl.textContent = newStreak; hudBump('hud-streak'); }
+  else streakCountEl.textContent = newStreak;
+  _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct };
+
   // Streak bonus indicator — show percentage when active
-  const streakEl = document.getElementById('hud-streak');
+  const streakWrap = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
-  streakEl.title = bonus > 0 ? `Streak bonus: +${bonus}% pièces et XP` : 'Révisez chaque jour pour construire votre série !';
+  streakWrap.title = bonus > 0 ? `Streak bonus: +${bonus}% pièces et XP` : 'Révisez chaque jour pour construire votre série !';
   const streakBonusEl = document.getElementById('streak-bonus');
   if (streakBonusEl) {
     if (bonus > 0) {
@@ -1160,30 +1210,43 @@ function renderOrders() {
     return;
   }
 
-  orders.forEach((order,i) => {
+  // Sort: fulfillable first, then by progress %
+  const sortedOrders = orders.map((o,i)=>({...o,_idx:i})).sort((a,b)=>{
+    const inv=farmData.inventory||{};
+    const pA=Object.entries(a.items_needed||{}).reduce((s,[id,q])=>s+Math.min(1,(inv[id]||0)/q),0)/Math.max(1,Object.keys(a.items_needed||{}).length);
+    const pB=Object.entries(b.items_needed||{}).reduce((s,[id,q])=>s+Math.min(1,(inv[id]||0)/q),0)/Math.max(1,Object.keys(b.items_needed||{}).length);
+    return pB-pA;
+  });
+  sortedOrders.forEach(order => {
+    const i = order._idx;
     const card = document.createElement('div'); card.className = 'order-card';
-    const inv = farmData.inventory||{}; let canDo=true, items='';
+    const inv = farmData.inventory||{}; let canDo=true, items='', totalNeeded=0, totalHave=0;
     Object.entries(order.items_needed||{}).forEach(([id,qty]) => {
       const have=inv[id]||0;
       if(have<qty) canDo=false;
       const enough = have >= qty;
+      totalNeeded += qty; totalHave += Math.min(have, qty);
       items+=`<div class="order-item ${enough?'fulfilled':''}">
         ${itemIcon(id,18)}
         <span style="font-weight:600">${itemName(id)}</span>
         <span style="margin-left:auto;font-weight:700;color:${enough?'#4caf50':'#e74c3c'}">${have}/${qty}</span>
       </div>`;
     });
-
+    const pct = totalNeeded > 0 ? Math.round(totalHave / totalNeeded * 100) : 0;
+    const almostDone = pct >= 70 && !canDo;
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type"><img src="${order.type==='boat'?ITEM_ICONS._icon_boat:ITEM_ICONS._icon_truck_color}" width="28" height="28" style="vertical-align:middle"> ${order.type==='boat'?'Bateau':'Camion'}</span>
         <span class="order-reward">${order.coin_reward} p. \u2022 +${order.xp_reward} XP</span>
       </div>
+      ${!canDo?`<div class="order-progress-wrap"><div class="order-prog-bar"><div class="order-prog-fill${almostDone?' almost':''}" style="width:${pct}%"></div></div><span class="order-prog-text">${pct}%</span></div>`:''}
       <div class="order-items">${items}</div>
-      <button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
-        ${canDo?'Livrer maintenant !':'Items manquants'}
+      <button class="order-fulfill-btn${canDo?' order-btn-ready':''}" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
+        ${canDo?'\u2714 Livrer maintenant !':'Items manquants'}
       </button>
     `;
+    if (canDo) card.style.borderColor = 'rgba(106,191,71,.4)';
+    if (almostDone) card.style.borderColor = 'rgba(255,152,0,.35)';
     list.appendChild(card);
   });
 }
@@ -1659,16 +1722,16 @@ function showCoinBurst(x,y,n){
 function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
-    const cx=window.innerWidth/2, cy=window.innerHeight/2;
-    showFloatingReward(`+${d.coins}`,cx,cy-20);
-    showCoinBurst(cx,cy,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
+    const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
+    showFloatingReward(`+${d.coins}`,cx,cy);
+    showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
   }
-  // XP: subtle text float
-  if(d.xp) showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);
-  // Material/item drops: individual notifications
-  if(d.items) Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});
+  // XP: appears slightly after coins for staggered feel
+  if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
+  // Material/item drops: staggered notifications
+  if(d.items){let delay=300;Object.entries(d.items).forEach(([id,qty])=>{setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'),delay);delay+=200})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
