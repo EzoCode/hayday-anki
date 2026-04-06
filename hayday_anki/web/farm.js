@@ -6,7 +6,7 @@
 let farmData = {};
 let _staticDefs = {};  // Cached static definitions (item_catalog, building_defs, etc.)
 let currentPanel = null;
-let currentShopCategory = 'decorations';
+let currentShopCategory = 'animals';
 let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
@@ -96,8 +96,6 @@ function applyHayDayAssets() {
     'icon-inventory': {sprite: 'hayday_silo'},
     'icon-orders': {sprite: '_icon_truck'},
     'icon-shop': {sprite: 'hayday_shop'},
-    'icon-achievements': {sprite: 'hayday_star'},
-    'icon-wheel': {sprite: '_icon_wheel'},
   };
   for (const [elId, cfg] of Object.entries(toolbarIcons)) {
     const el = document.getElementById(elId);
@@ -112,7 +110,6 @@ function applyHayDayAssets() {
     'zone-title-fields': 'hayday_wheat-icon',
     'zone-title-workshop': 'hayday_barn',
     'zone-title-pasture': 'hayday_cow',
-    'zone-title-village': 'hayday_scarecrow',
   };
   for (const [elId, sprKey] of Object.entries(zoneIcons)) {
     const src = S(sprKey);
@@ -324,8 +321,8 @@ const HD_BUILDINGS = {
   bakery:'buildings_bakery', barn:'hayday_barn', silo:'hayday_silo',
   shop:'hayday_shop', sugar_mill:'buildings_sugar_mill', dairy:'buildings_dairy',
   chicken_coop:'hayday_chicken_coop', bbq:'buildings_bbq',
-  // Buildings without own PNG → fall through to unique BUILDING_SVGS
-  windmill:'buildings_windmill', coop:'hayday_chicken_coop',
+  coop:'hayday_chicken_coop',
+  // windmill PNG is a spritesheet, not a building — use SVG fallback
 };
 function buildingImg(id, w) {
   // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
@@ -420,7 +417,7 @@ function updateFarm(data) {
   oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   if (Object.keys(oldGrowth).length > 0) {
@@ -438,7 +435,6 @@ function updateFarm(data) {
     if (currentPanel === 'buildings') renderBuildingsPanel();
     if (currentPanel === 'orders') renderOrders();
     if (currentPanel === 'shop') renderShop();
-    if (currentPanel === 'achievements') renderAchievements();
     if (currentPanel === 'settings') renderSettings();
   }
 }
@@ -692,7 +688,9 @@ function updateTabBadges() {
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
   setBadge('tab-farm', (d.mystery_boxes||[]).length);
-  setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
+  // Show badge on shop if wheel can be spun
+  const shopBadge = (d.can_spin_wheel ? 1 : 0);
+  setBadge('tab-shop', shopBadge);
 }
 
 function setBadge(tabId, count) {
@@ -1063,7 +1061,7 @@ function showTab(tab) {
   if (panel) { panel.classList.remove('hidden');
     if(tab==='inventory')renderInventory();if(tab==='buildings')renderBuildingsPanel();
     if(tab==='orders')renderOrders();if(tab==='shop')renderShop();
-    if(tab==='achievements')renderAchievements();if(tab==='settings')renderSettings();
+    if(tab==='settings')renderSettings();
   }
   SoundMgr.play('click');
 }
@@ -1190,10 +1188,13 @@ function renderOrders() {
 
 function renderShop() {
   const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
-  const shopCats=['decorations','animals','upgrades','land'];
+  const shopCats=['animals','upgrades','land','wheel','achievements'];
   document.querySelectorAll('.shop-tab').forEach((b,i)=>b.classList.toggle('active',shopCats[i]===currentShopCategory));
-  if(currentShopCategory==='decorations')renderShopDeco(grid);else if(currentShopCategory==='animals')renderShopAnimals(grid);
-  else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
+  if(currentShopCategory==='animals')renderShopAnimals(grid);
+  else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);
+  else if(currentShopCategory==='land')renderShopLand(grid);
+  else if(currentShopCategory==='wheel')renderShopWheel(grid);
+  else if(currentShopCategory==='achievements'){grid.innerHTML='<div id="achievements-list" style="display:flex;flex-direction:column;gap:6px;padding:0;grid-column:1/-1"></div>';renderAchievements();}
 }
 function showShopCategory(cat){currentShopCategory=cat;renderShop()}
 function renderShopDeco(grid){
@@ -1410,6 +1411,22 @@ function renderShopLand(grid){
   grid.appendChild(info);
 }
 
+function renderShopWheel(grid) {
+  const canSpin = farmData.can_spin_wheel;
+  const el = document.createElement('div');
+  el.className = 'item-cell';
+  el.style.cssText = 'grid-column:1/-1;min-height:100px;text-align:center;padding:16px;cursor:pointer';
+  const wheelSrc = S('_icon_wheel');
+  const wheelIcon = wheelSrc ? `<img src="${wheelSrc}" width="56" height="56" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))">` : '';
+  if (canSpin) {
+    el.innerHTML = `${wheelIcon}<div style="font-weight:800;font-size:15px;margin-top:8px;color:#2e7d32">Roue de la Fortune</div><div style="font-size:11px;color:#666;margin-top:4px">Tourne la roue pour gagner des pièces, gemmes ou matériaux !</div><button class="action-btn" style="margin-top:10px" onclick="event.stopPropagation();spinWheel()">Tourner !</button>`;
+  } else {
+    el.style.opacity = '.6';
+    el.innerHTML = `${wheelIcon}<div style="font-weight:800;font-size:15px;margin-top:8px;color:var(--text-d)">Roue de la Fortune</div><div style="font-size:11px;color:#999;margin-top:4px">Déjà tourné aujourd'hui. Reviens demain !</div>`;
+  }
+  grid.appendChild(el);
+}
+
 function renderSettings() {
   const stats = document.getElementById('farm-stats');
   if (stats && farmData) {
@@ -1447,7 +1464,7 @@ function getAchCategoryIcon(cat) {
   const key = (cat||'').toLowerCase().replace(/[^a-z]/g,'');
   return ACH_CATEGORY_ICONS[ACH_CAT_ALIASES[key]||key] || ACH_CATEGORY_ICONS.reviews;
 }
-function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
+function updateAchievements(achs){const list=document.getElementById('achievements-list');if(!list)return;list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 

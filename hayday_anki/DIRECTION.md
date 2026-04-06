@@ -106,8 +106,18 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - **drawWheel null check** : protection contre crash si canvas pas encore rendu.
 - **Duplicate CSS cleanup** : suppression des definitions .pq-* dupliquees.
 
+## Ameliorations (session 8 — fondations solides, simplification)
+- **Village/Decorations desactive** : la zone Village et l'onglet Deco dans la boutique utilisaient des SVG generiques moches (aucun vrai sprite de decoration). Retire du jeu plutot que de montrer du contenu casse. Sera reactive quand on aura de vrais sprites.
+- **Toolbar simplifiee de 7 a 5 boutons** : Ferme, Batir, Sac, Livrer, Boutique. L'ancienne barre etait surchargee et contraire au design de Hay Day (4-5 onglets max). La Roue et les Succes sont maintenant dans la Boutique (onglets supplementaires).
+- **Roue dans la Boutique** : la Roue de la Fortune est maintenant un onglet dans la Boutique avec un gros bouton clair. Badge sur l'onglet Boutique quand la roue est disponible.
+- **Succes dans la Boutique** : les succes sont un onglet dans la Boutique (+ lien depuis les Reglages). Plus besoin d'un onglet dedie dans la toolbar.
+- **Windmill sprite corrige** : windmill.png etait en fait un spritesheet (pas un batiment). Exclu de l'atlas, le batiment utilise maintenant son SVG isometrique.
+- **Toolbar plus spacieuse** : 5 boutons au lieu de 7, icones 28px au lieu de 24px, labels 9px au lieu de 8px. Plus confortable a utiliser.
+- **CSS nettoye** : suppression des styles morts (deco-tile, decorations-layer, zone-village, decoration-item, wheelIdle).
+- **Principe : pas de feature cassee** : mieux vaut ne pas montrer une feature que de montrer du contenu casse avec des placeholders moches.
+
 ## Prochaines etapes
-- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
+- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.) → reactiver Village/Deco
 - [ ] Evenements saisonniers avec bonus temporaires
 - [ ] Systeme de quetes quotidiennes/hebdomadaires
 - [ ] Tutoriel ameliore avec guidage contextuel

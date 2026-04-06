@@ -168,7 +168,7 @@ class FarmWebView:
                 "Crop_Spritesheet.png", "farm_spritesheet.png",
                 "chests_32x32.png", "cow_walk.png", "chicken_walk.png",
                 "pig_walk.png", "sheep_walk.png", "coin_anim.png",
-                "farmland.png", "plants.png",
+                "farmland.png", "plants.png", "windmill.png",
             }
             if name in skip_names:
                 continue

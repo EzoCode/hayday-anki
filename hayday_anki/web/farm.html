@@ -81,15 +81,6 @@
       <div class="zone-content" id="pasture-grid"></div>
     </div>
 
-    <!-- Zone: Village (decorations) -->
-    <div class="farm-zone zone-village" id="zone-village">
-      <div class="zone-header">
-        <span class="zone-title" id="zone-title-village">Village</span>
-        <button class="zone-add-btn" onclick="showTab('shop')">+ Décorer</button>
-      </div>
-      <div class="zone-content" id="deco-grid"></div>
-    </div>
-
     <!-- Land status bar -->
     <div class="land-bar" id="land-bar">
       <span id="land-status">Terrain: 0/20</span>
@@ -97,7 +88,6 @@
     </div>
 
     <!-- Floating layers -->
-    <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
     <div id="farmer-character"></div>
     <div id="reward-layer"></div>
@@ -123,12 +113,6 @@
   </button>
   <button class="tool-btn" onclick="showTab('shop')" id="tab-shop">
     <span class="tool-icon" id="icon-shop"></span><span class="tool-label">Boutique</span>
-  </button>
-  <button class="tool-btn" onclick="showTab('achievements')" id="tab-achievements">
-    <span class="tool-icon" id="icon-achievements"></span><span class="tool-label">Succès</span>
-  </button>
-  <button class="tool-btn wheel-btn" onclick="spinWheel()" id="tab-wheel">
-    <span class="tool-icon" id="icon-wheel"></span><span class="tool-label">Roue</span>
   </button>
 </div>
 
@@ -159,19 +143,15 @@
   <div class="panel-handle"></div>
   <div class="panel-header"><h2>Boutique</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div class="shop-tabs">
-    <button class="shop-tab active" onclick="showShopCategory('decorations')">Déco</button>
-    <button class="shop-tab" onclick="showShopCategory('animals')">Animaux</button>
+    <button class="shop-tab active" onclick="showShopCategory('animals')">Animaux</button>
     <button class="shop-tab" onclick="showShopCategory('upgrades')">Améliorer</button>
     <button class="shop-tab" onclick="showShopCategory('land')">Terrain</button>
+    <button class="shop-tab" onclick="showShopCategory('wheel')">Roue</button>
+    <button class="shop-tab" onclick="showShopCategory('achievements')">Succès</button>
   </div>
   <div id="shop-grid" class="item-grid"></div>
 </div>
 
-<div id="panel-achievements" class="panel hidden">
-  <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Succès</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
-  <div id="achievements-list"></div>
-</div>
 
 <div id="panel-settings" class="panel hidden">
   <div class="panel-handle"></div>
@@ -180,6 +160,9 @@
     <label class="setting-row"><span>Son</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
     <label class="setting-row"><span>Musique</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
     <label class="setting-row"><span>Notifications</span><input type="checkbox" id="setting-notifs" checked onchange="toggleNotifs(this.checked)"></label>
+  </div>
+  <div class="settings-actions">
+    <button class="settings-action-btn" onclick="currentShopCategory='achievements';showTab('shop')">Voir les Succès</button>
   </div>
   <div class="settings-info">
     <p id="farm-stats"></p>

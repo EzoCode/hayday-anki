@@ -126,24 +126,18 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   border: 1.5px solid rgba(255,255,255,0.12);
   border-bottom: 3px solid rgba(40,80,20,0.35);
 }
-.zone-village {
-  background: linear-gradient(180deg, rgba(180,153,94,0.65) 0%, rgba(150,123,64,0.6) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(255,255,255,0.12);
-  border-bottom: 3px solid rgba(100,73,34,0.35);
-}
+/* zone-village removed — decorations disabled until real sprites exist */
 
 .zone-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  background: linear-gradient(180deg, rgba(90,53,20,0.35) 0%, rgba(60,35,12,0.25) 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(90,53,20,0.4) 0%, rgba(60,35,12,0.28) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .zone-title {
@@ -263,25 +257,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   text-shadow: 0 1px 1px rgba(0,0,0,.2);
 }
 
-/* Deco tiles in village zone */
-.deco-tile {
-  width: 72px;
-  height: 72px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(0,0,0,0.05));
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: pointer;
-}
-.deco-tile:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 14px rgba(0,0,0,0.25); }
-.deco-tile:active { transform: scale(0.95); }
-.deco-tile img { max-width: 46px; max-height: 46px; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3)); }
-.deco-name { font-size: 8px; color: rgba(255,255,255,0.6); font-weight: 700; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+/* Deco tiles removed — decorations disabled until real sprites */
 
 /* Pasture tile */
 .pasture-tile {
@@ -456,8 +432,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .animal-count{font-size:9px;color:var(--text-l);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 @keyframes animalBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 
-/* ===== DECORATIONS & MYSTERY BOXES ===== */
-#decorations-layer{position:absolute;inset:0;pointer-events:none;z-index:3}
+/* ===== MYSTERY BOXES ===== */
 #mystery-boxes-layer{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:6px;min-height:0;z-index:4;position:relative}
 .mystery-box{cursor:pointer;animation:boxFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,215,0,.6));transition:transform .15s;position:relative}
 .mystery-box:hover{transform:scale(1.2);filter:drop-shadow(0 0 14px rgba(255,215,0,.8))}
@@ -486,17 +461,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}}
 
 /* ===== TOOLBAR — Mobile Tab Bar ===== */
-#toolbar{display:flex;justify-content:space-around;align-items:center;padding:3px 2px 6px;height:58px;flex-shrink:0;z-index:100;
+#toolbar{display:flex;justify-content:space-around;align-items:center;padding:4px 6px 8px;height:62px;flex-shrink:0;z-index:100;
   background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
-.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 5px;border-radius:8px;transition:all .2s;min-width:40px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-1px)}
+.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;padding:4px 8px;border-radius:10px;transition:all .2s;min-width:52px;position:relative}
+.tool-btn:hover{color:rgba(255,255,255,.8);transform:translateY(-2px)}
 .tool-btn.active{color:#f4a42a}
-.tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:18px;height:3px;background:#f4a42a;border-radius:2px;box-shadow:0 0 8px rgba(244,164,42,.6)}
-.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:24px}
-.tool-icon img{max-width:24px;max-height:24px;object-fit:contain}
-.tool-label{font-size:8px;font-weight:700;letter-spacing:.3px}
-.wheel-btn .tool-icon{animation:wheelIdle 8s linear infinite}
+.tool-btn.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:22px;height:3px;background:#f4a42a;border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.6)}
+.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:28px}
+.tool-icon img{max-width:28px;max-height:28px;object-fit:contain}
+.tool-label{font-size:9px;font-weight:700;letter-spacing:.3px}
+/* wheel moved to shop */
 @keyframes wheelIdle{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
 
@@ -520,6 +495,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .setting-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.5);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;color:var(--text-d);cursor:pointer;transition:background .15s}
 .setting-row:hover{background:rgba(255,255,255,.7)}
 .setting-row input[type="checkbox"]{width:18px;height:18px;accent-color:#6abf47;cursor:pointer}
+.settings-actions{padding:6px 16px;display:flex;gap:6px}
+.settings-action-btn{flex:1;padding:8px 12px;background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.3));border:1px solid rgba(0,0,0,.06);border-radius:10px;font-size:12px;font-weight:700;color:var(--text-d);cursor:pointer;transition:all .15s;text-align:center}
+.settings-action-btn:hover{background:rgba(255,255,255,.8);transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.1)}
 .settings-info{padding:10px 16px}
 .settings-info p{font-size:11px;color:#999;text-align:center}
 
@@ -754,11 +732,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .rain-drop{position:absolute;top:-20px;width:2px;height:18px;background:linear-gradient(180deg,transparent,rgba(150,180,220,.6));border-radius:0 0 2px 2px;animation:rainFall .7s linear infinite}
 @keyframes rainFall{0%{transform:translateY(-20px)}100%{transform:translateY(100vh)}}
 
-/* ===== DECORATION IMPROVEMENTS ===== */
-.decoration-item{position:absolute;font-size:22px;filter:drop-shadow(1px 2px 4px rgba(0,0,0,.35));pointer-events:auto;cursor:grab;animation:decoIdle 4s ease-in-out infinite;transition:transform .2s}
-.decoration-item:hover{transform:scale(1.3);filter:drop-shadow(2px 3px 6px rgba(0,0,0,.5))}
-.decoration-item img{max-width:32px;max-height:32px;image-rendering:pixelated}
-@keyframes decoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+/* Decoration items removed — disabled until real sprites */
 
 /* ===== FARMER CHARACTER ===== */
 #farmer-character{position:absolute;bottom:8px;right:12px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.35))}
