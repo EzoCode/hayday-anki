@@ -272,6 +272,8 @@ class FarmWebView:
                     self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
                     msg = f"{result['count']} récoltes : {items_text}"
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                    if result["count"] >= 3:
+                        self._js("createConfetti()")
                     self._check_and_show_level_up()
                 else:
                     self._js("showNotification('Aucune récolte prête !')")
@@ -307,6 +309,8 @@ class FarmWebView:
                 qty = int(parts[3]) if len(parts) > 3 else 1
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
+                    burst_count = min(10, max(3, coins // 5))
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/2, {burst_count})")
                     self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
                     self._js(f"showNotification('Vendu pour {coins} pièces !')")
                 self._send_state()
@@ -542,13 +546,21 @@ class FarmWebView:
         from . import production
         prod_mgr = production.ProductionManager(self.manager.state)
         collected = prod_mgr.collect_ready(building_id)
+        total_xp = 0
+        collected_names = []
         for item in collected:
             i_name = item["name"]
             if item.get("storage_full"):
                 self._js(f"showNotification({json.dumps(f'Silo plein ! {i_name} reste en attente.')})")
             else:
-                i_xp = item["xp"]
-                self._js(f"showNotification({json.dumps(f'{i_name} récupéré ! +{i_xp} XP')})")
+                i_xp = item.get("xp", 0)
+                total_xp += i_xp
+                collected_names.append(i_name)
+        if collected_names:
+            names_str = ", ".join(collected_names)
+            self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(8, len(collected_names) * 3)})")
+            self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
+            self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")
 
     def _check_and_show_level_up(self):
         """Check if XP earned outside reviews triggered a level-up."""
