@@ -329,7 +329,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
   top: auto; right: auto;
   z-index: 310;
 }
-.info-card .info-icon { font-size: 40px; text-align: center; margin-bottom: 6px; }
+.info-card .info-icon { font-size: 40px; text-align: center; margin-bottom: 6px; display:flex;align-items:center;justify-content:center; }
+.info-card .info-icon img { max-width:48px;max-height:48px;object-fit:contain; }
 .info-card h3 { font-size: 17px; margin-bottom: 4px; }
 .info-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 10px; }
 .req-section { margin-bottom: 10px; }
@@ -443,6 +444,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-55px) scale(.8)}}
 .coin-particle{position:absolute;animation:coinBurst .8s ease-out forwards;pointer-events:none}
 @keyframes coinBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.harvest-particle{position:absolute;pointer-events:none;z-index:155;animation:harvestBurst .8s ease-out forwards}
+@keyframes harvestBurst{0%{opacity:1;transform:translate(0,0) scale(1.2)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4) rotate(20deg)}}
 .coin-fly-to-hud{position:absolute;pointer-events:none;z-index:160;animation:coinFlyHud .6s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes coinFlyHud{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:1}100%{opacity:0;transform:translate(var(--target-x),var(--target-y)) scale(.4)}}
 .hud-coins,.hud-gems{transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
@@ -517,7 +520,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
 .order-card:hover{transform:translateY(-1px)}
 .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.order-type{font-size:22px}
+.order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
 .order-reward{font-size:11px;font-weight:800;color:#2e7d32}
 .order-items{display:flex;flex-wrap:wrap;gap:4px}
 .order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
@@ -669,23 +672,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .sell-total{font-weight:800;color:var(--gold-d)}
 
 /* ===== WEATHER SYSTEM ===== */
-.weather-night .farm-sky{background:linear-gradient(180deg,#0a1628 0%,#1a2744 60%,rgba(26,39,68,0) 100%)}
-.weather-night #farm-world{filter:brightness(.45) saturate(.6) hue-rotate(10deg)}
-.weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.55) 100%)}
-.weather-night .section-label{color:rgba(180,200,255,.5)}
-.weather-night .building-name{color:rgba(200,210,255,.8)}
-.weather-night .farm-sky::before{content:'✦';position:absolute;top:12px;left:20%;font-size:6px;color:rgba(255,255,255,.7);text-shadow:0 0 4px rgba(200,220,255,.8);animation:starTwinkle 3s ease-in-out infinite}
-.weather-night .farm-sky::after{content:'★  ✦  ·  ★  ·  ✦  ★  ·  ✦';position:absolute;top:8px;right:10%;font-size:5px;letter-spacing:8px;color:rgba(255,255,255,.5);text-shadow:0 0 6px rgba(200,220,255,.6);animation:starTwinkle 4s ease-in-out infinite .5s}
-@keyframes starTwinkle{0%,100%{opacity:.4;filter:brightness(1)}50%{opacity:1;filter:brightness(1.6)}}
+.weather-night .farm-sky{background:linear-gradient(180deg,#0f1e3d 0%,#1e3358 40%,#2a4a6b 70%,rgba(42,74,107,0) 100%)}
+.weather-night #farm-world{filter:brightness(.7) saturate(.75) hue-rotate(5deg)}
+.weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,20,.3) 100%)}
+.weather-night .section-label{color:rgba(180,200,255,.6)}
+.weather-night .building-name{color:rgba(220,225,255,.9)}
+.weather-night .farm-sky::before{content:'✦';position:absolute;top:12px;left:20%;font-size:6px;color:rgba(255,255,255,.8);text-shadow:0 0 6px rgba(200,220,255,.9);animation:starTwinkle 3s ease-in-out infinite}
+.weather-night .farm-sky::after{content:'★  ✦  ·  ★  ·  ✦  ★  ·  ✦';position:absolute;top:8px;right:10%;font-size:5px;letter-spacing:8px;color:rgba(255,255,255,.6);text-shadow:0 0 6px rgba(200,220,255,.7);animation:starTwinkle 4s ease-in-out infinite .5s}
+@keyframes starTwinkle{0%,100%{opacity:.5;filter:brightness(1)}50%{opacity:1;filter:brightness(1.5)}}
 
 .weather-sunset .farm-sky{background:linear-gradient(180deg,#ff6b35 0%,#ff8c42 30%,#ffc947 60%,rgba(255,201,71,0) 100%)}
 .weather-sunset .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(180,80,20,.2) 100%)}
 
 .weather-dawn .farm-sky{background:linear-gradient(180deg,#fce4b8 0%,#ffd89b 40%,#b8d4e3 70%,rgba(184,212,227,0) 100%)}
 
-.weather-rain .farm-sky{background:linear-gradient(180deg,#6b7b8d 0%,#8899a8 60%,rgba(136,153,168,0) 100%)}
-.weather-rain #farm-world{filter:brightness(.85) saturate(.75)}
-.weather-rain .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.35) 100%)}
+.weather-rain .farm-sky{background:linear-gradient(180deg,#7b8d9e 0%,#95a8b8 60%,rgba(149,168,184,0) 100%)}
+.weather-rain #farm-world{filter:brightness(.9) saturate(.85)}
+.weather-rain .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.2) 100%)}
 
 #rain-layer{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
 .rain-drop{position:absolute;top:-20px;width:2px;height:18px;background:linear-gradient(180deg,transparent,rgba(150,180,220,.6));border-radius:0 0 2px 2px;animation:rainFall .7s linear infinite}

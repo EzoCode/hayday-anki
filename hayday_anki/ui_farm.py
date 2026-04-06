@@ -471,6 +471,7 @@ class FarmWebView:
             {
                 "name": item.get("name", ""),
                 "emoji": item.get("emoji", ""),
+                "recipe_id": item.get("recipe_id", ""),
                 "ready": item.get("ready", False),
                 "sessions_waited": item.get("sessions_waited", 0),
                 "sessions_required": item.get("sessions_required", 1),
