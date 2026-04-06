@@ -323,11 +323,13 @@ function buildingIcon(id, w) {
 }
 
 const HD_BUILDINGS = {
-  bakery:'buildings_bakery', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'buildings_sugar_mill', dairy:'buildings_dairy',
-  chicken_coop:'hayday_chicken_coop', bbq:'buildings_bbq',
-  // Buildings without own PNG → fall through to unique BUILDING_SVGS
-  windmill:'buildings_windmill', coop:'hayday_chicken_coop',
+  // All buildings use HayDay isometric sprites (transparent bg, high quality)
+  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'hayday_mill-dark', dairy:'hayday_silo',
+  chicken_coop:'hayday_chicken_coop', bbq:'hayday_shop',
+  pastry_shop:'hayday_barn', jam_maker:'hayday_mill-dark',
+  pizzeria:'hayday_shop', juice_press:'hayday_silo',
+  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
   // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
