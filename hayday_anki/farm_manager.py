@@ -798,7 +798,8 @@ class FarmManager:
                 else:
                     field["state"] = "growing"
                     crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
-                    field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
+                    total_growth = crop_def.get("growth_reviews", 3)
+                    field["reviews_needed"] = max(1, total_growth // 4)
 
         # Wilt check on all ready fields (crops wilt after 50 reviews unharvested)
         for field in self.state.fields:
@@ -913,7 +914,8 @@ class FarmManager:
 
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
-        reviews_per_stage = max(1, crop_def.get("growth_reviews", 3))
+        total_growth = crop_def.get("growth_reviews", 3)
+        reviews_per_stage = max(1, total_growth // 4)
 
         field["state"] = "planted"
         field["crop"] = crop_id
