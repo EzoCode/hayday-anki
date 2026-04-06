@@ -79,8 +79,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .farm-sky{position:sticky;top:0;left:0;right:0;height:70px;
   background:linear-gradient(180deg,#4fa8d8 0%,#7cc4e4 25%,#a8dce8 50%,#c5e8b0 80%,rgba(197,232,176,0) 100%);
   z-index:0;pointer-events:none;overflow:hidden}
-.farm-sky::before{content:'';position:absolute;top:6px;left:12%;width:80px;height:24px;background:rgba(255,255,255,.65);border-radius:24px;filter:blur(10px);animation:cloudDrift 60s linear infinite}
-.farm-sky::after{content:'';position:absolute;top:18px;right:15%;width:55px;height:18px;background:rgba(255,255,255,.45);border-radius:18px;filter:blur(8px);animation:cloudDrift 80s linear infinite reverse}
+.farm-sky::before{content:'';position:absolute;top:8px;left:12%;width:70px;height:18px;background:rgba(255,255,255,.5);border-radius:20px 20px 14px 14px;animation:cloudDrift 60s linear infinite}
+.farm-sky::after{content:'';position:absolute;top:20px;right:15%;width:50px;height:14px;background:rgba(255,255,255,.35);border-radius:16px 16px 10px 10px;animation:cloudDrift 80s linear infinite reverse}
 @keyframes cloudDrift{0%{transform:translateX(0)}50%{transform:translateX(20px)}100%{transform:translateX(0)}}
 
 .farm-atmosphere{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(255,240,180,.06) 0%,transparent 50%),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.12) 100%);pointer-events:none;z-index:5}
@@ -112,32 +112,24 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 }
 
 .zone-fields {
-  background: linear-gradient(180deg, rgba(76,140,50,0.72) 0%, rgba(55,110,35,0.65) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #4a8c32 0%, #3a7025 100%);
   border: 1.5px solid rgba(255,255,255,0.15);
-  border-bottom: 3px solid rgba(40,80,20,0.4);
+  border-bottom: 3px solid rgba(40,80,20,0.5);
 }
 .zone-workshop {
-  background: linear-gradient(180deg, rgba(160,106,48,0.7) 0%, rgba(130,84,40,0.65) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #8b5e3c 0%, #6b4520 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
-  border-bottom: 3px solid rgba(90,53,20,0.4);
+  border-bottom: 3px solid rgba(90,53,20,0.5);
 }
 .zone-pasture {
-  background: linear-gradient(180deg, rgba(90,157,58,0.68) 0%, rgba(70,130,42,0.6) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #5a9d3a 0%, #468a2a 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
-  border-bottom: 3px solid rgba(40,80,20,0.35);
+  border-bottom: 3px solid rgba(40,80,20,0.45);
 }
 .zone-village {
-  background: linear-gradient(180deg, rgba(180,153,94,0.65) 0%, rgba(150,123,64,0.6) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, #a08552 0%, #8a7040 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
-  border-bottom: 3px solid rgba(100,73,34,0.35);
+  border-bottom: 3px solid rgba(100,73,34,0.45);
 }
 
 .zone-header {
@@ -145,9 +137,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  background: linear-gradient(180deg, rgba(90,53,20,0.4) 0%, rgba(70,42,16,0.35) 50%, rgba(60,35,12,0.28) 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.18) 100%);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   border-top: 1px solid rgba(255,255,255,0.1);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.1);
@@ -776,7 +766,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .weather-dawn .farm-sky{background:linear-gradient(180deg,#fce4b8 0%,#ffd89b 30%,#b8d4e3 70%,rgba(184,212,227,0) 100%)}
 .weather-dawn .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 50%,rgba(255,180,80,.1) 100%)}
 .weather-dawn #farm-world{filter:brightness(1.02) saturate(1.05)}
-.weather-dawn .farm-sky::before{content:'';position:absolute;top:5px;right:10%;width:24px;height:24px;background:radial-gradient(circle,#fff8e1 20%,#ffd54f 50%,transparent 70%);border-radius:50%;box-shadow:0 0 20px rgba(255,213,79,.5);filter:blur(2px)}
+.weather-dawn .farm-sky::before{content:'';position:absolute;top:5px;right:10%;width:24px;height:24px;background:radial-gradient(circle,#fff8e1 20%,#ffd54f 50%,transparent 70%);border-radius:50%;box-shadow:0 0 20px rgba(255,213,79,.5)}
 
 .weather-sunset #farm-world{filter:brightness(.95) saturate(1.1) sepia(.08)}
 
