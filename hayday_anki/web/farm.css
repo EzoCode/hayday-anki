@@ -857,4 +857,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .item-cell:hover::before{opacity:1}
 .item-cell{position:relative}
 
+/* ===== PLANTING ANIMATION ===== */
+.plant-seed-drop{position:absolute;pointer-events:none;z-index:155;animation:seedDrop .6s cubic-bezier(.2,.8,.3,1) forwards;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+@keyframes seedDrop{0%{opacity:1;transform:translateY(0) scale(1.3)}40%{opacity:1;transform:translateY(30px) scale(1)}60%{transform:translateY(25px) scale(1.15)}100%{opacity:0;transform:translateY(30px) scale(.6)}}
+.plant-dirt-particle{position:absolute;pointer-events:none;z-index:154;width:5px;height:5px;background:radial-gradient(circle,#c9a66b,#8b6914);border-radius:50%;animation:dirtBurst .5s ease-out forwards}
+@keyframes dirtBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3)}}
+.plot-just-planted{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-just-planted::after{content:'';position:absolute;inset:-4px;border-radius:16px;background:radial-gradient(circle,rgba(76,175,80,.6),transparent 70%);animation:growGlow 1s ease-out forwards;pointer-events:none;z-index:10}
+
 .hidden{display:none!important}

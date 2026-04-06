@@ -1632,7 +1632,69 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){
+  rot=rot||0;
+  const c=document.getElementById('wheel-canvas');if(!c)return;
+  const ctx=c.getContext('2d'),cx=140,cy=140,r=130;
+  const segs=[
+    {l:'25',sub:'pièces',c1:'#c0392b',c2:'#e74c3c',icon:'coin'},
+    {l:'50',sub:'pièces',c1:'#d4a056',c2:'#e8c87a',icon:'coin'},
+    {l:'100',sub:'pièces',c1:'#c0392b',c2:'#e74c3c',icon:'coin'},
+    {l:'1',sub:'gemme',c1:'#2980b9',c2:'#3498db',icon:'gem'},
+    {l:'3',sub:'gemmes',c1:'#d4a056',c2:'#e8c87a',icon:'gem'},
+    {l:'5',sub:'gemmes',c1:'#2980b9',c2:'#3498db',icon:'gem'},
+    {l:'3',sub:'matériaux',c1:'#c0392b',c2:'#e74c3c',icon:'mat'},
+    {l:'3',sub:'matériaux',c1:'#d4a056',c2:'#e8c87a',icon:'mat'},
+    {l:'1',sub:'Titre',c1:'#2980b9',c2:'#3498db',icon:'title'},
+  ];
+  ctx.clearRect(0,0,280,280);
+  const sa=2*Math.PI/segs.length;
+  // Draw segments with gradient fills
+  segs.forEach((s,i)=>{
+    const a=rot+i*sa;
+    // Segment fill
+    const grad=ctx.createRadialGradient(cx,cy,20,cx,cy,r);
+    grad.addColorStop(0,s.c2);grad.addColorStop(1,s.c1);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();
+    ctx.fillStyle=grad;ctx.fill();
+    // Segment divider lines
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.stroke();
+    // Inner light edge
+    ctx.beginPath();ctx.arc(cx,cy,r-2,a+0.02,a+sa-0.02);
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=3;ctx.stroke();
+    // Text labels
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);
+    ctx.fillStyle='#fff';ctx.textAlign='center';
+    ctx.font='bold 16px Nunito,sans-serif';ctx.fillText(s.l,r*.58,-2);
+    ctx.font='600 8px Nunito,sans-serif';ctx.globalAlpha=0.8;ctx.fillText(s.sub,r*.58,10);
+    ctx.globalAlpha=1;ctx.restore();
+  });
+  // Outer ring (wood border effect)
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='#8b5e3c';ctx.lineWidth=6;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
+  ctx.strokeStyle='#5a3520';ctx.lineWidth=2;ctx.stroke();
+  // Inner ring
+  ctx.beginPath();ctx.arc(cx,cy,22,0,2*Math.PI);
+  ctx.strokeStyle='#5a3520';ctx.lineWidth=2;ctx.stroke();
+  // Center hub (golden)
+  const hubGrad=ctx.createRadialGradient(cx-3,cy-3,2,cx,cy,20);
+  hubGrad.addColorStop(0,'#ffe566');hubGrad.addColorStop(0.5,'#ffd700');hubGrad.addColorStop(1,'#c5a200');
+  ctx.beginPath();ctx.arc(cx,cy,20,0,2*Math.PI);ctx.fillStyle=hubGrad;ctx.fill();
+  ctx.strokeStyle='#a08000';ctx.lineWidth=1.5;ctx.stroke();
+  // Hub highlight
+  ctx.beginPath();ctx.arc(cx-4,cy-4,8,0,2*Math.PI);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();
+  // Nails on outer ring (decorative)
+  for(let i=0;i<segs.length;i++){
+    const a=rot+i*sa;
+    const nx=cx+Math.cos(a)*(r-1),ny=cy+Math.sin(a)*(r-1);
+    ctx.beginPath();ctx.arc(nx,ny,3,0,2*Math.PI);
+    ctx.fillStyle='#c5a200';ctx.fill();ctx.strokeStyle='#8b6914';ctx.lineWidth=0.5;ctx.stroke();
+  }
+}
 
 function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
@@ -1792,6 +1854,111 @@ function updateTutorialStep() {
   document.querySelectorAll('.tutorial-step').forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === tutorialStep));
   document.querySelectorAll('.tutorial-dot').forEach((d, i) => d.classList.toggle('active', i === tutorialStep));
   document.getElementById('tutorial-btn').textContent = tutorialStep === TUTORIAL_STEPS - 1 ? 'Commencer !' : 'Suivant';
+}
+
+// --- Staggered Harvest Burst (harvest all) ---
+function staggeredHarvestBurst(plotIds) {
+  const allPlots = document.querySelectorAll('#fields-grid .plot');
+  const fields = farmData.fields || farmData.plots || [];
+  plotIds.forEach((pid, i) => {
+    setTimeout(() => {
+      const idx = fields.findIndex(f => f.id === pid);
+      const plotEl = allPlots[idx];
+      if (plotEl) {
+        const rect = plotEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const cropId = fields[idx]?.crop;
+        if (cropId) showHarvestBurst(cx, cy, cropId);
+        // Sparkles
+        const layer = document.getElementById('reward-layer');
+        for (let j = 0; j < 3; j++) {
+          const sp = document.createElement('div');
+          sp.className = 'harvest-sparkle';
+          sp.style.left = cx + 'px';
+          sp.style.top = cy + 'px';
+          sp.style.setProperty('--dx', ((Math.random() - 0.5) * 50) + 'px');
+          sp.style.setProperty('--dy', (-(Math.random() * 40 + 10)) + 'px');
+          layer.appendChild(sp);
+          setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 800);
+        }
+      }
+      if (i === 0) SoundMgr.play('click');
+    }, i * 120); // 120ms stagger between each plot
+  });
+}
+
+// --- Planting Animation ---
+function showPlantEffect(plotId, cropId) {
+  const fields = farmData.fields || farmData.plots || [];
+  const idx = fields.findIndex(f => f.id === plotId);
+  const allPlots = document.querySelectorAll('#fields-grid .plot');
+  const plotEl = allPlots[idx];
+  if (!plotEl) return;
+  const rect = plotEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const layer = document.getElementById('reward-layer');
+  // Seed drop animation
+  const portrait = cropPortrait(cropId, 20) || itemIcon(cropId, 18);
+  const seed = document.createElement('div');
+  seed.className = 'plant-seed-drop';
+  seed.innerHTML = portrait;
+  seed.style.left = cx + 'px';
+  seed.style.top = (cy - 40) + 'px';
+  layer.appendChild(seed);
+  setTimeout(() => { if (seed.parentNode) seed.parentNode.removeChild(seed); }, 700);
+  // Dirt burst particles
+  for (let i = 0; i < 6; i++) {
+    const p = document.createElement('div');
+    p.className = 'plant-dirt-particle';
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    const angle = (i / 6) * Math.PI * 2;
+    const dist = 20 + Math.random() * 25;
+    p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    p.style.setProperty('--dy', (Math.sin(angle) * dist - 15) + 'px');
+    p.style.animationDelay = (i * 30) + 'ms';
+    layer.appendChild(p);
+    setTimeout(() => { if (p.parentNode) p.parentNode.removeChild(p); }, 600);
+  }
+  // Green sparkle glow on plot
+  plotEl.classList.add('plot-just-planted');
+  setTimeout(() => plotEl.classList.remove('plot-just-planted'), 1000);
+  SoundMgr.play('click');
+}
+
+// --- Harvest Reward from Plot Position ---
+function harvestRewardFromPlot(plotId, coins, xp) {
+  // Find the plot element before state update removes it
+  const allPlots = document.querySelectorAll('#fields-grid .plot');
+  const fields = farmData.fields || farmData.plots || [];
+  const idx = fields.findIndex(f => f.id === plotId);
+  const plotEl = allPlots[idx];
+  let cx = window.innerWidth / 2, cy = window.innerHeight / 3;
+  if (plotEl) {
+    const rect = plotEl.getBoundingClientRect();
+    cx = rect.left + rect.width / 2;
+    cy = rect.top + rect.height / 2;
+  }
+  // XP reward floater from harvest position
+  if (xp > 0) {
+    showFloatingReward(`+${xp} XP`, cx, cy - 10);
+  }
+  // Even though harvest gives items not coins, show a satisfying green sparkle burst
+  const layer = document.getElementById('reward-layer');
+  for (let i = 0; i < 5; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'harvest-sparkle';
+    sp.style.left = cx + 'px';
+    sp.style.top = cy + 'px';
+    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 60) + 'px');
+    sp.style.setProperty('--dy', (-(Math.random() * 50 + 15)) + 'px');
+    sp.style.animationDelay = (i * 40) + 'ms';
+    layer.appendChild(sp);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 800);
+  }
+  SoundMgr.play('click');
 }
 
 document.addEventListener('DOMContentLoaded',()=>{

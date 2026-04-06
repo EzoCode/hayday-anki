@@ -253,15 +253,18 @@ class FarmWebView:
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)
                 if result:
-                    self._js(f"showReward({json.dumps(result)})")
+                    coins = result.get("coins", 0)
                     xp_val = result.get("xp", 0)
-                    self._js(f"showFloatingReward('+{xp_val} XP', window.innerWidth/2, window.innerHeight/3)")
+                    # Trigger coin burst and fly-to-HUD from the plot position
+                    self._js(f"harvestRewardFromPlot({plot_id}, {coins}, {xp_val})")
                     self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
 
             elif action == "harvest_all":
                 from .farm_manager import ITEM_CATALOG as _IC
+                # Collect ready plot IDs before harvesting for staggered animation
+                ready_ids = [f["id"] for f in self.manager.state.fields if f["state"] == "ready"]
                 result = self.manager.harvest_all()
                 if result["count"] > 0:
                     total_xp = result["xp"]
@@ -269,8 +272,9 @@ class FarmWebView:
                         f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
                         for iid, qty in result["items"].items()
                     )
-                    self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
-                    msg = f"{result['count']} récoltes : {items_text}"
+                    # Staggered harvest burst on each plot
+                    self._js(f"staggeredHarvestBurst({json.dumps(ready_ids)})")
+                    msg = f"{result['count']} récoltes : {items_text} (+{total_xp} XP)"
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                     if result["count"] >= 3:
                         self._js("createConfetti()")
@@ -290,6 +294,7 @@ class FarmWebView:
                     total_reviews = crop_def.get("growth_reviews", 3) * 4
                     msg = f"{crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
                     self._js(f"showNotification({json.dumps(msg)})")
+                    self._js(f"showPlantEffect({plot_id}, {json.dumps(crop_id)})")
                 else:
                     self._js("showNotification('Impossible de planter ici !')")
                 self._send_state()
@@ -425,7 +430,8 @@ class FarmWebView:
                     from . import progression
                     adef = progression.ANIMAL_DEFINITIONS.get(animal_type, {})
                     aname = adef.get("name", animal_type)
-                    self._js(f"showNotification({json.dumps(f'{aname} acheté(e) !')})")
+                    self._js(f"showNotification({json.dumps(f'{aname} acheté(e) !')}, 'reward')")
+                    self._js("SoundMgr.play('levelup')")
                 else:
                     reason = self.manager.get_pasture_fail_reason(animal_type)
                     self._js(f"showNotification({json.dumps(reason)})")
@@ -438,7 +444,9 @@ class FarmWebView:
                     from . import progression
                     bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
                     bname = bdef.get("name", building_id)
-                    self._js(f"showNotification({json.dumps(f'{bname} construit !')})")
+                    self._js(f"showNotification({json.dumps(f'{bname} construit !')}, 'reward')")
+                    self._js("createConfetti()")
+                    self._js("SoundMgr.play('levelup')")
                 else:
                     reason = self.manager.get_build_fail_reason(building_id)
                     self._js(f"showNotification({json.dumps(reason)})")
