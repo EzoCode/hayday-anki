@@ -25,6 +25,9 @@ function applyHayDayAssets() {
     if (!SPRITES['_icon_truck']) {
       SPRITES['_icon_truck'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='7' width='14' height='9' rx='1.5' fill='%23d4a056'/%3E%3Crect x='2' y='7.5' width='12' height='2' rx='.8' fill='%23e8c87a' opacity='.4'/%3E%3Cpath d='M15 10h4l3 3v3h-7z' fill='%238b5e3c'/%3E%3Cpath d='M15 10h4l3 3h-7z' fill='%23a0724a'/%3E%3Crect x='1' y='15.5' width='21' height='1' rx='.5' fill='%235a3520'/%3E%3Ccircle cx='5.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='5.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3Ccircle cx='18.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='18.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3C/svg%3E";
     }
+    if (!SPRITES['_icon_boat']) {
+      SPRITES['_icon_boat'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17l2-6h14l2 6' fill='%238b5e3c'/%3E%3Cpath d='M5 11h14l1.5 4.5H3.5z' fill='%23d4a056'/%3E%3Cpath d='M5 11h14l.8 2.4H4.2z' fill='%23e8c87a' opacity='.4'/%3E%3Crect x='3' y='16.5' width='18' height='1.5' rx='.75' fill='%235a3520'/%3E%3Crect x='11' y='4' width='2' height='8' rx='1' fill='%235a3520'/%3E%3Cpath d='M13 5l5 3.5-5 1.5z' fill='%23e74c3c'/%3E%3Cpath d='M13 5l5 3.5-5 .8z' fill='%23ff6b6b' opacity='.5'/%3E%3Cpath d='M1 19c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0' stroke='%234fc3f7' stroke-width='1.5' fill='none' opacity='.5'/%3E%3C/svg%3E";
+    }
     if (!SPRITES['_icon_wheel']) {
       SPRITES['_icon_wheel'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.5' fill='%238b5e3c'/%3E%3Ccircle cx='12' cy='12' r='9.5' fill='%23f4922a'/%3E%3Cpath d='M12 2.5v19M2.5 12h19' stroke='rgba(255,255,255,.45)' stroke-width='1'/%3E%3Cpath d='M5.3 5.3l13.4 13.4M18.7 5.3L5.3 18.7' stroke='rgba(255,255,255,.3)' stroke-width='1'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23ffd700' stroke='%23c5a200' stroke-width='.7'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23fff' opacity='.6'/%3E%3C/svg%3E";
     }
@@ -200,18 +203,18 @@ function img(key, w, h, cls) {
 
 const CROP_SPRITE_MAP = {
   wheat:'wheat', corn:'corn', carrot:'turnip', tomato:'tomato',
-  potato:'potato', sugarcane:'rice', soybean:'cassava',
+  potato:'potato', sugarcane:'rice', soybean:'cucumber',
   strawberry:'strawberry', apple:'orange', pumpkin:'melon',
 };
 function cropImg(id, stage, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_${stage}`, w||44, w||44, 'plot-crop'); }
 function cropPortrait(id, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_portrait`, w||28, w||28); }
 
 const HD_BUILDINGS = {
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_shop', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_barn', pastry_shop:'hayday_shop',
-  pizzeria:'hayday_shop', jam_maker:'hayday_barn', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  bakery:'buildings_bakery', barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'buildings_sugar_mill', dairy:'buildings_dairy',
+  chicken_coop:'buildings_coop', bbq:'buildings_bbq', pastry_shop:'buildings_bakery',
+  pizzeria:'buildings_bakery', jam_maker:'buildings_bakery', juice_press:'buildings_windmill',
+  pie_oven:'buildings_bakery', windmill:'buildings_windmill', coop:'buildings_coop',
 };
 function buildingImg(id, w) {
   const key = HD_BUILDINGS[id] || `buildings_${id}`;
@@ -224,6 +227,19 @@ function animalImg(id, w) {
   return `<img src="${src}" width="${w||50}" height="${w?Math.round(w*.85):42}" class="animal-img" draggable="false">`;
 }
 function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
+
+// Universal item icon — tries sprite sources in order of preference
+function itemIcon(id, w) {
+  w = w || 24;
+  const lbl = S(`hayday_${id}-lbl`);
+  if (lbl) return `<img src="${lbl}" width="${w}" height="${w}" style="object-fit:contain">`;
+  const portrait = cropPortrait(id, w);
+  if (portrait) return portrait;
+  const hd = S(`hayday_${id}`);
+  if (hd) return `<img src="${hd}" width="${w}" height="${w}" style="object-fit:contain">`;
+  const cat = (farmData.item_catalog||{})[id]||{};
+  return `<span style="font-size:${Math.round(w*0.7)}px">${cat.emoji||''}</span>`;
+}
 
 function fieldBg(state) {
   if (state === 'ready') return S('hayday_wheat-field') || S('hayday_field');
@@ -578,12 +594,15 @@ function renderVillage() {
     const name = decoDef.name || catFallback.name || decoName(deco.type);
     const el = document.createElement('div');
     el.className = 'deco-tile';
-    // Try to use Hay Day sprite for the decoration
+    // Try to use Hay Day sprite, then SVG icon, then emoji fallback
     const sprSrc = S(`hayday_${deco.type}`);
+    const svgSrc = DECO_SVG[deco.type];
     if (sprSrc) {
       el.innerHTML = `<img src="${sprSrc}" width="44" height="44" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))"><span class="deco-name">${name}</span>`;
+    } else if (svgSrc) {
+      el.innerHTML = `<img src="${svgSrc}" width="44" height="44" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))"><span class="deco-name">${name}</span>`;
     } else {
-      const emoji = decoDef.emoji || catFallback.emoji || DECO_EMOJI[deco.type] || '\u{1F33F}';
+      const emoji = decoDef.emoji || catFallback.emoji || '\u{1F33F}';
       el.innerHTML = `<span class="deco-emoji">${emoji}</span><span class="deco-name">${name}</span>`;
     }
     grid.appendChild(el);
@@ -692,8 +711,11 @@ function showItemInfo(itemId) {
   }
   reqs.push({label: 'En stock', value: `${qty}`, met: qty > 0});
 
+  // Prefer sprite over emoji for item icon
+  const itemSpr = S(`hayday_${itemId}-lbl`) || S(`hayday_${itemId}`);
+  const itemIcon = itemSpr ? `<img src="${itemSpr}" width="40" height="40" style="object-fit:contain">` : (cropPortrait(itemId, 40) || (cat.emoji || ''));
   showInfo({
-    icon: cat.emoji || '❓',
+    icon: itemIcon,
     title: cat.name || itemId,
     desc: info.desc || `${cat.category || 'Item'} — ${cat.name || itemId}`,
     requirements: reqs,
@@ -850,13 +872,28 @@ function showAnimalInfo(animalType) {
 }
 
 // --- Decoration Rendering ---
-const DECO_EMOJI = {
-  fence:'\u{1FAB5}',flower_pot:'\u{1FAB4}',bench:'\u{1FA91}',scarecrow:'\u{1F383}',
-  hay_bale:'\u{1F33E}',mailbox:'\u{1F4EA}',lamp_post:'\u{1F4A1}',garden_gnome:'\u{1F9D4}',
-  bird_bath:'\u{1F426}',tree_oak:'\u{1F333}',tree_pine:'\u{1F332}',picnic_table:'\u{1F3D5}\u{FE0F}',
-  pond:'\u{1F4A7}',swing:'\u{1F3A0}',fountain:'\u26F2',statue_chicken:'\u{1F414}',
-  tree_cherry:'\u{1F338}',arch_flowers:'\u{1F490}',statue_cow:'\u{1F404}',windmill_deco:'\u{1F3E1}'
+const DECO_SVG = {
+  fence: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='8' width='4' height='20' rx='1' fill='%23d4a056'/%3E%3Crect x='14' y='8' width='4' height='20' rx='1' fill='%23d4a056'/%3E%3Crect x='26' y='8' width='4' height='20' rx='1' fill='%23d4a056'/%3E%3Crect x='2' y='14' width='28' height='3' rx='1' fill='%23c49046'/%3E%3Crect x='2' y='22' width='28' height='3' rx='1' fill='%23c49046'/%3E%3Cpath d='M3 8l1-3 1 3M15 8l1-3 1 3M27 8l1-3 1 3' fill='%23d4a056'/%3E%3C/svg%3E",
+  flower_pot: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 18h12l-2 12H12z' fill='%23c49046'/%3E%3Cpath d='M10 18h12v2H10z' fill='%23d4a056'/%3E%3Ccircle cx='16' cy='13' r='4' fill='%23e91e63'/%3E%3Ccircle cx='12' cy='11' r='3' fill='%23f06292'/%3E%3Ccircle cx='20' cy='11' r='3' fill='%23e91e63'/%3E%3Cpath d='M15 18v-4M13 18v-5M17 18v-5' stroke='%234caf50' stroke-width='1.5'/%3E%3C/svg%3E",
+  bench: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='14' width='24' height='4' rx='1.5' fill='%23d4a056'/%3E%3Crect x='4' y='19' width='24' height='3' rx='1' fill='%23c49046'/%3E%3Crect x='6' y='22' width='3' height='8' rx='.5' fill='%238b5e3c'/%3E%3Crect x='23' y='22' width='3' height='8' rx='.5' fill='%238b5e3c'/%3E%3Crect x='3' y='8' width='3' height='14' rx='1' fill='%238b5e3c'/%3E%3Crect x='26' y='8' width='3' height='14' rx='1' fill='%238b5e3c'/%3E%3C/svg%3E",
+  hay_bale: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='22' rx='13' ry='8' fill='%23d4a056'/%3E%3Cellipse cx='16' cy='18' rx='13' ry='8' fill='%23e8c87a'/%3E%3Cpath d='M3 18c0-4 6-8 13-8s13 4 13 8' fill='%23f0d896' opacity='.5'/%3E%3Cpath d='M8 14v8M12 13v9M16 12v10M20 13v9M24 14v8' stroke='%23c49046' stroke-width='.8' opacity='.5'/%3E%3C/svg%3E",
+  mailbox: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='14' width='4' height='16' rx='1' fill='%238b5e3c'/%3E%3Crect x='8' y='6' width='16' height='10' rx='3' fill='%23e74c3c'/%3E%3Crect x='8' y='6' width='16' height='5' rx='3' fill='%23ef5350'/%3E%3Crect x='22' y='8' width='4' height='2' rx='1' fill='%23d4a056'/%3E%3C/svg%3E",
+  lamp_post: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14.5' y='10' width='3' height='20' rx='1' fill='%235a3520'/%3E%3Crect x='12' y='28' width='8' height='3' rx='1.5' fill='%235a3520'/%3E%3Cpath d='M10 10h12L18 4h-4z' fill='%23ffd700'/%3E%3Cpath d='M11 10h10l-3-4h-4z' fill='%23fff7aa' opacity='.6'/%3E%3Ccircle cx='16' cy='6' r='3' fill='%23ffd700' opacity='.3'/%3E%3C/svg%3E",
+  tree_oak: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='13' y='20' width='6' height='10' rx='1.5' fill='%238b5e3c'/%3E%3Ccircle cx='16' cy='14' r='10' fill='%234caf50'/%3E%3Ccircle cx='12' cy='10' r='6' fill='%2366bb6a'/%3E%3Ccircle cx='20' cy='12' r='5' fill='%2343a047'/%3E%3C/svg%3E",
+  tree_pine: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='24' width='4' height='7' rx='1' fill='%238b5e3c'/%3E%3Cpath d='M16 2l-10 14h6l-4 10h16l-4-10h6z' fill='%232e7d32'/%3E%3Cpath d='M16 2l-6 9h4l-3 7h10l-3-7h4z' fill='%234caf50' opacity='.5'/%3E%3C/svg%3E",
+  pond: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='20' rx='14' ry='8' fill='%230288d1'/%3E%3Cellipse cx='16' cy='19' rx='12' ry='6' fill='%234fc3f7' opacity='.6'/%3E%3Cellipse cx='12' cy='18' rx='3' ry='1.5' fill='%23fff' opacity='.3'/%3E%3C/svg%3E",
+  fountain: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='26' rx='12' ry='4' fill='%23bdbdbd'/%3E%3Crect x='14' y='14' width='4' height='12' rx='1' fill='%239e9e9e'/%3E%3Cellipse cx='16' cy='22' rx='10' ry='3' fill='%234fc3f7' opacity='.5'/%3E%3Cpath d='M16 6c-2 4-4 6-4 8a4 4 0 008 0c0-2-2-4-4-8z' fill='%234fc3f7' opacity='.6'/%3E%3Cpath d='M14 10c0 0-2 2-2 3a2 2 0 004 0c0-1-2-3-2-3z' fill='%2381d4fa'/%3E%3C/svg%3E",
+  garden_gnome: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='28' rx='6' ry='2' fill='rgba(0,0,0,.15)'/%3E%3Cpath d='M11 18h10v10H11z' fill='%232196f3'/%3E%3Ccircle cx='16' cy='15' r='5' fill='%23ffcc80'/%3E%3Cpath d='M16 4l-6 11h12z' fill='%23e74c3c'/%3E%3Ccircle cx='14' cy='14' r='1' fill='%233a2510'/%3E%3Ccircle cx='18' cy='14' r='1' fill='%233a2510'/%3E%3Cellipse cx='16' cy='19' rx='3' ry='4' fill='%23fff' opacity='.6'/%3E%3C/svg%3E",
+  tree_cherry: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='13' y='20' width='6' height='10' rx='1.5' fill='%238b5e3c'/%3E%3Ccircle cx='16' cy='14' r='10' fill='%23f48fb1'/%3E%3Ccircle cx='12' cy='10' r='5' fill='%23f8bbd0'/%3E%3Ccircle cx='20' cy='12' r='4' fill='%23ec407a'/%3E%3Ccircle cx='14' cy='16' r='1.5' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='18' cy='11' r='1' fill='%23fff' opacity='.5'/%3E%3C/svg%3E",
+  windmill_deco: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='12' y='14' width='8' height='16' rx='1' fill='%23d4a056'/%3E%3Crect x='10' y='28' width='12' height='3' rx='1' fill='%238b5e3c'/%3E%3Ccircle cx='16' cy='12' r='3' fill='%235a3520'/%3E%3Cpath d='M16 12l-2-10 2-1 2 1zm0 0l10 2 1 2-1 2zm0 0l2 10-2 1-2-1zm0 0l-10-2-1-2 1-2z' fill='%23d4a056' opacity='.9'/%3E%3C/svg%3E",
+  bird_bath: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='16' width='4' height='12' rx='1' fill='%239e9e9e'/%3E%3Crect x='12' y='26' width='8' height='3' rx='1.5' fill='%23757575'/%3E%3Cellipse cx='16' cy='15' rx='10' ry='3' fill='%239e9e9e'/%3E%3Cellipse cx='16' cy='14' rx='8' ry='2' fill='%234fc3f7' opacity='.5'/%3E%3Cpath d='M22 10c0 0 2-1 3-1s1 .5 1 1-.5 1-1 1l-2 1' fill='%238b5e3c'/%3E%3Ccircle cx='24' cy='9' r='2' fill='%238b5e3c'/%3E%3Ccircle cx='24.5' cy='8.5' r='.5' fill='%23fff'/%3E%3C/svg%3E",
+  swing: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='3' height='24' rx='1' fill='%238b5e3c'/%3E%3Crect x='25' y='4' width='3' height='24' rx='1' fill='%238b5e3c'/%3E%3Crect x='3' y='4' width='26' height='3' rx='1.5' fill='%23d4a056'/%3E%3Cline x1='12' y1='7' x2='12' y2='22' stroke='%235a3520' stroke-width='1.5'/%3E%3Cline x1='20' y1='7' x2='20' y2='22' stroke='%235a3520' stroke-width='1.5'/%3E%3Crect x='10' y='22' width='12' height='3' rx='1.5' fill='%23d4a056'/%3E%3C/svg%3E",
+  statue_chicken: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='10' y='24' width='12' height='6' rx='1' fill='%239e9e9e'/%3E%3Cellipse cx='16' cy='18' rx='6' ry='7' fill='%23bdbdbd'/%3E%3Ccircle cx='16' cy='11' r='4' fill='%23bdbdbd'/%3E%3Ccircle cx='17.5' cy='10.5' r='1' fill='%233a2510'/%3E%3Cpath d='M19 11l3-1v2z' fill='%23ff9800'/%3E%3Cpath d='M15 7c0-2 1-3 1-3s1 1 1 3' fill='%23e74c3c'/%3E%3C/svg%3E",
+  arch_flowers: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='6' width='3' height='24' rx='1' fill='%23d4a056'/%3E%3Crect x='25' y='6' width='3' height='24' rx='1' fill='%23d4a056'/%3E%3Cpath d='M5 6a11 11 0 0122 0' fill='none' stroke='%23d4a056' stroke-width='3'/%3E%3Ccircle cx='8' cy='5' r='3' fill='%23e91e63'/%3E%3Ccircle cx='16' cy='1' r='3' fill='%23f06292'/%3E%3Ccircle cx='24' cy='5' r='3' fill='%23e91e63'/%3E%3Ccircle cx='12' cy='2' r='2.5' fill='%23ff80ab'/%3E%3Ccircle cx='20' cy='2' r='2.5' fill='%23f48fb1'/%3E%3Ccircle cx='5' cy='14' r='2' fill='%234caf50'/%3E%3Ccircle cx='27' cy='14' r='2' fill='%234caf50'/%3E%3C/svg%3E",
+  statue_cow: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='8' y='24' width='16' height='6' rx='1' fill='%239e9e9e'/%3E%3Cellipse cx='16' cy='18' rx='8' ry='7' fill='%23bdbdbd'/%3E%3Ccircle cx='16' cy='10' r='5' fill='%23bdbdbd'/%3E%3Ccircle cx='14' cy='9' r='1' fill='%233a2510'/%3E%3Ccircle cx='18' cy='9' r='1' fill='%233a2510'/%3E%3Cellipse cx='16' cy='12' rx='3' ry='2' fill='%23f8bbd0'/%3E%3Cpath d='M10 7c-2-2-3-1-3 0s1 2 2 2M22 7c2-2 3-1 3 0s-1 2-2 2' fill='%23bdbdbd'/%3E%3C/svg%3E",
+  picnic_table: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='14' width='26' height='3' rx='1.5' fill='%23d4a056'/%3E%3Crect x='8' y='18' width='16' height='3' rx='1' fill='%23c49046'/%3E%3Cline x1='7' y1='17' x2='4' y2='28' stroke='%238b5e3c' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='25' y1='17' x2='28' y2='28' stroke='%238b5e3c' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E",
 };
+const DECO_EMOJI = {};
 // Decorations are rendered in the Village zone grid via renderVillage()
 
 // --- Weather System ---
@@ -931,9 +968,7 @@ function renderInventory() {
     } else {
       el.onclick = () => showItemInfo(id);
     }
-    let icon = ''; const lbl = S(`hayday_${id}-lbl`);
-    if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
-    else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
+    const icon = itemIcon(id, 36);
     // Add info button
     el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">\u24D8</span>`;
     grid.appendChild(el);
@@ -1007,15 +1042,19 @@ function renderOrders() {
       if(have<qty) canDo=false;
       const enough = have >= qty;
       items+=`<div class="order-item ${enough?'fulfilled':''}">
-        ${cropPortrait(id,18)||`<span style="font-size:14px">${(farmData.item_catalog||{})[id]?.emoji||''}</span>`}
+        ${itemIcon(id,18)}
         <span style="font-weight:600">${itemName(id)}</span>
         <span style="margin-left:auto;font-weight:700;color:${enough?'#4caf50':'#e74c3c'}">${have}/${qty}</span>
       </div>`;
     });
 
+    const orderIcon = order.type==='boat' ? S('_icon_boat') : S('_icon_truck');
+    const orderIconHtml = orderIcon ? `<img src="${orderIcon}" width="28" height="28" style="vertical-align:middle">` : '';
+    const orderLabel = order.type==='boat' ? 'Bateau' : 'Camion';
+    const orderMult = order.type==='boat' ? '3x' : '2x';
     card.innerHTML = `
       <div class="order-header">
-        <span class="order-type">${order.type==='boat'?'Bateau':'Camion'}</span>
+        <span class="order-type">${orderIconHtml} <span style="font-size:13px;font-weight:800;vertical-align:middle">${orderLabel}</span> <span class="order-mult">${orderMult}</span></span>
         <span class="order-reward">${order.coin_reward} p. \u2022 +${order.xp_reward} XP</span>
       </div>
       <div class="order-items">${items}</div>
@@ -1063,8 +1102,8 @@ function renderShopDeco(grid){
     el.className='item-cell';
     el.style.opacity=ok?'1':'.45';
     el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
-    const decoSpr = S(`hayday_${item.id}`);
-    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : `<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span>`;
+    const decoSpr = S(`hayday_${item.id}`) || DECO_SVG[item.id];
+    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : `<span class="item-emoji">${d.emoji||''}</span>`;
     el.innerHTML=`${decoIcon}<span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">${cost} p.</span>`;
     grid.appendChild(el);
   });
@@ -1094,7 +1133,7 @@ function showAnimalShopInfo(aid) {
     {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
-    icon: (()=>{const s=S(`hayday_${animalType}-lbl`)||S(`hayday_${animalType}`);return s?`<img src="${s}" width="40" height="40">`:(def.emoji||'');})(),
+    icon: (()=>{const s=S(`hayday_${aid}-lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:(def.emoji||'');})(),
     title: def.name || aid,
     desc: info.desc || '',
     requirements: reqs,
@@ -1270,7 +1309,25 @@ function renderSettings() {
 }
 
 function renderAchievements(){pycmd('farm:get_achievements')}
-function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const starSrc=S('hayday_star');const achIcon=starSrc?`<img src="${starSrc}" width="24" height="24" style="object-fit:contain">`:'';card.innerHTML=`<span class="achievement-icon">${achIcon}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
+const ACH_CATEGORY_ICONS = {
+  reviews: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='2' width='18' height='20' rx='2' fill='%234a7c3a'/%3E%3Crect x='5' y='5' width='10' height='1.5' rx='.75' fill='%23fff' opacity='.7'/%3E%3Crect x='5' y='8.5' width='8' height='1.5' rx='.75' fill='%23fff' opacity='.5'/%3E%3Crect x='5' y='12' width='12' height='1.5' rx='.75' fill='%23fff' opacity='.5'/%3E%3Crect x='5' y='15.5' width='6' height='1.5' rx='.75' fill='%23fff' opacity='.3'/%3E%3C/svg%3E",
+  streaks: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8 8 4 10 4 15a8 8 0 0016 0c0-5-4-7-8-13z' fill='%23ff6b00'/%3E%3Cpath d='M12 8c-2 3-4 4.5-4 7.5a4 4 0 008 0c0-3-2-4.5-4-7.5z' fill='%23ffd700'/%3E%3Cpath d='M12 13c-1 1.5-2 2.2-2 3.8a2 2 0 004 0c0-1.6-1-2.3-2-3.8z' fill='%23fff7aa'/%3E%3C/svg%3E",
+  accuracy: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23fff' stroke='%234a7c3a' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%234a7c3a' stroke-width='1.2'/%3E%3Ccircle cx='12' cy='12' r='4' fill='none' stroke='%234a7c3a' stroke-width='1'/%3E%3Ccircle cx='12' cy='12' r='1.5' fill='%23e74c3c'/%3E%3C/svg%3E",
+  time: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='13' r='9' fill='%23d4a056' stroke='%238b5e3c' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='13' r='7.5' fill='%23faf0dc'/%3E%3Cline x1='12' y1='13' x2='12' y2='7' stroke='%233a2510' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='12' y1='13' x2='16' y2='13' stroke='%233a2510' stroke-width='1.3' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='13' r='1' fill='%233a2510'/%3E%3C/svg%3E",
+  farming: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C9 2 6 5 6 9c0 2 1 3.5 2 4.5V22h8v-8.5c1-1 2-2.5 2-4.5 0-4-3-7-6-7z' fill='%234caf50'/%3E%3Cpath d='M10 22h4v-8c-1 .5-3 .5-4 0z' fill='%238b5e3c'/%3E%3Cpath d='M12 2c2 2 3.5 4 3.5 7 0 1.5-.5 2.8-1.5 3.8' fill='none' stroke='%2381c784' stroke-width='1' opacity='.6'/%3E%3C/svg%3E",
+  collections: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='6' width='8' height='8' rx='1.5' fill='%23ff9800' stroke='%23e65100' stroke-width='.8'/%3E%3Crect x='8' y='3' width='8' height='8' rx='1.5' fill='%234caf50' stroke='%232e7d32' stroke-width='.8'/%3E%3Crect x='14' y='6' width='8' height='8' rx='1.5' fill='%232196f3' stroke='%231565c0' stroke-width='.8'/%3E%3Crect x='5' y='13' width='8' height='8' rx='1.5' fill='%23e91e63' stroke='%23880e4f' stroke-width='.8'/%3E%3Crect x='11' y='13' width='8' height='8' rx='1.5' fill='%239c27b0' stroke='%234a148c' stroke-width='.8'/%3E%3C/svg%3E",
+  economy: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23ffd700' stroke='%23c5a200' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='7.5' fill='%23ffe566'/%3E%3Ctext x='12' y='16' text-anchor='middle' font-size='11' font-weight='bold' fill='%23c5a200'%3E%24%3C/text%3E%3C/svg%3E",
+  orders: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='8' width='14' height='9' rx='1.5' fill='%23d4a056'/%3E%3Cpath d='M16 11h3.5l2.5 2.5v3.5h-6z' fill='%238b5e3c'/%3E%3Ccircle cx='6' cy='18.5' r='2' fill='%233a2510'/%3E%3Ccircle cx='18' cy='18.5' r='2' fill='%233a2510'/%3E%3C/svg%3E",
+  production: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='10' width='16' height='12' rx='2' fill='%238b5e3c'/%3E%3Crect x='5' y='11' width='14' height='2' rx='1' fill='%23d4a056' opacity='.4'/%3E%3Cpath d='M8 10V6a4 4 0 018 0v4' fill='none' stroke='%235a3520' stroke-width='2'/%3E%3Ccircle cx='12' cy='16' r='2' fill='%23ffd700'/%3E%3C/svg%3E",
+  luck: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z' fill='%23ffd700' stroke='%23c5a200' stroke-width='.8'/%3E%3C/svg%3E",
+  levels: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 20h4v-6H4zm6 0h4v-10h-4zm6 0h4v-14h-4z' fill='%234caf50'/%3E%3Cpath d='M4 14h4v-1H4zm6 10h4v-1h-4zm6 6h4v-1h-4z' fill='%2381c784' opacity='.4'/%3E%3C/svg%3E",
+  upgrades: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 4l-8 8h5v8h6v-8h5z' fill='%234caf50'/%3E%3Cpath d='M12 4l-5 5h3v5h4V9h3z' fill='%2381c784' opacity='.5'/%3E%3C/svg%3E",
+};
+function achCategoryIcon(cat) {
+  const src = ACH_CATEGORY_ICONS[cat];
+  return src ? `<img src="${src}" width="24" height="24" style="object-fit:contain">` : '';
+}
+function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achIcon=achCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon">${achIcon}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail">\u{1F4DA} ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail">\u{1F33E} ${harvestMin}-${harvestMax} \u2022 \u{1FA99} ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
@@ -1423,7 +1480,7 @@ function showProductionDialog(data){
   const queue=data.queue||[];
   if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${q.emoji||'?'}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('click')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${cropPortrait(id,14)||''} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${r.emoji||'?'}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
+  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${r.emoji||'?'}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 

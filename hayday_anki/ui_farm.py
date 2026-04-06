@@ -147,10 +147,6 @@ class FarmWebView:
             if rel_path in skip_paths:
                 continue
 
-            # Skip old generated building sprites (replaced by hayday/)
-            if png_file.parent.name == "buildings":
-                continue
-
             rel = png_file.relative_to(SPRITES_DIR).as_posix()
             key = rel.replace("/", "_").replace(".png", "")
             try:

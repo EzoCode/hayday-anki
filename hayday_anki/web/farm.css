@@ -517,7 +517,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
 .order-card:hover{transform:translateY(-1px)}
 .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.order-type{font-size:22px}
+.order-type{font-size:22px;display:flex;align-items:center;gap:4px}
+.order-mult{font-size:9px;font-weight:900;color:#fff;background:linear-gradient(135deg,#ff9800,#f57c00);padding:1px 5px;border-radius:6px;vertical-align:middle}
 .order-reward{font-size:11px;font-weight:800;color:#2e7d32}
 .order-items{display:flex;flex-wrap:wrap;gap:4px}
 .order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
@@ -670,8 +671,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 
 /* ===== WEATHER SYSTEM ===== */
 .weather-night .farm-sky{background:linear-gradient(180deg,#0a1628 0%,#1a2744 60%,rgba(26,39,68,0) 100%)}
-.weather-night #farm-world{filter:brightness(.45) saturate(.6) hue-rotate(10deg)}
-.weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.55) 100%)}
+.weather-night #farm-world{filter:brightness(.7) saturate(.8) hue-rotate(5deg)}
+.weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.35) 100%)}
 .weather-night .section-label{color:rgba(180,200,255,.5)}
 .weather-night .building-name{color:rgba(200,210,255,.8)}
 .weather-night .farm-sky::before{content:'✦';position:absolute;top:12px;left:20%;font-size:6px;color:rgba(255,255,255,.7);text-shadow:0 0 4px rgba(200,220,255,.8);animation:starTwinkle 3s ease-in-out infinite}
