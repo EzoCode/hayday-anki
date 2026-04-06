@@ -20,6 +20,18 @@ function initDefs(defs) {
 }
 
 function applyHayDayAssets() {
+  // Inject SVG icons for missing sprites (truck, wheel, gear)
+  if (typeof SPRITES !== 'undefined') {
+    if (!SPRITES['_icon_truck']) {
+      SPRITES['_icon_truck'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='7' width='14' height='9' rx='1.5' fill='%23d4a056'/%3E%3Crect x='2' y='7.5' width='12' height='2' rx='.8' fill='%23e8c87a' opacity='.4'/%3E%3Cpath d='M15 10h4l3 3v3h-7z' fill='%238b5e3c'/%3E%3Cpath d='M15 10h4l3 3h-7z' fill='%23a0724a'/%3E%3Crect x='1' y='15.5' width='21' height='1' rx='.5' fill='%235a3520'/%3E%3Ccircle cx='5.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='5.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3Ccircle cx='18.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='18.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3C/svg%3E";
+    }
+    if (!SPRITES['_icon_wheel']) {
+      SPRITES['_icon_wheel'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.5' fill='%238b5e3c'/%3E%3Ccircle cx='12' cy='12' r='9.5' fill='%23f4922a'/%3E%3Cpath d='M12 2.5v19M2.5 12h19' stroke='rgba(255,255,255,.45)' stroke-width='1'/%3E%3Cpath d='M5.3 5.3l13.4 13.4M18.7 5.3L5.3 18.7' stroke='rgba(255,255,255,.3)' stroke-width='1'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23ffd700' stroke='%23c5a200' stroke-width='.7'/%3E%3Ccircle cx='12' cy='12' r='1' fill='%23fff' opacity='.6'/%3E%3C/svg%3E";
+    }
+    if (!SPRITES['_icon_gear']) {
+      SPRITES['_icon_gear'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='none' stroke='%23d4a056' stroke-width='2'/%3E%3Cpath d='M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12' stroke='%23d4a056' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E";
+    }
+  }
   // Background
   const bgSrc = S('hayday_background');
   if (bgSrc) {
@@ -38,8 +50,7 @@ function applyHayDayAssets() {
   if (coinSrc && coinEl) {
     coinEl.innerHTML = `<img src="${coinSrc}" width="16" height="16" style="vertical-align:middle">`;
   } else if (coinEl) {
-    coinEl.textContent = '\u{1FA99}';
-    coinEl.style.fontSize = '14px';
+    coinEl.innerHTML = '<span class="css-coin"></span>';
   }
   // Gem icon from sprite
   const gemSrc = S('ui_gem');
@@ -47,8 +58,19 @@ function applyHayDayAssets() {
   if (gemSrc && gemEl) {
     gemEl.innerHTML = `<img src="${gemSrc}" width="16" height="16" style="vertical-align:middle">`;
   } else if (gemEl) {
-    gemEl.textContent = '\u{1F48E}';
-    gemEl.style.fontSize = '14px';
+    gemEl.innerHTML = '<span class="css-gem"></span>';
+  }
+  // Streak fire — CSS fire icon
+  const fireEl = document.getElementById('streak-fire-icon');
+  if (fireEl) fireEl.innerHTML = '<span class="css-fire"></span>';
+  // Settings gear — SVG icon
+  const gearSrc = S('_icon_gear');
+  const gearImg = document.getElementById('hud-settings-img');
+  const gearFallback = document.getElementById('hud-settings-fallback');
+  if (gearSrc && gearImg) {
+    gearImg.src = gearSrc;
+    gearImg.style.display = '';
+    if (gearFallback) gearFallback.style.display = 'none';
   }
   // Level up overlay background
   const lvlBgSrc = S('hayday_new-level-bg');
@@ -66,38 +88,33 @@ function applyHayDayAssets() {
   if (starsEl && starSrc2) {
     const starImg = `<img src="${starSrc2}" width="28" height="28" style="vertical-align:middle;filter:drop-shadow(0 1px 3px rgba(0,0,0,.2))">`;
     starsEl.innerHTML = `${starImg} ${starImg} ${starImg}`;
-  } else if (starsEl) {
-    starsEl.textContent = '\u2B50\u2728\u2B50\u2728\u2B50';
   }
-  // Toolbar icons — use sprites with emoji fallbacks
+  // Toolbar icons — use sprites (with SVG fallbacks for missing ones)
   const toolbarIcons = {
-    'icon-farm': {sprite: 'hayday_wheat-icon', fallback: '\u{1F33E}'},
-    'icon-buildings': {sprite: 'hayday_barn', fallback: '\u{1F3ED}'},
-    'icon-inventory': {sprite: 'hayday_silo', fallback: '\u{1F4E6}'},
-    'icon-orders': {sprite: null, fallback: '\u{1F69A}'},
-    'icon-shop': {sprite: 'hayday_shop', fallback: '\u{1F3EA}'},
-    'icon-achievements': {sprite: 'hayday_star', fallback: '\u{1F3C6}'},
-    'icon-wheel': {sprite: null, fallback: '\u{1F3A1}'},
+    'icon-farm': {sprite: 'hayday_wheat-icon'},
+    'icon-buildings': {sprite: 'hayday_barn'},
+    'icon-inventory': {sprite: 'hayday_silo'},
+    'icon-orders': {sprite: '_icon_truck'},
+    'icon-shop': {sprite: 'hayday_shop'},
+    'icon-achievements': {sprite: 'hayday_star'},
+    'icon-wheel': {sprite: '_icon_wheel'},
   };
   for (const [elId, cfg] of Object.entries(toolbarIcons)) {
     const el = document.getElementById(elId);
     if (!el) continue;
-    const src = cfg.sprite ? S(cfg.sprite) : null;
+    const src = S(cfg.sprite);
     if (src) {
       el.innerHTML = `<img src="${src}" width="24" height="24" style="object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))">`;
-    } else {
-      el.textContent = cfg.fallback;
-      el.style.fontSize = '20px';
     }
   }
   // Zone title icons using Hay Day sprites
   const zoneIcons = {
-    'zone-title-fields': ['hayday_wheat-icon', 'wheat-icon'],
-    'zone-title-workshop': ['hayday_barn', null],
-    'zone-title-pasture': ['hayday_cow', null],
-    'zone-title-village': ['hayday_scarecrow', null],
+    'zone-title-fields': 'hayday_wheat-icon',
+    'zone-title-workshop': 'hayday_barn',
+    'zone-title-pasture': 'hayday_cow',
+    'zone-title-village': 'hayday_scarecrow',
   };
-  for (const [elId, [sprKey]] of Object.entries(zoneIcons)) {
+  for (const [elId, sprKey] of Object.entries(zoneIcons)) {
     const src = S(sprKey);
     const el = document.getElementById(elId);
     if (src && el) {
@@ -239,15 +256,19 @@ function createSparkleRain() {
   if (!layer) return;
   layer.innerHTML = '';
   const colors = ['#ffd700', '#ff6b6b', '#4fc3f7', '#ab47bc', '#66bb6a', '#ff8a65'];
-  const icons = ['\u2728', '\u2B50', '\u{1F4AB}', '\u{1F31F}', '\u2726', '\u2605'];
   for (let i = 0; i < 40; i++) {
     const s = document.createElement('div');
     s.className = 'sparkle-particle';
     s.style.left = Math.random() * 100 + '%';
     s.style.animationDelay = (Math.random() * 2) + 's';
     s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-    s.style.color = colors[Math.floor(Math.random() * colors.length)];
-    s.textContent = icons[Math.floor(Math.random() * icons.length)];
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    const size = 4 + Math.random() * 6;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    s.style.background = `radial-gradient(circle, #fff, ${c})`;
+    s.style.boxShadow = `0 0 ${size}px ${c}`;
     layer.appendChild(s);
   }
   setTimeout(() => { layer.innerHTML = ''; }, 4500);
@@ -294,10 +315,10 @@ function checkStorageWarnings() {
   const d = farmData;
   const barnPct = (d.barn_used||0) / Math.max(1, d.barn_capacity||50);
   const siloPct = (d.silo_used||0) / Math.max(1, d.silo_capacity||50);
-  if (barnPct >= 1) { showNotification('\u{1F6A8} ' + LANG.barn_full); _lastStorageWarning = now; }
-  else if (barnPct >= 0.9) { showNotification('\u{26A0}\u{FE0F} ' + LANG.barn_almost + ' (' + d.barn_used + '/' + d.barn_capacity + ')'); _lastStorageWarning = now; }
-  if (siloPct >= 1) { showNotification('\u{1F6A8} ' + LANG.silo_full); _lastStorageWarning = now; }
-  else if (siloPct >= 0.9) { showNotification('\u{26A0}\u{FE0F} ' + LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
+  if (barnPct >= 1) { showNotification(LANG.barn_full); _lastStorageWarning = now; }
+  else if (barnPct >= 0.9) { showNotification(LANG.barn_almost + ' (' + d.barn_used + '/' + d.barn_capacity + ')'); _lastStorageWarning = now; }
+  if (siloPct >= 1) { showNotification(LANG.silo_full); _lastStorageWarning = now; }
+  else if (siloPct >= 0.9) { showNotification(LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
 }
 
 function updateHUD() {
@@ -355,7 +376,7 @@ function renderFields() {
   // Update field cost on button
   const fieldCost = farmData.field_cost || 0;
   const addBtn = document.getElementById('add-field-btn');
-  if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (🪙${fieldCost})` : '+ Champ';
+  if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (${fieldCost})` : '+ Champ';
 
   // Show/hide harvest all button
   const readyCount = fields.filter(f => f.state === 'ready').length;
@@ -363,7 +384,7 @@ function renderFields() {
   if (harvestAllBtn) {
     if (readyCount >= 2) {
       harvestAllBtn.style.display = '';
-      harvestAllBtn.textContent = `🌾 Tout récolter (${readyCount})`;
+      harvestAllBtn.textContent = `Tout récolter (${readyCount})`;
     } else {
       harvestAllBtn.style.display = 'none';
     }
@@ -375,7 +396,7 @@ function renderFields() {
   if (plantAllBtn) {
     if (emptyWithLastCrop.length >= 2) {
       plantAllBtn.style.display = '';
-      plantAllBtn.textContent = `🌱 Tout planter (${emptyWithLastCrop.length})`;
+      plantAllBtn.textContent = `Tout planter (${emptyWithLastCrop.length})`;
     } else {
       plantAllBtn.style.display = 'none';
     }
@@ -533,7 +554,7 @@ function renderMysteryBoxes() {
     el.style.left = `${(box.x||1)*10}%`; el.style.top = `${(box.y||1)*12}%`;
     const idx = box.size==='large'?2:box.size==='medium'?1:0;
     const src = S(`ui_chest_${idx}_closed`);
-    if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else el.textContent = '\u{1F381}';
+    if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else { const fb=S('ui_chest_0_closed'); if(fb) el.innerHTML=`<img src="${fb}" width="36" height="36">`; else el.innerHTML='<div class="css-chest" style="width:30px;height:26px"></div>'; }
     el.onclick = () => showMysteryBox(i); layer.appendChild(el);
   });
 }
@@ -575,7 +596,7 @@ function updateLandBar() {
   const total = farmData.land_total || 20;
   const pct = Math.min(100, Math.round(used / Math.max(1, total) * 100));
   const statusEl = document.getElementById('land-status');
-  statusEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px"><span>\u{1F5FA}\u{FE0F} ${used}/${total}</span><div class="land-progress-bar"><div class="land-progress-fill" style="width:${pct}%"></div></div></div>`;
+  statusEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px"><span>Terrain ${used}/${total}</span><div class="land-progress-bar"><div class="land-progress-fill" style="width:${pct}%"></div></div></div>`;
 }
 
 // --- Info Overlay ---
@@ -695,11 +716,13 @@ function showBuildMenu() {
   // Built buildings
   const builtList = ALL_BUILDINGS.filter(b => built.includes(b.id));
   if (builtList.length > 0) {
-    html += '<div class="req-section"><h4>\u2705 Construits</h4>';
+    html += '<div class="req-section"><h4>Construits</h4>';
     builtList.forEach(b => {
       const def = defs[b.id]||{};
+      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
+      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain">` : '';
       html += `<div class="recipe-card" onclick="pycmd('farm:building_detail:${b.id}');hideOverlay()">
-        <div class="recipe-header"><span class="recipe-emoji">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong><span class="recipe-time">Tap pour produire</span></div></div></div>`;
     });
     html += '</div>';
@@ -708,15 +731,17 @@ function showBuildMenu() {
   // Available to build
   const availList = ALL_BUILDINGS.filter(b => unlocked.includes(b.id) && !built.includes(b.id));
   if (availList.length > 0) {
-    html += '<div class="req-section"><h4>\u{1F528} Disponibles</h4>';
+    html += '<div class="req-section"><h4>Disponibles</h4>';
     availList.forEach(b => {
       const def = defs[b.id]||{};
       const cost = def.cost_coins||0;
       const canBuy = coins >= cost && landFree >= 2;
+      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
+      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain">` : '';
       html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:build:${b.id}');hideOverlay()`:''}">
-        <div class="recipe-header"><span class="recipe-emoji">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
-        <span class="recipe-time">\u{1FA99} ${cost} + 2 terrain${canBuy?'':coins<cost?' (pas assez)':' (terrain plein)'}</span></div></div>
+        <span class="recipe-time">${cost} p. + 2 terrain${canBuy?'':coins<cost?' (pas assez)':' (terrain plein)'}</span></div></div>
         <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
     });
     html += '</div>';
@@ -725,20 +750,24 @@ function showBuildMenu() {
   // Locked (not yet unlocked by level)
   const lockedList = ALL_BUILDINGS.filter(b => !unlocked.includes(b.id) && !built.includes(b.id));
   if (lockedList.length > 0) {
-    html += '<div class="req-section"><h4>\u{1F512} \u00C0 d\u00E9bloquer</h4>';
+    html += '<div class="req-section"><h4>\u00C0 d\u00E9bloquer</h4>';
     lockedList.forEach(b => {
       const def = defs[b.id]||{};
       const cost = def.cost_coins||0;
+      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
+      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain;filter:grayscale(1) opacity(.5)">` : '';
       html += `<div class="recipe-card disabled">
-        <div class="recipe-header"><span class="recipe-emoji" style="filter:grayscale(1) opacity(.5)">${def.emoji||'\u{1F3ED}'}</span>
+        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
-        <span class="recipe-time">\u{1F512} Niveau ${b.lvl} requis (tu es ${level}) \u2022 \u{1FA99} ${cost}</span></div></div>
+        <span class="recipe-time">Niveau ${b.lvl} requis (tu es ${level}) \u2022 ${cost} p.</span></div></div>
         <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
     });
     html += '</div>';
   }
 
-  showInfo({ icon: '\u{1F3D7}\u{FE0F}', title: 'B\u00E2timents', desc: 'Construis des b\u00E2timents pour transformer tes r\u00E9coltes en produits de valeur !' });
+  const buildInfoSrc = S('hayday_barn');
+  const buildInfoIcon = buildInfoSrc ? `<img src="${buildInfoSrc}" width="40" height="40" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">` : '';
+  showInfo({ icon: buildInfoIcon, title: 'B\u00E2timents', desc: 'Construis des b\u00E2timents pour transformer tes r\u00E9coltes en produits de valeur !' });
   document.getElementById('info-requirements').innerHTML = html;
 }
 
@@ -755,14 +784,14 @@ function showAnimalMenu() {
   const owned = (farmData.pastures||[]).map(p => p.animal_type);
   const ownedUnique = [...new Set(owned)];
   if (ownedUnique.length > 0) {
-    html += '<div class="req-section"><h4>\u2705 Tes animaux</h4>';
+    html += '<div class="req-section"><h4>Tes animaux</h4>';
     ownedUnique.forEach(aid => {
       const def = defs[aid]||{};
       const count = (farmData.pastures||[]).filter(p=>p.animal_type===aid).reduce((s,p)=>s+(p.count||1),0);
       html += `<div class="recipe-card" onclick="showAnimalInfo('${aid}');hideOverlay()">
-        <div class="recipe-header">${animalLbl(aid,28)||`<span class="recipe-emoji">${def.emoji||''}</span>`}
+        <div class="recipe-header">${animalLbl(aid,28)||animalImg(aid,28)}
         <div class="recipe-info"><strong>${def.name||aid} x${count}</strong>
-        <span class="recipe-time">Produit ${def.product_emoji||''} ${def.product||''} / ${def.produce_every_n_reviews||10} reviews</span></div></div></div>`;
+        <span class="recipe-time">Produit ${def.product||''} / ${def.produce_every_n_reviews||10} reviews</span></div></div></div>`;
     });
     html += '</div>';
   }
@@ -770,7 +799,7 @@ function showAnimalMenu() {
   // Available
   const availAnimals = ALL_ANIMALS.filter(a => unlocked.includes(a.id));
   if (availAnimals.length > 0) {
-    html += '<div class="req-section"><h4>\u{1F43E} Disponibles</h4>';
+    html += '<div class="req-section"><h4>Disponibles</h4>';
     availAnimals.forEach(a => {
       const def = defs[a.id]||{};
       const cost = def.cost_coins||0;
@@ -779,9 +808,9 @@ function showAnimalMenu() {
       const canBuy = coins >= cost && (!needsLand || landFree >= 2);
       const landNote = needsLand ? ' + 2 terrain' : '';
       html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:add_pasture:${a.id}');hideOverlay()`:''}">
-        <div class="recipe-header">${animalLbl(a.id,28)||`<span class="recipe-emoji">${def.emoji||''}</span>`}
+        <div class="recipe-header">${animalLbl(a.id,28)||animalImg(a.id,28)}
         <div class="recipe-info"><strong>${def.name||a.id}</strong>
-        <span class="recipe-time">\u{1FA99} ${cost}${landNote} \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
+        <span class="recipe-time">${cost} p.${landNote} \u2022 ${def.product||''}</span></div></div></div>`;
     });
     html += '</div>';
   }
@@ -789,30 +818,34 @@ function showAnimalMenu() {
   // Locked
   const lockedAnimals = ALL_ANIMALS.filter(a => !unlocked.includes(a.id));
   if (lockedAnimals.length > 0) {
-    html += '<div class="req-section"><h4>\u{1F512} \u00C0 d\u00E9bloquer</h4>';
+    html += '<div class="req-section"><h4>\u00C0 d\u00E9bloquer</h4>';
     lockedAnimals.forEach(a => {
       const def = defs[a.id]||{};
       const cost = def.cost_coins||0;
       html += `<div class="recipe-card disabled">
-        <div class="recipe-header"><span class="recipe-emoji" style="filter:grayscale(1) opacity(.5)">${def.emoji||''}</span>
+        <div class="recipe-header" style="filter:grayscale(1) opacity(.5)">${animalLbl(a.id,28)||animalImg(a.id,28)}
         <div class="recipe-info"><strong>${def.name||a.id}</strong>
-        <span class="recipe-time">\u{1F512} Niveau ${a.lvl} (tu es ${level}) \u2022 \u{1FA99} ${cost} \u2022 ${def.product_emoji||''} ${def.product||''}</span></div></div></div>`;
+        <span class="recipe-time">Niveau ${a.lvl} (tu es ${level}) \u2022 ${cost} p. \u2022 ${def.product||''}</span></div></div></div>`;
     });
     html += '</div>';
   }
 
-  showInfo({ icon: '\u{1F404}', title: 'Animaux', desc: 'Les animaux produisent des ressources pr\u00E9cieuses pendant que tu r\u00E9vises !' });
+  const animalInfoSrc = S('hayday_cow');
+  const animalInfoIcon = animalInfoSrc ? `<img src="${animalInfoSrc}" width="40" height="40" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">` : '';
+  showInfo({ icon: animalInfoIcon, title: 'Animaux', desc: 'Les animaux produisent des ressources pr\u00E9cieuses pendant que tu r\u00E9vises !' });
   document.getElementById('info-requirements').innerHTML = html;
 }
 
 function showAnimalInfo(animalType) {
   const defs = farmData.animal_defs || {};
   const def = defs[animalType] || {};
+  const aSrc = S(`hayday_${animalType}-lbl`) || S(`hayday_${animalType}`);
+  const aIcon = aSrc ? `<img src="${aSrc}" width="40" height="40" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">` : '';
   showInfo({
-    icon: def.emoji || '\u{1F404}',
+    icon: aIcon,
     title: def.name || animalType,
-    desc: `Produit ${def.product_emoji||''} ${def.product||''} tous les ${def.produce_every_n_reviews||10} reviews.`,
-    produces: [`${def.product_emoji||''} ${def.product||''} (${def.produce_every_n_reviews||10} reviews)`],
+    desc: `Produit ${def.product||''} tous les ${def.produce_every_n_reviews||10} reviews.`,
+    produces: [`${def.product||''} (${def.produce_every_n_reviews||10} reviews)`],
   });
 }
 
@@ -882,8 +915,12 @@ function hidePanel() { currentPanel=null; document.querySelectorAll('.panel').fo
 function renderInventory() {
   const grid = document.getElementById('inventory-grid'); grid.innerHTML = '';
   const inv = farmData.inventory||{}, cat = farmData.item_catalog||{};
-  document.getElementById('barn-status').textContent = `\u{1F3DA}\u{FE0F} Grange: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
-  document.getElementById('silo-status').textContent = `\u{1F3ED} Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
+  const barnSpr = S('hayday_barn');
+  const siloSpr = S('hayday_silo');
+  const barnIcon = barnSpr ? `<img src="${barnSpr}" width="14" height="14" style="vertical-align:middle;margin-right:2px">` : '';
+  const siloIcon = siloSpr ? `<img src="${siloSpr}" width="14" height="14" style="vertical-align:middle;margin-right:2px">` : '';
+  document.getElementById('barn-status').innerHTML = `${barnIcon}Grange: ${farmData.barn_used||0}/${farmData.barn_capacity||50}`;
+  document.getElementById('silo-status').innerHTML = `${siloIcon}Silo: ${farmData.silo_used||0}/${farmData.silo_capacity||50}`;
   Object.entries(inv).forEach(([id,qty]) => {
     if (qty<=0) return; const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
@@ -898,7 +935,7 @@ function renderInventory() {
     if (lbl) icon = `<img src="${lbl}" width="36" height="36">`;
     else { const p = cropPortrait(id,30); icon = p || `<span class="item-emoji">${it.emoji||'\u{2753}'}</span>`; }
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">\u{1FA99} ${it.sell_price}</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">\u24D8</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -932,11 +969,11 @@ function renderBuildingsPanel() {
     } else if (isUnlocked) {
       const cost = bdef.cost||0;
       const canBuy = coins >= cost && landFree >= 2;
-      subtitle = `🪙 ${cost} + 2 terrain`;
+      subtitle = `${cost} pièces + 2 terrain`;
       if (!canBuy) opacity = '0.6';
       card.onclick = () => pycmd(`farm:build:${bid}`);
     } else {
-      subtitle = `🔒 Niveau ${b.lvl} requis (tu es ${level})`;
+      subtitle = `Niveau ${b.lvl} requis (tu es ${level})`;
       opacity = '0.35';
       card.style.filter = 'grayscale(0.6)';
     }
@@ -954,7 +991,7 @@ function renderOrders() {
   // Explanation header
   const header = document.createElement('div');
   header.style.cssText = 'padding:8px 12px;font-size:11px;color:#888;line-height:1.4';
-  header.innerHTML = '💡 <strong>Les commandes</strong> te rapportent <strong>2× le prix normal</strong> en pièces et XP. Remplis les items demandés et livre !';
+  header.innerHTML = '<strong>Les commandes</strong> te rapportent <strong>2x le prix normal</strong> en pièces et XP. Remplis les items demandés et livre !';
   list.appendChild(header);
 
   if (!orders.length) {
@@ -978,12 +1015,12 @@ function renderOrders() {
 
     card.innerHTML = `
       <div class="order-header">
-        <span class="order-type">${order.type==='boat'?'\u26F5 Bateau':'\u{1F69A} Camion'}</span>
-        <span class="order-reward">\u{1FA99} ${order.coin_reward} • +${order.xp_reward} XP</span>
+        <span class="order-type">${order.type==='boat'?'Bateau':'Camion'}</span>
+        <span class="order-reward">${order.coin_reward} p. \u2022 +${order.xp_reward} XP</span>
       </div>
       <div class="order-items">${items}</div>
       <button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
-        ${canDo?'📦 Livrer maintenant !':'⏳ Items manquants'}
+        ${canDo?'Livrer maintenant !':'Items manquants'}
       </button>
     `;
     list.appendChild(card);
@@ -1026,15 +1063,17 @@ function renderShopDeco(grid){
     el.className='item-cell';
     el.style.opacity=ok?'1':'.45';
     el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
-    el.innerHTML=`<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span><span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">\u{1FA99} ${cost}</span>`;
+    const decoSpr = S(`hayday_${item.id}`);
+    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : `<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span>`;
+    el.innerHTML=`${decoIcon}<span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">${cost} p.</span>`;
     grid.appendChild(el);
   });
 }
 const ANIMAL_INFO_DB = {
-  cow: {lvl:10, desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.', produces:'🥛 Lait → Beurre, Fromage, Crème'},
-  chicken: {lvl:20, desc:'Pond des œufs tous les 8 reviews. Les œufs servent aux cookies et gâteaux.', produces:'🥚 Œuf → Cookie, Gâteau'},
-  pig: {lvl:30, desc:'Produit du bacon tous les 15 reviews. Le bacon fait des burgers (le plus cher !).', produces:'🥓 Bacon → Burger (35🪙)'},
-  sheep: {lvl:60, desc:'Tond de la laine tous les 20 reviews. La laine se vend très cher.', produces:'🧶 Laine (10🪙)'},
+  cow: {lvl:10, desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.', produces:'Lait \u2192 Beurre, Fromage, Cr\u00E8me'},
+  chicken: {lvl:20, desc:'Pond des \u0153ufs tous les 8 reviews. Les \u0153ufs servent aux cookies et g\u00E2teaux.', produces:'\u0152uf \u2192 Cookie, G\u00E2teau'},
+  pig: {lvl:30, desc:'Produit du bacon tous les 15 reviews. Le bacon fait des burgers (le plus cher !).', produces:'Bacon \u2192 Burger (35 pi\u00E8ces)'},
+  sheep: {lvl:60, desc:'Tond de la laine tous les 20 reviews. La laine se vend tr\u00E8s cher.', produces:'Laine (10 pi\u00E8ces)'},
 };
 
 function showAnimalShopInfo(aid) {
@@ -1049,18 +1088,18 @@ function showAnimalShopInfo(aid) {
   const needsLand = !hasPasture;
   const landFree = (farmData.land_total||20) - (farmData.land_used||0);
   const reqs = [
-    {label: `⭐ Niveau ${info.lvl}`, value: level >= info.lvl ? `✓ (${level})` : `✗ (${level})`, met: level >= info.lvl},
-    {label: `🪙 ${cost} pièces`, value: (farmData.coins||0) >= cost ? '✓' : `✗ (${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
-    {label: '🗺️ Terrain', value: needsLand ? (landFree >= 2 ? `✓ (2 requis)` : `✗ (${landFree} libre)`) : '✓ (enclos existant)', met: !needsLand || landFree >= 2},
+    {label: `Niveau ${info.lvl}`, value: level >= info.lvl ? `\u2713 (${level})` : `\u2717 (${level})`, met: level >= info.lvl},
+    {label: `${cost} pi\u00E8ces`, value: (farmData.coins||0) >= cost ? '\u2713' : `\u2717 (${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
+    {label: 'Terrain', value: needsLand ? (landFree >= 2 ? `\u2713 (2 requis)` : `\u2717 (${landFree} libre)`) : '\u2713 (enclos existant)', met: !needsLand || landFree >= 2},
     {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
-    icon: def.emoji || '🐄',
+    icon: (()=>{const s=S(`hayday_${animalType}-lbl`)||S(`hayday_${animalType}`);return s?`<img src="${s}" width="40" height="40">`:(def.emoji||'');})(),
     title: def.name || aid,
     desc: info.desc || '',
     requirements: reqs,
     produces: [info.produces || ''],
-    action_label: unlocked && count < maxN ? `Acheter (🪙${cost})` : null,
+    action_label: unlocked && count < maxN ? `Acheter (${cost} pi\u00E8ces)` : null,
     action_cmd: unlocked && count < maxN ? `pycmd('farm:add_pasture:${aid}');hideOverlay()` : null,
   });
 }
@@ -1090,7 +1129,7 @@ function renderShopAnimals(grid){
     el.innerHTML=`
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
-      <span class="item-price">${unlocked?`🪙 ${cost}`:`🔒 Niv.${info.lvl}`}</span>
+      <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
       <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
     `;
     grid.appendChild(el);
@@ -1099,23 +1138,25 @@ function renderShopAnimals(grid){
 function showUpgradeInfo(uid) {
   const d = farmData, inv = d.inventory||{};
   const defs = {
-    barn: {name:'Grange',emoji:'🏚️',desc:'Stocke les matériaux (boulons, planches, etc). Plus de capacité = plus de matériaux gardés.',
+    barn: {name:'Grange',desc:'Stocke les mat\u00E9riaux (boulons, planches, etc). Plus de capacit\u00E9 = plus de mat\u00E9riaux gard\u00E9s.',
       level:d.barn_level||1, cap:d.barn_capacity||50, newCap:(d.barn_capacity||50)+25,
-      mats:[{id:'bolt',e:'🔩',n:(d.barn_level||1)+1},{id:'plank',e:'🪵',n:(d.barn_level||1)+1},{id:'duct_tape',e:'🩹',n:(d.barn_level||1)+1}]},
-    silo: {name:'Silo',emoji:'🏭',desc:'Stocke les récoltes et produits transformés. Plus de capacité = plus de production.',
+      mats:[{id:'bolt',e:'',n:(d.barn_level||1)+1},{id:'plank',e:'',n:(d.barn_level||1)+1},{id:'duct_tape',e:'',n:(d.barn_level||1)+1}]},
+    silo: {name:'Silo',desc:'Stocke les r\u00E9coltes et produits transform\u00E9s. Plus de capacit\u00E9 = plus de production.',
       level:d.silo_level||1, cap:d.silo_capacity||50, newCap:(d.silo_capacity||50)+25,
-      mats:[{id:'nail',e:'📌',n:(d.silo_level||1)+1},{id:'screw',e:'🪛',n:(d.silo_level||1)+1},{id:'paint',e:'🎨',n:(d.silo_level||1)+1}]},
+      mats:[{id:'nail',e:'',n:(d.silo_level||1)+1},{id:'screw',e:'',n:(d.silo_level||1)+1},{id:'paint',e:'',n:(d.silo_level||1)+1}]},
   };
   const u = defs[uid]; if (!u) return;
   const reqs = u.mats.map(m => ({
-    label: `${m.e} ${m.id.replace(/_/g,' ')} x${m.n}`,
+    label: `${itemName(m.id)} x${m.n}`,
     value: `${inv[m.id]||0}/${m.n}`,
     met: (inv[m.id]||0) >= m.n,
   }));
   const canUp = u.mats.every(m => (inv[m.id]||0) >= m.n);
+  const upgSrc = S(uid === 'barn' ? 'hayday_barn' : 'hayday_silo');
+  const upgIcon = upgSrc ? `<img src="${upgSrc}" width="40" height="40">` : '';
   showInfo({
-    icon: u.emoji, title: `${u.name} — Niv. ${u.level}`,
-    desc: `${u.desc}\n\nCapacité actuelle : ${u.cap} → ${u.newCap} après amélioration.\n\n💡 Les matériaux tombent aléatoirement (~12%) quand tu révises des cartes.`,
+    icon: upgIcon, title: `${u.name} \u2014 Niv. ${u.level}`,
+    desc: `${u.desc}\n\nCapacit\u00E9 actuelle : ${u.cap} \u2192 ${u.newCap} apr\u00E8s am\u00E9lioration.\n\nLes mat\u00E9riaux tombent al\u00E9atoirement (~12%) quand tu r\u00E9vises des cartes.`,
     requirements: reqs,
     action_label: canUp ? `Améliorer → Niv. ${u.level+1}` : null,
     action_cmd: canUp ? `pycmd('farm:upgrade:${uid}');hideOverlay()` : null,
@@ -1125,9 +1166,9 @@ function showUpgradeInfo(uid) {
 function renderShopUpgrades(grid){
   const d=farmData, inv=d.inventory||{};
 
-  [{id:'barn',name:'Grange',emoji:'🏚️',level:d.barn_level||1,cap:d.barn_capacity||50,newCap:(d.barn_capacity||50)+25,
+  [{id:'barn',name:'Grange',level:d.barn_level||1,cap:d.barn_capacity||50,newCap:(d.barn_capacity||50)+25,
     mats:[{id:'bolt',n:(d.barn_level||1)+1},{id:'plank',n:(d.barn_level||1)+1},{id:'duct_tape',n:(d.barn_level||1)+1}]},
-   {id:'silo',name:'Silo',emoji:'🏭',level:d.silo_level||1,cap:d.silo_capacity||50,newCap:(d.silo_capacity||50)+25,
+   {id:'silo',name:'Silo',level:d.silo_level||1,cap:d.silo_capacity||50,newCap:(d.silo_capacity||50)+25,
     mats:[{id:'nail',n:(d.silo_level||1)+1},{id:'screw',n:(d.silo_level||1)+1},{id:'paint',n:(d.silo_level||1)+1}]}
   ].forEach(u=>{
     const canUp=u.mats.every(m=>(inv[m.id]||0)>=m.n);
@@ -1137,7 +1178,7 @@ function renderShopUpgrades(grid){
     el.onclick=()=>{if(canUp){pycmd(`farm:upgrade:${u.id}`);SoundMgr.play('click')}else showUpgradeInfo(u.id)};
     el.innerHTML=`
       ${buildingImg(u.id,40)}
-      <span class="item-name">${u.emoji} ${u.name} Niv.${u.level}</span>
+      <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
       <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
     `;
@@ -1160,7 +1201,7 @@ function renderShopLand(grid){
   status.style.cssText='grid-column:1/-1;min-height:80px;text-align:left;padding:10px';
   const usedPct=Math.round(landUsed/Math.max(1,landTotal)*100);
   status.innerHTML=`
-    <div style="font-weight:800;font-size:14px;margin-bottom:6px">🗺️ Ton terrain</div>
+    <div style="font-weight:800;font-size:14px;margin-bottom:6px">Ton terrain</div>
     <div style="height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-bottom:6px">
       <div style="height:100%;width:${usedPct}%;background:linear-gradient(90deg,#4caf50,#81c784);border-radius:4px"></div>
     </div>
@@ -1184,18 +1225,18 @@ function renderShopLand(grid){
   el.style.cssText=`grid-column:1/-1;min-height:80px;text-align:left;padding:10px;opacity:${canBuy?'1':'.5'}`;
   el.onclick=()=>{
     if(canBuy){pycmd('farm:buy_land');SoundMgr.play('click')}
-    else if(deeds<1) showNotification('Il te faut un Titre de propriété (📜). Drop rare en révisant !');
-    else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`);
+    else if(deeds<1) showNotification('Il te faut un Titre de propri\u00e9t\u00e9. Drop rare en r\u00e9visant !');
+    else showNotification(`Il faut ${cost} pi\u00e8ces (tu as ${coins}).`);
   };
   el.innerHTML=`
-    <div style="font-weight:800;font-size:13px;margin-bottom:4px">🏗️ Agrandir le terrain (+5)</div>
+    <div style="font-weight:800;font-size:13px;margin-bottom:4px">Agrandir le terrain (+5)</div>
     <div style="font-size:11px;color:#666;margin-bottom:6px">
-      Plus de terrain = plus de champs, bâtiments et enclos.
+      Plus de terrain = plus de champs, b\u00e2timents et enclos.
     </div>
     <div style="font-size:11px">
-      <span style="font-weight:700">Coût :</span>
-      🪙 ${cost} pièces ${coins>=cost?'<span style="color:#4caf50">✓</span>':'<span style="color:#e74c3c">✗ ('+coins+')</span>'}
-      • 📜 Titre x1 ${deeds>=1?'<span style="color:#4caf50">✓</span>':'<span style="color:#e74c3c">✗ ('+deeds+')</span>'}
+      <span style="font-weight:700">Co\u00fbt :</span>
+      ${cost} pi\u00e8ces ${coins>=cost?'<span style="color:#4caf50">\u2713</span>':'<span style="color:#e74c3c">\u2717 ('+coins+')</span>'}
+      \u2022 Titre x1 ${deeds>=1?'<span style="color:#4caf50">\u2713</span>':'<span style="color:#e74c3c">\u2717 ('+deeds+')</span>'}
     </div>
   `;
   grid.appendChild(el);
@@ -1203,7 +1244,7 @@ function renderShopLand(grid){
   // Info text
   const info=document.createElement('div');
   info.style.cssText='grid-column:1/-1;font-size:10px;color:#999;padding:4px 8px;line-height:1.4';
-  info.innerHTML='💡 Les <strong>Titres de propriété</strong> 📜 sont des drops rares (~3%) obtenus en révisant des cartes. Continue à réviser pour en obtenir !';
+  info.innerHTML='Les <strong>Titres de propri\u00e9t\u00e9</strong> sont des drops rares (~3%) obtenus en r\u00e9visant des cartes. Continue \u00e0 r\u00e9viser pour en obtenir !';
   grid.appendChild(info);
 }
 
@@ -1214,22 +1255,22 @@ function renderSettings() {
     const accuracy = d.total_reviews > 0 ? Math.round((d.total_correct||0) / d.total_reviews * 100) : 0;
     stats.innerHTML = `
       <div class="stats-grid">
-        <div class="stat-row"><span>\u{1F3AF} ${LANG.level_label}</span><strong>${d.level||1}</strong></div>
-        <div class="stat-row"><span>\u{1F4DA} ${LANG.total_reviews}</span><strong>${formatNum(d.lifetime_reviews||0)}</strong></div>
-        <div class="stat-row"><span>\u{2705} ${LANG.accuracy}</span><strong>${accuracy}%</strong></div>
-        <div class="stat-row"><span>\u{1F525} ${LANG.best_streak}</span><strong>${d.best_streak||0} jours</strong></div>
-        <div class="stat-row"><span>\u{1FA99} ${LANG.coins_total}</span><strong>${formatNum(d.total_coins_earned||0)}</strong></div>
-        <div class="stat-row"><span>\u{1F33E} ${LANG.harvests}</span><strong>${d.total_harvests||0}</strong></div>
-        <div class="stat-row"><span>\u{1F3ED} ${LANG.produced}</span><strong>${d.total_produced||0}</strong></div>
-        <div class="stat-row"><span>\u{1F69A} ${LANG.orders_done}</span><strong>${d.orders_completed||0}</strong></div>
-        <div class="stat-row"><span>\u{1F4E6} ${LANG.items_sold}</span><strong>${d.total_items_sold||0}</strong></div>
-        <div class="stat-row"><span>\u{1F4CB} ${LANG.total_sessions_label}</span><strong>${d.total_sessions||0}</strong></div>
+        <div class="stat-row"><span>${LANG.level_label}</span><strong>${d.level||1}</strong></div>
+        <div class="stat-row"><span>${LANG.total_reviews}</span><strong>${formatNum(d.lifetime_reviews||0)}</strong></div>
+        <div class="stat-row"><span>${LANG.accuracy}</span><strong>${accuracy}%</strong></div>
+        <div class="stat-row"><span>${LANG.best_streak}</span><strong>${d.best_streak||0} jours</strong></div>
+        <div class="stat-row"><span>${LANG.coins_total}</span><strong>${formatNum(d.total_coins_earned||0)}</strong></div>
+        <div class="stat-row"><span>${LANG.harvests}</span><strong>${d.total_harvests||0}</strong></div>
+        <div class="stat-row"><span>${LANG.produced}</span><strong>${d.total_produced||0}</strong></div>
+        <div class="stat-row"><span>${LANG.orders_done}</span><strong>${d.orders_completed||0}</strong></div>
+        <div class="stat-row"><span>${LANG.items_sold}</span><strong>${d.total_items_sold||0}</strong></div>
+        <div class="stat-row"><span>${LANG.total_sessions_label}</span><strong>${d.total_sessions||0}</strong></div>
       </div>`;
   }
 }
 
 function renderAchievements(){pycmd('farm:get_achievements')}
-function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);card.innerHTML=`<span class="achievement-icon">${a.icon||'\u{1F3C6}'}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">\u{1F48E} ${a.gems}</span>`:''}`;list.appendChild(card)})}
+function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const starSrc=S('hayday_star');const achIcon=starSrc?`<img src="${starSrc}" width="24" height="24" style="object-fit:contain">`:'';card.innerHTML=`<span class="achievement-icon">${achIcon}</span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||`<span style="font-size:28px">${CROP_EMOJI[id]||'\u{1F331}'}</span>`}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail">\u{1F4DA} ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail">\u{1F33E} ${harvestMin}-${harvestMax} \u2022 \u{1FA99} ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
@@ -1249,7 +1290,7 @@ function showSellDialog(id, qty) {
   if (!overlay) return pycmd(`farm:sell:${id}:1`);
   document.getElementById('sell-item-name').textContent = `${cat.emoji||''} ${itemName(id)}`;
   document.getElementById('sell-item-stock').textContent = `Stock : ${qty}`;
-  document.getElementById('sell-unit-price').textContent = `\u{1FA99} ${price} / unité`;
+  document.getElementById('sell-unit-price').textContent = `${price} p. / unit\u00e9`;
   const btns = document.getElementById('sell-buttons');
   btns.innerHTML = '';
   const amounts = [1];
@@ -1263,7 +1304,7 @@ function showSellDialog(id, qty) {
     const total = n * price;
     const btn = document.createElement('button');
     btn.className = 'sell-amount-btn';
-    btn.innerHTML = `<span>${label}</span><span class="sell-total">\u{1FA99} ${total}</span>`;
+    btn.innerHTML = `<span>${label}</span><span class="sell-total">${total} p.</span>`;
     btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('click'); };
     btns.appendChild(btn);
   });
@@ -1297,16 +1338,16 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25\u{1FA99}',c:'#f44336'},{l:'50\u{1FA99}',c:'#e91e63'},{l:'100\u{1FA99}',c:'#9c27b0'},{l:'1\u{1F48E}',c:'#673ab7'},{l:'3\u{1F48E}',c:'#3f51b5'},{l:'5\u{1F48E}',c:'#2196f3'},{l:'3\u{1F529}',c:'#009688'},{l:'3\u{1FAB5}',c:'#4caf50'},{l:'\u{1F4DC}',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else icon.textContent='\u{1F4E6}'}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
 function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
 function showLevelUp(d){
   SoundMgr.play('levelup');
   document.getElementById('levelup-level').textContent=d.new_level;
-  let rw='';if(d.gem_reward>0)rw=`\u{1F48E} +${d.gem_reward} ${LANG.gemmes}`;
+  let rw='';if(d.gem_reward>0)rw=`+${d.gem_reward} ${LANG.gemmes}`;
   document.getElementById('levelup-rewards').innerHTML=rw;
   let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${u.emoji||''} ${u.name}</span>`});
   document.getElementById('levelup-unlocks').innerHTML=ul;
@@ -1325,25 +1366,59 @@ function showDailyLoginBonus(d){
   for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
   document.getElementById('login-days-row').innerHTML=dots;
   let rw='';
-  if(reward.coins)rw+=`<span class="login-reward-item">\u{1FA99} +${reward.coins}</span>`;
-  if(reward.gems)rw+=`<span class="login-reward-item">\u{1F48E} +${reward.gems}</span>`;
+  if(reward.coins){const cSrc=S('ui_coin');rw+=`<span class="login-reward-item">${cSrc?`<img src="${cSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.coins}</span>`;}
+  if(reward.gems){const gSrc=S('ui_gem');rw+=`<span class="login-reward-item">${gSrc?`<img src="${gSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.gems}</span>`;}
   document.getElementById('login-reward-detail').innerHTML=rw;
   el.classList.remove('hidden');
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
-function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div><div class="session-stat"><div class="session-stat-value">\u{1F525}${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemName(id)} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
+function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div><div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemName(id)} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
 function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
-function showCoinBurst(x,y,n){const layer=document.getElementById('reward-layer');for(let i=0;i<(n||5);i++){const el=document.createElement('div');el.className='coin-particle';el.textContent='\u{1FA99}';el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';el.style.setProperty('--dx',((Math.random()-.5)*80)+'px');el.style.setProperty('--dy',(-(Math.random()*60+20))+'px');el.style.animationDelay=(i*50)+'ms';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1000)}}
+function showCoinBurst(x,y,n){
+  const layer=document.getElementById('reward-layer');
+  const coinSrc=S('ui_coin');
+  for(let i=0;i<(n||5);i++){
+    const el=document.createElement('div');
+    el.className='coin-particle';
+    if(coinSrc)el.innerHTML=`<img src="${coinSrc}" width="16" height="16">`;
+    else el.innerHTML='<span class="css-coin" style="width:12px;height:12px"></span>';
+    el.style.left=(x||window.innerWidth/2)+'px';
+    el.style.top=(y||window.innerHeight/2)+'px';
+    el.style.setProperty('--dx',((Math.random()-.5)*80)+'px');
+    el.style.setProperty('--dy',(-(Math.random()*60+20))+'px');
+    el.style.animationDelay=(i*50)+'ms';
+    layer.appendChild(el);
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1000);
+  }
+  // Fly a coin to HUD (satisfying collection feel)
+  const hudCoins=document.getElementById('hud-coins');
+  if(hudCoins&&(n||5)>0){
+    const coinFly=document.createElement('div');
+    coinFly.className='coin-fly-to-hud';
+    if(coinSrc)coinFly.innerHTML=`<img src="${coinSrc}" width="20" height="20">`;
+    else coinFly.innerHTML='<span class="css-coin" style="width:16px;height:16px"></span>';
+    coinFly.style.left=(x||window.innerWidth/2)+'px';
+    coinFly.style.top=(y||window.innerHeight/2)+'px';
+    const rect=hudCoins.getBoundingClientRect();
+    coinFly.style.setProperty('--target-x',(rect.left+rect.width/2-(x||window.innerWidth/2))+'px');
+    coinFly.style.setProperty('--target-y',(rect.top+rect.height/2-(y||window.innerHeight/2))+'px');
+    layer.appendChild(coinFly);
+    setTimeout(()=>{hudCoins.style.transform='scale(1.2)';setTimeout(()=>{hudCoins.style.transform='';},200)},500);
+    setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
+  }
+}
 function showReward(d){SoundMgr.play('click');if(d.coins){showFloatingReward(`+${d.coins}`,window.innerWidth/2,window.innerHeight/2-20);showCoinBurst(window.innerWidth/2,window.innerHeight/2)}if(d.xp)showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);if(d.items)Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}}
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
 function showProductionDialog(data){
-  document.getElementById('production-title').textContent=`\u{1F3ED} ${data.building_name||'Production'}`;
+  const bldSrc = S(HD_BUILDINGS[data.building_id] || `buildings_${data.building_id}`);
+  const bldIcon = bldSrc ? `<img src="${bldSrc}" width="22" height="22" style="vertical-align:middle;margin-right:4px">` : '';
+  document.getElementById('production-title').innerHTML = `${bldIcon}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
   if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${q.emoji||'?'}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('click')};qd.appendChild(btn)}list.appendChild(qd)}

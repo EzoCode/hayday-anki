@@ -36,12 +36,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .hud-coins{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,215,0,.2)}
 .hud-gems{background:linear-gradient(135deg,rgba(79,195,247,.15),rgba(0,0,0,.35));border:1px solid rgba(79,195,247,.2)}
 .hud-streak{background:linear-gradient(135deg,rgba(255,100,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,100,0,.2)}
-.currency-icon{font-size:14px}
-.streak-fire{font-size:14px;animation:flame 1.5s ease-in-out infinite}
-.hud-settings{background:none;border:none;font-size:16px;cursor:pointer;padding:2px;opacity:.6;transition:opacity .2s}
+.currency-icon{font-size:14px;display:flex;align-items:center}
+.streak-fire{display:flex;align-items:center;animation:flame 1.5s ease-in-out infinite}
+.hud-settings{background:none;border:none;font-size:16px;cursor:pointer;padding:2px;opacity:.6;transition:opacity .2s;display:flex;align-items:center}
 .hud-settings:hover{opacity:1}
 @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.25) translateY(-1px);filter:brightness(1.4)}}
 .streak-bonus{font-size:8px;font-weight:900;color:#ff6;background:rgba(255,100,0,.4);padding:0 4px;border-radius:6px;margin-left:2px;letter-spacing:.3px}
+
+/* ===== CSS-only icons (replacing emojis) ===== */
+.css-fire{display:inline-block;width:11px;height:14px;background:linear-gradient(0deg,#ffd700 0%,#ff8c00 35%,#ff4500 65%,#e00 100%);border-radius:50% 50% 50% 50% / 60% 60% 30% 30%;box-shadow:0 0 5px rgba(255,140,0,.6);position:relative}
+.css-fire::before{content:'';position:absolute;bottom:0;left:2px;width:7px;height:8px;background:linear-gradient(0deg,#fff7aa 0%,#ffd700 50%,transparent 100%);border-radius:50% 50% 50% 50% / 60% 60% 30% 30%}
+.css-coin{display:inline-block;width:14px;height:14px;background:radial-gradient(circle at 40% 35%,#ffe566,#ffd700 40%,#c5a200 100%);border-radius:50%;border:1.5px solid #b8960e;box-shadow:inset 0 1px 2px rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.3)}
+.css-gem{display:inline-block;width:12px;height:14px;background:linear-gradient(135deg,#81d4fa 0%,#4fc3f7 40%,#0288d1 100%);clip-path:polygon(50% 0%,100% 35%,80% 100%,20% 100%,0% 35%);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.css-gear{display:inline-block;width:18px;height:18px;position:relative}
+.css-gear::before{content:'';position:absolute;inset:3px;border:2px solid rgba(212,160,86,.8);border-radius:50%}
+.css-gear::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,transparent 30%,transparent 30%),
+  linear-gradient(0deg,rgba(212,160,86,.8) 0%,rgba(212,160,86,.8) 100%) center top/2.5px 5px no-repeat,
+  linear-gradient(0deg,rgba(212,160,86,.8) 0%,rgba(212,160,86,.8) 100%) center bottom/2.5px 5px no-repeat,
+  linear-gradient(90deg,rgba(212,160,86,.8) 0%,rgba(212,160,86,.8) 100%) left center/5px 2.5px no-repeat,
+  linear-gradient(90deg,rgba(212,160,86,.8) 0%,rgba(212,160,86,.8) 100%) right center/5px 2.5px no-repeat}
 
 /* ===== NEXT UNLOCK HINT ===== */
 #next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 8px;font-size:10px;font-weight:700;color:rgba(255,215,0,.9);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(0,0,0,.15),rgba(0,0,0,.25),rgba(0,0,0,.15));letter-spacing:.3px;overflow:hidden}
@@ -366,7 +379,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .plot-empty .field-img{filter:brightness(.85) saturate(.8)}
 .plot-planted,.plot-growing{background:linear-gradient(145deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.1)}
 .plot-ready{background:linear-gradient(145deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 18px rgba(255,215,0,.5);border:2px solid var(--gold);animation:readyGlow 2s ease-in-out infinite}
-.plot-ready::after{content:'✨';position:absolute;top:2px;right:4px;font-size:10px;animation:sparkle 1.5s ease-in-out infinite;z-index:3}
+.plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:14px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
 .plot-wilted{background:linear-gradient(145deg,#8a7a5a,#6b5a3a);border:2px solid rgba(139,69,19,.4);filter:saturate(.3) brightness(.75);cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
 .plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
@@ -430,10 +443,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-55px) scale(.8)}}
 .coin-particle{position:absolute;animation:coinBurst .8s ease-out forwards;pointer-events:none}
 @keyframes coinBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.coin-fly-to-hud{position:absolute;pointer-events:none;z-index:160;animation:coinFlyHud .6s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes coinFlyHud{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:1}100%{opacity:0;transform:translate(var(--target-x),var(--target-y)) scale(.4)}}
+.hud-coins,.hud-gems{transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
 
 /* ===== SPARKLE & CONFETTI LAYERS ===== */
 #sparkle-layer,#confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
-.sparkle-particle{position:absolute;top:-20px;font-size:16px;animation:sparkleFall 3s ease-in forwards}
+.sparkle-particle{position:absolute;top:-20px;animation:sparkleFall 3s ease-in forwards}
 @keyframes sparkleFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(.5)}30%{opacity:1;transform:translateY(30vh) rotate(180deg) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(360deg) scale(.3)}}
 .confetti-piece{position:absolute;bottom:50%;width:8px;height:8px;border-radius:2px;animation:confettiBurst 1.8s ease-out forwards}
 @keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}}
@@ -550,7 +566,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 #wheel-result{margin-top:10px;font-size:16px;font-weight:900;color:#2e7d32}
 
 /* Mystery box */
-.box-icon{font-size:64px;display:inline-block;margin:16px 0;transition:transform .3s}
+.box-icon{display:inline-block;margin:16px 0;transition:transform .3s;min-width:64px;min-height:64px}
+.css-chest{display:inline-block;width:56px;height:48px;background:linear-gradient(180deg,#d4a056 0%,#8b5e3c 50%,#5a3520 100%);border-radius:6px;border:2px solid #5a3520;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 4px 8px rgba(0,0,0,.3);position:relative}
+.css-chest::before{content:'';position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:12px;height:10px;background:#ffd700;border-radius:2px;border:1.5px solid #c5a200;box-shadow:0 0 6px rgba(255,215,0,.5)}
 .box-icon.shaking{animation:boxShake .3s ease-in-out infinite}
 .box-icon.opened{animation:boxOpen .6s ease forwards}
 @keyframes boxShake{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-12deg) scale(1.05)}30%{transform:rotate(12deg) scale(1.05)}45%{transform:rotate(-8deg)}60%{transform:rotate(8deg)}75%{transform:rotate(-4deg)}}
