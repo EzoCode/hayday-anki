@@ -559,7 +559,7 @@ function renderFields() {
     if (field.state === 'empty') {
       if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
         const lcName = cropName(field.last_crop);
-        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 24) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
+        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
         el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
@@ -571,7 +571,11 @@ function renderFields() {
       }
     } else if (field.state === 'ready') {
       const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      const coinSrc = S('ui_coin');
+      const coinMini = coinSrc ? `<img src="${coinSrc}" width="10" height="10" style="vertical-align:middle">` : '';
+      const cropDef = (farmData.crop_defs||{})[field.crop]||{};
+      const sellPrice = cropDef.sell_price || 2;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">${coinMini} Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
@@ -588,7 +592,8 @@ function renderFields() {
       const name = cropName(field.crop);
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 36 : 44;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${reviewsLeft > 0 ? reviewsLeft + ' rev.' : name}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      el.title = `${name} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${reviewsLeft} révisions restantes`;
     }
     grid.appendChild(el);
   });
@@ -1161,7 +1166,7 @@ function renderOrders() {
   }
 
   orders.forEach((order,i) => {
-    const card = document.createElement('div'); card.className = 'order-card';
+    const card = document.createElement('div');
     const inv = farmData.inventory||{}; let canDo=true, items='';
     Object.entries(order.items_needed||{}).forEach(([id,qty]) => {
       const have=inv[id]||0;
@@ -1174,10 +1179,12 @@ function renderOrders() {
       </div>`;
     });
 
+    card.className = 'order-card' + (canDo ? ' can-fulfill' : '');
+    const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="14" height="14" style="vertical-align:middle">` : '';
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type"><img src="${order.type==='boat'?ITEM_ICONS._icon_boat:ITEM_ICONS._icon_truck_color}" width="28" height="28" style="vertical-align:middle"> ${order.type==='boat'?'Bateau':'Camion'}</span>
-        <span class="order-reward">${order.coin_reward} p. \u2022 +${order.xp_reward} XP</span>
+        <span class="order-reward">${coinIcon} ${order.coin_reward} p. \u2022 +${order.xp_reward} XP</span>
       </div>
       <div class="order-items">${items}</div>
       <button class="order-fulfill-btn" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
@@ -1574,13 +1581,17 @@ function showBoxResult(r){const icon=document.getElementById('box-icon');icon.cl
 function showLevelUp(d){
   SoundMgr.play('levelup');
   document.getElementById('levelup-level').textContent=d.new_level;
-  let rw='';if(d.gem_reward>0)rw=`+${d.gem_reward} ${LANG.gemmes}`;
+  const gemSrc=S('ui_gem');
+  let rw='';if(d.gem_reward>0)rw=`${gemSrc?`<img src="${gemSrc}" width="18" height="18" style="vertical-align:middle">`:''}+${d.gem_reward} ${LANG.gemmes}`;
   document.getElementById('levelup-rewards').innerHTML=rw;
   let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${itemIcon(u.id||u.type||'', 16)} ${u.name}</span>`});
   document.getElementById('levelup-unlocks').innerHTML=ul;
   document.getElementById('levelup-overlay').classList.remove('hidden');
   createSparkleRain();
   createConfetti();
+  // Flash level badge
+  const lvlBadge=document.getElementById('hud-level');
+  if(lvlBadge){lvlBadge.classList.remove('level-up-flash');void lvlBadge.offsetWidth;lvlBadge.classList.add('level-up-flash');setTimeout(()=>lvlBadge.classList.remove('level-up-flash'),1000)}
 }
 function hideLevelUp(){document.getElementById('levelup-overlay').classList.add('hidden')}
 
@@ -1662,11 +1673,18 @@ function showReward(d){
     const cx=window.innerWidth/2, cy=window.innerHeight/2;
     showFloatingReward(`+${d.coins}`,cx,cy-20);
     showCoinBurst(cx,cy,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
+    // HUD coin counter bump
+    const coinHud=document.getElementById('hud-coins');
+    if(coinHud){coinHud.classList.remove('hud-bump');void coinHud.offsetWidth;coinHud.classList.add('hud-bump')}
   }
-  // XP: subtle text float
-  if(d.xp) showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);
-  // Material/item drops: individual notifications
-  if(d.items) Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});
+  // XP: flash the XP bar + float text
+  if(d.xp){
+    showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);
+    const xpFill=document.getElementById('hud-xp-bar');
+    if(xpFill){xpFill.classList.remove('xp-gained');void xpFill.offsetWidth;xpFill.classList.add('xp-gained');setTimeout(()=>xpFill.classList.remove('xp-gained'),800)}
+  }
+  // Material/item drops: individual notifications with slight delay cascade
+  if(d.items){let delay=0;Object.entries(d.items).forEach(([id,qty])=>{setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'),delay);delay+=300})}
   // Mystery box appearance
   if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}
 }

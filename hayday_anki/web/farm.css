@@ -29,8 +29,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .hud-xp{position:relative;width:140px;height:30px}
 .xp-bar-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;display:none;pointer-events:none}
 .xp-bar-track{position:absolute;top:8px;left:34px;right:8px;height:12px;background:#1a1a1a;border-radius:6px;overflow:hidden;border:1px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 4px rgba(0,0,0,.6);z-index:1}
-.xp-bar-fill{height:100%;background:linear-gradient(180deg,#81c784,var(--xp));border-radius:6px;transition:width .5s;box-shadow:0 0 6px rgba(76,175,80,.4);position:relative}
-.xp-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:6px 6px 0 0}
+.xp-bar-fill{height:100%;background:linear-gradient(180deg,#a5d6a7,#4caf50 40%,#388e3c);border-radius:6px;transition:width .6s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 6px rgba(76,175,80,.4);position:relative}
+.xp-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);border-radius:6px 6px 0 0}
+.xp-bar-fill.xp-gained{animation:xpFlash .8s ease-out;box-shadow:0 0 12px rgba(76,175,80,.8)}
+@keyframes xpFlash{0%{box-shadow:0 0 16px rgba(76,175,80,1),0 0 30px rgba(76,175,80,.5)}100%{box-shadow:0 0 6px rgba(76,175,80,.4)}}
 .xp-text{position:absolute;top:8px;left:34px;right:8px;height:12px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:3}
 .hud-currency{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.35);padding:3px 10px 3px 6px;border-radius:16px;border:1px solid rgba(255,255,255,.12);color:var(--text-l);font-weight:800;font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,.5);backdrop-filter:blur(4px)}
 .hud-coins{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,215,0,.2)}
@@ -138,30 +140,33 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  background: linear-gradient(180deg, rgba(90,53,20,0.35) 0%, rgba(60,35,12,0.25) 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 25%, transparent 50%, rgba(0,0,0,.08) 100%),
+    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b3a1a);
+  border-bottom: 2px solid #4a2810;
+  border-top: 1px solid rgba(255,255,255,.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.25);
 }
 
 .zone-title {
   font-size: 13px;
   font-weight: 800;
-  color: rgba(255,255,255,0.95);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  color: #fef8e8;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 6px rgba(0,0,0,.2);
   flex: 1;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
 }
 
 .zone-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.6);
-  background: rgba(0,0,0,0.2);
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.3);
   padding: 2px 8px;
   border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 
 .zone-add-btn {
@@ -202,7 +207,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 10px;
+  padding: 12px 10px;
   justify-content: center;
   min-height: 60px;
 }
@@ -210,10 +215,16 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .zone-empty-msg {
   width: 100%;
   text-align: center;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.6);
   font-size: 11px;
-  font-style: italic;
-  padding: 10px;
+  font-weight: 600;
+  padding: 16px 10px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 /* Land bar */
@@ -410,17 +421,20 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:14px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
 .plot-crop img{max-width:56px;max-height:56px;width:auto;height:auto}
-.plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
-.plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
-.plot-pct{position:absolute;top:2px;right:4px;font-size:8px;font-weight:800;color:rgba(255,255,255,.7);text-shadow:0 1px 2px rgba(0,0,0,.7);z-index:3}
+.plot-label{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);z-index:2;letter-spacing:.2px}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 12px 12px}
+.plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#4caf50,#388e3c);transition:width .4s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 12px 12px;position:relative}
+.plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:0 0 12px 12px}
+.plot-pct{position:absolute;top:2px;right:4px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.2);font-weight:200;position:relative;z-index:1}
-.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:2px;opacity:.6;transition:opacity .2s}
-.plot-empty-prompt:hover{opacity:1}
-.plot-empty-label{font-size:9px;color:rgba(255,255,255,.5);font-weight:600}
-.plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.6;transition:opacity .2s}
-.plot-replant-label{font-size:8px;color:rgba(255,255,255,.7);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.55;transition:all .2s}
+.plot-empty:hover .plot-empty-prompt{opacity:1;transform:scale(1.08)}
+.plot-empty-label{font-size:9px;color:rgba(255,255,255,.6);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.plot-replant{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;opacity:.7;transition:all .2s}
+.plot-replant img{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3));transition:transform .2s}
+.plot-replant-label{font-size:8px;color:rgba(255,255,255,.85);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5);background:rgba(0,0,0,.2);padding:1px 6px;border-radius:6px}
 .plot-empty:hover .plot-replant{opacity:1}
+.plot-empty:hover .plot-replant img{transform:scale(1.15)}
 
 @keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -434,8 +448,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== BUILDINGS ON FARM — Card Style ===== */
 #buildings-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6px}
 .building-tile{position:relative;cursor:pointer;transition:transform .15s, box-shadow .15s;display:flex;flex-direction:column;align-items:center;
-  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.15));border-radius:16px;padding:10px 12px 8px;border:1px solid rgba(255,255,255,.12);min-width:105px;
-  box-shadow:0 3px 10px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08)}
+  background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.04) 40%,rgba(0,0,0,.1) 100%);border-radius:16px;padding:10px 12px 8px;border:1px solid rgba(255,255,255,.12);min-width:105px;
+  box-shadow:0 4px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);border-bottom:2px solid rgba(0,0,0,.15)}
 .building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1)}
 .building-tile:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .building-tile::after{content:'';position:absolute;bottom:6px;left:18%;right:18%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,.25),transparent);border-radius:50%;z-index:0}
@@ -476,7 +490,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .coin-fly-to-hud{position:absolute;pointer-events:none;z-index:160;animation:coinFlyHud .6s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes coinFlyHud{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:1}100%{opacity:0;transform:translate(var(--target-x),var(--target-y)) scale(.4)}}
 .hud-coins,.hud-gems,.hud-streak{transition:transform .15s cubic-bezier(.34,1.56,.64,1)}
-.hud-xp .xp-bar-fill{transition:width .6s cubic-bezier(.25,.46,.45,.94)}
+.hud-coins.hud-bump,.hud-gems.hud-bump{animation:hudBump .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes hudBump{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.hud-level.level-up-flash{animation:levelFlash 1s ease-out}
+@keyframes levelFlash{0%{box-shadow:0 0 8px rgba(255,215,0,.5),inset 0 0 4px rgba(255,215,0,.3),0 0 30px rgba(255,215,0,1)}100%{box-shadow:0 0 8px rgba(255,215,0,.5),inset 0 0 4px rgba(255,215,0,.3)}}
 
 /* ===== SPARKLE & CONFETTI LAYERS ===== */
 #sparkle-layer,#confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
@@ -491,8 +508,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
 .tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 5px;border-radius:8px;transition:all .2s;min-width:40px;position:relative}
 .tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-1px)}
-.tool-btn.active{color:#f4a42a}
-.tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:18px;height:3px;background:#f4a42a;border-radius:2px;box-shadow:0 0 8px rgba(244,164,42,.6)}
+.tool-btn.active{color:#f4a42a;filter:brightness(1.1)}
+.tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:linear-gradient(90deg,transparent,#f4a42a,transparent);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:24px}
 .tool-icon img{max-width:24px;max-height:24px;object-fit:contain}
 .tool-label{font-size:8px;font-weight:700;letter-spacing:.3px}
@@ -548,8 +566,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ORDERS ===== */
 #orders-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
-.order-card:hover{transform:translateY(-1px)}
+.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .15s}
+.order-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.order-card.can-fulfill{border:1.5px solid rgba(106,191,71,.3);background:linear-gradient(145deg,rgba(232,245,233,.7),rgba(200,230,201,.4));box-shadow:0 2px 8px rgba(76,175,80,.12)}
 .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
 .order-reward{font-size:11px;font-weight:800;color:#2e7d32}
@@ -557,9 +576,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
 .order-item img{max-width:18px;max-height:18px}
 .order-item.fulfilled{opacity:.65;background:rgba(76,175,80,.08)}
-.order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-.order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(74,158,47,.4)}
-.order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.order-fulfill-btn{margin-top:8px;width:100%;padding:10px;background:linear-gradient(180deg,#7dd856,#4caf50,#388e3c);color:#fff;border:2px solid rgba(255,255,255,.2);border-radius:12px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 3px 10px rgba(74,158,47,.35),inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3);letter-spacing:.3px}
+.order-fulfill-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(74,158,47,.5),inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 #2d6e1a}
+.order-fulfill-btn:active{transform:translateY(1px);box-shadow:0 1px 4px rgba(74,158,47,.3)}
+.order-fulfill-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;border-color:transparent}
 
 /* ===== SHOP ===== */
 .shop-tabs{display:flex;gap:3px;padding:6px 14px 0}
@@ -785,10 +805,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== REWARD NOTIFICATION (gold) ===== */
 .notification.reward-notif{
-  background:linear-gradient(135deg,rgba(40,25,10,.92),rgba(80,50,10,.95));
-  border:1px solid rgba(255,215,0,.4);
+  background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(80,50,10,.96));
+  border:1px solid rgba(255,215,0,.45);
   color:var(--gold);
-  box-shadow:0 4px 14px rgba(255,215,0,.2),0 4px 14px rgba(0,0,0,.4)}
+  box-shadow:0 4px 14px rgba(255,215,0,.25),0 4px 14px rgba(0,0,0,.4);
+  animation:notifIn .35s cubic-bezier(.34,1.56,.64,1),rewardGlow 1.5s ease-in-out .3s,notifOut .3s ease 2.5s forwards}
+@keyframes rewardGlow{0%,100%{border-color:rgba(255,215,0,.45)}50%{border-color:rgba(255,215,0,.8);box-shadow:0 4px 14px rgba(255,215,0,.4),0 4px 14px rgba(0,0,0,.4)}}
 
 /* ===== RESPONSIVE TOUCH TARGETS ===== */
 @media(max-width:400px){
@@ -805,10 +827,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes growPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
 /* Growth feedback — triggered when a plot advances after review */
-.plot-grew{animation:plotGrew .8s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew .plot-crop{animation:cropGrew .6s cubic-bezier(.34,1.56,.64,1) !important}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}30%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 0 20px rgba(106,191,71,.6),0 6px 12px rgba(0,0,0,.3)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}}
-@keyframes cropGrew{0%{transform:scale(1)}30%{transform:scale(1.2)}100%{transform:scale(1)}}
+.plot-grew{animation:plotGrew .9s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew .plot-crop{animation:cropGrew .7s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew::before{content:'';position:absolute;inset:-4px;border-radius:18px;background:radial-gradient(circle,rgba(106,191,71,.4),transparent 70%);animation:grewGlow .9s ease-out forwards;z-index:0;pointer-events:none}
+@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}30%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.3),inset -2px -2px 6px rgba(0,0,0,.35),0 0 22px rgba(106,191,71,.7),0 6px 12px rgba(0,0,0,.3);transform:scale(1.04)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3);transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1)}30%{transform:scale(1.25) translateY(-2px)}100%{transform:scale(1) translateY(0)}}
+@keyframes grewGlow{0%{opacity:1}100%{opacity:0}}
 
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.5s ease-in-out infinite !important}
