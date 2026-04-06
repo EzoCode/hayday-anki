@@ -272,22 +272,50 @@ function itemIcon(id, w) {
   // Try inline SVG icon
   const svgSrc = ITEM_ICONS[id];
   if (svgSrc) return `<img src="${svgSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
+  // Try building SVG
+  const bldSrc = (typeof BUILDING_SVGS !== 'undefined') && BUILDING_SVGS[id];
+  if (bldSrc) return `<img src="${bldSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try hayday sprite
   const hdSrc = S(`hayday_${id}`);
   if (hdSrc) return `<img src="${hdSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Fallback: generic placeholder icon
-  const cat = (farmData.item_catalog||{})[id] || {};
   return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
 
+// --- Inline SVG Building Icons (distinct identity per building) ---
+const BUILDING_SVGS = {
+  bakery: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cpath d='M10 55h60v18a4 4 0 01-4 4H14a4 4 0 01-4-4z' fill='%23c9884a'/%3E%3Cpath d='M5 55L40 25l35 30z' fill='%23d4534a'/%3E%3Cpath d='M12 55L40 30l28 25z' fill='%23e8665e'/%3E%3Crect x='28' y='58' width='24' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='30' y='60' width='20' height='14' rx='1' fill='%23ffd54f' opacity='.4'/%3E%3Crect x='15' y='42' width='12' height='10' rx='1' fill='%238b5e3c'/%3E%3Crect x='16' y='43' width='10' height='8' rx='1' fill='%23ffd54f' opacity='.35'/%3E%3Crect x='53' y='42' width='12' height='10' rx='1' fill='%238b5e3c'/%3E%3Crect x='54' y='43' width='10' height='8' rx='1' fill='%23ffd54f' opacity='.35'/%3E%3Crect x='37' y='20' width='6' height='10' rx='1' fill='%23999'/%3E%3Cellipse cx='40' cy='18' rx='2' ry='3' fill='%23ddd' opacity='.5'/%3E%3Ccircle cx='40' cy='65' r='5' fill='%23e8b87a'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23daa06d'/%3E%3C/svg%3E",
+  sugar_mill: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='15' y='35' width='50' height='40' rx='3' fill='%23e0d5c0'/%3E%3Cpath d='M10 35L40 15l30 20z' fill='%23c9884a'/%3E%3Cpath d='M15 35L40 19l25 16z' fill='%23daa06d'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Ccircle cx='55' cy='30' r='10' fill='%23c9884a'/%3E%3Cpath d='M55 20v20M45 30h20' stroke='%23a06a30' stroke-width='2.5'/%3E%3Cpath d='M48 23l14 14M48 37l14-14' stroke='%23a06a30' stroke-width='1.5'/%3E%3Ccircle cx='55' cy='30' r='3' fill='%23daa06d'/%3E%3C/svg%3E",
+  dairy: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23f5f5f5'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%234fc3f7'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%2381d4fa'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='16' y='48' width='10' height='8' rx='1' fill='%23bbb'/%3E%3Crect x='17' y='49' width='8' height='6' rx='1' fill='%23e3f2fd'/%3E%3Crect x='54' y='48' width='10' height='8' rx='1' fill='%23bbb'/%3E%3Crect x='55' y='49' width='8' height='6' rx='1' fill='%23e3f2fd'/%3E%3C/svg%3E",
+  bbq: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='40' width='56' height='35' rx='3' fill='%23795548'/%3E%3Cpath d='M8 40L40 20l32 20z' fill='%23e74c3c'/%3E%3Cpath d='M14 40L40 24l26 16z' fill='%23ef5350'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%235d4037'/%3E%3Crect x='34' y='16' width='3' height='8' rx='1' fill='%23999'/%3E%3Crect x='43' y='14' width='3' height='10' rx='1' fill='%23999'/%3E%3Cellipse cx='35' cy='14' rx='3' ry='4' fill='%23bbb' opacity='.3'/%3E%3Cellipse cx='44' cy='12' rx='3' ry='4' fill='%23bbb' opacity='.25'/%3E%3C/svg%3E",
+  pastry_shop: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23fff8e1'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%23ff9800'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%23ffb74d'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='16' y='48' width='10' height='8' rx='1' fill='%23daa06d'/%3E%3Crect x='54' y='48' width='10' height='8' rx='1' fill='%23daa06d'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23ffc107'/%3E%3Ccircle cx='40' cy='63' r='3' fill='%23ffe082'/%3E%3Ccircle cx='40' cy='61' r='1.5' fill='%23e74c3c'/%3E%3C/svg%3E",
+  jam_maker: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23d7ccc8'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%239c27b0'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%23ba68c8'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Cpath d='M22 62h6v8a2 2 0 01-2 2h-2a2 2 0 01-2-2z' fill='%23e74c3c'/%3E%3Cpath d='M52 62h6v8a2 2 0 01-2 2h-2a2 2 0 01-2-2z' fill='%239c27b0'/%3E%3C/svg%3E",
+  pizzeria: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23fff3e0'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%23f44336'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%23ef5350'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Ccircle cx='40' cy='64' r='6' fill='%23ffc107'/%3E%3Ccircle cx='37' cy='62' r='2' fill='%23e74c3c'/%3E%3Ccircle cx='43' cy='65' r='1.5' fill='%234caf50'/%3E%3Ccircle cx='40' cy='68' r='1.5' fill='%23e74c3c'/%3E%3C/svg%3E",
+  juice_press: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23e8f5e9'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%23ff9800'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%23ffb74d'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='16' y='48' width='10' height='8' rx='1' fill='%232e7d32'/%3E%3Crect x='54' y='48' width='10' height='8' rx='1' fill='%232e7d32'/%3E%3Ccircle cx='40' cy='25' r='5' fill='%23ff9800'/%3E%3Ccircle cx='40' cy='25' r='3' fill='%23ffc107'/%3E%3C/svg%3E",
+  pie_oven: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23efebe9'/%3E%3Cpath d='M8 38L40 18l32 20z' fill='%23795548'/%3E%3Cpath d='M14 38L40 22l26 16z' fill='%238d6e63'/%3E%3Crect x='26' y='50' width='28' height='16' rx='3' fill='%23333'/%3E%3Crect x='28' y='52' width='24' height='12' rx='2' fill='%23e65100' opacity='.7'/%3E%3Crect x='35' y='14' width='4' height='8' rx='1' fill='%23999'/%3E%3Crect x='41' y='12' width='4' height='10' rx='1' fill='%23999'/%3E%3Cellipse cx='37' cy='13' rx='3' ry='3' fill='%23bbb' opacity='.3'/%3E%3C/svg%3E",
+};
+
+// Get building icon <img> tag (small, for menus/lists)
+function buildingIcon(id, w) {
+  w = w || 28;
+  if (BUILDING_SVGS[id]) return `<img src="${BUILDING_SVGS[id]}" width="${w}" height="${w}" style="object-fit:contain">`;
+  const sprSrc = S(HD_BUILDINGS[id]) || S(`buildings_${id}`);
+  if (sprSrc) return `<img src="${sprSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
+  return '';
+}
+
 const HD_BUILDINGS = {
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_shop', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_barn', pastry_shop:'hayday_shop',
-  pizzeria:'hayday_shop', jam_maker:'hayday_barn', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  bakery:'_bld_bakery', barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'_bld_sugar_mill', dairy:'_bld_dairy',
+  chicken_coop:'hayday_chicken_coop', bbq:'_bld_bbq', pastry_shop:'_bld_pastry_shop',
+  pizzeria:'_bld_pizzeria', jam_maker:'_bld_jam_maker', juice_press:'_bld_juice_press',
+  pie_oven:'_bld_pie_oven', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
+  // Try custom SVG first
+  if (BUILDING_SVGS[id]) {
+    return `<img src="${BUILDING_SVGS[id]}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
+  }
   const key = HD_BUILDINGS[id] || `buildings_${id}`;
   return img(key, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
 }
@@ -817,10 +845,8 @@ function showBuildMenu() {
     html += '<div class="req-section"><h4>Construits</h4>';
     builtList.forEach(b => {
       const def = defs[b.id]||{};
-      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
-      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain">` : '';
       html += `<div class="recipe-card" onclick="pycmd('farm:building_detail:${b.id}');hideOverlay()">
-        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
+        <div class="recipe-header"><span class="recipe-emoji">${buildingIcon(b.id)}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong><span class="recipe-time">Tap pour produire</span></div></div></div>`;
     });
     html += '</div>';
@@ -834,10 +860,8 @@ function showBuildMenu() {
       const def = defs[b.id]||{};
       const cost = def.cost_coins||0;
       const canBuy = coins >= cost && landFree >= 2;
-      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
-      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain">` : '';
       html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:build:${b.id}');hideOverlay()`:''}">
-        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
+        <div class="recipe-header"><span class="recipe-emoji">${buildingIcon(b.id)}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
         <span class="recipe-time">${cost} p. + 2 terrain${canBuy?'':coins<cost?' (pas assez)':' (terrain plein)'}</span></div></div>
         <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
@@ -852,10 +876,8 @@ function showBuildMenu() {
     lockedList.forEach(b => {
       const def = defs[b.id]||{};
       const cost = def.cost_coins||0;
-      const bSrc = S(HD_BUILDINGS[b.id]) || S(`buildings_${b.id}`);
-      const bImg = bSrc ? `<img src="${bSrc}" width="28" height="28" style="object-fit:contain;filter:grayscale(1) opacity(.5)">` : '';
       html += `<div class="recipe-card disabled">
-        <div class="recipe-header"><span class="recipe-emoji">${bImg}</span>
+        <div class="recipe-header"><span class="recipe-emoji" style="filter:grayscale(1) opacity(.5)">${buildingIcon(b.id)}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
         <span class="recipe-time">Niveau ${b.lvl} requis (tu es ${level}) \u2022 ${cost} p.</span></div></div>
         <div class="recipe-ingredients"><span class="recipe-ingredient">${def.description||''}</span></div></div>`;
@@ -1557,9 +1579,8 @@ function showReward(d){SoundMgr.play('click');if(d.coins){showFloatingReward(`+$
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
 function showProductionDialog(data){
-  const bldSrc = S(HD_BUILDINGS[data.building_id] || `buildings_${data.building_id}`);
-  const bldIcon = bldSrc ? `<img src="${bldSrc}" width="22" height="22" style="vertical-align:middle;margin-right:4px">` : '';
-  document.getElementById('production-title').innerHTML = `${bldIcon}${data.building_name||'Production'}`;
+  const bldIcon = buildingIcon(data.building_id, 22);
+  document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
   if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('click')};qd.appendChild(btn)}list.appendChild(qd)}

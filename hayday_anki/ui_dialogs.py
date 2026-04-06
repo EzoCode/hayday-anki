@@ -31,7 +31,7 @@ class SessionSummaryDialog(QDialog):
         layout.setSpacing(12)
 
         # Title
-        title = QLabel("\U0001F389 Session Complete!")
+        title = QLabel("Session terminée !")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         font = QFont()
         font.setPointSize(18)
@@ -46,7 +46,7 @@ class SessionSummaryDialog(QDialog):
         self._add_stat(stats, 0, 0, str(s.get("reviews", 0)), "Cards Reviewed")
         self._add_stat(stats, 0, 1, f"+{s.get('coins_earned', 0)}", "Coins Earned", "#f4a42a")
         self._add_stat(stats, 1, 0, f"+{s.get('xp_earned', 0)}", "XP Earned", "#66bb6a")
-        self._add_stat(stats, 1, 1, f"\U0001F525 {s.get('streak', 0)}", "Day Streak", "#ff6600")
+        self._add_stat(stats, 1, 1, str(s.get('streak', 0)), "Série", "#ff6600")
 
         layout.addLayout(stats)
 
@@ -67,13 +67,13 @@ class SessionSummaryDialog(QDialog):
             layout.addWidget(items_val)
 
         # Level info
-        level_label = QLabel(f"\u2B50 Level {s.get('level', 1)} | \U0001FA99 {s.get('total_coins', 0)} | \U0001F48E {s.get('total_gems', 0)}")
+        level_label = QLabel(f"Niveau {s.get('level', 1)} | {s.get('total_coins', 0)} pièces | {s.get('total_gems', 0)} gemmes")
         level_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         level_label.setStyleSheet("color: #888; font-size: 12px; margin-top: 8px;")
         layout.addWidget(level_label)
 
         # Continue button
-        btn = QPushButton("\U0001F33E Continue Farming!")
+        btn = QPushButton("Continuer !")
         btn.setStyleSheet("""
             QPushButton {
                 background: #f4a42a; color: white; border: none;
@@ -154,7 +154,7 @@ class LevelUpDialog(QDialog):
         # Gem reward
         gems = data.get("gem_reward", 0)
         if gems > 0:
-            gem_label = QLabel(f"\U0001F48E +{gems} gems")
+            gem_label = QLabel(f"+{gems} gemmes")
             gem_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             gem_label.setStyleSheet("font-size: 16px; color: #4fc3f7;")
             layout.addWidget(gem_label)
@@ -168,9 +168,8 @@ class LevelUpDialog(QDialog):
             layout.addWidget(unlock_label)
 
             for u in unlocks:
-                emoji = u.get("emoji", "")
                 name = u.get("name", "")
-                ul = QLabel(f"{emoji} {name}")
+                ul = QLabel(name)
                 ul.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 ul.setStyleSheet("font-size: 14px; font-weight: 600;")
                 layout.addWidget(ul)

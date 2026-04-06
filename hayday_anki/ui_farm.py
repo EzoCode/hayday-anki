@@ -249,7 +249,7 @@ class FarmWebView:
                     crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
                     crop_name = crop_def.get("name", crop_id)
                     total_reviews = crop_def.get("growth_reviews", 3) * 4
-                    msg = f"\U0001F331 {crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
+                    msg = f"{crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
                     self._js(f"showNotification({json.dumps(msg)})")
                 else:
                     self._js("showNotification('Impossible de planter ici !')")
@@ -259,7 +259,7 @@ class FarmWebView:
             elif action == "plant_all_empty":
                 count = self.manager.plant_all_empty()
                 if count > 0:
-                    self._js(f"showNotification({json.dumps(f'🌱 {count} cultures plantées !')})")
+                    self._js(f"showNotification({json.dumps(f'{count} cultures plantées !')})")
                 else:
                     self._js("showNotification('Aucune parcelle à replanter !')")
                 self._send_state()

@@ -1672,7 +1672,6 @@ class FarmManager:
         building_defs = {
             bid: {
                 "name": bdef.get("name", bid),
-                "emoji": bdef.get("emoji", ""),
                 "cost_coins": bdef.get("cost_coins", 0),
                 "cost": bdef.get("cost_coins", 0),
                 "description": bdef.get("description", ""),
@@ -1682,11 +1681,9 @@ class FarmManager:
         animal_defs = {
             aid: {
                 "name": adef.get("name", aid),
-                "emoji": adef.get("emoji", ""),
                 "cost_coins": adef.get("cost_coins", 100),
                 "cost": adef.get("cost_coins", 100),
                 "product": adef.get("product", ""),
-                "product_emoji": ITEM_CATALOG.get(adef.get("product", ""), {}).get("emoji", ""),
                 "produce_every_n_reviews": adef.get("produce_every_n_reviews", 10),
                 "max_owned": adef.get("max_owned", 5),
                 "max": adef.get("max_owned", 5),
@@ -1696,7 +1693,6 @@ class FarmManager:
         crop_defs = {
             cid: {
                 "name": cdef.get("name", cid),
-                "emoji": cdef.get("emoji", ""),
                 "growth_reviews": cdef.get("growth_reviews", 3),
                 "harvest_min": cdef.get("harvest_min", 2),
                 "harvest_max": cdef.get("harvest_max", 4),
@@ -1706,7 +1702,7 @@ class FarmManager:
             for cid, cdef in progression.CROP_DEFINITIONS.items()
         }
         deco_defs = {
-            did: {"name": ddef.get("name", did), "emoji": ddef.get("emoji", ""), "cost": ddef.get("cost", 0)}
+            did: {"name": ddef.get("name", did), "cost": ddef.get("cost", 0)}
             for did, ddef in progression.DECORATION_CATALOG.items()
         }
 
@@ -1772,7 +1768,7 @@ class FarmManager:
             "session_xp": self.state.session_xp_earned,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
             "active_events": [
-                {"name": e.get("name", ""), "emoji": e.get("emoji", "")}
+                {"name": e.get("name", "")}
                 for e in self.state.active_events
                 if self._is_event_active(e)
             ],
@@ -1795,7 +1791,7 @@ class FarmManager:
         return {
             "level": result["level"],
             "items": [
-                {"name": u.get("name", ""), "emoji": u.get("emoji", ""), "type": u.get("type", "")}
+                {"name": u.get("name", ""), "type": u.get("type", ""), "id": u.get("id", "")}
                 for u in result["unlocks"]
             ],
         }
