@@ -280,16 +280,23 @@ function itemIcon(id, w) {
   return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
 
-const HD_BUILDINGS = {
+// Building sprite lookup: try buildings_X first (unique sprites), then hayday fallbacks
+const HD_BUILDINGS_FALLBACK = {
   bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
   shop:'hayday_shop', sugar_mill:'hayday_shop', dairy:'hayday_silo',
   chicken_coop:'hayday_chicken_coop', bbq:'hayday_barn', pastry_shop:'hayday_shop',
   pizzeria:'hayday_shop', jam_maker:'hayday_barn', juice_press:'hayday_silo',
   pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
 };
+// Keep HD_BUILDINGS as alias for backward compat in showBuildMenu/showAnimalMenu
+const HD_BUILDINGS = HD_BUILDINGS_FALLBACK;
 function buildingImg(id, w) {
-  const key = HD_BUILDINGS[id] || `buildings_${id}`;
-  return img(key, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
+  // Prefer unique building sprites (buildings_bakery, etc.)
+  const uniqueKey = `buildings_${id}`;
+  if (S(uniqueKey)) return img(uniqueKey, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
+  // Fall back to hayday/ generic icons
+  const fallbackKey = HD_BUILDINGS_FALLBACK[id] || uniqueKey;
+  return img(fallbackKey, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
 }
 
 function animalImg(id, w) {
@@ -375,13 +382,22 @@ function updateFarm(data) {
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
-  // Animate plots that grew
+  // Animate plots that changed state
   const newFields = farmData.fields || farmData.plots || [];
   if (Object.keys(oldGrowth).length > 0) {
     const allPlots = document.querySelectorAll('#fields-grid .plot');
     newFields.forEach((f, idx) => {
+      const oldKey = oldGrowth[f.id];
       const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
-      if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
+      if (!oldKey || oldKey === newKey || !allPlots[idx]) return;
+      const oldState = oldKey.split(':')[2];
+      // Newly planted: seed drop animation
+      if (oldState === 'empty' && (f.state === 'planted' || f.state === 'growing')) {
+        allPlots[idx].classList.add('plot-planted-anim');
+        setTimeout(() => allPlots[idx]?.classList.remove('plot-planted-anim'), 600);
+      }
+      // Growth advance: glow animation
+      else if (f.state !== 'empty') {
         allPlots[idx].classList.add('plot-grew');
         setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
       }
@@ -1382,38 +1398,81 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
 
 function harvestPlot(id){
   SoundMgr.play('levelup');
-  // Find the plot element and create harvest burst from it
-  const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
-  if (field && plots.length > 0) {
-    // Find the matching plot element
-    const allPlots = document.querySelectorAll('.plot');
-    const idx = (farmData.fields||[]).findIndex(f => f.id === id);
-    const plotEl = allPlots[idx];
-    if (plotEl) {
-      const rect = plotEl.getBoundingClientRect();
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top + rect.height/2;
-      // Create harvest burst particles
-      showHarvestBurst(cx, cy, field.crop);
-    }
+  const allPlots = document.querySelectorAll('#fields-grid .plot');
+  const idx = (farmData.fields||[]).findIndex(f => f.id === id);
+  const plotEl = allPlots[idx];
+  if (plotEl && field) {
+    const rect = plotEl.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    // 1) Crop burst particles flying out
+    showHarvestBurst(cx, cy, field.crop);
+    // 2) Plot shrink + pop animation
+    plotEl.style.transition = 'transform 0.15s cubic-bezier(.34,1.56,.64,1)';
+    plotEl.style.transform = 'scale(0.85)';
+    setTimeout(() => { plotEl.style.transform = 'scale(1.1)'; }, 150);
+    setTimeout(() => { plotEl.style.transform = ''; }, 350);
+    // 3) Coins fly to HUD after a short delay
+    setTimeout(() => showCoinFlyToHud(cx, cy, 4), 300);
   }
   pycmd(`farm:harvest:${id}`);
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
   const portrait = cropPortrait(cropId, 20);
-  for (let i = 0; i < 6; i++) {
+  // Main crop particles burst outward
+  for (let i = 0; i < 8; i++) {
     const el = document.createElement('div');
     el.className = 'harvest-particle';
     el.innerHTML = portrait || itemIcon(cropId, 18);
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    el.style.setProperty('--dx', ((Math.random() - 0.5) * 120) + 'px');
-    el.style.setProperty('--dy', (-(Math.random() * 80 + 30)) + 'px');
-    el.style.animationDelay = (i * 60) + 'ms';
+    const angle = (i / 8) * Math.PI * 2;
+    const dist = 50 + Math.random() * 60;
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 30) + 'px');
+    el.style.animationDelay = (i * 40) + 'ms';
     layer.appendChild(el);
     setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+  }
+  // Sparkle ring around harvest point
+  for (let i = 0; i < 5; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'harvest-sparkle';
+    sp.style.left = (x + (Math.random()-0.5)*60) + 'px';
+    sp.style.top = (y + (Math.random()-0.5)*60) + 'px';
+    layer.appendChild(sp);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 800);
+  }
+}
+function showCoinFlyToHud(startX, startY, count) {
+  const layer = document.getElementById('reward-layer');
+  const hudCoins = document.getElementById('hud-coins');
+  if (!hudCoins) return;
+  const target = hudCoins.getBoundingClientRect();
+  const tx = target.left + target.width/2;
+  const ty = target.top + target.height/2;
+  const coinSrc = S('ui_coin');
+  for (let i = 0; i < (count||4); i++) {
+    const el = document.createElement('div');
+    el.className = 'coin-fly-to-hud';
+    if (coinSrc) el.innerHTML = `<img src="${coinSrc}" width="18" height="18">`;
+    else el.innerHTML = '<span class="css-coin" style="width:14px;height:14px"></span>';
+    el.style.left = startX + 'px';
+    el.style.top = startY + 'px';
+    el.style.setProperty('--target-x', (tx - startX + (Math.random()-0.5)*20) + 'px');
+    el.style.setProperty('--target-y', (ty - startY) + 'px');
+    el.style.animationDelay = (i * 80) + 'ms';
+    layer.appendChild(el);
+    setTimeout(() => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+      // Pulse the HUD coin counter on arrival
+      if (i === count-1) {
+        hudCoins.style.transform = 'scale(1.3)';
+        setTimeout(() => { hudCoins.style.transform = ''; }, 200);
+      }
+    }, 700 + i * 80);
   }
 }
 function plantAllEmpty(){SoundMgr.play('click');pycmd('farm:plant_all_empty')}
@@ -1479,7 +1538,55 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){
+  rot=rot||0;
+  const c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),cx=140,cy=140,r=130;
+  const segs=[
+    {l:'25',sub:'pièces',c:'#e74c3c',c2:'#c0392b'},
+    {l:'50',sub:'pièces',c:'#ff9800',c2:'#e65100'},
+    {l:'100',sub:'pièces',c:'#ffc107',c2:'#f9a825'},
+    {l:'1',sub:'gemme',c:'#4fc3f7',c2:'#0288d1'},
+    {l:'3',sub:'gemmes',c:'#7c4dff',c2:'#6200ea'},
+    {l:'5',sub:'gemmes',c:'#e040fb',c2:'#aa00ff'},
+    {l:'3',sub:'matériaux',c:'#66bb6a',c2:'#2e7d32'},
+    {l:'3',sub:'matériaux',c:'#26a69a',c2:'#00796b'},
+    {l:'Titre',sub:'foncier',c:'#ffd700',c2:'#c5a200'},
+  ];
+  ctx.clearRect(0,0,280,280);
+  const sa=2*Math.PI/segs.length;
+  // Draw segments with gradient effect
+  segs.forEach((s,i)=>{
+    const a=rot+i*sa;
+    // Main segment
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();
+    const grad=ctx.createRadialGradient(cx,cy,20,cx,cy,r);
+    grad.addColorStop(0,s.c);grad.addColorStop(1,s.c2);
+    ctx.fillStyle=grad;ctx.fill();
+    // Segment border
+    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.stroke();
+    // Inner highlight
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r*0.95,a+0.02,a+sa-0.02);ctx.closePath();
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.stroke();
+    // Text
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);
+    ctx.fillStyle='#fff';ctx.textAlign='center';
+    ctx.font='bold 16px sans-serif';ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=3;
+    ctx.fillText(s.l,r*0.6,-2);
+    ctx.font='bold 8px sans-serif';ctx.fillStyle='rgba(255,255,255,0.7)';
+    ctx.fillText(s.sub,r*0.6,9);
+    ctx.shadowBlur=0;
+    ctx.restore();
+  });
+  // Center circle with golden ring
+  ctx.beginPath();ctx.arc(cx,cy,22,0,2*Math.PI);
+  const cGrad=ctx.createRadialGradient(cx,cy,5,cx,cy,22);
+  cGrad.addColorStop(0,'#fff');cGrad.addColorStop(0.5,'#ffd700');cGrad.addColorStop(1,'#c5a200');
+  ctx.fillStyle=cGrad;ctx.fill();
+  ctx.strokeStyle='#8b6914';ctx.lineWidth=2;ctx.stroke();
+  // Center dot
+  ctx.beginPath();ctx.arc(cx,cy,6,0,2*Math.PI);
+  ctx.fillStyle='#fff';ctx.fill();
+}
 
 function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
@@ -1552,7 +1659,28 @@ function showCoinBurst(x,y,n){
     setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
   }
 }
-function showReward(d){SoundMgr.play('click');if(d.coins){showFloatingReward(`+${d.coins}`,window.innerWidth/2,window.innerHeight/2-20);showCoinBurst(window.innerWidth/2,window.innerHeight/2)}if(d.xp)showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);if(d.items)Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}}
+function showReward(d){
+  // Show coins + XP as floating text
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  if (d.coins > 0) {
+    showFloatingReward(`+${d.coins}`, cx - 30, cy - 20);
+  }
+  if (d.xp > 0) {
+    showFloatingReward(`+${d.xp} XP`, cx + 30, cy - 20);
+  }
+  // Show material/item drops with stagger
+  if(d.items){
+    let delay=200;
+    Object.entries(d.items).forEach(([id,qty])=>{
+      setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'), delay);
+      delay+=300;
+    });
+  }
+  if(d.mystery_box){
+    const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;
+    showNotification(`Une ${sz} boîte mystère est apparue !`,'reward');
+  }
+}
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}

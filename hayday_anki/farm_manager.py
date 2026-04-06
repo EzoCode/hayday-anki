@@ -691,20 +691,8 @@ class FarmManager:
         if now.weekday() >= 5:  # Saturday=5, Sunday=6
             self.state.weekend_review_count += 1
 
-        # Determine crop drop based on level
-        crop_drop = self._roll_crop_drop()
-        if crop_drop:
-            item_id, qty = crop_drop
-            if self.state.add_item(item_id, qty):
-                rewards["items"][item_id] = qty
-                self.state.session_items_earned[item_id] = \
-                    self.state.session_items_earned.get(item_id, 0) + qty
-            else:
-                crop_name = ITEM_CATALOG.get(item_id, {}).get("name", item_id)
-                rewards["notifications"].append({
-                    "type": "storage_full",
-                    "message": f"Silo plein ! {crop_name} perdu(e). Vendez ou améliorez le silo.",
-                })
+        # Crops are ONLY obtained by harvesting fields — no random drops.
+        # This makes the farming loop (plant → grow → harvest) the core mechanic.
 
         # Random material drop (variable ratio reinforcement)
         if random.random() < 0.12:  # ~12% chance per review
@@ -753,16 +741,6 @@ class FarmManager:
         self._pending_notifications.extend(rewards["notifications"])
 
         return rewards
-
-    def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
-        """Roll for a crop drop based on unlocked crops.
-        Low chance (10%) — farming fields should be the primary crop source."""
-        if random.random() < 0.10:
-            available = self.state.unlocked_crops
-            if available:
-                crop = random.choice(available)
-                return (crop, 1)
-        return None
 
     def _roll_material_drop(self) -> Optional[str]:
         """Roll for a material drop from the drop table."""
@@ -1322,14 +1300,20 @@ class FarmManager:
 
         while len(self.state.active_orders) < 3 and order_items:
             items_needed = {}
-            num_items = random.randint(1, min(3, self.state.level // 5 + 1))
+            # Scale difficulty with level: early=1 item type, later=up to 3
+            num_items = random.randint(1, min(3, max(1, self.state.level // 10 + 1)))
             for _ in range(num_items):
                 item = random.choice(order_items)
-                qty = random.randint(1, max(1, min(self.state.level // 3, 10)))
+                # Quantities: small and achievable — 1-3 early, up to 5-8 at high levels
+                max_qty = max(2, min(8, self.state.level // 5 + 2))
+                qty = random.randint(1, max_qty)
                 items_needed[item] = items_needed.get(item, 0) + qty
 
-            # Boat orders are harder but more rewarding
-            order_type = random.choice(["truck", "boat"])
+            # Trucks appear first (simpler), boats at level 10+
+            if self.state.level < 10:
+                order_type = "truck"
+            else:
+                order_type = random.choice(["truck", "boat"])
             reward_mult = 3 if order_type == "boat" else 2
 
             coin_reward = sum(
@@ -1795,7 +1779,7 @@ class FarmManager:
         return {
             "level": result["level"],
             "items": [
-                {"name": u.get("name", ""), "emoji": u.get("emoji", ""), "type": u.get("type", "")}
+                {"id": u.get("id", ""), "name": u.get("name", ""), "type": u.get("type", "")}
                 for u in result["unlocks"]
             ],
         }
