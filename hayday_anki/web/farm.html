@@ -135,7 +135,7 @@
 <!-- ===== PANELS ===== -->
 <div id="panel-inventory" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Inventaire</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Inventaire</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div class="panel-subheader">
     <span id="barn-status">Grange: 0/50</span>
     <span id="silo-status">Silo: 0/50</span>
@@ -145,19 +145,19 @@
 
 <div id="panel-buildings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Bâtiments</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Bâtiments</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div id="buildings-list"></div>
 </div>
 
 <div id="panel-orders" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Commandes</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Commandes</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div id="orders-list"></div>
 </div>
 
 <div id="panel-shop" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Boutique</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Boutique</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div class="shop-tabs">
     <button class="shop-tab active" onclick="showShopCategory('decorations')">Déco</button>
     <button class="shop-tab" onclick="showShopCategory('animals')">Animaux</button>
@@ -169,13 +169,13 @@
 
 <div id="panel-achievements" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Succès</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Succès</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div id="achievements-list"></div>
 </div>
 
 <div id="panel-settings" class="panel hidden">
   <div class="panel-handle"></div>
-  <div class="panel-header"><h2>Réglages</h2><button class="close-btn" onclick="hidePanel()">✕</button></div>
+  <div class="panel-header"><h2>Réglages</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
   <div class="settings-list">
     <label class="setting-row"><span>Son</span><input type="checkbox" id="setting-sound" checked onchange="toggleSound(this.checked)"></label>
     <label class="setting-row"><span>Musique</span><input type="checkbox" id="setting-music" onchange="toggleMusic(this.checked)"></label>
@@ -194,11 +194,11 @@
       <div class="wheel-border">
         <canvas id="wheel-canvas" width="280" height="280"></canvas>
       </div>
-      <div id="wheel-pointer">▼</div>
+      <div id="wheel-pointer"></div>
     </div>
     <button id="wheel-spin-btn" class="action-btn" onclick="doSpinWheel()">Tourner !</button>
     <div id="wheel-result" class="hidden"></div>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 
@@ -208,7 +208,7 @@
     <div id="mystery-box-animation"><div class="box-icon" id="box-icon"></div></div>
     <div id="mystery-box-result" class="hidden"></div>
     <button id="open-box-btn" class="action-btn" onclick="doOpenBox()">Ouvrir !</button>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 
@@ -227,7 +227,7 @@
   <div class="overlay-card">
     <h2>Planter une culture</h2>
     <div id="crop-choices"></div>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 
@@ -235,7 +235,7 @@
   <div class="overlay-card production-card">
     <h2 id="production-title">Production</h2>
     <div id="production-recipes"></div>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 
@@ -256,7 +256,7 @@
     <div id="sell-item-stock" class="sell-stock"></div>
     <div id="sell-unit-price" class="sell-unit-price"></div>
     <div id="sell-buttons" class="sell-buttons"></div>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 
@@ -268,7 +268,7 @@
     <div id="info-requirements"></div>
     <div id="info-produces"></div>
     <div id="info-actions"></div>
-    <button class="close-btn overlay-close" onclick="hideOverlay()">✕</button>
+    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
   </div>
 </div>
 

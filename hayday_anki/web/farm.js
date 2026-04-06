@@ -251,6 +251,14 @@ const ITEM_ICONS = {
   pond: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='18' rx='14' ry='10' fill='%234fc3f7' opacity='.4'/%3E%3Cellipse cx='16' cy='17' rx='12' ry='8' fill='%232196f3' opacity='.5'/%3E%3Cellipse cx='13' cy='15' rx='4' ry='2' fill='%23fff' opacity='.2'/%3E%3Ccircle cx='20' cy='14' r='2' fill='%234caf50'/%3E%3Ccircle cx='22' cy='16' r='1.5' fill='%234caf50'/%3E%3C/svg%3E",
   garden_gnome: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2L10 12h12z' fill='%23e74c3c'/%3E%3Ccircle cx='16' cy='14' r='5' fill='%23fdd9b5'/%3E%3Crect x='11' y='18' width='10' height='10' rx='2' fill='%232196f3'/%3E%3Ccircle cx='14' cy='13' r='1' fill='%23333'/%3E%3Ccircle cx='18' cy='13' r='1' fill='%23333'/%3E%3Cellipse cx='16' cy='16' rx='2' ry='3' fill='%23f5f5f5'/%3E%3C/svg%3E",
   _icon_boat: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 20 Q6 26 16 26 Q26 26 30 20z' fill='%238b5e3c'/%3E%3Cpath d='M4 20 Q8 24 16 24 Q24 24 28 20z' fill='%23d4a056'/%3E%3Crect x='12' y='8' width='8' height='12' rx='1' fill='%23c9884a'/%3E%3Crect x='15' y='4' width='2' height='16' fill='%235a3520'/%3E%3Cpath d='M17 6 L17 14 L24 14z' fill='%23f5f5f5' stroke='%23ddd' stroke-width='.5'/%3E%3Cpath d='M2 20h28' stroke='%234fc3f7' stroke-width='1.5' opacity='.4'/%3E%3C/svg%3E",
+  bird_bath: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='14' width='4' height='12' rx='1' fill='%23999'/%3E%3Cellipse cx='16' cy='14' rx='10' ry='3' fill='%23bbb'/%3E%3Cellipse cx='16' cy='13' rx='8' ry='2' fill='%234fc3f7' opacity='.4'/%3E%3Crect x='12' y='24' width='8' height='3' rx='1' fill='%23999'/%3E%3Cpath d='M10 10 Q12 8 14 10' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E",
+  swing: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='3' height='24' rx='1' fill='%238b5e3c'/%3E%3Crect x='25' y='4' width='3' height='24' rx='1' fill='%238b5e3c'/%3E%3Crect x='4' y='4' width='24' height='3' rx='1' fill='%23a06a30'/%3E%3Cline x1='12' y1='7' x2='12' y2='20' stroke='%23888' stroke-width='1.5'/%3E%3Cline x1='20' y1='7' x2='20' y2='20' stroke='%23888' stroke-width='1.5'/%3E%3Crect x='10' y='20' width='12' height='3' rx='1' fill='%23c9884a'/%3E%3C/svg%3E",
+  statue_chicken: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='10' y='24' width='12' height='4' rx='1' fill='%23999'/%3E%3Cellipse cx='16' cy='18' rx='6' ry='7' fill='%23bbb'/%3E%3Ccircle cx='16' cy='10' r='5' fill='%23ccc'/%3E%3Cpath d='M14 9h-3l2-3z' fill='%23e74c3c'/%3E%3Ccircle cx='14' cy='9' r='1' fill='%23333'/%3E%3Cpath d='M12 12l-2 1 2 0' fill='%23ff9800'/%3E%3C/svg%3E",
+  tree_cherry: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='14' y='18' width='4' height='12' rx='1' fill='%238b5e3c'/%3E%3Ccircle cx='16' cy='12' r='10' fill='%23f48fb1'/%3E%3Ccircle cx='12' cy='9' r='5' fill='%23f8bbd0'/%3E%3Ccircle cx='20' cy='10' r='5' fill='%23f06292'/%3E%3Ccircle cx='16' cy='6' r='4' fill='%23f8bbd0'/%3E%3Ccircle cx='10' cy='14' r='1' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='18' cy='8' r='1' fill='%23fff' opacity='.5'/%3E%3C/svg%3E",
+  arch_flowers: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='3' height='20' rx='1' fill='%238b5e3c'/%3E%3Crect x='25' y='8' width='3' height='20' rx='1' fill='%238b5e3c'/%3E%3Cpath d='M5 8 Q16 0 27 8' stroke='%238b5e3c' stroke-width='3' fill='none'/%3E%3Ccircle cx='8' cy='6' r='3' fill='%23e74c3c'/%3E%3Ccircle cx='16' cy='3' r='3' fill='%23ff9800'/%3E%3Ccircle cx='24' cy='6' r='3' fill='%23e91e63'/%3E%3Ccircle cx='12' cy='4' r='2' fill='%23ffc107'/%3E%3Ccircle cx='20' cy='4' r='2' fill='%23f44336'/%3E%3Ccircle cx='5' cy='12' r='2' fill='%234caf50'/%3E%3Ccircle cx='27' cy='12' r='2' fill='%234caf50'/%3E%3C/svg%3E",
+  statue_cow: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='10' y='24' width='12' height='4' rx='1' fill='%23999'/%3E%3Cellipse cx='16' cy='18' rx='8' ry='7' fill='%23bbb'/%3E%3Ccircle cx='16' cy='10' r='6' fill='%23ccc'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%23ccc'/%3E%3Ccircle cx='22' cy='7' r='2' fill='%23ccc'/%3E%3Ccircle cx='14' cy='10' r='1' fill='%23333'/%3E%3Ccircle cx='18' cy='10' r='1' fill='%23333'/%3E%3Cellipse cx='16' cy='13' rx='3' ry='2' fill='%23f8bbd0'/%3E%3C/svg%3E",
+  windmill_deco: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M12 28h8l2-18H10z' fill='%23c9884a'/%3E%3Cpath d='M12 28h8l2-18H10z' fill='none' stroke='%23a06a30' stroke-width='.5'/%3E%3Ccircle cx='16' cy='12' r='3' fill='%23999'/%3E%3Cpath d='M16 12L16 2M16 12L26 8M16 12L26 16M16 12L16 22M16 12L6 16M16 12L6 8' stroke='%23888' stroke-width='2'/%3E%3Ccircle cx='16' cy='12' r='1.5' fill='%23666'/%3E%3C/svg%3E",
+  picnic_table: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='14' width='26' height='3' rx='1' fill='%23c9884a'/%3E%3Crect x='6' y='10' width='20' height='3' rx='1' fill='%23daa06d'/%3E%3Cpath d='M8 17L4 28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M24 17L28 28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='6' y='18' width='20' height='3' rx='1' fill='%23c9884a'/%3E%3C/svg%3E",
 };
 
 // Get item icon as <img> tag (SVG inline or sprite, no emoji fallback for key items)
@@ -268,9 +276,9 @@ function itemIcon(id, w) {
   // Try hayday sprite
   const hdSrc = S(`hayday_${id}`);
   if (hdSrc) return `<img src="${hdSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
-  // Fallback: use emoji from catalog
+  // Fallback: generic placeholder icon
   const cat = (farmData.item_catalog||{})[id] || {};
-  return `<span style="font-size:${Math.round(w*0.8)}px">${cat.emoji||''}</span>`;
+  return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
 
 const HD_BUILDINGS = {
@@ -287,7 +295,7 @@ function buildingImg(id, w) {
 
 function animalImg(id, w) {
   const src = S(`hayday_${id}`) || S(`animals_${id}`);
-  if (!src) return `<span style="font-size:${w||40}px">${ANIMAL_EMOJI[id]||''}</span>`;
+  if (!src) return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w||50}" height="${w?Math.round(w*.85):42}" style="object-fit:contain">`;
   return `<img src="${src}" width="${w||50}" height="${w?Math.round(w*.85):42}" class="animal-img" draggable="false">`;
 }
 function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
@@ -299,8 +307,7 @@ function fieldBg(state) {
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
-const CROP_EMOJI = { wheat:'\u{1F33E}',corn:'\u{1F33D}',carrot:'\u{1F955}',tomato:'\u{1F345}',potato:'\u{1F954}',sugarcane:'\u{1F33F}',soybean:'\u{1FAD8}',strawberry:'\u{1F353}',apple:'\u{1F34E}',pumpkin:'\u{1F383}' };
-const ANIMAL_EMOJI = { cow:'\u{1F404}',chicken:'\u{1F414}',pig:'\u{1F416}',sheep:'\u{1F411}' };
+// (CROP_EMOJI and ANIMAL_EMOJI removed — all rendering uses cropPortrait/itemIcon/animalImg)
 // Centralized building/animal definitions (single source of truth)
 const ALL_BUILDINGS = [
   {id:'bakery',lvl:5},{id:'sugar_mill',lvl:15},{id:'dairy',lvl:25},
@@ -362,9 +369,25 @@ function createConfetti() {
 
 // --- Core State Update ---
 function updateFarm(data) {
+  // Track which plots grew for animation
+  const oldFields = farmData.fields || farmData.plots || [];
+  const oldGrowth = {};
+  oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  // Animate plots that grew
+  const newFields = farmData.fields || farmData.plots || [];
+  if (Object.keys(oldGrowth).length > 0) {
+    const allPlots = document.querySelectorAll('#fields-grid .plot');
+    newFields.forEach((f, idx) => {
+      const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
+      if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
+        allPlots[idx].classList.add('plot-grew');
+        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+      }
+    });
+  }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
     if (currentPanel === 'buildings') renderBuildingsPanel();
@@ -417,7 +440,7 @@ function updateHUD() {
   if (nextEl && d.next_unlock) {
     const nu = d.next_unlock;
     const mainItem = nu.items.find(i => i.type !== 'plots') || nu.items[0];
-    nextEl.innerHTML = `<span class="next-unlock-label">Niv.${nu.level}</span> ${mainItem.emoji||''} ${mainItem.name}`;
+    nextEl.innerHTML = `<span class="next-unlock-label">Niv.${nu.level}</span> ${itemIcon(mainItem.id||mainItem.type||'', 14)} ${mainItem.name}`;
     nextEl.style.display = '';
   } else if (nextEl) {
     nextEl.style.display = 'none';
@@ -426,7 +449,7 @@ function updateHUD() {
   const banner = document.getElementById('event-banner');
   const events = d.active_events || [];
   if (events.length > 0) {
-    banner.innerHTML = events.map(e => `<span class="event-tag">${e.emoji} ${e.name}</span>`).join('');
+    banner.innerHTML = events.map(e => `<span class="event-tag"><span class="event-icon"></span> ${e.name}</span>`).join('');
     banner.style.display = '';
   } else {
     banner.style.display = 'none';
@@ -576,7 +599,7 @@ function renderPastures() {
     const reviewsSince = p.reviews_since_last || 0;
     const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
     const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
-    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${adef.product_emoji||''} ${reviewsSince}/${produceEvery}</span>`;
+    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsSince}/${produceEvery}</span>`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
   });
@@ -618,7 +641,6 @@ function renderMysteryBoxes() {
   const layer = document.getElementById('mystery-boxes-layer'); layer.innerHTML = '';
   (farmData.mystery_boxes||[]).forEach((box,i) => {
     const el = document.createElement('div'); el.className = 'mystery-box';
-    el.style.left = `${(box.x||1)*10}%`; el.style.top = `${(box.y||1)*12}%`;
     const idx = box.size==='large'?2:box.size==='medium'?1:0;
     const src = S(`ui_chest_${idx}_closed`);
     if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else { const fb=S('ui_chest_0_closed'); if(fb) el.innerHTML=`<img src="${fb}" width="36" height="36">`; else el.innerHTML='<div class="css-chest" style="width:30px;height:26px"></div>'; }
@@ -653,8 +675,7 @@ function renderVillage() {
     } else if (svgSrc) {
       el.innerHTML = `<img src="${svgSrc}" width="40" height="40" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2))"><span class="deco-name">${name}</span>`;
     } else {
-      const emoji = decoDef.emoji || catFallback.emoji || DECO_EMOJI[deco.type] || '\u{1F33F}';
-      el.innerHTML = `<span class="deco-emoji">${emoji}</span><span class="deco-name">${name}</span>`;
+      el.innerHTML = `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%234caf50' opacity='.5'/%3E%3Cpath d='M16 8v8M12 12l4-4 4 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E" width="32" height="32" style="object-fit:contain"><span class="deco-name">${name}</span>`;
     }
     grid.appendChild(el);
   });
@@ -920,13 +941,7 @@ function showAnimalInfo(animalType) {
 }
 
 // --- Decoration Rendering ---
-const DECO_EMOJI = {
-  fence:'\u{1FAB5}',flower_pot:'\u{1FAB4}',bench:'\u{1FA91}',scarecrow:'\u{1F383}',
-  hay_bale:'\u{1F33E}',mailbox:'\u{1F4EA}',lamp_post:'\u{1F4A1}',garden_gnome:'\u{1F9D4}',
-  bird_bath:'\u{1F426}',tree_oak:'\u{1F333}',tree_pine:'\u{1F332}',picnic_table:'\u{1F3D5}\u{FE0F}',
-  pond:'\u{1F4A7}',swing:'\u{1F3A0}',fountain:'\u26F2',statue_chicken:'\u{1F414}',
-  tree_cherry:'\u{1F338}',arch_flowers:'\u{1F490}',statue_cow:'\u{1F404}',windmill_deco:'\u{1F3E1}'
-};
+// (DECO_EMOJI removed — all rendering uses ITEM_ICONS SVGs or hayday sprites)
 // Decorations are rendered in the Village zone grid via renderVillage()
 
 // --- Weather System ---
@@ -1133,7 +1148,7 @@ function renderShopDeco(grid){
     el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
     const decoSpr = S(`hayday_${item.id}`);
     const decoSvg = ITEM_ICONS[item.id];
-    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : decoSvg ? `<img src="${decoSvg}" width="30" height="30" style="object-fit:contain">` : `<span class="item-emoji">${d.emoji||DECO_EMOJI[item.id]||''}</span>`;
+    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : decoSvg ? `<img src="${decoSvg}" width="30" height="30" style="object-fit:contain">` : `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%234caf50' opacity='.5'/%3E%3Cpath d='M16 8v8M12 12l4-4 4 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E" width="30" height="30" style="object-fit:contain">`;
     el.innerHTML=`${decoIcon}<span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">${cost} p.</span>`;
     grid.appendChild(el);
   });
@@ -1163,7 +1178,7 @@ function showAnimalShopInfo(aid) {
     {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
-    icon: (()=>{const s=S(`hayday_${aid}-lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:(def.emoji||'');})(),
+    icon: (()=>{const s=S(`hayday_${aid}-lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:itemIcon(aid, 40);})(),
     title: def.name || aid,
     desc: info.desc || '',
     requirements: reqs,
@@ -1356,7 +1371,7 @@ function getAchCategoryIcon(cat) {
 }
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||itemIcon(id,36)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail">\u{1F4DA} ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail">\u{1F33E} ${harvestMin}-${harvestMax} \u2022 \u{1FA99} ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||itemIcon(id,36)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail"><span class="crop-stat-icon reviews-icon"></span> ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail"><span class="crop-stat-icon harvest-icon"></span> ${harvestMin}-${harvestMax} \u2022 <span class="crop-stat-icon coin-icon-sm"></span> ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('levelup');
@@ -1468,7 +1483,7 @@ function showLevelUp(d){
   document.getElementById('levelup-level').textContent=d.new_level;
   let rw='';if(d.gem_reward>0)rw=`+${d.gem_reward} ${LANG.gemmes}`;
   document.getElementById('levelup-rewards').innerHTML=rw;
-  let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${u.emoji||''} ${u.name}</span>`});
+  let ul='';(d.unlocks||[]).forEach(u=>{ul+=`<span class="unlock-tag">${itemIcon(u.id||u.type||'', 16)} ${u.name}</span>`});
   document.getElementById('levelup-unlocks').innerHTML=ul;
   document.getElementById('levelup-overlay').classList.remove('hidden');
   createSparkleRain();
