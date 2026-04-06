@@ -219,6 +219,9 @@ const ITEM_ICONS = {
   paint: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='28' rx='8' ry='2' fill='%23000' opacity='.08'/%3E%3Crect x='5' y='8' width='22' height='18' rx='2.5' fill='%23e53935' stroke='%23b71c1c' stroke-width='.5'/%3E%3Crect x='5' y='8' width='22' height='5' rx='2' fill='%23c62828'/%3E%3Crect x='6' y='9' width='9' height='2.5' rx='1' fill='%23ef9a9a' opacity='.3'/%3E%3Crect x='13' y='3' width='6' height='7' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Crect x='14' y='4' width='2' height='5' fill='%23bbb' opacity='.25'/%3E%3C/svg%3E",
   land_deed: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='4' width='22' height='24' rx='2' fill='%23f5e6c8'/%3E%3Crect x='5' y='4' width='22' height='24' rx='2' fill='none' stroke='%23c9a66b' stroke-width='1.5'/%3E%3Cline x1='9' y1='10' x2='23' y2='10' stroke='%23a08050' stroke-width='1'/%3E%3Cline x1='9' y1='14' x2='23' y2='14' stroke='%23a08050' stroke-width='1'/%3E%3Cline x1='9' y1='18' x2='18' y2='18' stroke='%23a08050' stroke-width='1'/%3E%3Ccircle cx='20' cy='22' r='3.5' fill='%23c9884a' stroke='%23a06a30' stroke-width='1'/%3E%3C/svg%3E",
   expansion_permit: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='6' width='24' height='20' rx='2' fill='%234caf50'/%3E%3Crect x='4' y='6' width='24' height='20' rx='2' fill='none' stroke='%232e7d32' stroke-width='1.5'/%3E%3Crect x='6' y='8' width='20' height='16' rx='1' fill='none' stroke='%23fff' stroke-width='.5' opacity='.3'/%3E%3Cpath d='M12 16h8M16 12v8' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  // Transport icons (used in Orders panel)
+  _icon_truck_color: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='9' width='17' height='12' rx='2' fill='%23d4a056'/%3E%3Crect x='3' y='10' width='15' height='3' rx='1' fill='%23e8c87a' opacity='.3'/%3E%3Cpath d='M19 13h5l4 4v4h-9z' fill='%238b5e3c'/%3E%3Cpath d='M19 13h5l4 4h-9z' fill='%23a0724a'/%3E%3Crect x='2' y='20' width='26' height='2' rx='1' fill='%235a3520'/%3E%3Ccircle cx='8' cy='24' r='3' fill='%233a2510'/%3E%3Ccircle cx='8' cy='24' r='1.2' fill='%238b6914'/%3E%3Ccircle cx='24' cy='24' r='3' fill='%233a2510'/%3E%3Ccircle cx='24' cy='24' r='1.2' fill='%238b6914'/%3E%3Crect x='5' y='12' width='10' height='6' rx='1' fill='%23ffd54f' opacity='.2'/%3E%3C/svg%3E",
+  _icon_boat: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3 20L6 12h20l3 8z' fill='%238b5e3c'/%3E%3Cpath d='M5 20L7 14h18l2 6z' fill='%23c9884a'/%3E%3Cpath d='M7 14h18v2H7z' fill='%23daa06d' opacity='.3'/%3E%3Crect x='14' y='6' width='4' height='8' rx='1' fill='%23a06a30'/%3E%3Cpath d='M18 7h8v6h-8z' fill='%23fff' opacity='.85'/%3E%3Cpath d='M18 7L26 10v3h-8z' fill='%23e8e8e8' opacity='.4'/%3E%3Cpath d='M2 21Q8 25 16 25Q24 25 30 21L28 24Q22 28 16 28Q10 28 4 24z' fill='%234fc3f7' opacity='.3'/%3E%3Cpath d='M4 22Q10 26 16 26Q22 26 28 22' stroke='%234fc3f7' stroke-width='1.5' fill='none' opacity='.5'/%3E%3Crect x='10' y='15' width='3' height='4' rx='.5' fill='%23ffd54f' opacity='.4'/%3E%3Crect x='19' y='15' width='3' height='4' rx='.5' fill='%23ffd54f' opacity='.4'/%3E%3C/svg%3E",
   // Animal products
   milk: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='mb' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='1' stop-color='%23dce8f0'/%3E%3C/linearGradient%3E%3ClinearGradient id='ml' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e3f2fd'/%3E%3Cstop offset='1' stop-color='%23bbdefb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M11 10h10l1.5 3v13a2.5 2.5 0 01-2.5 2.5h-8A2.5 2.5 0 019.5 26V13z' fill='url(%23mb)' stroke='%23b0bec5' stroke-width='.8'/%3E%3Cpath d='M11.5 7h9a1 1 0 011 1v3h-11V8a1 1 0 011-1z' fill='%23a1887f' stroke='%238d6e63' stroke-width='.6'/%3E%3Crect x='13' y='5' width='6' height='3' rx='1' fill='%238d6e63'/%3E%3Crect x='10.5' y='15' width='11' height='10' rx='1.5' fill='url(%23ml)' opacity='.55'/%3E%3Cpath d='M11 20 Q16 17 21 20' stroke='%23fff' stroke-width='1.2' fill='none' opacity='.7'/%3E%3Cpath d='M12 5.5h8' stroke='%23a1887f' stroke-width='.5'/%3E%3Cellipse cx='14' cy='13' rx='3' ry='1.5' fill='%23fff' opacity='.45'/%3E%3Crect x='12' y='18' width='8' height='1.5' rx='.5' fill='%2390caf9' opacity='.2'/%3E%3Cpath d='M18 8v2.5' stroke='%23795548' stroke-width='.4' opacity='.5'/%3E%3C/svg%3E",
   egg: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='eg' cx='.4' cy='.35' r='.65'%3E%3Cstop offset='0' stop-color='%23fff8ef'/%3E%3Cstop offset='.5' stop-color='%23f5e0c0'/%3E%3Cstop offset='1' stop-color='%23d4b896'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='16' cy='17' rx='9.5' ry='12' fill='url(%23eg)'/%3E%3Cellipse cx='16' cy='17' rx='9.5' ry='12' fill='none' stroke='%23c9a87c' stroke-width='.8'/%3E%3Cellipse cx='13' cy='12' rx='4.5' ry='3.5' fill='%23fff' opacity='.5' transform='rotate(-15 13 12)'/%3E%3Cellipse cx='12' cy='11' rx='2' ry='1.5' fill='%23fff' opacity='.6'/%3E%3Cellipse cx='19' cy='23' rx='5' ry='3' fill='%23c9a87c' opacity='.15'/%3E%3Cpath d='M9 24 Q16 28 23 24' stroke='%23b89870' stroke-width='.5' fill='none' opacity='.3'/%3E%3C/svg%3E",
@@ -289,10 +292,10 @@ function itemIcon(id, w) {
   if (hdSrc) return `<img src="${hdSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try animal sprite
   const anSrc = S(`animals_${id}`);
-  if (anSrc) return `<img src="${anSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  if (anSrc) return `<img src="${anSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try building sprite
   const blSrc = S(`buildings_${id}`);
-  if (blSrc) return `<img src="${blSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  if (blSrc) return `<img src="${blSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Fallback: generic placeholder icon
   return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
@@ -456,6 +459,7 @@ function checkStorageWarnings() {
   else if (siloPct >= 0.9) { showNotification(LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
 }
 
+let _prevCoins = -1, _prevGems = -1, _prevXpPct = -1;
 function updateHUD() {
   const d = farmData;
   const starSrc = S('hayday_star');
@@ -465,8 +469,24 @@ function updateHUD() {
   document.getElementById('hud-xp-bar').style.width = (d.xp_percent || 0) + '%';
   document.getElementById('hud-xp-text').textContent = `${d.xp_progress||0}/${d.xp_needed||20}`;
   document.getElementById('streak-count').textContent = d.streak || 0;
-  document.getElementById('coin-count').textContent = formatNum(d.coins || 0);
-  document.getElementById('gem-count').textContent = formatNum(d.gems || 0);
+  const newCoins = d.coins || 0;
+  const newGems = d.gems || 0;
+  document.getElementById('coin-count').textContent = formatNum(newCoins);
+  document.getElementById('gem-count').textContent = formatNum(newGems);
+  // Satisfying bump when values increase
+  if (_prevCoins >= 0 && newCoins > _prevCoins) {
+    const el = document.getElementById('hud-coins');
+    el.classList.remove('hud-bump'); void el.offsetWidth; el.classList.add('hud-bump');
+  }
+  if (_prevGems >= 0 && newGems > _prevGems) {
+    const el = document.getElementById('hud-gems');
+    el.classList.remove('hud-bump'); void el.offsetWidth; el.classList.add('hud-bump');
+  }
+  if (_prevXpPct >= 0 && (d.xp_percent||0) > _prevXpPct) {
+    const el = document.querySelector('.hud-xp');
+    el.classList.remove('hud-bump'); void el.offsetWidth; el.classList.add('hud-bump');
+  }
+  _prevCoins = newCoins; _prevGems = newGems; _prevXpPct = d.xp_percent || 0;
   // Streak bonus indicator — show percentage when active
   const streakEl = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
@@ -1452,7 +1472,7 @@ function updateAchievements(achs){const list=document.getElementById('achievemen
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
-  SoundMgr.play('click');
+  SoundMgr.play('levelup');
   // Find the plot element and create harvest burst from it
   const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
@@ -1467,6 +1487,12 @@ function harvestPlot(id){
       const cy = rect.top + rect.height/2;
       // Create harvest burst particles
       showHarvestBurst(cx, cy, field.crop);
+      // Coin burst from the plot position (satisfying collection feel)
+      setTimeout(() => showCoinBurst(cx, cy, 5), 300);
+      // Scale-down animation on the plot itself
+      plotEl.style.transition = 'transform .3s cubic-bezier(.34,1.56,.64,1)';
+      plotEl.style.transform = 'scale(0.85)';
+      setTimeout(() => { plotEl.style.transform = ''; }, 400);
     }
   }
   pycmd(`farm:harvest:${id}`);
@@ -1539,7 +1565,22 @@ function showSellDialog(id, qty) {
 }
 function fulfillOrder(i){SoundMgr.play('click');pycmd(`farm:fulfill_order:${i}`)}
 
-function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification(LANG.come_back)}
+function spinWheel(){
+  SoundMgr.play('click');
+  document.getElementById('wheel-overlay').classList.remove('hidden');
+  drawWheel();
+  const btn = document.getElementById('wheel-spin-btn');
+  if(farmData.can_spin_wheel){
+    btn.disabled = false;
+    btn.textContent = LANG.spin;
+    document.getElementById('wheel-result').classList.add('hidden');
+  } else {
+    btn.disabled = true;
+    btn.textContent = LANG.come_back;
+    document.getElementById('wheel-result').textContent = 'Revenez demain pour tourner à nouveau !';
+    document.getElementById('wheel-result').classList.remove('hidden');
+  }
+}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
 function showWheelResult(r){
   wheelSpinning=false;
@@ -1567,7 +1608,7 @@ function showWheelResult(r){
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:auto">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
 function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
@@ -1669,6 +1710,20 @@ function showReward(d){
   if(d.items) Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});
   // Mystery box appearance
   if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}
+  // Show "+1" growth indicator on all growing plots (review = growth visual link)
+  showGrowthIndicators();
+}
+
+function showGrowthIndicators() {
+  const plots = document.querySelectorAll('.plot-planted, .plot-growing');
+  plots.forEach((plot, i) => {
+    const indicator = document.createElement('div');
+    indicator.className = 'growth-indicator';
+    indicator.textContent = '+1';
+    indicator.style.animationDelay = (i * 60) + 'ms';
+    plot.appendChild(indicator);
+    setTimeout(() => { if (indicator.parentNode) indicator.parentNode.removeChild(indicator); }, 1200);
+  });
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
