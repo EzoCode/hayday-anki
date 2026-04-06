@@ -48,7 +48,7 @@ function applyHayDayAssets() {
   const coinSrc = S('ui_coin');
   const coinEl = document.getElementById('coin-icon');
   if (coinSrc && coinEl) {
-    coinEl.innerHTML = `<img src="${coinSrc}" width="16" height="16" style="vertical-align:middle">`;
+    coinEl.innerHTML = `<img src="${coinSrc}" width="16" height="16" style="vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))">`;
   } else if (coinEl) {
     coinEl.innerHTML = '<span class="css-coin"></span>';
   }
@@ -56,7 +56,7 @@ function applyHayDayAssets() {
   const gemSrc = S('ui_gem');
   const gemEl = document.getElementById('gem-icon');
   if (gemSrc && gemEl) {
-    gemEl.innerHTML = `<img src="${gemSrc}" width="16" height="16" style="vertical-align:middle">`;
+    gemEl.innerHTML = `<img src="${gemSrc}" width="15" height="15" style="vertical-align:middle;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))">`;
   } else if (gemEl) {
     gemEl.innerHTML = '<span class="css-gem"></span>';
   }
@@ -73,7 +73,7 @@ function applyHayDayAssets() {
     if (gearFallback) gearFallback.style.display = 'none';
   }
   // Level up overlay background
-  const lvlBgSrc = S('hayday_new-level-bg');
+  const lvlBgSrc = S('hayday_new_level_bg');
   if (lvlBgSrc) {
     const lvlCard = document.querySelector('.levelup-card');
     if (lvlCard) {
@@ -91,7 +91,7 @@ function applyHayDayAssets() {
   }
   // Toolbar icons — use sprites (with SVG fallbacks for missing ones)
   const toolbarIcons = {
-    'icon-farm': {sprite: 'hayday_wheat-icon'},
+    'icon-farm': {sprite: 'hayday_wheat_icon'},
     'icon-buildings': {sprite: 'hayday_barn'},
     'icon-inventory': {sprite: 'hayday_silo'},
     'icon-orders': {sprite: '_icon_truck'},
@@ -109,7 +109,7 @@ function applyHayDayAssets() {
   }
   // Zone title icons using Hay Day sprites
   const zoneIcons = {
-    'zone-title-fields': 'hayday_wheat-icon',
+    'zone-title-fields': 'hayday_wheat_icon',
     'zone-title-workshop': 'hayday_barn',
     'zone-title-pasture': 'hayday_cow',
     'zone-title-village': 'hayday_scarecrow',
@@ -265,7 +265,7 @@ const ITEM_ICONS = {
 function itemIcon(id, w) {
   w = w || 24;
   // Try hayday label sprite first
-  const lblSrc = S(`hayday_${id}-lbl`);
+  const lblSrc = S(`hayday_${id}_lbl`);
   if (lblSrc) return `<img src="${lblSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try crop portrait
   const cp = cropPortrait(id, w);
@@ -282,11 +282,11 @@ function itemIcon(id, w) {
 }
 
 const HD_BUILDINGS = {
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_shop', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_barn', pastry_shop:'hayday_shop',
-  pizzeria:'hayday_shop', jam_maker:'hayday_barn', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  bakery:'hayday_shop', barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', sugar_mill:'hayday_silo', dairy:'hayday_barn',
+  chicken_coop:'hayday_chicken_coop', bbq:'hayday_shop', pastry_shop:'hayday_shop',
+  pizzeria:'hayday_shop', jam_maker:'hayday_silo', juice_press:'hayday_silo',
+  pie_oven:'hayday_barn', windmill:'hayday_mill_dark', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
   const key = HD_BUILDINGS[id] || `buildings_${id}`;
@@ -298,11 +298,11 @@ function animalImg(id, w) {
   if (!src) return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w||50}" height="${w?Math.round(w*.85):42}" style="object-fit:contain">`;
   return `<img src="${src}" width="${w||50}" height="${w?Math.round(w*.85):42}" class="animal-img" draggable="false">`;
 }
-function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
+function animalLbl(id, w) { return img(`hayday_${id}_lbl`, w||45, w||45, 'animal-lbl'); }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('hayday_field');
+  if (state === 'ready') return S('hayday_wheat_field') || S('hayday_field');
+  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa_field') || S('hayday_field');
   return S('hayday_field');
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
@@ -592,7 +592,7 @@ function renderPastures() {
     const el = document.createElement('div');
     el.className = 'pasture-tile';
     el.style.animationDelay = `${Math.random()*2}s`;
-    const lbl = S(`hayday_${p.animal_type}-lbl`);
+    const lbl = S(`hayday_${p.animal_type}_lbl`);
     const name = animalName(p.animal_type) || (p.animal_type||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     const adef = (farmData.animal_defs||{})[p.animal_type]||{};
     const produceEvery = adef.produce_every_n_reviews || 10;
@@ -930,7 +930,7 @@ function showAnimalMenu() {
 function showAnimalInfo(animalType) {
   const defs = farmData.animal_defs || {};
   const def = defs[animalType] || {};
-  const aSrc = S(`hayday_${animalType}-lbl`) || S(`hayday_${animalType}`);
+  const aSrc = S(`hayday_${animalType}_lbl`) || S(`hayday_${animalType}`);
   const aIcon = aSrc ? `<img src="${aSrc}" width="40" height="40" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">` : '';
   showInfo({
     icon: aIcon,
@@ -1178,7 +1178,7 @@ function showAnimalShopInfo(aid) {
     {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
-    icon: (()=>{const s=S(`hayday_${aid}-lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:itemIcon(aid, 40);})(),
+    icon: (()=>{const s=S(`hayday_${aid}_lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:itemIcon(aid, 40);})(),
     title: def.name || aid,
     desc: info.desc || '',
     requirements: reqs,
@@ -1566,7 +1566,7 @@ function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000
 function renderFarmer() {
   const el = document.getElementById('farmer-character');
   if (!el) return;
-  const src = S('hayday_farmer-woman') || S('hayday_farmer-man');
+  const src = S('hayday_farmer_woman') || S('hayday_farmer_man');
   if (src) el.innerHTML = `<img src="${src}" width="40" height="48" class="farmer-sprite">`;
   else el.innerHTML = '';
 }
@@ -1584,7 +1584,7 @@ function showTutorial() {
     dots.appendChild(d);
   }
   const farmer = document.getElementById('tutorial-farmer');
-  const src = S('hayday_farmer-man') || S('hayday_farmer-woman');
+  const src = S('hayday_farmer_man') || S('hayday_farmer_woman');
   if (src) farmer.innerHTML = `<img src="${src}" width="56" height="64">`;
   document.getElementById('tutorial-overlay').classList.remove('hidden');
   updateTutorialStep();

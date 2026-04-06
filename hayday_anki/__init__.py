@@ -209,7 +209,7 @@ def _process_animals(mgr):
         view = _get_view()
         if view.web:
             for p in collected_products:
-                msg = f"{p['emoji']} +{p['qty']} {p['name']}"
+                msg = f"+{p['qty']} {p['name']}"
                 view._js(f"showNotification({json.dumps(msg)}, 'reward')")
 
 
@@ -241,9 +241,9 @@ def _check_achievements(mgr):
         if view.web:
             ach_name = ach.get("name", "")
             ach_tier = ach.get("tier", "")
-            tier_emoji = {"bronze": "\U0001F949", "silver": "\U0001F948", "gold": "\U0001F947"}.get(ach_tier, "\U0001F3C6")
-            gem_text = f" +{gem_reward}\U0001F48E" if gem_reward > 0 else ""
-            msg = f"{tier_emoji} {ach_name} ({ach_tier}){gem_text}"
+            tier_label = {"bronze": "Bronze", "silver": "Argent", "gold": "Or"}.get(ach_tier, "")
+            gem_text = f" +{gem_reward} gemmes" if gem_reward > 0 else ""
+            msg = f"{tier_label} : {ach_name}{gem_text}"
             view._js(f"showNotification({json.dumps(msg)}, 'reward')")
             if ach_tier == "gold":
                 view._js("createConfetti()")
