@@ -84,9 +84,18 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Bonus de serie visible** : badge "+X%" affiche dans le HUD a cote du compteur de serie.
 - **Crops pretes animees** : les cultures pretes a recolter rebondissent avec un label dore pour attirer l'attention.
 
+## Ameliorations (session 6 â€” gameplay polish)
+- **itemIcon() ameliore** : utilise maintenant les vrais sprites de cultures (stage 4), animaux, et batiments du sprite atlas au lieu de fallback SVG generiques. Ajout de l'icone scarecrow manquante.
+- **Grille de champs responsive** : 3 colonnes par defaut, 4 a 8+ champs, 5 a 15+ champs. La ferme s'adapte a la progression du joueur.
+- **Feedback recolte differencie** : la recolte utilise un son different du level-up. Burst de particules ameliore (8 particules en cercle + sparkles dores).
+- **Pourcentage de croissance visible** : chaque parcelle en croissance affiche un % dans le coin superieur droit.
+- **Notification "culture prete"** : quand une culture devient prete a recolter pendant les revisions, une notification doree apparait.
+- **Session summary ameliore** : affiche la precision, icone de pieces, animations pop-in echelonnees, confettis de celebration.
+- **Commandes (ordres) ameliores** : les livraisons bateau donnent maintenant des gemmes en bonus. Confettis + coin burst a la livraison.
+- **Reward visuel ameliore** : plus de particules proportionnelles aux pieces gagnees lors des revisions.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
-- [ ] Ameliorer l'apparence des decorations dans la zone Village
 - [ ] Evenements saisonniers avec bonus temporaires
 - [ ] Systeme de quetes quotidiennes/hebdomadaires
 - [ ] Tutoriel ameliore avec guidage contextuel

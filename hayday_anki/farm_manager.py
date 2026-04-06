@@ -743,7 +743,8 @@ class FarmManager:
             })
 
         # Advance crop growth on plots
-        self._advance_plots()
+        crop_notifs = self._advance_plots()
+        rewards["notifications"].extend(crop_notifs)
 
         # Check level up
         level_up = self._check_level_up()
@@ -774,11 +775,13 @@ class FarmManager:
                 return item_id
         return "bolt"  # fallback
 
-    def _advance_plots(self):
-        """Advance ALL growing fields per review. Ready crops wilt after too long."""
+    def _advance_plots(self) -> List[Dict]:
+        """Advance ALL growing fields per review. Ready crops wilt after too long.
+        Returns list of notification dicts for newly ready crops."""
         from . import progression
 
         # Advance every active field each review (like Hay Day — all crops grow in parallel)
+        newly_ready = []
         for field in self.state.fields:
             if field["state"] not in ("planted", "growing"):
                 continue
@@ -789,10 +792,26 @@ class FarmManager:
                 if field["growth_stage"] >= 4:
                     field["state"] = "ready"
                     field["_ready_since"] = self.state.total_reviews
+                    newly_ready.append(field.get("crop", ""))
                 else:
                     field["state"] = "growing"
                     crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
                     field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
+
+        # Build notifications for newly ready crops
+        notifs = []
+        if newly_ready:
+            crop_counts = {}
+            for crop_id in newly_ready:
+                crop_name = ITEM_CATALOG.get(crop_id, {}).get("name", crop_id)
+                crop_counts[crop_name] = crop_counts.get(crop_name, 0) + 1
+            for name, count in crop_counts.items():
+                msg = f"{name} prêt à récolter !" if count == 1 else f"{count}x {name} prêts à récolter !"
+                notifs.append({
+                    "type": "crop_ready",
+                    "message": msg,
+                })
+        return notifs
 
         # Wilt check on all ready fields
         for field in self.state.fields:
@@ -1373,9 +1392,16 @@ class FarmManager:
         self.state.session_xp_earned += order["xp_reward"]
         self.state.orders_completed += 1
 
+        # Boat orders have a chance to give gems (like Hay Day)
+        gem_reward = 0
+        if order["type"] == "boat":
+            gem_reward = random.choice([0, 0, 1, 1, 2])
+            self.state.gems += gem_reward
+
         result = {
             "coins": order["coin_reward"],
             "xp": order["xp_reward"],
+            "gems": gem_reward,
             "order_type": order["type"],
         }
 
@@ -1623,6 +1649,7 @@ class FarmManager:
 
         summary = {
             "reviews": self.state.session_reviews,
+            "correct": self.state.session_correct,
             "coins_earned": self.state.session_coins_earned,
             "xp_earned": self.state.session_xp_earned,
             "items_earned": dict(self.state.session_items_earned),

@@ -312,8 +312,12 @@ class FarmWebView:
                 if result:
                     r_coins = result["coins"]
                     r_xp = result["xp"]
+                    r_gems = result.get("gems", 0)
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 8)")
                     self._js(f"showFloatingReward('+{r_coins} pièces', window.innerWidth/2, window.innerHeight/3)")
-                    self._js(f"showNotification('Commande livrée ! +{r_coins} pièces, +{r_xp} XP')")
+                    gem_text = f" +{r_gems} gemmes" if r_gems > 0 else ""
+                    self._js(f"showNotification('Commande livrée ! +{r_coins} pièces, +{r_xp} XP{gem_text}', 'reward')")
+                    self._js("createConfetti()")
                     self._check_and_show_level_up()
                 else:
                     self._js("showNotification('Items manquants !')")
@@ -543,11 +547,14 @@ class FarmWebView:
         """Called after a card review — show reward animation."""
         if self.web:
             self._js(f"showReward({json.dumps(rewards)})")
-            # Show any additional notifications (storage full, etc.)
+            # Show additional notifications (storage full, crop ready, etc.)
             for notif in rewards.get("notifications", []):
-                if notif.get("type") in ("storage_full",):
-                    msg = notif.get("message", "")
+                ntype = notif.get("type", "")
+                msg = notif.get("message", "")
+                if ntype == "storage_full":
                     self._js(f"showNotification({json.dumps(msg)})")
+                elif ntype == "crop_ready":
+                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
             self._send_state()
 
     def on_level_up(self, data: dict):

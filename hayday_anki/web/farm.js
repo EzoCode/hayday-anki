@@ -257,27 +257,37 @@ const ITEM_ICONS = {
   arch_flowers: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='8' width='3' height='20' rx='1' fill='%238b5e3c'/%3E%3Crect x='25' y='8' width='3' height='20' rx='1' fill='%238b5e3c'/%3E%3Cpath d='M5 8 Q16 0 27 8' stroke='%238b5e3c' stroke-width='3' fill='none'/%3E%3Ccircle cx='8' cy='6' r='3' fill='%23e74c3c'/%3E%3Ccircle cx='16' cy='3' r='3' fill='%23ff9800'/%3E%3Ccircle cx='24' cy='6' r='3' fill='%23e91e63'/%3E%3Ccircle cx='12' cy='4' r='2' fill='%23ffc107'/%3E%3Ccircle cx='20' cy='4' r='2' fill='%23f44336'/%3E%3Ccircle cx='5' cy='12' r='2' fill='%234caf50'/%3E%3Ccircle cx='27' cy='12' r='2' fill='%234caf50'/%3E%3C/svg%3E",
   statue_cow: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='10' y='24' width='12' height='4' rx='1' fill='%23999'/%3E%3Cellipse cx='16' cy='18' rx='8' ry='7' fill='%23bbb'/%3E%3Ccircle cx='16' cy='10' r='6' fill='%23ccc'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%23ccc'/%3E%3Ccircle cx='22' cy='7' r='2' fill='%23ccc'/%3E%3Ccircle cx='14' cy='10' r='1' fill='%23333'/%3E%3Ccircle cx='18' cy='10' r='1' fill='%23333'/%3E%3Cellipse cx='16' cy='13' rx='3' ry='2' fill='%23f8bbd0'/%3E%3C/svg%3E",
   windmill_deco: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M12 28h8l2-18H10z' fill='%23c9884a'/%3E%3Cpath d='M12 28h8l2-18H10z' fill='none' stroke='%23a06a30' stroke-width='.5'/%3E%3Ccircle cx='16' cy='12' r='3' fill='%23999'/%3E%3Cpath d='M16 12L16 2M16 12L26 8M16 12L26 16M16 12L16 22M16 12L6 16M16 12L6 8' stroke='%23888' stroke-width='2'/%3E%3Ccircle cx='16' cy='12' r='1.5' fill='%23666'/%3E%3C/svg%3E",
+  scarecrow: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='15' y='12' width='2' height='16' fill='%238b5e3c'/%3E%3Crect x='7' y='14' width='18' height='2' rx='1' fill='%238b5e3c'/%3E%3Ccircle cx='16' cy='8' r='5' fill='%23fdd9b5'/%3E%3Cpath d='M10 5h12l1-3H9z' fill='%23795548'/%3E%3Crect x='8' y='4' width='16' height='2' rx='1' fill='%23a1887f'/%3E%3Ccircle cx='14' cy='8' r='1' fill='%23333'/%3E%3Ccircle cx='18' cy='8' r='1' fill='%23333'/%3E%3Cpath d='M14 10h4' stroke='%23333' stroke-width='.8'/%3E%3Cpath d='M7 16l-2 6M25 16l2 6' stroke='%23daa06d' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
   picnic_table: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='14' width='26' height='3' rx='1' fill='%23c9884a'/%3E%3Crect x='6' y='10' width='20' height='3' rx='1' fill='%23daa06d'/%3E%3Cpath d='M8 17L4 28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M24 17L28 28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='6' y='18' width='20' height='3' rx='1' fill='%23c9884a'/%3E%3C/svg%3E",
 };
 
 // Get item icon as <img> tag (SVG inline or sprite, no emoji fallback for key items)
 function itemIcon(id, w) {
   w = w || 24;
-  // Try hayday label sprite first
+  // Try hayday label sprite first (e.g. hayday_cow-lbl)
   const lblSrc = S(`hayday_${id}-lbl`);
   if (lblSrc) return `<img src="${lblSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
-  // Try crop portrait
+  // Try crop portrait (dedicated small icon for each crop)
   const cp = cropPortrait(id, w);
   if (cp) return cp;
-  // Try inline SVG icon
+  // Try mature crop sprite (stage 4 = ready) as icon — real game feel
+  const cropReady = S(`crops_${id}_4`);
+  if (cropReady) return `<img src="${cropReady}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  // Try inline SVG icon (handcrafted per item)
   const svgSrc = ITEM_ICONS[id];
   if (svgSrc) return `<img src="${svgSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try building SVG
   const bldSrc = (typeof BUILDING_SVGS !== 'undefined') && BUILDING_SVGS[id];
   if (bldSrc) return `<img src="${bldSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
-  // Try hayday sprite
+  // Try hayday sprite (e.g. hayday_scarecrow)
   const hdSrc = S(`hayday_${id}`);
   if (hdSrc) return `<img src="${hdSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
+  // Try animal sprite
+  const anSrc = S(`animals_${id}`);
+  if (anSrc) return `<img src="${anSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  // Try building sprite
+  const blSrc = S(`buildings_${id}`);
+  if (blSrc) return `<img src="${blSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
   // Fallback: generic placeholder icon
   return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
@@ -488,6 +498,11 @@ function renderFields() {
   grid.innerHTML = '';
   const fields = farmData.fields || farmData.plots || [];
 
+  // Responsive grid columns based on field count
+  grid.classList.remove('cols-4', 'cols-5');
+  if (fields.length >= 15) grid.classList.add('cols-5');
+  else if (fields.length >= 8) grid.classList.add('cols-4');
+
   document.getElementById('fields-count').textContent = fields.length;
 
   // Update field cost on button
@@ -520,7 +535,9 @@ function renderFields() {
   }
 
   if (fields.length === 0) {
-    grid.innerHTML = '<div class="zone-empty-msg">Aucun champ. Ajoute-en un !</div>';
+    const wheatSrc = S('crops_wheat_portrait') || S('crops_wheat_4');
+    const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="28" height="28" style="image-rendering:pixelated;vertical-align:middle;margin-right:4px">` : '';
+    grid.innerHTML = `<div class="zone-empty-msg">${wheatIcon}Ajoute ton premier champ pour commencer !</div>`;
     return;
   }
 
@@ -546,7 +563,7 @@ function renderFields() {
       }
     } else if (field.state === 'ready') {
       const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 40)}</div><span class="plot-label plot-ready-label">${name} — Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 44)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
@@ -559,8 +576,10 @@ function renderFields() {
       const totalNeeded = reviewsPerStage * 4;
       const totalDone = stage * reviewsPerStage + done;
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
+      const pctRound = Math.round(pct);
       const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      const reviewsLeft = totalNeeded - totalDone;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, 36)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
     }
     grid.appendChild(el);
   });
@@ -1403,7 +1422,7 @@ function updateAchievements(achs){const list=document.getElementById('achievemen
 function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const sellPrice=def.sell_price||2;const xpH=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,36)||itemIcon(id,36)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-detail"><span class="crop-stat-icon reviews-icon"></span> ${gr} reviews/stade \u2022 ${totalReviews} total</span><span class="crop-detail"><span class="crop-stat-icon harvest-icon"></span> ${harvestMin}-${harvestMax} \u2022 <span class="crop-stat-icon coin-icon-sm"></span> ${sellPrice}/u \u2022 +${xpH} XP</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
-  SoundMgr.play('levelup');
+  SoundMgr.play('click');
   // Find the plot element and create harvest burst from it
   const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
@@ -1424,18 +1443,33 @@ function harvestPlot(id){
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
-  const portrait = cropPortrait(cropId, 20);
-  for (let i = 0; i < 6; i++) {
+  const portrait = cropPortrait(cropId, 22) || itemIcon(cropId, 20);
+  // Main crop burst (8 particles fanning out)
+  for (let i = 0; i < 8; i++) {
     const el = document.createElement('div');
     el.className = 'harvest-particle';
-    el.innerHTML = portrait || itemIcon(cropId, 18);
+    el.innerHTML = portrait;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    el.style.setProperty('--dx', ((Math.random() - 0.5) * 120) + 'px');
-    el.style.setProperty('--dy', (-(Math.random() * 80 + 30)) + 'px');
-    el.style.animationDelay = (i * 60) + 'ms';
+    const angle = (i / 8) * Math.PI * 2;
+    const dist = 60 + Math.random() * 50;
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 40) + 'px');
+    el.style.animationDelay = (i * 40) + 'ms';
     layer.appendChild(el);
     setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+  }
+  // Gold sparkles around the harvest
+  for (let i = 0; i < 5; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'harvest-sparkle';
+    sp.style.left = x + 'px';
+    sp.style.top = y + 'px';
+    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
+    sp.style.setProperty('--dy', (-(Math.random() * 60 + 20)) + 'px');
+    sp.style.animationDelay = (100 + i * 50) + 'ms';
+    layer.appendChild(sp);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
   }
 }
 function plantAllEmpty(){SoundMgr.play('click');pycmd('farm:plant_all_empty')}
@@ -1536,7 +1570,25 @@ function showDailyLoginBonus(d){
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
-function showSessionSummary(d){SoundMgr.play('click');document.getElementById('session-stats').innerHTML=`<div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div><div class="session-stat"><div class="session-stat-value">${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div><div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>`;let items='';Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,14)} ${itemName(id)} x${qty}</span>`});document.getElementById('session-items').innerHTML=items;document.getElementById('session-overlay').classList.remove('hidden')}
+function showSessionSummary(d){
+  SoundMgr.play('levelup');
+  const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20" style="vertical-align:middle">` : '<span class="css-coin" style="width:16px;height:16px;display:inline-block;vertical-align:middle"></span>';
+  const gemIcon = S('ui_gem') ? `<img src="${S('ui_gem')}" width="18" height="18" style="vertical-align:middle">` : '';
+  const accuracy = d.reviews > 0 ? Math.round((d.correct||0)/d.reviews*100) : 0;
+  document.getElementById('session-stats').innerHTML = `
+    <div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div>
+    <div class="session-stat"><div class="session-stat-value">${coinIcon} ${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div>
+    <div class="session-stat"><div class="session-stat-value">+${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div>
+    <div class="session-stat"><div class="session-stat-value">${accuracy}%</div><div class="session-stat-label">${LANG.accuracy}</div></div>
+    <div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>
+    ${d.harvests_count>0?`<div class="session-stat"><div class="session-stat-value">${d.harvests_count}</div><div class="session-stat-label">${LANG.harvests}</div></div>`:''}
+  `;
+  let items='';
+  Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,14)} ${itemName(id)} x${qty}</span>`});
+  document.getElementById('session-items').innerHTML=items;
+  document.getElementById('session-overlay').classList.remove('hidden');
+  createConfetti();
+}
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
 function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
@@ -1574,7 +1626,20 @@ function showCoinBurst(x,y,n){
     setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
   }
 }
-function showReward(d){SoundMgr.play('click');if(d.coins){showFloatingReward(`+${d.coins}`,window.innerWidth/2,window.innerHeight/2-20);showCoinBurst(window.innerWidth/2,window.innerHeight/2)}if(d.xp)showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);if(d.items)Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}}
+function showReward(d){
+  // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
+  if(d.coins){
+    const cx=window.innerWidth/2, cy=window.innerHeight/2;
+    showFloatingReward(`+${d.coins}`,cx,cy-20);
+    showCoinBurst(cx,cy,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
+  }
+  // XP: subtle text float
+  if(d.xp) showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2);
+  // Material/item drops: individual notifications
+  if(d.items) Object.entries(d.items).forEach(([id,qty])=>{showNotification(`+${qty} ${itemName(id)}`,'reward')});
+  // Mystery box appearance
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;showNotification(`Une ${sz} boîte mystère est apparue !`,'reward')}
+}
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
