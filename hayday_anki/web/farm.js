@@ -323,13 +323,11 @@ function buildingIcon(id, w) {
 }
 
 const HD_BUILDINGS = {
-  // All buildings use HayDay isometric sprites (transparent bg, high quality)
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_mill-dark', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_shop',
-  pastry_shop:'hayday_barn', jam_maker:'hayday_mill-dark',
-  pizzeria:'hayday_shop', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  // Only map buildings that have their own unique HayDay sprite
+  // All other buildings use BUILDING_SVGS unique icons (better than duplicating barn/silo)
+  barn:'hayday_barn', silo:'hayday_silo',
+  shop:'hayday_shop', chicken_coop:'hayday_chicken_coop',
+  coop:'hayday_chicken_coop', windmill:'hayday_mill-dark',
 };
 function buildingImg(id, w) {
   // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
@@ -367,7 +365,7 @@ const ALL_BUILDINGS = [
 const ALL_ANIMALS = [
   {id:'cow',lvl:10},{id:'chicken',lvl:20},{id:'pig',lvl:30},{id:'sheep',lvl:60},
 ];
-const GROWTH_LABEL = ['Graine','Pousse','Croissance','Floraison','Prêt !'];
+const GROWTH_LABEL = ['Planté','Pousse','Croissance','Floraison','Prêt !'];
 const EXPANSION_LEVELS = [
   {lvl:3,plots:2},{lvl:5,plots:2},{lvl:10,plots:2},{lvl:15,plots:2},{lvl:20,plots:2},
   {lvl:25,plots:2},{lvl:30,plots:2},{lvl:35,plots:2},{lvl:40,plots:2},{lvl:50,plots:2},
@@ -615,21 +613,23 @@ function renderFields() {
       if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
         const lcName = cropName(field.last_crop);
         el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 24) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
+        el.title = `Replanter ${lcName} (clic droit = choisir autre)`;
         el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
-        // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
         const plusSrc = S('hayday_plus');
         const plusIcon = plusSrc ? `<img src="${plusSrc}" width="24" height="24" style="opacity:.5">` : '<span class="plot-plus">+</span>';
         el.innerHTML += `<div class="plot-empty-prompt">${plusIcon}<span class="plot-empty-label">Planter</span></div>`;
+        el.title = 'Cliquer pour planter une culture';
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
-      const name = cropName(field.crop);
       el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.title = `${cropName(field.crop)} — Prêt à récolter !`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
+      el.title = `${cropName(field.crop)} — Fané. Cliquer pour nettoyer.`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
@@ -643,7 +643,8 @@ function renderFields() {
       const name = cropName(field.crop);
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 36 : 44;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      el.title = `${name} — ${GROWTH_LABEL[Math.min(stage,4)]} (${reviewsLeft} rev. restantes)`;
     }
     grid.appendChild(el);
   });
@@ -682,6 +683,7 @@ function renderWorkshop() {
     const ready = queue.filter(q=>q.ready).length;
     const producing = queue.filter(q=>!q.ready).length;
     if (producing > 0) el.classList.add('producing');
+    if (ready > 0) el.classList.add('building-ready');
     let statusHtml = '';
     if (ready > 0) {
       statusHtml = `<span class="building-badge">${ready}</span>`;
@@ -691,6 +693,7 @@ function renderWorkshop() {
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }
     el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${statusHtml}`;
+    el.title = ready > 0 ? `${name} — ${ready} produit(s) prêt(s) !` : producing > 0 ? `${name} — Production en cours` : `${name} — Cliquer pour produire`;
     grid.appendChild(el);
   });
 }
@@ -724,8 +727,13 @@ function renderPastures() {
     const produceEvery = adef.produce_every_n_reviews || 10;
     const reviewsSince = p.reviews_since_last || 0;
     const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
+    const isReady = progPct >= 90;
+    if (isReady) el.classList.add('pasture-ready');
     const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
-    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsSince}/${produceEvery}</span>`;
+    const prodName = itemName(adef.product||'');
+    const progLabel = isReady ? `${prodName} bientôt !` : `${reviewsSince}/${produceEvery}`;
+    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill${isReady?' almost':''}" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${progLabel}</span>`;
+    el.title = `${name} x${p.count||1} — Produit ${prodName} tous les ${produceEvery} reviews (${reviewsSince}/${produceEvery})`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
   });

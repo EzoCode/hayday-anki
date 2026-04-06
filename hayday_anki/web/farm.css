@@ -334,6 +334,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   color: rgba(255,255,255,0.45);
   font-weight: 600;
 }
+.pasture-ready{border-color:var(--gold) !important;box-shadow:0 0 14px rgba(255,215,0,.4),0 3px 10px rgba(0,0,0,.15) !important;animation:readyGlow 2s ease-in-out infinite !important}
+.pasture-ready .pasture-prod-label{color:rgba(255,215,0,.9);font-weight:700}
+.pasture-progress-fill.almost{background:linear-gradient(90deg,#ffb74d,#ff9800) !important;animation:almostPulse 2s ease-in-out infinite}
 
 /* Info card — scrollable overlay with fixed close button */
 .info-card {
@@ -397,8 +400,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot:hover{transform:translateY(-3px) scale(1.03);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
 .plot:active{transform:scale(.95)}
 
-.plot-empty{background:linear-gradient(145deg,var(--soil-l),var(--soil-m));border:2px dashed rgba(255,255,255,.2);transition:border-color .2s}
-.plot-empty:hover{border-color:rgba(255,215,0,.4);background:linear-gradient(145deg,var(--soil-l),#9a7520)}
+.plot-empty{background:linear-gradient(145deg,var(--soil-l),var(--soil-m));border:2px dashed rgba(255,255,255,.18);transition:all .2s}
+.plot-empty:hover{border-color:rgba(255,215,0,.5);background:linear-gradient(145deg,#d4b87a,#a58a40);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),0 0 16px rgba(255,215,0,.2),0 4px 10px rgba(0,0,0,.25)}
 .plot-empty .field-img{filter:brightness(.85) saturate(.8)}
 .plot-planted,.plot-growing{background:linear-gradient(145deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.1)}
 .plot-ready{background:linear-gradient(145deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer}
@@ -440,7 +443,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1)}
 .building-tile:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .building-tile::after{content:'';position:absolute;bottom:6px;left:18%;right:18%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,.25),transparent);border-radius:50%;z-index:0}
-.building-img{max-width:120px;max-height:100px;object-fit:contain;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.45));position:relative;z-index:1;transition:transform .2s;image-rendering:auto}
+.building-img{max-width:120px;max-height:100px;object-fit:contain;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.4));position:relative;z-index:1;transition:transform .2s ease;image-rendering:auto}
 .building-tile:hover .building-img{transform:scale(1.05)}
 /* Active building subtle breathing — feels alive when producing */
 .building-tile.producing .building-img{animation:buildingBreathe 3s ease-in-out infinite}
@@ -448,6 +451,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .building-name{font-size:10px;color:var(--text-l);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.6);margin-top:2px;text-align:center;letter-spacing:.2px}
 .building-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#ff6b6b,var(--red));color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(231,76,60,.5);animation:badgePulse 1.5s ease-in-out infinite;z-index:10}
 @keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 2px 6px rgba(231,76,60,.4)}50%{transform:scale(1.15);box-shadow:0 2px 12px rgba(231,76,60,.7)}}
+.building-ready{border-color:var(--gold) !important;box-shadow:0 0 18px rgba(255,215,0,.5),0 3px 10px rgba(0,0,0,.2) !important;animation:readyGlow 2s ease-in-out infinite}
+.building-ready .building-name{color:var(--gold) !important}
 .building-prod-bar{position:absolute;bottom:4px;left:12%;right:12%;height:4px;background:rgba(0,0,0,.2);border-radius:2px;overflow:hidden;z-index:5}
 .building-prod-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:2px;transition:width .4s;box-shadow:0 0 4px rgba(76,175,80,.3)}
 
