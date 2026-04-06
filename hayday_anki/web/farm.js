@@ -348,10 +348,10 @@ function animalImg(id, w) {
 function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('tiles_dirt_planted') || S('hayday_field');
-  if (state === 'empty') return S('tiles_dirt') || S('hayday_field');
-  return S('hayday_field') || S('tiles_grass');
+  if (state === 'ready') return S('hayday_wheat-field') || S('hayday_field');
+  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('hayday_field');
+  if (state === 'empty') return S('hayday_field');
+  return S('hayday_field');
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
@@ -612,36 +612,32 @@ function renderFields() {
     if (field.state === 'empty') {
       if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
         const lcName = cropName(field.last_crop);
-        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 24) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
+        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
         el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
-        // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
         const plusSrc = S('hayday_plus');
-        const plusIcon = plusSrc ? `<img src="${plusSrc}" width="24" height="24" style="opacity:.5">` : '<span class="plot-plus">+</span>';
-        el.innerHTML += `<div class="plot-empty-prompt">${plusIcon}<span class="plot-empty-label">Planter</span></div>`;
+        const plusIcon = plusSrc ? `<img src="${plusSrc}" width="28" height="28" style="opacity:.6;filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))">` : '<span class="plot-plus">+</span>';
+        el.innerHTML += `<div class="plot-empty-prompt">${plusIcon}</div>`;
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
-      const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-label plot-ready-label">${cropName(field.crop)}</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
+      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label plot-wilted-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
-      // Total progress across ALL 4 stages (not just current stage)
       const cropDef = (farmData.crop_defs||{})[field.crop]||{};
       const reviewsPerStage = cropDef.growth_reviews || needed;
       const totalNeeded = reviewsPerStage * 4;
       const totalDone = stage * reviewsPerStage + done;
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
-      const name = cropName(field.crop);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 36 : 44;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      const cropSize = stage <= 1 ? 38 : 48;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${cropName(field.crop)}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-reviews-left">${reviewsLeft}</span>`;
     }
     grid.appendChild(el);
   });
@@ -1516,7 +1512,7 @@ function getAchCategoryIcon(cat) {
 }
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,52)||cropImg(id,4,52)||itemIcon(id,52)}</div><div class="crop-choice-info"><strong>${name}</strong><div style="display:flex;gap:4px;margin-top:2px"><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews}</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('click');
