@@ -94,6 +94,18 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Commandes (ordres) ameliores** : les livraisons bateau donnent maintenant des gemmes en bonus. Confettis + coin burst a la livraison.
 - **Reward visuel ameliore** : plus de particules proportionnelles aux pieces gagnees lors des revisions.
 
+## Ameliorations (session 7 â€” UX polish et solidite)
+- **Plant dialog redesign** : le dialog de plantation est maintenant une grille visuelle Hay Day (portraits 52px, badges reviews/prix, grid responsive) au lieu d'une liste verticale text-heavy. Selection plus rapide et plus satisfaisante.
+- **Production dialog ameliore** : recipe cards avec meilleur espacement, bordures arrondies, shadows, items ingredients avec taille 16px et drop-shadow. Queue items prets avec animation pulse doree.
+- **Sell dialog ameliore** : boutons de vente plus gros (14px border-radius), hover avec glow dore, total en grand. Item name avec icone.
+- **Weather dawn** : ajout du soleil levant (radial gradient), atmosphere chaude, leger boost de brightness.
+- **Weather sunset** : ajout du filtre sepia doux pour ambiance couchante.
+- **Level up unlocks** : tags avec animation pop-in echelonnee et shadow.
+- **Ready crops** : label "Recolter !" avec glow dore pulse et letter-spacing.
+- **Session summary harvest count** : le compteur de recoltes de session fonctionne maintenant (ajout `session_harvests` au backend).
+- **drawWheel null check** : protection contre crash si canvas pas encore rendu.
+- **Duplicate CSS cleanup** : suppression des definitions .pq-* dupliquees.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

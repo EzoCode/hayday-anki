@@ -610,20 +610,27 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 @keyframes starsGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}
 .levelup-number{font-size:56px;font-weight:900;color:#2e7d32;text-shadow:0 2px 4px rgba(0,0,0,.15),0 0 20px rgba(76,175,80,.3);margin:4px 0;animation:levelPop .6s cubic-bezier(.34,1.56,.64,1)}
 @keyframes levelPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
-#levelup-rewards{font-size:13px;margin:4px 0}
-#levelup-unlocks{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
-.unlock-tag{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15)}
+#levelup-rewards{font-size:14px;margin:6px 0;font-weight:800;color:var(--gem);text-shadow:0 1px 2px rgba(0,0,0,.1)}
+#levelup-unlocks{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.unlock-tag{background:rgba(255,255,255,.35);padding:5px 12px;border-radius:14px;font-size:11px;font-weight:700;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.08);animation:unlockPop .4s cubic-bezier(.34,1.56,.64,1) both}
+.unlock-tag:nth-child(1){animation-delay:.1s}.unlock-tag:nth-child(2){animation-delay:.2s}.unlock-tag:nth-child(3){animation-delay:.3s}.unlock-tag:nth-child(4){animation-delay:.4s}
+@keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 
-/* Plant dialog */
-.crop-choice{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.35));border-radius:14px;padding:10px 12px;border:1px solid rgba(0,0,0,.06);cursor:pointer;transition:all .15s;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.crop-choice:hover{background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateX(5px);box-shadow:0 4px 12px rgba(106,191,71,.2)}
-.crop-choice:active{transform:scale(.98)}
-.crop-choice-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-.crop-choice-icon img{max-width:36px;max-height:36px}
-.crop-choice-info{flex:1}
-.crop-choice-info strong{font-size:13px;color:var(--text-d)}
-.crop-choice-info span{font-size:9px;color:#888;display:block}
-.crop-detail{font-size:9px;color:#777;margin-top:1px}
+/* Plant dialog — Hay Day style seed selector */
+#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;padding:4px 0;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(240,248,232,.5));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(106,191,71,.1);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
+.crop-choice:hover{background:rgba(255,255,255,.95);border-color:#6abf47;transform:translateY(-3px);box-shadow:0 6px 16px rgba(106,191,71,.25),inset 0 1px 0 rgba(255,255,255,.6)}
+.crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
+.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
+.crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
+.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain}
+.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
+.crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
+.crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
+.crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
+.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
+.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -635,30 +642,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .event-icon{display:inline-block;width:14px;height:14px;vertical-align:middle;margin-right:2px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23ffd700'/%3E%3Cpath d='M8 3l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10.5 4.5 12.5l.5-3.5L2.5 6.5 6 6z' fill='%23fff' opacity='.8'/%3E%3C/svg%3E") center/contain no-repeat}
 
 /* Production dialog */
-.production-card{max-height:70vh;overflow-y:auto;text-align:left}
-.production-card h3{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 5px}
-.production-queue-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.4);border-radius:8px;margin-bottom:4px;transition:all .15s}
-.production-queue-item.ready{border:1px solid var(--gold);box-shadow:0 0 8px rgba(255,215,0,.25);background:rgba(255,215,0,.08)}
-.pq-emoji{font-size:20px}
+.production-card{max-height:70vh;overflow-y:auto;text-align:left;padding-top:30px !important}
+.production-card h3{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(0,0,0,.06)}
+.production-queue-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:linear-gradient(145deg,rgba(255,255,255,.5),rgba(255,255,255,.25));border-radius:10px;margin-bottom:5px;transition:all .15s;border:1px solid rgba(0,0,0,.04)}
+.production-queue-item.ready{border:1.5px solid var(--gold);box-shadow:0 0 12px rgba(255,215,0,.3);background:linear-gradient(145deg,rgba(255,253,231,.7),rgba(255,248,225,.4));animation:readyPulse 2s ease-in-out infinite}
+@keyframes readyPulse{0%,100%{box-shadow:0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 0 16px rgba(255,215,0,.45)}}
+.pq-emoji{font-size:20px;display:flex;align-items:center}
+.pq-emoji img{filter:drop-shadow(1px 1px 2px rgba(0,0,0,.2))}
 .pq-info{flex:1}
-.pq-info strong{font-size:12px;display:block}
-.pq-info span{font-size:9px;color:#888}
-.pq-bar{width:50px;height:4px;background:rgba(0,0,0,.1);border-radius:2px;overflow:hidden}
-.pq-bar-fill{height:100%;background:var(--xp);border-radius:2px;transition:width .3s}
-.pq-ready-badge{color:var(--xp);font-weight:900;font-size:16px}
-.recipe-card{display:flex;flex-direction:column;gap:5px;padding:8px 10px;background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.25));border-radius:10px;border:1px solid rgba(0,0,0,.05);cursor:pointer;transition:all .15s;margin-bottom:5px}
-.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.8);border-color:#6abf47;transform:translateX(3px)}
+.pq-info strong{font-size:12px;display:block;color:var(--text-d)}
+.pq-info span{font-size:10px;color:#888}
+.pq-bar{flex:0 0 60px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden}
+.pq-bar-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:3px;transition:width .4s}
+.pq-ready-badge{font-size:16px;font-weight:900;color:#4caf50;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+.recipe-card{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;border:1px solid rgba(0,0,0,.05);cursor:pointer;transition:all .18s;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateY(-2px);box-shadow:0 4px 12px rgba(106,191,71,.2)}
 .recipe-card.disabled{opacity:.4;cursor:not-allowed}
-.recipe-header{display:flex;align-items:center;gap:8px}
-.recipe-emoji{font-size:24px}
+.recipe-header{display:flex;align-items:center;gap:10px}
+.recipe-emoji{display:flex;align-items:center;justify-content:center;width:36px;height:36px}
+.recipe-emoji img{filter:drop-shadow(1px 1px 2px rgba(0,0,0,.2));max-width:32px;max-height:32px}
 .recipe-info{flex:1}
-.recipe-info strong{font-size:12px;color:var(--text-d)}
-.recipe-time{font-size:9px;color:#888;display:block}
-.recipe-ingredients{display:flex;flex-wrap:wrap;gap:4px}
-.recipe-ingredient{font-size:10px;padding:2px 6px;border-radius:4px;display:flex;align-items:center;gap:2px}
-.recipe-ingredient img{max-width:14px;max-height:14px}
-.recipe-ingredient.has{background:rgba(76,175,80,.15);color:#2e7d32}
-.recipe-ingredient.need{background:rgba(244,67,54,.12);color:#c62828}
+.recipe-info strong{font-size:13px;color:var(--text-d)}
+.recipe-time{font-size:9px;color:#888;display:block;margin-top:1px}
+.recipe-ingredients{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.recipe-ingredient{font-size:10px;padding:3px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;font-weight:600;border:1px solid transparent;transition:all .15s}
+.recipe-ingredient img{max-width:16px;max-height:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.recipe-ingredient.has{background:rgba(76,175,80,.12);color:#2e7d32;border-color:rgba(76,175,80,.15)}
+.recipe-ingredient.need{background:rgba(244,67,54,.08);color:#c62828;border-color:rgba(244,67,54,.12)}
 
 /* Session summary */
 #session-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
@@ -697,15 +707,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .stat-row strong{font-weight:900;color:#2e7d32;font-size:14px}
 
 /* ===== SELL DIALOG ===== */
-.sell-card{min-width:240px}
-.sell-item-name{font-size:20px;font-weight:900;color:var(--text-d);margin:8px 0 2px}
-.sell-stock{font-size:11px;color:#888;font-weight:700}
-.sell-unit-price{font-size:10px;color:var(--gold-d);font-weight:700;margin-bottom:10px}
-.sell-buttons{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-.sell-amount-btn{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border:1px solid rgba(0,0,0,.06);border-radius:12px;cursor:pointer;transition:all .15s;font-size:14px;font-weight:700;color:var(--text-d)}
-.sell-amount-btn:hover{background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateX(4px);box-shadow:0 3px 8px rgba(106,191,71,.15)}
+.sell-card{min-width:260px}
+.sell-item-name{font-size:18px;font-weight:900;color:var(--text-d);margin:8px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px}
+.sell-item-name img{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2))}
+.sell-stock{font-size:11px;color:#888;font-weight:700;background:rgba(0,0,0,.04);padding:3px 10px;border-radius:8px;display:inline-block}
+.sell-unit-price{font-size:11px;color:var(--gold-d);font-weight:700;margin:4px 0 12px}
+.sell-buttons{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.sell-amount-btn{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border:1px solid rgba(0,0,0,.06);border-radius:14px;cursor:pointer;transition:all .18s;font-size:14px;font-weight:700;color:var(--text-d);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sell-amount-btn:hover{background:rgba(255,255,255,.95);border-color:rgba(255,215,0,.4);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,215,0,.15)}
 .sell-amount-btn:active{transform:scale(.97)}
-.sell-total{font-weight:800;color:var(--gold-d)}
+.sell-total{font-weight:900;color:var(--gold-d);font-size:15px}
 
 /* ===== WEATHER SYSTEM ===== */
 .weather-night .farm-sky{background:linear-gradient(180deg,#0f1e3d 0%,#1e3358 40%,#2a4a6b 70%,rgba(42,74,107,0) 100%)}
@@ -720,7 +731,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 .weather-sunset .farm-sky{background:linear-gradient(180deg,#ff6b35 0%,#ff8c42 30%,#ffc947 60%,rgba(255,201,71,0) 100%)}
 .weather-sunset .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(180,80,20,.2) 100%)}
 
-.weather-dawn .farm-sky{background:linear-gradient(180deg,#fce4b8 0%,#ffd89b 40%,#b8d4e3 70%,rgba(184,212,227,0) 100%)}
+.weather-dawn .farm-sky{background:linear-gradient(180deg,#fce4b8 0%,#ffd89b 30%,#b8d4e3 70%,rgba(184,212,227,0) 100%)}
+.weather-dawn .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 50%,rgba(255,180,80,.1) 100%)}
+.weather-dawn #farm-world{filter:brightness(1.02) saturate(1.05)}
+.weather-dawn .farm-sky::before{content:'';position:absolute;top:5px;right:10%;width:24px;height:24px;background:radial-gradient(circle,#fff8e1 20%,#ffd54f 50%,transparent 70%);border-radius:50%;box-shadow:0 0 20px rgba(255,213,79,.5);filter:blur(2px)}
+
+.weather-sunset #farm-world{filter:brightness(.95) saturate(1.1) sepia(.08)}
 
 .weather-rain .farm-sky{background:linear-gradient(180deg,#7b8d9e 0%,#95a8b8 60%,rgba(149,168,184,0) 100%)}
 .weather-rain #farm-world{filter:brightness(.9) saturate(.85)}
@@ -789,7 +805,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;width:100vw;hei
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.5s ease-in-out infinite !important}
 @keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}30%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:800;color:var(--gold) !important;text-shadow:0 1px 3px rgba(0,0,0,.6) !important}
+.plot-ready-label{font-weight:900;color:var(--gold) !important;text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 8px rgba(255,215,0,.4) !important;font-size:9px !important;letter-spacing:.3px;animation:labelPulse 2s ease-in-out infinite}
+@keyframes labelPulse{0%,100%{opacity:.9}50%{opacity:1;text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 12px rgba(255,215,0,.6)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}

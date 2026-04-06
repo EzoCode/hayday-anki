@@ -211,6 +211,7 @@ class FarmState:
         self.session_items_earned: Dict[str, int] = {}
         self.session_reviews: int = 0
         self.session_correct: int = 0
+        self.session_harvests: int = 0
 
         # Production queues: building_id -> [{"recipe_id", "started_session", "ready": bool}]
         self.production_queues: Dict[str, List[Dict]] = {}
@@ -412,6 +413,7 @@ class FarmState:
         state.session_items_earned = {}
         state.session_reviews = 0
         state.session_correct = 0
+        state.session_harvests = 0
         state.production_queues = {}
         state.achievements = {}
         state.last_login_date = None
@@ -1113,6 +1115,7 @@ class FarmManager:
         self.state.xp += xp_gain
         self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
+        self.state.session_harvests += 1
 
         # Reset field — remember last crop for quick replant
         last_crop = field["crop"]
@@ -1634,6 +1637,7 @@ class FarmManager:
         self.state.session_items_earned = {}
         self.state.session_reviews = 0
         self.state.session_correct = 0
+        self.state.session_harvests = 0
         self._pending_notifications = []
         # Update streak at session start so the correct bonus applies during reviews
         self.update_streak()
@@ -1653,6 +1657,7 @@ class FarmManager:
             "coins_earned": self.state.session_coins_earned,
             "xp_earned": self.state.session_xp_earned,
             "items_earned": dict(self.state.session_items_earned),
+            "harvests_count": self.state.session_harvests,
             "level": self.state.level,
             "total_coins": self.state.coins,
             "total_gems": self.state.gems,
