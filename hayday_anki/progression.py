@@ -196,91 +196,86 @@ def get_gem_reward_for_level(level: int) -> int:
 # Each entry: level -> list of unlocks
 UNLOCK_TABLE: Dict[int, List[Dict]] = {
     1: [
-        {"type": "crop", "id": "wheat", "name": "Blé", "emoji": "\U0001F33E"},
-        {"type": "crop", "id": "corn", "name": "Maïs", "emoji": "\U0001F33D"},
+        {"type": "crop", "id": "wheat", "name": "Blé"},
+        {"type": "crop", "id": "corn", "name": "Maïs"},
     ],
     3: [
-        {"type": "crop", "id": "carrot", "name": "Carotte", "emoji": "\U0001F955"},
+        {"type": "crop", "id": "turnip", "name": "Navet"},
         {"type": "plots", "count": 2, "id": "plots_3", "name": "+2 Parcelles"},
     ],
     5: [
-        {"type": "building", "id": "bakery", "name": "Boulangerie", "emoji": "\U0001F3ED"},
+        {"type": "building", "id": "bakery", "name": "Boulangerie"},
         {"type": "plots", "count": 2, "id": "plots_5", "name": "+2 Parcelles"},
     ],
     7: [
-        {"type": "feature", "id": "roadside_shop", "name": "Échoppe", "emoji": "\U0001F3EA"},
+        {"type": "feature", "id": "roadside_shop", "name": "Échoppe"},
     ],
     10: [
-        {"type": "crop", "id": "tomato", "name": "Tomate", "emoji": "\U0001F345"},
-        {"type": "animal", "id": "cow", "name": "Vache", "emoji": "\U0001F404"},
+        {"type": "crop", "id": "tomato", "name": "Tomate"},
+        {"type": "animal", "id": "cow", "name": "Vache"},
         {"type": "plots", "count": 2, "id": "plots_10", "name": "+2 Parcelles"},
     ],
     12: [
-        {"type": "crop", "id": "soybean", "name": "Soja", "emoji": "\U0001FAD8"},
-    ],
-    14: [
-        {"type": "feature", "id": "merchant_tom", "name": "Marchand Tom", "emoji": "\U0001F9D4"},
+        {"type": "crop", "id": "cucumber", "name": "Concombre"},
     ],
     15: [
-        {"type": "crop", "id": "potato", "name": "Patate", "emoji": "\U0001F954"},
-        {"type": "building", "id": "sugar_mill", "name": "Sucrerie", "emoji": "\U0001F3ED"},
-        {"type": "crop", "id": "sugarcane", "name": "Canne à sucre", "emoji": "\U0001F33F"},
+        {"type": "crop", "id": "potato", "name": "Patate"},
+        {"type": "building", "id": "sugar_mill", "name": "Sucrerie"},
+        {"type": "crop", "id": "rice", "name": "Riz"},
         {"type": "plots", "count": 2, "id": "plots_15", "name": "+2 Parcelles"},
     ],
     17: [
-        {"type": "feature", "id": "boat_dock", "name": "Quai", "emoji": "\u26F5"},
-    ],
-    18: [
-        {"type": "feature", "id": "derby", "name": "Derby", "emoji": "\U0001F3C7"},
+        {"type": "feature", "id": "boat_dock", "name": "Quai"},
     ],
     20: [
-        {"type": "crop", "id": "strawberry", "name": "Fraise", "emoji": "\U0001F353"},
-        {"type": "animal", "id": "chicken", "name": "Poule", "emoji": "\U0001F414"},
+        {"type": "crop", "id": "strawberry", "name": "Fraise"},
+        {"type": "animal", "id": "chicken", "name": "Poule"},
         {"type": "plots", "count": 2, "id": "plots_20", "name": "+2 Parcelles"},
     ],
-    24: [
-        {"type": "feature", "id": "mine", "name": "Mine", "emoji": "\u26CF\uFE0F"},
+    22: [
+        {"type": "crop", "id": "eggplant", "name": "Aubergine"},
     ],
     25: [
-        {"type": "building", "id": "dairy", "name": "Laiterie", "emoji": "\U0001F95B"},
+        {"type": "crop", "id": "lemon", "name": "Citron"},
+        {"type": "building", "id": "dairy", "name": "Laiterie"},
         {"type": "plots", "count": 2, "id": "plots_25", "name": "+2 Parcelles"},
     ],
-    27: [
-        {"type": "feature", "id": "fishing", "name": "Étang de pêche", "emoji": "\U0001F3A3"},
-    ],
     30: [
-        {"type": "crop", "id": "apple", "name": "Pomme", "emoji": "\U0001F34E"},
-        {"type": "animal", "id": "pig", "name": "Cochon", "emoji": "\U0001F416"},
+        {"type": "crop", "id": "orange", "name": "Orange"},
+        {"type": "animal", "id": "pig", "name": "Cochon"},
         {"type": "plots", "count": 2, "id": "plots_30", "name": "+2 Parcelles"},
     ],
-    34: [
-        {"type": "feature", "id": "town", "name": "Ville", "emoji": "\U0001F3D8\uFE0F"},
+    32: [
+        {"type": "crop", "id": "sunflower", "name": "Tournesol"},
     ],
     35: [
-        {"type": "building", "id": "bbq", "name": "Barbecue", "emoji": "\U0001F356"},
+        {"type": "crop", "id": "pineapple", "name": "Ananas"},
+        {"type": "building", "id": "bbq", "name": "Barbecue"},
         {"type": "plots", "count": 2, "id": "plots_35", "name": "+2 Parcelles"},
     ],
     40: [
-        {"type": "building", "id": "pastry_shop", "name": "Pâtisserie", "emoji": "\U0001F370"},
-        {"type": "crop", "id": "pumpkin", "name": "Citrouille", "emoji": "\U0001F383"},
+        {"type": "building", "id": "pastry_shop", "name": "Pâtisserie"},
+        {"type": "crop", "id": "melon", "name": "Melon"},
         {"type": "plots", "count": 2, "id": "plots_40", "name": "+2 Parcelles"},
     ],
     45: [
-        {"type": "building", "id": "jam_maker", "name": "Confiturerie", "emoji": "\U0001F36F"},
+        {"type": "crop", "id": "grapes", "name": "Raisin"},
+        {"type": "building", "id": "jam_maker", "name": "Confiturerie"},
     ],
     50: [
-        {"type": "building", "id": "pizzeria", "name": "Pizzeria", "emoji": "\U0001F355"},
+        {"type": "building", "id": "pizzeria", "name": "Pizzeria"},
         {"type": "plots", "count": 2, "id": "plots_50", "name": "+2 Parcelles"},
     ],
     55: [
-        {"type": "building", "id": "juice_press", "name": "Pressoir", "emoji": "\U0001F9C3"},
+        {"type": "crop", "id": "coffee", "name": "Café"},
+        {"type": "building", "id": "juice_press", "name": "Pressoir"},
     ],
     60: [
-        {"type": "animal", "id": "sheep", "name": "Mouton", "emoji": "\U0001F411"},
+        {"type": "animal", "id": "sheep", "name": "Mouton"},
         {"type": "plots", "count": 1, "id": "plots_60", "name": "+1 Parcelle"},
     ],
     70: [
-        {"type": "building", "id": "pie_oven", "name": "Four à tartes", "emoji": "\U0001F967"},
+        {"type": "building", "id": "pie_oven", "name": "Four à tartes"},
         {"type": "plots", "count": 1, "id": "plots_70", "name": "+1 Parcelle"},
     ],
     80: [
@@ -290,7 +285,7 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "plots", "count": 1, "id": "plots_90", "name": "+1 Parcelle"},
     ],
     100: [
-        {"type": "feature", "id": "sanctuary", "name": "Sanctuaire", "emoji": "\U0001F3DE\uFE0F"},
+        {"type": "feature", "id": "sanctuary", "name": "Sanctuaire"},
         {"type": "plots", "count": 1, "id": "plots_100", "name": "+1 Parcelle"},
     ],
 }
@@ -329,9 +324,8 @@ def get_next_unlocks(current_level: int) -> Optional[Dict]:
 CROP_DEFINITIONS = {
     "wheat": {
         "name": "Blé",
-        "emoji": "\U0001F33E",
         "unlock_level": 1,
-        "growth_reviews": 3,    # Reviews per growth stage
+        "growth_reviews": 3,    # Reviews per growth stage (x4 stages = 12 total)
         "harvest_min": 2,
         "harvest_max": 4,
         "sell_price": 2,
@@ -339,7 +333,6 @@ CROP_DEFINITIONS = {
     },
     "corn": {
         "name": "Maïs",
-        "emoji": "\U0001F33D",
         "unlock_level": 1,
         "growth_reviews": 4,
         "harvest_min": 2,
@@ -347,9 +340,8 @@ CROP_DEFINITIONS = {
         "sell_price": 3,
         "xp_per_harvest": 4,
     },
-    "carrot": {
-        "name": "Carotte",
-        "emoji": "\U0001F955",
+    "turnip": {
+        "name": "Navet",
         "unlock_level": 3,
         "growth_reviews": 5,
         "harvest_min": 2,
@@ -359,7 +351,6 @@ CROP_DEFINITIONS = {
     },
     "tomato": {
         "name": "Tomate",
-        "emoji": "\U0001F345",
         "unlock_level": 10,
         "growth_reviews": 6,
         "harvest_min": 2,
@@ -367,29 +358,8 @@ CROP_DEFINITIONS = {
         "sell_price": 5,
         "xp_per_harvest": 6,
     },
-    "potato": {
-        "name": "Patate",
-        "emoji": "\U0001F954",
-        "unlock_level": 15,
-        "growth_reviews": 5,
-        "harvest_min": 3,
-        "harvest_max": 5,
-        "sell_price": 4,
-        "xp_per_harvest": 5,
-    },
-    "sugarcane": {
-        "name": "Canne à sucre",
-        "emoji": "\U0001F33F",
-        "unlock_level": 15,
-        "growth_reviews": 7,
-        "harvest_min": 2,
-        "harvest_max": 4,
-        "sell_price": 5,
-        "xp_per_harvest": 6,
-    },
-    "soybean": {
-        "name": "Soja",
-        "emoji": "\U0001FAD8",
+    "cucumber": {
+        "name": "Concombre",
         "unlock_level": 12,
         "growth_reviews": 4,
         "harvest_min": 3,
@@ -397,9 +367,26 @@ CROP_DEFINITIONS = {
         "sell_price": 4,
         "xp_per_harvest": 4,
     },
+    "potato": {
+        "name": "Patate",
+        "unlock_level": 15,
+        "growth_reviews": 5,
+        "harvest_min": 3,
+        "harvest_max": 5,
+        "sell_price": 4,
+        "xp_per_harvest": 5,
+    },
+    "rice": {
+        "name": "Riz",
+        "unlock_level": 15,
+        "growth_reviews": 7,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 5,
+        "xp_per_harvest": 6,
+    },
     "strawberry": {
         "name": "Fraise",
-        "emoji": "\U0001F353",
         "unlock_level": 20,
         "growth_reviews": 8,
         "harvest_min": 2,
@@ -407,9 +394,26 @@ CROP_DEFINITIONS = {
         "sell_price": 7,
         "xp_per_harvest": 8,
     },
-    "apple": {
-        "name": "Pomme",
-        "emoji": "\U0001F34E",
+    "eggplant": {
+        "name": "Aubergine",
+        "unlock_level": 22,
+        "growth_reviews": 6,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 5,
+        "xp_per_harvest": 6,
+    },
+    "lemon": {
+        "name": "Citron",
+        "unlock_level": 25,
+        "growth_reviews": 8,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 6,
+        "xp_per_harvest": 7,
+    },
+    "orange": {
+        "name": "Orange",
         "unlock_level": 30,
         "growth_reviews": 10,
         "harvest_min": 3,
@@ -417,15 +421,50 @@ CROP_DEFINITIONS = {
         "sell_price": 6,
         "xp_per_harvest": 7,
     },
-    "pumpkin": {
-        "name": "Citrouille",
-        "emoji": "\U0001F383",
+    "sunflower": {
+        "name": "Tournesol",
+        "unlock_level": 32,
+        "growth_reviews": 9,
+        "harvest_min": 2,
+        "harvest_max": 3,
+        "sell_price": 8,
+        "xp_per_harvest": 9,
+    },
+    "pineapple": {
+        "name": "Ananas",
+        "unlock_level": 35,
+        "growth_reviews": 10,
+        "harvest_min": 1,
+        "harvest_max": 3,
+        "sell_price": 9,
+        "xp_per_harvest": 10,
+    },
+    "melon": {
+        "name": "Melon",
         "unlock_level": 40,
         "growth_reviews": 12,
         "harvest_min": 1,
         "harvest_max": 3,
         "sell_price": 8,
         "xp_per_harvest": 10,
+    },
+    "grapes": {
+        "name": "Raisin",
+        "unlock_level": 45,
+        "growth_reviews": 11,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 9,
+        "xp_per_harvest": 11,
+    },
+    "coffee": {
+        "name": "Café",
+        "unlock_level": 55,
+        "growth_reviews": 14,
+        "harvest_min": 1,
+        "harvest_max": 3,
+        "sell_price": 12,
+        "xp_per_harvest": 14,
     },
 }
 
@@ -437,7 +476,6 @@ CROP_DEFINITIONS = {
 BUILDING_DEFINITIONS = {
     "bakery": {
         "name": "Boulangerie",
-        "emoji": "\U0001F3ED",
         "unlock_level": 5,
         "cost_coins": 50,
         "max_queue": 3,
@@ -445,15 +483,13 @@ BUILDING_DEFINITIONS = {
     },
     "sugar_mill": {
         "name": "Sucrerie",
-        "emoji": "\U0001F3ED",
         "unlock_level": 15,
         "cost_coins": 200,
         "max_queue": 2,
-        "description": "Transforme la canne à sucre en sucre.",
+        "description": "Transforme le riz en sucre.",
     },
     "dairy": {
         "name": "Laiterie",
-        "emoji": "\U0001F95B",
         "unlock_level": 25,
         "cost_coins": 500,
         "max_queue": 3,
@@ -461,7 +497,6 @@ BUILDING_DEFINITIONS = {
     },
     "bbq": {
         "name": "Barbecue",
-        "emoji": "\U0001F356",
         "unlock_level": 35,
         "cost_coins": 1000,
         "max_queue": 2,
@@ -469,7 +504,6 @@ BUILDING_DEFINITIONS = {
     },
     "pastry_shop": {
         "name": "Pâtisserie",
-        "emoji": "\U0001F370",
         "unlock_level": 40,
         "cost_coins": 2000,
         "max_queue": 3,
@@ -477,7 +511,6 @@ BUILDING_DEFINITIONS = {
     },
     "jam_maker": {
         "name": "Confiturerie",
-        "emoji": "\U0001F36F",
         "unlock_level": 45,
         "cost_coins": 1500,
         "max_queue": 2,
@@ -485,7 +518,6 @@ BUILDING_DEFINITIONS = {
     },
     "pizzeria": {
         "name": "Pizzeria",
-        "emoji": "\U0001F355",
         "unlock_level": 50,
         "cost_coins": 5000,
         "max_queue": 3,
@@ -493,15 +525,13 @@ BUILDING_DEFINITIONS = {
     },
     "juice_press": {
         "name": "Pressoir",
-        "emoji": "\U0001F9C3",
         "unlock_level": 55,
         "cost_coins": 3000,
-        "max_queue": 2,
+        "max_queue": 3,
         "description": "Jus frais à partir de fruits.",
     },
     "pie_oven": {
         "name": "Four à tartes",
-        "emoji": "\U0001F967",
         "unlock_level": 70,
         "cost_coins": 8000,
         "max_queue": 3,
@@ -517,41 +547,33 @@ BUILDING_DEFINITIONS = {
 ANIMAL_DEFINITIONS = {
     "cow": {
         "name": "Vache",
-        "emoji": "\U0001F404",
         "unlock_level": 10,
         "cost_coins": 100,
         "product": "milk",
-        "product_emoji": "\U0001F95B",
         "produce_every_n_reviews": 10,  # Produce 1 milk every 10 reviews
         "max_owned": 5,
     },
     "chicken": {
         "name": "Poule",
-        "emoji": "\U0001F414",
         "unlock_level": 20,
         "cost_coins": 50,
         "product": "egg",
-        "product_emoji": "\U0001F95A",
         "produce_every_n_reviews": 8,
         "max_owned": 8,
     },
     "pig": {
         "name": "Cochon",
-        "emoji": "\U0001F416",
         "unlock_level": 30,
         "cost_coins": 200,
         "product": "bacon",
-        "product_emoji": "\U0001F953",
         "produce_every_n_reviews": 15,
         "max_owned": 4,
     },
     "sheep": {
         "name": "Mouton",
-        "emoji": "\U0001F411",
         "unlock_level": 60,
         "cost_coins": 500,
         "product": "wool",
-        "product_emoji": "\U0001F9F6",
         "produce_every_n_reviews": 20,
         "max_owned": 3,
     },
@@ -586,26 +608,26 @@ DECORATION_COSTS = {
 }
 
 DECORATION_CATALOG = {
-    "fence": {"name": "Clôture en bois", "emoji": "\U0001FAB5", "cost": 10, "category": "basic"},
-    "flower_pot": {"name": "Pot de fleurs", "emoji": "\U0001FAB4", "cost": 25, "category": "basic"},
-    "bench": {"name": "Banc", "emoji": "\U0001FA91", "cost": 50, "category": "basic"},
-    "scarecrow": {"name": "Épouvantail", "emoji": "\U0001F383", "cost": 75, "category": "basic"},
-    "hay_bale": {"name": "Botte de foin", "emoji": "\U0001F33E", "cost": 15, "category": "basic"},
-    "mailbox": {"name": "Boite aux lettres", "emoji": "\U0001F4EA", "cost": 30, "category": "basic"},
-    "lamp_post": {"name": "Lampadaire", "emoji": "\U0001F4A1", "cost": 40, "category": "basic"},
-    "garden_gnome": {"name": "Nain de jardin", "emoji": "\U0001F9D4", "cost": 60, "category": "premium"},
-    "bird_bath": {"name": "Bain d'oiseaux", "emoji": "\U0001F426", "cost": 80, "category": "premium"},
-    "tree_oak": {"name": "Chene", "emoji": "\U0001F333", "cost": 100, "category": "nature"},
-    "tree_pine": {"name": "Sapin", "emoji": "\U0001F332", "cost": 90, "category": "nature"},
-    "picnic_table": {"name": "Table de pique-nique", "emoji": "\U0001F3D5\uFE0F", "cost": 120, "category": "premium"},
-    "pond": {"name": "Mare", "emoji": "\U0001F4A7", "cost": 150, "category": "nature"},
-    "swing": {"name": "Balancoire", "emoji": "\U0001F3A0", "cost": 180, "category": "premium"},
-    "fountain": {"name": "Fontaine", "emoji": "\u26F2", "cost": 200, "category": "premium"},
-    "statue_chicken": {"name": "Statue Poule", "emoji": "\U0001F414", "cost": 250, "category": "special"},
-    "tree_cherry": {"name": "Cerisier en fleurs", "emoji": "\U0001F338", "cost": 300, "category": "special"},
-    "arch_flowers": {"name": "Arche fleurie", "emoji": "\U0001F490", "cost": 350, "category": "special"},
-    "statue_cow": {"name": "Vache doree", "emoji": "\U0001F404", "cost": 400, "category": "special"},
-    "windmill_deco": {"name": "Moulin", "emoji": "\U0001F3E1", "cost": 500, "category": "special"},
+    "fence": {"name": "Clôture en bois", "cost": 10, "category": "basic"},
+    "flower_pot": {"name": "Pot de fleurs", "cost": 25, "category": "basic"},
+    "bench": {"name": "Banc", "cost": 50, "category": "basic"},
+    "scarecrow": {"name": "Épouvantail", "cost": 75, "category": "basic"},
+    "hay_bale": {"name": "Botte de foin", "cost": 15, "category": "basic"},
+    "mailbox": {"name": "Boite aux lettres", "cost": 30, "category": "basic"},
+    "lamp_post": {"name": "Lampadaire", "cost": 40, "category": "basic"},
+    "garden_gnome": {"name": "Nain de jardin", "cost": 60, "category": "premium"},
+    "bird_bath": {"name": "Bain d'oiseaux", "cost": 80, "category": "premium"},
+    "tree_oak": {"name": "Chene", "cost": 100, "category": "nature"},
+    "tree_pine": {"name": "Sapin", "cost": 90, "category": "nature"},
+    "picnic_table": {"name": "Table de pique-nique", "cost": 120, "category": "premium"},
+    "pond": {"name": "Mare", "cost": 150, "category": "nature"},
+    "swing": {"name": "Balancoire", "cost": 180, "category": "premium"},
+    "fountain": {"name": "Fontaine", "cost": 200, "category": "premium"},
+    "statue_chicken": {"name": "Statue Poule", "cost": 250, "category": "special"},
+    "tree_cherry": {"name": "Cerisier en fleurs", "cost": 300, "category": "special"},
+    "arch_flowers": {"name": "Arche fleurie", "cost": 350, "category": "special"},
+    "statue_cow": {"name": "Vache doree", "cost": 400, "category": "special"},
+    "windmill_deco": {"name": "Moulin", "cost": 500, "category": "special"},
 }
 
 
@@ -614,11 +636,11 @@ DECORATION_CATALOG = {
 # =============================================================================
 
 GROWTH_STAGES = {
-    0: {"name": "Graine", "emoji": "\U0001F331", "description": "Vient d'être planté"},
-    1: {"name": "Pousse", "emoji": "\U0001F33F", "description": "Commence à pousser"},
-    2: {"name": "Croissance", "emoji": "\U0001F33E", "description": "Pousse bien"},
-    3: {"name": "Floraison", "emoji": "\U0001F33C", "description": "Bientôt prêt"},
-    4: {"name": "Prêt", "emoji": "\u2705", "description": "Prêt à récolter !"},
+    0: {"name": "Graine", "description": "Vient d'être planté"},
+    1: {"name": "Pousse", "description": "Commence à pousser"},
+    2: {"name": "Croissance", "description": "Pousse bien"},
+    3: {"name": "Floraison", "description": "Bientôt prêt"},
+    4: {"name": "Prêt", "description": "Prêt à récolter !"},
 }
 
-WILTED_STAGE = {"name": "Fané", "emoji": "\U0001F342", "description": "A besoin d'attention"}
+WILTED_STAGE = {"name": "Fané", "description": "A besoin d'attention"}

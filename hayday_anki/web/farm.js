@@ -198,11 +198,8 @@ function img(key, w, h, cls) {
   return `<img src="${src}" width="${w||48}" height="${h||48}" class="${cls||''}" draggable="false">`;
 }
 
-const CROP_SPRITE_MAP = {
-  wheat:'wheat', corn:'corn', carrot:'turnip', tomato:'tomato',
-  potato:'potato', sugarcane:'rice', soybean:'cassava',
-  strawberry:'strawberry', apple:'orange', pumpkin:'melon',
-};
+// Crop IDs now match sprite filenames directly — no remapping needed
+const CROP_SPRITE_MAP = {};
 function cropImg(id, stage, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_${stage}`, w||44, w||44, 'plot-crop'); }
 function cropPortrait(id, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_portrait`, w||28, w||28); }
 
@@ -233,9 +230,11 @@ const ITEM_ICONS = {
   pizza: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4L4 28h24z' fill='%23ffc107'/%3E%3Cpath d='M16 4L4 28h24z' fill='none' stroke='%23e6a800' stroke-width='1'/%3E%3Cpath d='M16 8L6 26h20z' fill='%23e74c3c' opacity='.3'/%3E%3Ccircle cx='14' cy='16' r='2.5' fill='%23e74c3c'/%3E%3Ccircle cx='19' cy='20' r='2' fill='%23e74c3c'/%3E%3Ccircle cx='12' cy='22' r='1.5' fill='%234caf50'/%3E%3Ccircle cx='18' cy='14' r='1.5' fill='%234caf50'/%3E%3C/svg%3E",
   burger: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='10' rx='12' ry='5' fill='%23c9884a'/%3E%3Crect x='4' y='14' width='24' height='3' fill='%234caf50'/%3E%3Crect x='4' y='17' width='24' height='3' fill='%23e74c3c'/%3E%3Crect x='4' y='20' width='24' height='3' fill='%23ffc107'/%3E%3Cellipse cx='16' cy='25' rx='12' ry='4' fill='%23a06a30'/%3E%3Cellipse cx='14' cy='9' rx='5' ry='2' fill='%23daa06d' opacity='.4'/%3E%3C/svg%3E",
   pie: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='20' rx='13' ry='8' fill='%23c9884a'/%3E%3Cellipse cx='16' cy='18' rx='12' ry='7' fill='%23daa06d'/%3E%3Cpath d='M4 18h24' stroke='%23c9884a' stroke-width='1'/%3E%3Cpath d='M8 18 L16 12 L24 18' stroke='%23c9884a' stroke-width='1' fill='%23e8b87a'/%3E%3Cpath d='M12 18v-3M20 18v-3' stroke='%23c9884a' stroke-width='.8'/%3E%3C/svg%3E",
-  pumpkin_pie: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='20' rx='13' ry='8' fill='%23c9884a'/%3E%3Cellipse cx='16' cy='18' rx='12' ry='7' fill='%23ff9800'/%3E%3Cpath d='M4 18h24' stroke='%23c9884a' stroke-width='1'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23fff' opacity='.3'/%3E%3Cpath d='M8 18 L16 12 L24 18' stroke='%23c9884a' stroke-width='1' fill='none'/%3E%3C/svg%3E",
+  melon_pie: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='20' rx='13' ry='8' fill='%23c9884a'/%3E%3Cellipse cx='16' cy='18' rx='12' ry='7' fill='%2366bb6a'/%3E%3Cpath d='M4 18h24' stroke='%23c9884a' stroke-width='1'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23fff' opacity='.3'/%3E%3Cpath d='M8 18 L16 12 L24 18' stroke='%23c9884a' stroke-width='1' fill='none'/%3E%3C/svg%3E",
   jam: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M9 12h14v14a3 3 0 01-3 3H12a3 3 0 01-3-3z' fill='%23e74c3c'/%3E%3Crect x='9' y='8' width='14' height='5' rx='1' fill='%23f5e6c8'/%3E%3Crect x='9' y='8' width='14' height='5' rx='1' fill='none' stroke='%23c9884a' stroke-width='.5'/%3E%3Crect x='10' y='14' width='5' height='3' rx='1' fill='%23f5a0a0' opacity='.4'/%3E%3C/svg%3E",
+  grape_jam: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M9 12h14v14a3 3 0 01-3 3H12a3 3 0 01-3-3z' fill='%239c27b0'/%3E%3Crect x='9' y='8' width='14' height='5' rx='1' fill='%23f5e6c8'/%3E%3Crect x='9' y='8' width='14' height='5' rx='1' fill='none' stroke='%23c9884a' stroke-width='.5'/%3E%3Crect x='10' y='14' width='5' height='3' rx='1' fill='%23ce93d8' opacity='.4'/%3E%3C/svg%3E",
   juice: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 8h12l-1 18a2 2 0 01-2 2h-6a2 2 0 01-2-2z' fill='%23ff9800' opacity='.8'/%3E%3Cpath d='M10 8h12l-1 18a2 2 0 01-2 2h-6a2 2 0 01-2-2z' fill='none' stroke='%23e65100' stroke-width='.8'/%3E%3Crect x='12' y='4' width='8' height='5' rx='1' fill='%23e0e0e0'/%3E%3Cellipse cx='15' cy='12' rx='3' ry='2' fill='%23fff' opacity='.3'/%3E%3C/svg%3E",
+  lemonade: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 8h12l-1 18a2 2 0 01-2 2h-6a2 2 0 01-2-2z' fill='%23ffd54f' opacity='.8'/%3E%3Cpath d='M10 8h12l-1 18a2 2 0 01-2 2h-6a2 2 0 01-2-2z' fill='none' stroke='%23f9a825' stroke-width='.8'/%3E%3Crect x='12' y='4' width='8' height='5' rx='1' fill='%23e0e0e0'/%3E%3Cellipse cx='15' cy='12' rx='3' ry='2' fill='%23fff' opacity='.3'/%3E%3Ccircle cx='18' cy='18' r='3' fill='%234caf50' opacity='.4'/%3E%3C/svg%3E",
   // Truck & Boat icons for orders
   _icon_truck_color: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='10' width='18' height='12' rx='2' fill='%23d4a056'/%3E%3Crect x='3' y='10.5' width='16' height='3' rx='1' fill='%23e8c87a' opacity='.4'/%3E%3Cpath d='M20 14h6l4 4v4h-10z' fill='%238b5e3c'/%3E%3Cpath d='M20 14h6l4 4h-10z' fill='%23a0724a'/%3E%3Crect x='2' y='21' width='28' height='1.5' rx='.5' fill='%235a3520'/%3E%3Ccircle cx='8' cy='24' r='3' fill='%233a2510'/%3E%3Ccircle cx='8' cy='24' r='1.2' fill='%238b6914'/%3E%3Ccircle cx='25' cy='24' r='3' fill='%233a2510'/%3E%3Ccircle cx='25' cy='24' r='1.2' fill='%238b6914'/%3E%3C/svg%3E",
   // Decoration icons
@@ -736,18 +735,24 @@ const ITEM_INFO = {
   screw: {desc: 'Sert à améliorer le Silo. Matériau peu commun.', usage: 'Améliorer Silo (+25 stockage)'},
   paint: {desc: 'Sert à améliorer le Silo. Matériau rare.', usage: 'Améliorer Silo (+25 stockage)'},
   land_deed: {desc: 'Acte de propriété. Nécessaire pour agrandir ton terrain. Très rare (~3% des drops matériaux).', usage: 'Acheter du terrain (+5 unités)'},
-  expansion_permit: {desc: 'Permis d\'expansion. Ultra rare (~2% des drops). Nécessaire pour agrandir le terrain.', usage: 'Acheter du terrain (+5 unités)'},
+  expansion_permit: {desc: "Permis d'expansion. Ultra rare (~2% des drops). Nécessaire pour agrandir le terrain.", usage: 'Acheter du terrain (+5 unités)'},
   // Crops
   wheat: {desc: 'Céréale de base. Pousse vite (3 reviews/stade). Ingrédient du pain et des cookies.', usage: 'Vendre ou transformer en Pain/Cookie'},
-  corn: {desc: 'Céréale dorée. Pousse en 4 reviews/stade.', usage: 'Vendre ou utiliser dans des recettes'},
-  carrot: {desc: 'Légume-racine. Pousse en 5 reviews/stade.', usage: 'Vendre'},
+  corn: {desc: 'Céréale dorée. Pousse en 4 reviews/stade.', usage: 'Vendre'},
+  turnip: {desc: 'Légume-racine. Pousse en 5 reviews/stade.', usage: 'Vendre'},
   tomato: {desc: 'Fruit juteux. Essentiel pour les pizzas ! Pousse en 6 reviews/stade.', usage: 'Vendre ou Pizza'},
+  cucumber: {desc: 'Légume frais et croquant. Pousse en 4 reviews/stade.', usage: 'Vendre'},
   potato: {desc: 'Tubercule nourrissant. Pousse en 5 reviews/stade.', usage: 'Vendre'},
-  sugarcane: {desc: 'Transformée en sucre au Moulin. Pousse en 7 reviews/stade.', usage: 'Vendre ou Sucre → Confiture/Gâteau'},
+  rice: {desc: 'Céréale précieuse. Transformé en sucre à la Sucrerie. Pousse en 7 reviews/stade.', usage: 'Vendre ou Sucre → Confiture/Limonade'},
   strawberry: {desc: 'Fruit délicat. Ingrédient de la confiture ! Pousse en 8 reviews/stade.', usage: 'Vendre ou Confiture'},
-  apple: {desc: 'Fruit polyvalent. Fait du jus et des tartes. Pousse en 10 reviews/stade.', usage: 'Vendre ou Jus/Tarte'},
-  pumpkin: {desc: 'Grosse cucurbitacée. Pousse lentement (12 reviews/stade) mais vaut cher.', usage: 'Vendre ou Tarte à la citrouille'},
-  soybean: {desc: 'Légumineuse. Pousse en 4 reviews/stade.', usage: 'Vendre'},
+  eggplant: {desc: 'Légume méditerranéen. Se vend bien. Pousse en 6 reviews/stade.', usage: 'Vendre'},
+  lemon: {desc: 'Agrume acidulé. Ingrédient de la limonade ! Pousse en 8 reviews/stade.', usage: 'Vendre ou Limonade'},
+  orange: {desc: "Fruit juteux. Fait du jus et des tartes. Pousse en 10 reviews/stade.", usage: "Vendre ou Jus d'orange/Tarte"},
+  sunflower: {desc: 'Fleur majestueuse. Se vend cher ! Pousse en 9 reviews/stade.', usage: 'Vendre'},
+  pineapple: {desc: 'Fruit tropical. Pousse lentement mais vaut cher. 10 reviews/stade.', usage: 'Vendre'},
+  melon: {desc: 'Gros fruit juteux. Pousse lentement (12 reviews/stade) mais vaut cher.', usage: 'Vendre ou Tarte au melon'},
+  grapes: {desc: 'Raisin sucré. Fait de la confiture ! Pousse en 11 reviews/stade.', usage: 'Vendre ou Confiture de raisin'},
+  coffee: {desc: 'Grain précieux. Le plus cher des cultures ! Pousse lentement (14 reviews/stade).', usage: 'Vendre'},
   // Animal products
   milk: {desc: 'Produit par les vaches (1 par vache tous les 10 reviews). Transformable en beurre, fromage, crème.', usage: 'Vendre ou Beurre/Fromage/Crème'},
   egg: {desc: 'Pondu par les poules (1 par poule tous les 8 reviews). Ingrédient des cookies et gâteaux.', usage: 'Vendre ou Cookie/Gâteau'},
@@ -757,16 +762,18 @@ const ITEM_INFO = {
   bread: {desc: 'Fabriqué à la Boulangerie (3 blé → 1 session). Base de nombreuses recettes.', usage: 'Vendre ou Burger/Pizza'},
   butter: {desc: 'Fabriqué à la Laiterie (2 lait → 1 session). Ingrédient du gâteau.', usage: 'Vendre ou Gâteau'},
   cheese: {desc: 'Fabriqué à la Laiterie (3 lait → 2 sessions). Ingrédient de la pizza.', usage: 'Vendre ou Pizza'},
-  sugar: {desc: 'Fabriqué au Moulin (3 canne → 1 session). Ingrédient confiture/gâteau.', usage: 'Vendre ou Confiture/Gâteau'},
+  sugar: {desc: 'Fabriqué à la Sucrerie (3 riz → 1 session). Ingrédient confiture/limonade.', usage: 'Vendre ou Confiture/Limonade'},
   cookie: {desc: 'Fabriqué à la Boulangerie (2 blé + 1 œuf → 1 session).', usage: 'Vendre'},
   cake: {desc: 'Fabriqué à la Pâtisserie (1 pain + 1 beurre + 1 œuf → 2 sessions). Se vend très cher !', usage: 'Vendre (25 pièces)'},
   pizza: {desc: 'Fabriquée à la Pizzeria (1 pain + 2 tomates + 1 fromage → 2 sessions). Top prix !', usage: 'Vendre (30 pièces)'},
   burger: {desc: 'Fabriqué au BBQ (1 pain + 1 bacon → 2 sessions). Le plus cher !', usage: 'Vendre (35 pièces)'},
   jam: {desc: 'Fabriquée à la Confiturerie (3 fraises + 1 sucre → 1 session).', usage: 'Vendre (20 pièces)'},
-  juice: {desc: 'Fabriqué au Pressoir (3 pommes → 1 session).', usage: 'Vendre (16 pièces)'},
-  pie: {desc: 'Fabriquée à la Pâtisserie (2 blé + 2 pommes + 1 sucre → 2 sessions).', usage: 'Vendre (28 pièces)'},
-  pumpkin_pie: {desc: 'Fabriquée au Four à tartes (2 citrouilles + 2 blé + 1 crème → 2 sessions). La plus chère !', usage: 'Vendre (35 pièces)'},
-  cream: {desc: 'Fabriquée à la Laiterie (2 lait → 1 session). Ingrédient de la tarte citrouille.', usage: 'Vendre ou Tarte citrouille'},
+  grape_jam: {desc: 'Fabriquée à la Confiturerie (3 raisins + 1 sucre → 1 session).', usage: 'Vendre (22 pièces)'},
+  juice: {desc: "Fabriqué au Pressoir (3 oranges → 1 session).", usage: 'Vendre (16 pièces)'},
+  lemonade: {desc: 'Fabriquée au Pressoir (3 citrons + 1 sucre → 1 session). Rafraîchissante !', usage: 'Vendre (18 pièces)'},
+  pie: {desc: "Fabriquée à la Pâtisserie (2 blé + 2 oranges + 1 sucre → 2 sessions).", usage: 'Vendre (28 pièces)'},
+  melon_pie: {desc: 'Fabriquée au Four à tartes (2 melons + 2 blé + 1 crème → 2 sessions). La plus chère !', usage: 'Vendre (35 pièces)'},
+  cream: {desc: 'Fabriquée à la Laiterie (2 lait → 1 session). Ingrédient de la tarte au melon.', usage: 'Vendre ou Tarte au melon'},
 };
 
 function showItemInfo(itemId) {

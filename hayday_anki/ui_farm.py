@@ -458,7 +458,6 @@ class FarmWebView:
             recipe_data.append({
                 "id": recipe["id"],
                 "name": recipe["name"],
-                "emoji": recipe["emoji"],
                 "ingredients": recipe["ingredients"],
                 "xp": recipe["xp"],
                 "sessions_required": recipe["sessions_required"],
@@ -470,7 +469,6 @@ class FarmWebView:
         queue_data = [
             {
                 "name": item.get("name", ""),
-                "emoji": item.get("emoji", ""),
                 "recipe_id": item.get("recipe_id", ""),
                 "ready": item.get("ready", False),
                 "sessions_waited": item.get("sessions_waited", 0),
@@ -504,13 +502,12 @@ class FarmWebView:
         prod_mgr = production.ProductionManager(self.manager.state)
         collected = prod_mgr.collect_ready(building_id)
         for item in collected:
-            i_emoji = item["emoji"]
             i_name = item["name"]
             if item.get("storage_full"):
                 self._js(f"showNotification({json.dumps(f'Silo plein ! {i_name} reste en attente.')})")
             else:
                 i_xp = item["xp"]
-                self._js(f"showNotification({json.dumps(f'{i_emoji} {i_name} récupéré ! +{i_xp} XP')})")
+                self._js(f"showNotification({json.dumps(f'{i_name} récupéré ! +{i_xp} XP')})")
 
     def _check_and_show_level_up(self):
         """Check if XP earned outside reviews triggered a level-up."""

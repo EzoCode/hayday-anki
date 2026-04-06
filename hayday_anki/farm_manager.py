@@ -19,62 +19,80 @@ SAVE_FILE = DATA_DIR / "farm_save.json"
 DATA_DIR.mkdir(exist_ok=True)
 
 # Schema version — bump when FarmState structure changes
-SAVE_SCHEMA_VERSION = 2
+SAVE_SCHEMA_VERSION = 3
 
 
 # --- Item Definitions ---
 
 ITEM_CATALOG = {
-    # Raw materials (from reviews)
-    "wheat": {"name": "Blé", "emoji": "\U0001F33E", "category": "crop", "sell_price": 2, "xp": 1},
-    "corn": {"name": "Maïs", "emoji": "\U0001F33D", "category": "crop", "sell_price": 3, "xp": 2},
-    "carrot": {"name": "Carotte", "emoji": "\U0001F955", "category": "crop", "sell_price": 4, "xp": 2},
-    "tomato": {"name": "Tomate", "emoji": "\U0001F345", "category": "crop", "sell_price": 5, "xp": 3},
-    "potato": {"name": "Patate", "emoji": "\U0001F954", "category": "crop", "sell_price": 4, "xp": 2},
-    "strawberry": {"name": "Fraise", "emoji": "\U0001F353", "category": "crop", "sell_price": 7, "xp": 4},
-    "apple": {"name": "Pomme", "emoji": "\U0001F34E", "category": "crop", "sell_price": 6, "xp": 3},
-    "sugarcane": {"name": "Canne à sucre", "emoji": "\U0001F33F", "category": "crop", "sell_price": 5, "xp": 3},
-    "soybean": {"name": "Soja", "emoji": "\U0001FAD8", "category": "crop", "sell_price": 4, "xp": 2},
-    "pumpkin": {"name": "Citrouille", "emoji": "\U0001F383", "category": "crop", "sell_price": 8, "xp": 5},
+    # Crops — IDs match sprite filenames exactly
+    "wheat": {"name": "Blé", "category": "crop", "sell_price": 2, "xp": 1},
+    "corn": {"name": "Maïs", "category": "crop", "sell_price": 3, "xp": 2},
+    "turnip": {"name": "Navet", "category": "crop", "sell_price": 4, "xp": 2},
+    "tomato": {"name": "Tomate", "category": "crop", "sell_price": 5, "xp": 3},
+    "cucumber": {"name": "Concombre", "category": "crop", "sell_price": 4, "xp": 2},
+    "potato": {"name": "Patate", "category": "crop", "sell_price": 4, "xp": 2},
+    "rice": {"name": "Riz", "category": "crop", "sell_price": 5, "xp": 3},
+    "strawberry": {"name": "Fraise", "category": "crop", "sell_price": 7, "xp": 4},
+    "eggplant": {"name": "Aubergine", "category": "crop", "sell_price": 5, "xp": 3},
+    "lemon": {"name": "Citron", "category": "crop", "sell_price": 6, "xp": 3},
+    "orange": {"name": "Orange", "category": "crop", "sell_price": 6, "xp": 3},
+    "sunflower": {"name": "Tournesol", "category": "crop", "sell_price": 8, "xp": 4},
+    "pineapple": {"name": "Ananas", "category": "crop", "sell_price": 9, "xp": 5},
+    "melon": {"name": "Melon", "category": "crop", "sell_price": 8, "xp": 5},
+    "grapes": {"name": "Raisin", "category": "crop", "sell_price": 9, "xp": 5},
+    "coffee": {"name": "Café", "category": "crop", "sell_price": 12, "xp": 7},
 
     # Animal products
-    "milk": {"name": "Lait", "emoji": "\U0001F95B", "category": "animal_product", "sell_price": 8, "xp": 4},
-    "egg": {"name": "Œuf", "emoji": "\U0001F95A", "category": "animal_product", "sell_price": 6, "xp": 3},
-    "wool": {"name": "Laine", "emoji": "\U0001F9F6", "category": "animal_product", "sell_price": 10, "xp": 5},
-    "bacon": {"name": "Bacon", "emoji": "\U0001F953", "category": "animal_product", "sell_price": 12, "xp": 6},
+    "milk": {"name": "Lait", "category": "animal_product", "sell_price": 8, "xp": 4},
+    "egg": {"name": "Œuf", "category": "animal_product", "sell_price": 6, "xp": 3},
+    "wool": {"name": "Laine", "category": "animal_product", "sell_price": 10, "xp": 5},
+    "bacon": {"name": "Bacon", "category": "animal_product", "sell_price": 12, "xp": 6},
 
     # Processed goods
-    "bread": {"name": "Pain", "emoji": "\U0001F35E", "category": "processed", "sell_price": 10, "xp": 5},
-    "butter": {"name": "Beurre", "emoji": "\U0001F9C8", "category": "processed", "sell_price": 12, "xp": 6},
-    "cheese": {"name": "Fromage", "emoji": "\U0001F9C0", "category": "processed", "sell_price": 15, "xp": 7},
-    "cake": {"name": "Gâteau", "emoji": "\U0001F370", "category": "processed", "sell_price": 25, "xp": 12},
-    "cookie": {"name": "Cookie", "emoji": "\U0001F36A", "category": "processed", "sell_price": 18, "xp": 8},
-    "sugar": {"name": "Sucre", "emoji": "\U0001F36C", "category": "processed", "sell_price": 8, "xp": 4},
-    "cream": {"name": "Crème", "emoji": "\U0001F36E", "category": "processed", "sell_price": 14, "xp": 6},
-    "pizza": {"name": "Pizza", "emoji": "\U0001F355", "category": "processed", "sell_price": 30, "xp": 15},
-    "burger": {"name": "Burger", "emoji": "\U0001F354", "category": "processed", "sell_price": 35, "xp": 18},
-    "pie": {"name": "Tarte", "emoji": "\U0001F967", "category": "processed", "sell_price": 28, "xp": 14},
-    "pumpkin_pie": {"name": "Tarte citrouille", "emoji": "\U0001F967", "category": "processed", "sell_price": 35, "xp": 18},
-    "jam": {"name": "Confiture", "emoji": "\U0001F36F", "category": "processed", "sell_price": 20, "xp": 10},
-    "juice": {"name": "Jus", "emoji": "\U0001F9C3", "category": "processed", "sell_price": 16, "xp": 8},
+    "bread": {"name": "Pain", "category": "processed", "sell_price": 10, "xp": 5},
+    "butter": {"name": "Beurre", "category": "processed", "sell_price": 12, "xp": 6},
+    "cheese": {"name": "Fromage", "category": "processed", "sell_price": 15, "xp": 7},
+    "cake": {"name": "Gâteau", "category": "processed", "sell_price": 25, "xp": 12},
+    "cookie": {"name": "Cookie", "category": "processed", "sell_price": 18, "xp": 8},
+    "sugar": {"name": "Sucre", "category": "processed", "sell_price": 8, "xp": 4},
+    "cream": {"name": "Crème", "category": "processed", "sell_price": 14, "xp": 6},
+    "pizza": {"name": "Pizza", "category": "processed", "sell_price": 30, "xp": 15},
+    "burger": {"name": "Burger", "category": "processed", "sell_price": 35, "xp": 18},
+    "pie": {"name": "Tarte à l'orange", "category": "processed", "sell_price": 28, "xp": 14},
+    "melon_pie": {"name": "Tarte au melon", "category": "processed", "sell_price": 35, "xp": 18},
+    "jam": {"name": "Confiture de fraises", "category": "processed", "sell_price": 20, "xp": 10},
+    "grape_jam": {"name": "Confiture de raisin", "category": "processed", "sell_price": 22, "xp": 11},
+    "juice": {"name": "Jus d'orange", "category": "processed", "sell_price": 16, "xp": 8},
+    "lemonade": {"name": "Limonade", "category": "processed", "sell_price": 18, "xp": 9},
 
     # Upgrade materials (random drops)
-    "bolt": {"name": "Boulon", "emoji": "\U0001F529", "category": "material", "sell_price": 0, "xp": 0},
-    "plank": {"name": "Planche", "emoji": "\U0001FAB5", "category": "material", "sell_price": 0, "xp": 0},
-    "duct_tape": {"name": "Ruban adhésif", "emoji": "\U0001FA79", "category": "material", "sell_price": 0, "xp": 0},
-    "nail": {"name": "Clou", "emoji": "\U0001F4CC", "category": "material", "sell_price": 0, "xp": 0},
-    "screw": {"name": "Vis", "emoji": "\U0001FA9B", "category": "material", "sell_price": 0, "xp": 0},
-    "paint": {"name": "Peinture", "emoji": "\U0001F3A8", "category": "material", "sell_price": 0, "xp": 0},
-    "land_deed": {"name": "Titre foncier", "emoji": "\U0001F4DC", "category": "material", "sell_price": 0, "xp": 0},
-    "expansion_permit": {"name": "Permis d'expansion", "emoji": "\U0001F3D7\uFE0F", "category": "material", "sell_price": 0, "xp": 0},
+    "bolt": {"name": "Boulon", "category": "material", "sell_price": 0, "xp": 0},
+    "plank": {"name": "Planche", "category": "material", "sell_price": 0, "xp": 0},
+    "duct_tape": {"name": "Ruban adhésif", "category": "material", "sell_price": 0, "xp": 0},
+    "nail": {"name": "Clou", "category": "material", "sell_price": 0, "xp": 0},
+    "screw": {"name": "Vis", "category": "material", "sell_price": 0, "xp": 0},
+    "paint": {"name": "Peinture", "category": "material", "sell_price": 0, "xp": 0},
+    "land_deed": {"name": "Titre foncier", "category": "material", "sell_price": 0, "xp": 0},
+    "expansion_permit": {"name": "Permis d'expansion", "category": "material", "sell_price": 0, "xp": 0},
 
     # Decorations
-    "fence": {"name": "Clôture", "emoji": "\U0001FAB5", "category": "decoration", "sell_price": 5, "xp": 2},
-    "flower_pot": {"name": "Pot de fleurs", "emoji": "\U0001FAB4", "category": "decoration", "sell_price": 10, "xp": 3},
-    "bench": {"name": "Banc", "emoji": "\U0001FA91", "category": "decoration", "sell_price": 15, "xp": 5},
-    "fountain": {"name": "Fontaine", "emoji": "\u26F2", "category": "decoration", "sell_price": 50, "xp": 15},
-    "scarecrow": {"name": "Épouvantail", "emoji": "\U0001F383", "category": "decoration", "sell_price": 20, "xp": 7},
-    "windmill_deco": {"name": "Moulin", "emoji": "\U0001F3E1", "category": "decoration", "sell_price": 100, "xp": 25},
+    "fence": {"name": "Clôture", "category": "decoration", "sell_price": 5, "xp": 2},
+    "flower_pot": {"name": "Pot de fleurs", "category": "decoration", "sell_price": 10, "xp": 3},
+    "bench": {"name": "Banc", "category": "decoration", "sell_price": 15, "xp": 5},
+    "fountain": {"name": "Fontaine", "category": "decoration", "sell_price": 50, "xp": 15},
+    "scarecrow": {"name": "Épouvantail", "category": "decoration", "sell_price": 20, "xp": 7},
+    "windmill_deco": {"name": "Moulin", "category": "decoration", "sell_price": 100, "xp": 25},
+}
+
+# Save migration: rename old crop IDs to new ones
+_CROP_RENAME_MAP = {
+    "carrot": "turnip",
+    "soybean": "cucumber",
+    "apple": "orange",
+    "pumpkin": "melon",
+    "sugarcane": "rice",
+    "pumpkin_pie": "melon_pie",
 }
 
 
@@ -440,6 +458,46 @@ class FarmState:
             ]:
                 if not hasattr(state, attr) or not isinstance(getattr(state, attr, None), int):
                     setattr(state, attr, default)
+
+        if saved_version < 3:
+            # v3: renamed crops to match sprite filenames
+            # carrot→turnip, soybean→cucumber, apple→orange,
+            # pumpkin→melon, sugarcane→rice, pumpkin_pie→melon_pie
+            for old_id, new_id in _CROP_RENAME_MAP.items():
+                # Rename in inventory
+                if old_id in state.inventory:
+                    state.inventory[new_id] = state.inventory.pop(old_id) + state.inventory.get(new_id, 0)
+                # Rename in unlocked_crops
+                if old_id in state.unlocked_crops:
+                    state.unlocked_crops.remove(old_id)
+                    if new_id not in state.unlocked_crops:
+                        state.unlocked_crops.append(new_id)
+            # Rename in fields
+            for field in (state.fields or []):
+                if field.get("crop") in _CROP_RENAME_MAP:
+                    field["crop"] = _CROP_RENAME_MAP[field["crop"]]
+                if field.get("last_crop") in _CROP_RENAME_MAP:
+                    field["last_crop"] = _CROP_RENAME_MAP[field["last_crop"]]
+            # Rename in production queues
+            for bid, queue in (state.production_queues or {}).items():
+                for item in queue:
+                    if item.get("recipe_id") in _CROP_RENAME_MAP:
+                        item["recipe_id"] = _CROP_RENAME_MAP[item["recipe_id"]]
+                    for key in ("output", "ingredients"):
+                        old_dict = item.get(key, {})
+                        if old_dict:
+                            new_dict = {}
+                            for k, v in old_dict.items():
+                                new_dict[_CROP_RENAME_MAP.get(k, k)] = v
+                            item[key] = new_dict
+            # Rename in active orders
+            for order in (state.active_orders or []):
+                old_items = order.get("items_needed", {})
+                if old_items:
+                    new_items = {}
+                    for k, v in old_items.items():
+                        new_items[_CROP_RENAME_MAP.get(k, k)] = v
+                    order["items_needed"] = new_items
 
         # Migrate old plots to fields if needed
         if not state.fields and state.plots:

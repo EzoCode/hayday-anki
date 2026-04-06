@@ -19,7 +19,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "bread",
             "name": "Pain",
-            "emoji": "\U0001F35E",
             "ingredients": {"wheat": 3},
             "output": {"bread": 1},
             "sessions_required": 1,
@@ -28,7 +27,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "cookie",
             "name": "Cookie",
-            "emoji": "\U0001F36A",
             "ingredients": {"wheat": 2, "egg": 1},
             "output": {"cookie": 1},
             "sessions_required": 1,
@@ -39,8 +37,7 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "sugar",
             "name": "Sucre",
-            "emoji": "\U0001F36C",
-            "ingredients": {"sugarcane": 3},
+            "ingredients": {"rice": 3},
             "output": {"sugar": 1},
             "sessions_required": 1,
             "xp": 4,
@@ -50,7 +47,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "butter",
             "name": "Beurre",
-            "emoji": "\U0001F9C8",
             "ingredients": {"milk": 2},
             "output": {"butter": 1},
             "sessions_required": 1,
@@ -59,7 +55,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "cheese",
             "name": "Fromage",
-            "emoji": "\U0001F9C0",
             "ingredients": {"milk": 3},
             "output": {"cheese": 1},
             "sessions_required": 2,
@@ -68,7 +63,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "cream",
             "name": "Crème",
-            "emoji": "\U0001F36E",
             "ingredients": {"milk": 2},
             "output": {"cream": 1},
             "sessions_required": 1,
@@ -79,7 +73,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "burger",
             "name": "Burger",
-            "emoji": "\U0001F354",
             "ingredients": {"bread": 1, "bacon": 1},
             "output": {"burger": 1},
             "sessions_required": 2,
@@ -90,7 +83,6 @@ RECIPES: Dict[str, List[Dict]] = {
         {
             "id": "cake",
             "name": "Gâteau",
-            "emoji": "\U0001F370",
             "ingredients": {"bread": 1, "butter": 1, "egg": 1},
             "output": {"cake": 1},
             "sessions_required": 2,
@@ -98,9 +90,8 @@ RECIPES: Dict[str, List[Dict]] = {
         },
         {
             "id": "pie",
-            "name": "Tarte",
-            "emoji": "\U0001F967",
-            "ingredients": {"wheat": 2, "apple": 2, "sugar": 1},
+            "name": "Tarte à l'orange",
+            "ingredients": {"wheat": 2, "orange": 2, "sugar": 1},
             "output": {"pie": 1},
             "sessions_required": 2,
             "xp": 14,
@@ -109,19 +100,25 @@ RECIPES: Dict[str, List[Dict]] = {
     "jam_maker": [
         {
             "id": "jam",
-            "name": "Confiture",
-            "emoji": "\U0001F36F",
+            "name": "Confiture de fraises",
             "ingredients": {"strawberry": 3, "sugar": 1},
             "output": {"jam": 1},
             "sessions_required": 1,
             "xp": 10,
+        },
+        {
+            "id": "grape_jam",
+            "name": "Confiture de raisin",
+            "ingredients": {"grapes": 3, "sugar": 1},
+            "output": {"grape_jam": 1},
+            "sessions_required": 1,
+            "xp": 12,
         },
     ],
     "pizzeria": [
         {
             "id": "pizza",
             "name": "Pizza",
-            "emoji": "\U0001F355",
             "ingredients": {"bread": 1, "tomato": 2, "cheese": 1},
             "output": {"pizza": 1},
             "sessions_required": 2,
@@ -131,21 +128,27 @@ RECIPES: Dict[str, List[Dict]] = {
     "juice_press": [
         {
             "id": "juice",
-            "name": "Jus",
-            "emoji": "\U0001F9C3",
-            "ingredients": {"apple": 3},
+            "name": "Jus d'orange",
+            "ingredients": {"orange": 3},
             "output": {"juice": 1},
             "sessions_required": 1,
             "xp": 8,
         },
+        {
+            "id": "lemonade",
+            "name": "Limonade",
+            "ingredients": {"lemon": 3, "sugar": 1},
+            "output": {"lemonade": 1},
+            "sessions_required": 1,
+            "xp": 10,
+        },
     ],
     "pie_oven": [
         {
-            "id": "pumpkin_pie",
-            "name": "Tarte à la citrouille",
-            "emoji": "\U0001F967",
-            "ingredients": {"pumpkin": 2, "wheat": 2, "cream": 1},
-            "output": {"pumpkin_pie": 1},
+            "id": "melon_pie",
+            "name": "Tarte au melon",
+            "ingredients": {"melon": 2, "wheat": 2, "cream": 1},
+            "output": {"melon_pie": 1},
             "sessions_required": 2,
             "xp": 18,
         },
@@ -228,7 +231,6 @@ class ProductionManager:
         production_item = {
             "recipe_id": recipe_id,
             "name": recipe["name"],
-            "emoji": recipe["emoji"],
             "output": recipe["output"],
             "xp": recipe["xp"],
             "sessions_required": recipe["sessions_required"],
@@ -264,7 +266,6 @@ class ProductionManager:
                             "item": output_id,
                             "qty": qty,
                             "name": item["name"],
-                            "emoji": item["emoji"],
                             "xp": item["xp"],
                             "storage_full": False,
                         })
@@ -278,7 +279,6 @@ class ProductionManager:
                             "item": output_id,
                             "qty": 0,
                             "name": item["name"],
-                            "emoji": item["emoji"],
                             "xp": 0,
                             "storage_full": True,
                         })
@@ -298,7 +298,6 @@ class ProductionManager:
                 result[building_id].append({
                     "recipe_id": item["recipe_id"],
                     "name": item["name"],
-                    "emoji": item["emoji"],
                     "ready": item.get("ready", False),
                     "sessions_waited": item.get("sessions_waited", 0),
                     "sessions_required": item.get("sessions_required", 1),
