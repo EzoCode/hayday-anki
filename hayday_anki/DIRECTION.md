@@ -106,6 +106,27 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - **drawWheel null check** : protection contre crash si canvas pas encore rendu.
 - **Duplicate CSS cleanup** : suppression des definitions .pq-* dupliquees.
 
+## Ameliorations (session 8 — polish visuel et fondations solides)
+- **Pig SVG inline** : ajout d'un SVG detaille pour le cochon dans ITEM_ICONS (manquait dans les sprites hayday/ — pas de pig-lbl.png). Le pig apparait maintenant correctement partout (inventaire, shop, pasture labels).
+- **renderFarmer() dans updateFarm()** : le fermier se re-rend a chaque mise a jour de la ferme (avant, seulement au DOMContentLoaded). Le personnage est toujours visible.
+- **fieldBg() fallback ameliore** : les parcelles vides utilisent maintenant `tiles_dirt` au lieu de `hayday_field`, les parcelles plantees utilisent `tiles_dirt_planted`. Meilleure differenciation visuelle des etats.
+- **Building idle animation** : les batiments en production ont une animation "breathing" subtile (`.producing` class). La ferme parait vivante quand des choses se produisent.
+- **Variable shadowed corrigee** : `const q = queue.find(q=>...)` → `queue.find(item=>...)` dans renderWorkshop.
+- **CSS polish majeur** :
+  - Ciel : nuages animes avec `cloudDrift`, couleurs plus riches
+  - Farm-world : texture d'herbe multi-couches avec radial gradients, reflets subtils
+  - Zone headers : ombres interieures type bois, meilleur relief
+  - Parcelles vides : hover dore pour inviter a planter
+  - Parcelles pretes : glow elargi (40px outer glow), bordure plus epaisse
+  - Toolbar : tab active avec glow gradient + icone illuminee
+  - Action buttons : effet shimmer au hover (pseudo-element glissant), meilleur feedback tactile
+  - Overlay cards : reflet superieur, ombre interieure, bordure plus marquee
+  - Level badge : glow elargi, background radial dore subtil
+  - Notifications : max-width pour eviter debordement, centrage
+  - Pastures : animation bobbing differenciee odd/even pour effet naturel
+  - Items inventaire : hover avec outline dore, meilleur feedback tactile
+  - Crop sprites : transitions sur transform et filter pour changements fluides
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

@@ -219,6 +219,8 @@ const ITEM_ICONS = {
   paint: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='28' rx='8' ry='2' fill='%23000' opacity='.08'/%3E%3Crect x='5' y='8' width='22' height='18' rx='2.5' fill='%23e53935' stroke='%23b71c1c' stroke-width='.5'/%3E%3Crect x='5' y='8' width='22' height='5' rx='2' fill='%23c62828'/%3E%3Crect x='6' y='9' width='9' height='2.5' rx='1' fill='%23ef9a9a' opacity='.3'/%3E%3Crect x='13' y='3' width='6' height='7' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Crect x='14' y='4' width='2' height='5' fill='%23bbb' opacity='.25'/%3E%3C/svg%3E",
   land_deed: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='4' width='22' height='24' rx='2' fill='%23f5e6c8'/%3E%3Crect x='5' y='4' width='22' height='24' rx='2' fill='none' stroke='%23c9a66b' stroke-width='1.5'/%3E%3Cline x1='9' y1='10' x2='23' y2='10' stroke='%23a08050' stroke-width='1'/%3E%3Cline x1='9' y1='14' x2='23' y2='14' stroke='%23a08050' stroke-width='1'/%3E%3Cline x1='9' y1='18' x2='18' y2='18' stroke='%23a08050' stroke-width='1'/%3E%3Ccircle cx='20' cy='22' r='3.5' fill='%23c9884a' stroke='%23a06a30' stroke-width='1'/%3E%3C/svg%3E",
   expansion_permit: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='6' width='24' height='20' rx='2' fill='%234caf50'/%3E%3Crect x='4' y='6' width='24' height='20' rx='2' fill='none' stroke='%232e7d32' stroke-width='1.5'/%3E%3Crect x='6' y='8' width='20' height='16' rx='1' fill='none' stroke='%23fff' stroke-width='.5' opacity='.3'/%3E%3Cpath d='M12 16h8M16 12v8' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  // Pig SVG (missing from hayday/ PNGs — inline fallback for pasture labels)
+  pig: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='26' rx='10' ry='2' fill='%23000' opacity='.06'/%3E%3Cellipse cx='16' cy='20' rx='11' ry='8' fill='%23f8bbd0'/%3E%3Cellipse cx='16' cy='19' rx='10' ry='7' fill='%23fce4ec'/%3E%3Ccircle cx='16' cy='13' r='7.5' fill='%23f8bbd0'/%3E%3Ccircle cx='16' cy='12.5' r='7' fill='%23fce4ec'/%3E%3Cpath d='M10 8 Q9 4 11.5 5.5' fill='%23f8bbd0' stroke='%23f48fb1' stroke-width='.4'/%3E%3Cpath d='M22 8 Q23 4 20.5 5.5' fill='%23f8bbd0' stroke='%23f48fb1' stroke-width='.4'/%3E%3Ccircle cx='13.5' cy='11' r='1.5' fill='%23333'/%3E%3Ccircle cx='13.8' cy='10.7' r='.4' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='18.5' cy='11' r='1.5' fill='%23333'/%3E%3Ccircle cx='18.8' cy='10.7' r='.4' fill='%23fff' opacity='.5'/%3E%3Cellipse cx='16' cy='15' rx='4' ry='2.8' fill='%23f48fb1'/%3E%3Ccircle cx='14.5' cy='14.8' r='.7' fill='%23e91e63' opacity='.4'/%3E%3Ccircle cx='17.5' cy='14.8' r='.7' fill='%23e91e63' opacity='.4'/%3E%3Cellipse cx='13' cy='10' rx='2.5' ry='1.5' fill='%23fff' opacity='.2'/%3E%3Cpath d='M22 22 Q24 24 23 26' stroke='%23f48fb1' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E",
   // Animal products
   milk: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='mb' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='1' stop-color='%23dce8f0'/%3E%3C/linearGradient%3E%3ClinearGradient id='ml' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e3f2fd'/%3E%3Cstop offset='1' stop-color='%23bbdefb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M11 10h10l1.5 3v13a2.5 2.5 0 01-2.5 2.5h-8A2.5 2.5 0 019.5 26V13z' fill='url(%23mb)' stroke='%23b0bec5' stroke-width='.8'/%3E%3Cpath d='M11.5 7h9a1 1 0 011 1v3h-11V8a1 1 0 011-1z' fill='%23a1887f' stroke='%238d6e63' stroke-width='.6'/%3E%3Crect x='13' y='5' width='6' height='3' rx='1' fill='%238d6e63'/%3E%3Crect x='10.5' y='15' width='11' height='10' rx='1.5' fill='url(%23ml)' opacity='.55'/%3E%3Cpath d='M11 20 Q16 17 21 20' stroke='%23fff' stroke-width='1.2' fill='none' opacity='.7'/%3E%3Cpath d='M12 5.5h8' stroke='%23a1887f' stroke-width='.5'/%3E%3Cellipse cx='14' cy='13' rx='3' ry='1.5' fill='%23fff' opacity='.45'/%3E%3Crect x='12' y='18' width='8' height='1.5' rx='.5' fill='%2390caf9' opacity='.2'/%3E%3Cpath d='M18 8v2.5' stroke='%23795548' stroke-width='.4' opacity='.5'/%3E%3C/svg%3E",
   egg: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='eg' cx='.4' cy='.35' r='.65'%3E%3Cstop offset='0' stop-color='%23fff8ef'/%3E%3Cstop offset='.5' stop-color='%23f5e0c0'/%3E%3Cstop offset='1' stop-color='%23d4b896'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='16' cy='17' rx='9.5' ry='12' fill='url(%23eg)'/%3E%3Cellipse cx='16' cy='17' rx='9.5' ry='12' fill='none' stroke='%23c9a87c' stroke-width='.8'/%3E%3Cellipse cx='13' cy='12' rx='4.5' ry='3.5' fill='%23fff' opacity='.5' transform='rotate(-15 13 12)'/%3E%3Cellipse cx='12' cy='11' rx='2' ry='1.5' fill='%23fff' opacity='.6'/%3E%3Cellipse cx='19' cy='23' rx='5' ry='3' fill='%23c9a87c' opacity='.15'/%3E%3Cpath d='M9 24 Q16 28 23 24' stroke='%23b89870' stroke-width='.5' fill='none' opacity='.3'/%3E%3C/svg%3E",
@@ -346,9 +348,10 @@ function animalImg(id, w) {
 function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('hayday_field');
-  return S('hayday_field');
+  if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
+  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('tiles_dirt_planted') || S('hayday_field');
+  if (state === 'empty') return S('tiles_dirt') || S('hayday_field');
+  return S('hayday_field') || S('tiles_grass');
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
@@ -420,7 +423,7 @@ function updateFarm(data) {
   oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather(); renderFarmer();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   if (Object.keys(oldGrowth).length > 0) {
@@ -676,11 +679,12 @@ function renderWorkshop() {
     const queue = (farmData.production_queues||{})[bid]||[];
     const ready = queue.filter(q=>q.ready).length;
     const producing = queue.filter(q=>!q.ready).length;
+    if (producing > 0) el.classList.add('producing');
     let statusHtml = '';
     if (ready > 0) {
       statusHtml = `<span class="building-badge">${ready}</span>`;
     } else if (producing > 0) {
-      const q = queue.find(q=>!q.ready);
+      const q = queue.find(item=>!item.ready);
       const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }

@@ -23,7 +23,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
 .hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;border:2px solid var(--gold);box-shadow:0 0 8px rgba(255,215,0,.5),inset 0 0 4px rgba(255,215,0,.3)}
+  border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 10px rgba(255,215,0,.5),0 0 20px rgba(255,215,0,.15),inset 0 0 4px rgba(255,215,0,.3);
+  background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.15),transparent 60%)}
 .hud-star{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .level-num{position:relative;z-index:1;font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .hud-xp{position:relative;width:140px;height:30px}
@@ -68,7 +69,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== NOTIFICATIONS ===== */
 #notification-area{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-.notification{background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(60,35,15,.96));color:var(--text-l);padding:8px 20px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid rgba(255,200,100,.25);box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);animation:notifIn .35s cubic-bezier(.34,1.56,.64,1),notifOut .3s ease 2.5s forwards;pointer-events:auto;letter-spacing:.2px}
+.notification{background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(60,35,15,.96));color:var(--text-l);padding:8px 22px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid rgba(255,200,100,.25);box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);animation:notifIn .35s cubic-bezier(.34,1.56,.64,1),notifOut .3s ease 2.5s forwards;pointer-events:auto;letter-spacing:.2px;max-width:300px;text-align:center}
 @keyframes notifIn{from{opacity:0;transform:translateY(-12px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes notifOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
 
@@ -76,21 +77,26 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #farm-container{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
 
 .farm-sky{position:sticky;top:0;left:0;right:0;height:70px;
-  background:linear-gradient(180deg,#5eb8e4 0%,#87ceeb 35%,#a8dce8 60%,#c5e8b0 85%,rgba(197,232,176,0) 100%);
-  z-index:0;pointer-events:none}
-.farm-sky::before{content:'';position:absolute;top:8px;left:15%;width:70px;height:22px;background:rgba(255,255,255,.7);border-radius:22px;filter:blur(10px)}
-.farm-sky::after{content:'';position:absolute;top:14px;right:18%;width:50px;height:16px;background:rgba(255,255,255,.5);border-radius:16px;filter:blur(8px)}
+  background:linear-gradient(180deg,#4fa8d8 0%,#7cc4e4 25%,#a8dce8 50%,#c5e8b0 80%,rgba(197,232,176,0) 100%);
+  z-index:0;pointer-events:none;overflow:hidden}
+.farm-sky::before{content:'';position:absolute;top:6px;left:12%;width:80px;height:24px;background:rgba(255,255,255,.65);border-radius:24px;filter:blur(10px);animation:cloudDrift 60s linear infinite}
+.farm-sky::after{content:'';position:absolute;top:18px;right:15%;width:55px;height:18px;background:rgba(255,255,255,.45);border-radius:18px;filter:blur(8px);animation:cloudDrift 80s linear infinite reverse}
+@keyframes cloudDrift{0%{transform:translateX(0)}50%{transform:translateX(20px)}100%{transform:translateX(0)}}
 
 .farm-atmosphere{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(255,240,180,.06) 0%,transparent 50%),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.12) 100%);pointer-events:none;z-index:5}
 
 #farm-world{position:relative;min-height:100%;padding:12px 10px 20px;
   background-color:#5a9d3a;
   background-image:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0px,rgba(255,255,255,.03) 2px,transparent 2px,transparent 28px),
-    repeating-linear-gradient(0deg,rgba(0,0,0,.02) 0px,rgba(0,0,0,.02) 1px,transparent 1px,transparent 24px),
-    linear-gradient(160deg,#6db844 0%,#5a9d3a 30%,#4c8c32 60%,#5a9d3a 100%);
+    radial-gradient(ellipse at 30% 20%, rgba(129,199,132,.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(56,142,60,.1) 0%, transparent 40%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 2px,transparent 2px,transparent 22px),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0px,rgba(0,0,0,.025) 1px,transparent 1px,transparent 18px),
+    repeating-linear-gradient(45deg,transparent 0px,transparent 40px,rgba(255,255,255,.015) 40px,rgba(255,255,255,.015) 42px),
+    linear-gradient(160deg,#6db844 0%,#5a9d3a 25%,#4c8c32 50%,#5a9d3a 75%,#6db844 100%);
   background-size:cover;background-position:center top;background-repeat:no-repeat}
-#farm-world::before{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(0deg,rgba(60,100,30,.2) 0%,transparent 100%);pointer-events:none;z-index:0}
+#farm-world::before{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(0deg,rgba(40,80,20,.15) 0%,transparent 100%);pointer-events:none;z-index:0}
+#farm-world::after{content:'';position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(135,206,235,.08) 0%,transparent 100%);pointer-events:none;z-index:0}
 
 .section-label{color:rgba(255,255,255,.75);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:4px 12px;margin-bottom:6px;text-shadow:0 1px 3px rgba(0,0,0,.4);position:relative;z-index:1}
 
@@ -139,11 +145,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  background: linear-gradient(180deg, rgba(90,53,20,0.35) 0%, rgba(60,35,12,0.25) 100%);
+  background: linear-gradient(180deg, rgba(90,53,20,0.4) 0%, rgba(70,42,16,0.35) 50%, rgba(60,35,12,0.28) 100%);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.1);
 }
 
 .zone-title {
@@ -303,7 +310,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .pasture-tile:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
 .pasture-tile:active { transform: scale(0.95); }
 .pasture-tile img { max-width: 55px; max-height: 50px; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3)); transition: transform 0.2s; }
-.pasture-tile:hover img { transform: scale(1.08); }
+.pasture-tile img{animation:pastureBob 3s ease-in-out infinite}
+.pasture-tile:nth-child(even) img{animation-duration:3.5s;animation-delay:.5s}
+.pasture-tile:hover img{transform:scale(1.08);animation-play-state:paused}
+@keyframes pastureBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.02)}}
 .pasture-count {
   font-size: 10px;
   font-weight: 900;
@@ -397,10 +407,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot:hover{transform:translateY(-3px) scale(1.03);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
 .plot:active{transform:scale(.95)}
 
-.plot-empty{background:linear-gradient(145deg,var(--soil-l),var(--soil-m));border:2px dashed rgba(255,255,255,.15)}
+.plot-empty{background:linear-gradient(145deg,var(--soil-l),var(--soil-m));border:2px dashed rgba(255,255,255,.2);transition:border-color .2s}
+.plot-empty:hover{border-color:rgba(255,215,0,.4);background:linear-gradient(145deg,var(--soil-l),#9a7520)}
 .plot-empty .field-img{filter:brightness(.85) saturate(.8)}
 .plot-planted,.plot-growing{background:linear-gradient(145deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.1)}
-.plot-ready{background:linear-gradient(145deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 18px rgba(255,215,0,.5);border:2px solid var(--gold);animation:readyGlow 2s ease-in-out infinite}
+.plot-ready{background:linear-gradient(145deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:14px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
 .plot-wilted{background:linear-gradient(145deg,#8a7a5a,#6b5a3a);border:2px solid rgba(139,69,19,.4);filter:saturate(.3) brightness(.75);cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
@@ -408,8 +419,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
 
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:14px}
-.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45))}
-.plot-crop img{max-width:56px;max-height:56px;width:auto;height:auto}
+.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s}
+.plot-crop img{max-width:56px;max-height:56px;width:auto;height:auto;transition:transform .3s ease}
 .plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:0 0 12px 12px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,var(--xp),#81c784);transition:width .3s;border-radius:0 0 12px 12px}
@@ -441,6 +452,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .building-tile::after{content:'';position:absolute;bottom:6px;left:18%;right:18%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,.25),transparent);border-radius:50%;z-index:0}
 .building-img{max-width:120px;max-height:100px;object-fit:contain;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.45));position:relative;z-index:1;transition:transform .2s;image-rendering:auto}
 .building-tile:hover .building-img{transform:scale(1.05)}
+/* Active building subtle breathing — feels alive when producing */
+.building-tile.producing .building-img{animation:buildingBreathe 3s ease-in-out infinite}
+@keyframes buildingBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02) translateY(-1px)}}
 .building-name{font-size:10px;color:var(--text-l);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.6);margin-top:2px;text-align:center;letter-spacing:.2px}
 .building-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#ff6b6b,var(--red));color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(231,76,60,.5);animation:badgePulse 1.5s ease-in-out infinite;z-index:10}
 @keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 2px 6px rgba(231,76,60,.4)}50%{transform:scale(1.15);box-shadow:0 2px 12px rgba(231,76,60,.7)}}
@@ -497,9 +511,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
 .tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 5px;border-radius:8px;transition:all .2s;min-width:40px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-1px)}
-.tool-btn.active{color:#f4a42a}
-.tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:18px;height:3px;background:#f4a42a;border-radius:2px;box-shadow:0 0 8px rgba(244,164,42,.6)}
+.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
+.tool-btn.active{color:#f4a42a;transform:translateY(-1px)}
+.tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:24px}
 .tool-icon img{max-width:24px;max-height:24px;object-fit:contain}
 .tool-label{font-size:8px;font-weight:700;letter-spacing:.3px}
@@ -533,8 +548,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== ITEM GRID — Polished Cards ===== */
 .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
 .item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.6));border-radius:14px;padding:8px 4px;border:1px solid rgba(212,160,86,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:76px;box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
-.item-cell:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.15)}
-.item-cell:active{transform:scale(.95)}
+.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.2)}
+.item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .item-cell img{image-rendering:auto;max-width:40px;max-height:40px;object-fit:contain}
 .item-name{font-size:9px;font-weight:700;color:#666;margin-top:1px;text-align:center}
 .item-qty{font-size:11px;font-weight:900;color:var(--text-d);background:rgba(0,0,0,.05);padding:0 6px;border-radius:8px}
@@ -603,7 +618,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .overlay.hidden{display:none}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 .overlay-close{position:absolute;top:10px;right:10px}
-.overlay-card{background:linear-gradient(180deg,#faf4e8,#f2e8d6,#e8dcc6);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5);border:3px solid rgba(212,160,86,.45);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
+.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
+.overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
 
@@ -717,10 +733,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .login-reward-item{font-size:18px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.4)}
 
 /* ===== ACTION BUTTONS — Hay Day Green Style ===== */
-.action-btn{background:linear-gradient(180deg,#f7c948,#f4922a,#e07c18);color:#fff;border:2px solid rgba(255,255,255,.25);padding:11px 30px;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(244,146,42,.45),inset 0 2px 0 rgba(255,255,255,.3),0 3px 0 #b86a12;transition:all .15s;margin-top:10px;letter-spacing:.4px;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-.action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(244,146,42,.55),inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #b86a12}
-.action-btn:active{transform:translateY(1px);box-shadow:0 1px 4px rgba(244,146,42,.3),inset 0 1px 0 rgba(255,255,255,.2)}
+.action-btn{background:linear-gradient(180deg,#f7c948 0%,#f4a22a 30%,#f4922a 60%,#e07c18 100%);color:#fff;border:2px solid rgba(255,255,255,.3);padding:12px 32px;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(244,146,42,.45),inset 0 2px 0 rgba(255,255,255,.35),0 3px 0 #b86a12;transition:all .15s;margin-top:10px;letter-spacing:.4px;text-shadow:0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.action-btn::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .4s;pointer-events:none}
+.action-btn:hover::before{left:100%}
+.action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,146,42,.55),inset 0 1px 0 rgba(255,255,255,.4),0 3px 0 #b86a12}
+.action-btn:active{transform:translateY(1px) scale(.98);box-shadow:0 1px 4px rgba(244,146,42,.3),inset 0 1px 0 rgba(255,255,255,.2)}
 .action-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.action-btn:disabled::before{display:none}
 
 /* ===== STATS GRID ===== */
 .stats-grid{display:flex;flex-direction:column;gap:4px}
