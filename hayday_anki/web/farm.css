@@ -213,6 +213,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .zone-empty-msg {
   width: 100%;
+  grid-column: 1 / -1;
   text-align: center;
   color: rgba(255,255,255,0.4);
   font-size: 11px;
@@ -293,8 +294,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* Pasture tile */
 .pasture-tile {
-  width: 105px;
-  height: 110px;
+  min-width: 95px;
+  min-height: 110px;
   border-radius: 14px;
   display: flex;
   flex-direction: column;
@@ -424,8 +425,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;margin-bottom:4px}
 .plot-crop img{max-width:60px;max-height:60px;width:auto;height:auto;transition:transform .3s ease}
-.plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2;letter-spacing:.2px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 14px 14px}
+.plot-label{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2;letter-spacing:.3px}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:5px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 14px 14px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047,#81c784);transition:width .5s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 4px rgba(76,175,80,.4)}
 .plot-pct{position:absolute;top:3px;right:5px;font-size:9px;font-weight:900;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3}
 .plot-reviews-left{position:absolute;top:3px;left:5px;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);text-shadow:0 1px 2px rgba(0,0,0,.7);z-index:3}
@@ -891,9 +892,39 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== PANEL CLOSE ANIMATION ===== */
 .panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
 .panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
-@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
 
-/* ===== READY PLOT CROP NAME ===== */
-.plot-ready-crop-name{color:rgba(255,255,255,1) !important;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 10px rgba(255,215,0,.5) !important;font-size:8px !important;top:auto !important;bottom:18px !important}
+/* ===== READY PLOT — Hay Day-style harvest indicator ===== */
+.plot-ready .plot-crop-name{display:none !important}
+.plot-ready .plot-label.plot-ready-label{
+  position:absolute;bottom:4px;left:6px;right:6px;
+  background:linear-gradient(180deg,#6abf47,#4a9e2f);
+  color:#fff;font-size:9px;font-weight:900;
+  padding:3px 0;border-radius:8px;
+  text-shadow:0 1px 1px rgba(0,0,0,.3);
+  box-shadow:0 2px 6px rgba(74,158,47,.4),inset 0 1px 0 rgba(255,255,255,.3);
+  letter-spacing:.3px;z-index:4;
+  animation:harvestBtnPulse 1.5s ease-in-out infinite;
+}
+@keyframes harvestBtnPulse{0%,100%{box-shadow:0 2px 6px rgba(74,158,47,.4),inset 0 1px 0 rgba(255,255,255,.3)}50%{box-shadow:0 2px 12px rgba(74,158,47,.7),inset 0 1px 0 rgba(255,255,255,.4),0 0 14px rgba(106,191,71,.3)}}
+
+/* ===== WORKSHOP & PASTURE GRID LAYOUT ===== */
+#workshop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;padding:10px;justify-content:center}
+#pasture-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;padding:10px;justify-content:center}
+
+/* ===== RESPONSIVE TOOLBAR ===== */
+@media (max-width:420px){
+  #toolbar{padding:2px 0 4px;height:50px}
+  .tool-btn{padding:4px 2px}
+  .tool-label{font-size:8px}
+  .tool-icon img{width:20px;height:20px}
+  #hud{padding:4px 6px;height:48px}
+  .hud-currency{padding:2px 6px 2px 4px;font-size:11px}
+  .hud-level{width:38px;height:38px}
+  .level-num{font-size:13px}
+  .xp-bar-track{top:6px;height:10px}
+  .hud-xp{width:110px;height:26px}
+  #fields-grid{grid-template-columns:repeat(3,minmax(0,95px));gap:7px;padding:8px}
+  .plot{max-width:100px}
+}
 
 .hidden{display:none!important}
