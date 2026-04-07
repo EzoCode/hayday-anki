@@ -258,10 +258,22 @@ class ProductionManager:
         remaining = []
         for item in queue:
             if item.get("ready", False):
-                # Add output to inventory
+                # Try to add all outputs to inventory
                 all_added = True
+                added_outputs = []
                 for output_id, qty in item["output"].items():
                     if self.state.add_item(output_id, qty):
+                        added_outputs.append((output_id, qty))
+                    else:
+                        all_added = False
+                        break
+
+                if all_added:
+                    # All outputs fit — grant XP once per recipe, not per output
+                    self.state.xp += item["xp"]
+                    self.state.session_xp_earned += item["xp"]
+                    self.state.total_produced += 1
+                    for output_id, qty in added_outputs:
                         collected.append({
                             "item": output_id,
                             "qty": qty,
@@ -269,20 +281,18 @@ class ProductionManager:
                             "xp": item["xp"],
                             "storage_full": False,
                         })
-                        self.state.xp += item["xp"]
-                        self.state.session_xp_earned += item["xp"]
-                        self.state.total_produced += 1
-                    else:
-                        # Storage full — keep in queue and notify
-                        remaining.append(item)
-                        collected.append({
-                            "item": output_id,
-                            "qty": 0,
-                            "name": item["name"],
-                            "xp": 0,
-                            "storage_full": True,
-                        })
-                        all_added = False
+                else:
+                    # Storage full — revert any partially added outputs
+                    for output_id, qty in added_outputs:
+                        self.state.remove_item(output_id, qty)
+                    remaining.append(item)
+                    collected.append({
+                        "item": list(item["output"].keys())[0],
+                        "qty": 0,
+                        "name": item["name"],
+                        "xp": 0,
+                        "storage_full": True,
+                    })
             else:
                 remaining.append(item)
 

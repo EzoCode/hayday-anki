@@ -1056,7 +1056,7 @@ function showBuildMenu() {
       const def = defs[b.id]||{};
       const cost = def.cost_coins||0;
       const canBuy = coins >= cost && landFree >= 2;
-      html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:build:${b.id}');hideOverlay()`:''}">
+      html += `<div class="recipe-card ${canBuy?'':'disabled'}" ${canBuy?`onclick="pycmd('farm:build:${b.id}');hideOverlay()"`:'style="cursor:default"'}>
         <div class="recipe-header"><span class="recipe-emoji">${buildingIcon(b.id)}</span>
         <div class="recipe-info"><strong>${def.name||buildingName(b.id)}</strong>
         <span class="recipe-time">${cost} p. + 2 terrain${canBuy?'':coins<cost?' (pas assez)':' (terrain plein)'}</span></div></div>
@@ -1107,7 +1107,7 @@ function showAnimalMenu() {
       html += `<div class="recipe-card" onclick="showAnimalInfo('${aid}');hideOverlay()">
         <div class="recipe-header">${animalLbl(aid,28)||animalImg(aid,28)}
         <div class="recipe-info"><strong>${def.name||aid} x${count}</strong>
-        <span class="recipe-time">Produit ${def.product||''} / ${def.produce_every_n_reviews||10} reviews</span></div></div></div>`;
+        <span class="recipe-time">${itemIcon(def.product||'', 14)} ${itemName(def.product||'')} / ${def.produce_every_n_reviews||10} rev.</span></div></div></div>`;
     });
     html += '</div>';
   }
@@ -1123,10 +1123,10 @@ function showAnimalMenu() {
       const needsLand = !hasPasture;
       const canBuy = coins >= cost && (!needsLand || landFree >= 2);
       const landNote = needsLand ? ' + 2 terrain' : '';
-      html += `<div class="recipe-card ${canBuy?'':'disabled'}" onclick="${canBuy?`pycmd('farm:add_pasture:${a.id}');hideOverlay()`:''}">
+      html += `<div class="recipe-card ${canBuy?'':'disabled'}" ${canBuy?`onclick="pycmd('farm:add_pasture:${a.id}');hideOverlay()"`:'style="cursor:default"'}>
         <div class="recipe-header">${animalLbl(a.id,28)||animalImg(a.id,28)}
         <div class="recipe-info"><strong>${def.name||a.id}</strong>
-        <span class="recipe-time">${cost} p.${landNote} \u2022 ${def.product||''}</span></div></div></div>`;
+        <span class="recipe-time">${cost} p.${landNote} \u2022 ${itemIcon(def.product||'', 14)} ${itemName(def.product||'')}</span></div></div></div>`;
     });
     html += '</div>';
   }
@@ -1157,11 +1157,12 @@ function showAnimalInfo(animalType) {
   const def = defs[animalType] || {};
   const aSrc = S(`hayday_${animalType}-lbl`) || S(`hayday_${animalType}`);
   const aIcon = aSrc ? `<img src="${aSrc}" width="40" height="40" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">` : '';
+  const productName = itemName(def.product || '');
   showInfo({
     icon: aIcon,
     title: def.name || animalType,
-    desc: `Produit ${def.product||''} tous les ${def.produce_every_n_reviews||10} reviews.`,
-    produces: [`${def.product||''} (${def.produce_every_n_reviews||10} reviews)`],
+    desc: `Produit ${productName} tous les ${def.produce_every_n_reviews||10} reviews.`,
+    produces: [`${itemIcon(def.product||'', 16)} ${productName} (${def.produce_every_n_reviews||10} reviews)`],
   });
 }
 
@@ -1237,22 +1238,56 @@ function renderInventory() {
   const siloColor = siloPct >= 90 ? '#e74c3c' : siloPct >= 70 ? '#ff9800' : '#4caf50';
   document.getElementById('barn-status').innerHTML = `${barnIcon}Grange ${barnUsed}/${barnCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${barnPct}%;height:100%;background:${barnColor};border-radius:3px"></span></span>`;
   document.getElementById('silo-status').innerHTML = `${siloIcon}Silo ${siloUsed}/${siloCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${siloPct}%;height:100%;background:${siloColor};border-radius:3px"></span></span>`;
+  // Group items by category for organized display
+  const catOrder = ['crop','animal_product','processed','material','decoration'];
+  const catLabels = {crop:'Récoltes',animal_product:'Produits animaux',processed:'Produits transformés',material:'Matériaux',decoration:'Décorations'};
+  const grouped = {};
   Object.entries(inv).forEach(([id,qty]) => {
-    if (qty<=0) return; const it = cat[id]||{};
-    const el = document.createElement('div'); el.className = 'item-cell';
-    // Tap = show item info, info card has sell button
-    // Click tile = sell if sellable, otherwise show info
-    if ((it.sell_price||0) > 0 && qty > 0) {
-      el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
-    } else {
-      el.onclick = () => showItemInfo(id);
-    }
-    const icon = itemIcon(id, 36);
-    // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
-    grid.appendChild(el);
+    if (qty<=0) return;
+    const catName = (cat[id]||{}).category || 'other';
+    if (!grouped[catName]) grouped[catName] = [];
+    grouped[catName].push({id,qty});
   });
-  if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
+  let hasItems = false;
+  catOrder.forEach(catKey => {
+    const items = grouped[catKey];
+    if (!items || !items.length) return;
+    hasItems = true;
+    const label = document.createElement('div');
+    label.className = 'inv-category-label';
+    label.textContent = catLabels[catKey] || catKey;
+    grid.appendChild(label);
+    items.forEach(({id,qty}) => {
+      const it = cat[id]||{};
+      const el = document.createElement('div'); el.className = 'item-cell';
+      if ((it.sell_price||0) > 0 && qty > 0) {
+        el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
+      } else {
+        el.onclick = () => showItemInfo(id);
+      }
+      const icon = itemIcon(id, 36);
+      el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">i</span>`;
+      grid.appendChild(el);
+    });
+  });
+  // Show uncategorized items
+  Object.entries(grouped).forEach(([catKey,items]) => {
+    if (catOrder.includes(catKey)) return;
+    hasItems = true;
+    items.forEach(({id,qty}) => {
+      const it = cat[id]||{};
+      const el = document.createElement('div'); el.className = 'item-cell';
+      if ((it.sell_price||0) > 0 && qty > 0) {
+        el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
+      } else {
+        el.onclick = () => showItemInfo(id);
+      }
+      const icon = itemIcon(id, 36);
+      el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">i</span>`;
+      grid.appendChild(el);
+    });
+  });
+  if (!hasItems) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
 }
 
 function renderBuildingsPanel() {
@@ -1372,6 +1407,7 @@ function renderShopDeco(grid){
     {id:'bird_bath',cat:'Premium'},{id:'tree_oak',cat:'Nature'},{id:'tree_pine',cat:'Nature'},
     {id:'pond',cat:'Nature'},{id:'swing',cat:'Premium'},{id:'fountain',cat:'Premium'},
     {id:'statue_chicken',cat:'Spécial'},{id:'tree_cherry',cat:'Spécial'},
+    {id:'picnic_table',cat:'Premium'},
     {id:'arch_flowers',cat:'Spécial'},{id:'statue_cow',cat:'Spécial'},{id:'windmill_deco',cat:'Spécial'},
   ];
   let lastCat='';
@@ -1458,7 +1494,7 @@ function renderShopAnimals(grid){
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
       <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">i</span>
     `;
     grid.appendChild(el);
   });
@@ -1508,7 +1544,7 @@ function renderShopUpgrades(grid){
       ${buildingImg(u.id,40)}
       <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">i</span>
     `;
     grid.appendChild(el);
   });
@@ -1834,7 +1870,7 @@ function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
     const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
-    showFloatingReward(`+${d.coins}`,cx,cy);
+    showFloatingReward(`+${d.coins} p.`,cx,cy);
     showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
     SoundMgr.play('coin');
   }
@@ -1853,9 +1889,9 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;let qOutHtml='';if(q.output){Object.entries(q.output).forEach(([id,qty])=>{qOutHtml+=`${itemIcon(id,16)} `})}const qIcon=qOutHtml||itemIcon(q.recipe_id||'',24);s.innerHTML=`<span class="pq-emoji">${qIcon}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
+  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});let outHtml='';if(r.output){Object.entries(r.output).forEach(([id,qty])=>{outHtml+=`<span class="recipe-output-item">${itemIcon(id,14)} ${qty>1?qty+'x ':''}${itemName(id)}</span>`})}c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span>${outHtml?`<span class="recipe-output">\u2192 ${outHtml}</span>`:''}</div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 

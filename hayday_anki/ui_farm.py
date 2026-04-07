@@ -506,6 +506,7 @@ class FarmWebView:
                 "id": recipe["id"],
                 "name": recipe["name"],
                 "ingredients": recipe["ingredients"],
+                "output": recipe.get("output", {}),
                 "xp": recipe["xp"],
                 "sessions_required": recipe["sessions_required"],
                 "can_craft": can,
@@ -520,6 +521,7 @@ class FarmWebView:
                 "ready": item.get("ready", False),
                 "sessions_waited": item.get("sessions_waited", 0),
                 "sessions_required": item.get("sessions_required", 1),
+                "output": item.get("output", {}),
             }
             for item in queue
         ]

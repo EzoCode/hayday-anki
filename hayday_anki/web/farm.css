@@ -555,6 +555,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ITEM GRID — Polished Cards ===== */
 .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
+.inv-category-label{grid-column:1/-1;font-size:10px;font-weight:800;color:var(--wood-m);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 2px;border-bottom:1px solid rgba(212,160,86,.2);margin-top:4px}
 .item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.6));border-radius:14px;padding:8px 4px;border:1px solid rgba(212,160,86,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:76px;box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
 .item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.2)}
 .item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.08)}
@@ -716,6 +717,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .recipe-ingredient img{max-width:16px;max-height:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
 .recipe-ingredient.has{background:rgba(76,175,80,.12);color:#2e7d32;border-color:rgba(76,175,80,.15)}
 .recipe-ingredient.need{background:rgba(244,67,54,.08);color:#c62828;border-color:rgba(244,67,54,.12)}
+.recipe-output{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:var(--gold-d);margin-top:1px}
+.recipe-output-item{display:inline-flex;align-items:center;gap:2px;font-size:9px}
+.recipe-output-item img{max-width:14px;max-height:14px}
 
 /* Session summary */
 #session-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
