@@ -267,7 +267,7 @@ class FarmWebView:
                         f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
                         for iid, qty in result["items"].items()
                     )
-                    self._js("SoundMgr.play('levelup')")
+                    self._js("SoundMgr.play('harvest')")
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(10, result['count'] * 2)})")
                     self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
                     msg = f"{result['count']} récoltes : {items_text}"
@@ -289,6 +289,7 @@ class FarmWebView:
                     crop_name = crop_def.get("name", crop_id)
                     total_reviews = crop_def.get("growth_reviews", 3) * 4
                     msg = f"{crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
+                    self._js("SoundMgr.play('plant')")
                     self._js(f"showNotification({json.dumps(msg)})")
                 else:
                     self._js("showNotification('Impossible de planter ici !')")
@@ -310,6 +311,7 @@ class FarmWebView:
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
                     burst_count = min(10, max(3, coins // 5))
+                    self._js("SoundMgr.play('coin')")
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/2, {burst_count})")
                     self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
                     self._js(f"showNotification('Vendu pour {coins} pièces !')")
@@ -559,6 +561,7 @@ class FarmWebView:
                 collected_names.append(i_name)
         if collected_names:
             names_str = ", ".join(collected_names)
+            self._js("SoundMgr.play('collect')")
             self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(8, len(collected_names) * 3)})")
             self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
             self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")

@@ -137,6 +137,27 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Harvest All** : ajout de son "levelup" + coin burst visuel lors de la recolte groupee.
 - **Plant dialog enrichi** : affiche maintenant le stock en silo et le nombre de champs en culture pour chaque crop. Le joueur voit immediatement ce qu'il fait pousser et ce qu'il a en stock.
 
+## Ameliorations (session 10 â€” game feel et audio)
+- **Web Audio API synth sounds** : 8 sons distincts synthetises (harvest, plant, coin, collect, grow, click, levelup, error). Chaque action a un son unique et satisfaisant sans avoir besoin de fichiers audio externes. Les fichiers WAV/MP3 restent prioritaires quand ils existent.
+- **Son de harvest distinct** : les recoltes jouent un arpege ascendant satisfaisant (C-E-G), different du level-up.
+- **Son de plantation** : bruit terreux + chime de pousse quand on plante.
+- **Son de piece** : ding classique de piece quand on gagne/vend.
+- **Son de collecte** : arpege ascendant (A-C#-E-A) pour les productions et drops.
+- **Son de croissance** : note magique subtile quand les cultures avancent pendant les revisions.
+- **Son de culture prete** : le son harvest joue automatiquement quand une culture arrive a maturite (avec delai pour pas superposer le son de piece).
+- **Vent sur les cultures** : animation CSS `cropWind` fait osciller les cultures en croissance comme dans un vrai champ. Transform-origin au bas pour un mouvement naturel.
+- **Particules ambiantes** : graines, pollen dore, et feuilles flottent au-dessus de la ferme. 8 particules avec durees et delais aleatoires pour un effet organique.
+- **Nuages ameliores** : deux nuages avec gradients radiaux et animations distinctes, plus realistes (parallaxe implicite).
+- **Ready crops hover ameliore** : les parcelles pretes a recolter grossissent plus au hover (+8% au lieu de +4%), glow blanc renforce.
+- **Empty plot hover ameliore** : les parcelles vides ont un glow vert subtil au hover pour inviter a planter.
+- **Building has-ready glow** : les batiments avec des produits prets ont un glow dore pulse, attirant l'attention du joueur.
+- **Badge batiment vert** : le badge de produit pret est maintenant vert (couleur positive) au lieu de rouge.
+- **Feedback croissance renforce** : l'animation `.plot-grew` est plus visible (scale 1.08, brightness 1.4, glow plus large). Le joueur VOIT ses cultures pousser a chaque revision.
+- **Floating reward ameliore** : animation plus dynamique avec apparition en scale (0.5->1.3->1.1->0.7), plus lisible.
+- **Notifications premium** : backdrop-filter blur pour un look plus integre.
+- **Deco tiles ameliores** : effet de lumiere (pseudo-element radial-gradient), hover plus prononce, image scale au hover.
+- **Planted plots** : pseudo-element de lumiere subtile sur les parcelles en croissance.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

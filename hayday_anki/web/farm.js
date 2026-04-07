@@ -164,15 +164,97 @@ function itemName(id) { const c = (farmData.item_catalog||{})[id]; return c ? c.
 // Safe parseInt wrapper
 function safeInt(val, fallback) { const n = parseInt(val, 10); return isNaN(n) ? (fallback||0) : n; }
 
-// --- Sound Manager ---
+// --- Sound Manager with Web Audio API synth sounds ---
 const SoundMgr = {
   enabled: true,
   musicEnabled: false,
   volume: 0.5,
+  _ctx: null,
+  _getCtx() {
+    if (!this._ctx) try { this._ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    return this._ctx;
+  },
   play(id) {
     if (!this.enabled) return;
+    // Try HTML audio element first
     const el = document.getElementById(`snd-${id}`);
-    if (el && el.src) { el.volume = this.volume; el.currentTime = 0; el.play().catch(()=>{}); }
+    if (el && el.src) { el.volume = this.volume; el.currentTime = 0; el.play().catch(()=>{}); return; }
+    // Fallback: synth sounds via Web Audio API
+    this._synth(id);
+  },
+  // Synthesized game sounds - each action has a unique feel
+  _synth(id) {
+    const ctx = this._getCtx();
+    if (!ctx) return;
+    const vol = this.volume * 0.4;
+    const t = ctx.currentTime;
+    if (id === 'harvest') {
+      // Satisfying pluck + ascending chime (like picking fruit)
+      [523, 659, 784].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, t + i * 0.08);
+        g.gain.setValueAtTime(vol * 0.6, t + i * 0.08);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.25);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t + i * 0.08); o.stop(t + i * 0.08 + 0.3);
+      });
+    } else if (id === 'plant') {
+      // Soft earthy thud + sprout sound
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(140, t + 0.1);
+      g.gain.setValueAtTime(vol * 0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.2);
+      // Sprout chime
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.type = 'sine'; o2.frequency.setValueAtTime(880, t + 0.1);
+      g2.gain.setValueAtTime(vol * 0.3, t + 0.1); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o2.connect(g2); g2.connect(ctx.destination); o2.start(t + 0.1); o2.stop(t + 0.35);
+    } else if (id === 'coin') {
+      // Classic coin ding
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(1318, t); o.frequency.setValueAtTime(1568, t + 0.07);
+      g.gain.setValueAtTime(vol * 0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
+    } else if (id === 'collect') {
+      // Rewarding ascending arpeggio (collecting production)
+      [440, 554, 659, 880].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, t + i * 0.06);
+        g.gain.setValueAtTime(vol * 0.35, t + i * 0.06);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.2);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t + i * 0.06); o.stop(t + i * 0.06 + 0.25);
+      });
+    } else if (id === 'click') {
+      // Subtle tap
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(600, t + 0.04);
+      g.gain.setValueAtTime(vol * 0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.08);
+    } else if (id === 'levelup') {
+      // Triumphant fanfare
+      [523, 659, 784, 1047].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = i < 2 ? 'triangle' : 'sine';
+        o.frequency.setValueAtTime(f, t + i * 0.12);
+        g.gain.setValueAtTime(vol * 0.5, t + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.4);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t + i * 0.12); o.stop(t + i * 0.12 + 0.45);
+      });
+    } else if (id === 'error') {
+      // Dull descending tone
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(150, t + 0.15);
+      g.gain.setValueAtTime(vol * 0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
+    } else if (id === 'grow') {
+      // Subtle magical growth sound
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(440, t); o.frequency.exponentialRampToValueAtTime(660, t + 0.15);
+      g.gain.setValueAtTime(vol * 0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
+    }
   },
   playMusic() {
     if (!this.musicEnabled) return;
@@ -434,6 +516,7 @@ function updateFarm(data) {
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather(); renderFarmer();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
+  let anyGrew = false, anyReady = false;
   if (Object.keys(oldGrowth).length > 0) {
     const allPlots = document.querySelectorAll('#fields-grid .plot');
     newFields.forEach((f, idx) => {
@@ -441,8 +524,14 @@ function updateFarm(data) {
       if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
         allPlots[idx].classList.add('plot-grew');
         setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+        anyGrew = true;
+        // Check if this plot just became ready
+        const oldState = oldGrowth[f.id].split(':')[2];
+        if (f.state === 'ready' && oldState !== 'ready') anyReady = true;
       }
     });
+    if (anyReady) setTimeout(() => SoundMgr.play('harvest'), 400);
+    else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
   }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
@@ -621,7 +710,7 @@ function renderFields() {
       if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
         const lcName = cropName(field.last_crop);
         el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
-        el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
+        el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('plant'); };
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
@@ -686,6 +775,7 @@ function renderWorkshop() {
     const ready = queue.filter(q=>q.ready).length;
     const producing = queue.filter(q=>!q.ready).length;
     if (producing > 0) el.classList.add('producing');
+    if (ready > 0) el.classList.add('has-ready');
     let statusHtml = '';
     if (ready > 0) {
       statusHtml = `<span class="building-badge">${ready}</span>`;
@@ -1533,10 +1623,10 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · '+stock+' en stock':''}${growing>0?' · '+growing+' en culture':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · '+stock+' en stock':''}${growing>0?' · '+growing+' en culture':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
-  SoundMgr.play('levelup');
+  SoundMgr.play('harvest');
   // Find the plot element and create harvest burst from it
   const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
@@ -1586,7 +1676,7 @@ function showHarvestBurst(x, y, cropId) {
     setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
   }
 }
-function plantAllEmpty(){SoundMgr.play('click');pycmd('farm:plant_all_empty')}
+function plantAllEmpty(){SoundMgr.play('plant');pycmd('farm:plant_all_empty')}
 function sellItem(id){
   SoundMgr.play('click');
   const qty = (farmData.inventory||{})[id]||0;
@@ -1616,12 +1706,12 @@ function showSellDialog(id, qty) {
     const btn = document.createElement('button');
     btn.className = 'sell-amount-btn';
     btn.innerHTML = `<span>${label}</span><span class="sell-total">${total} p.</span>`;
-    btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('click'); };
+    btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('coin'); };
     btns.appendChild(btn);
   });
   overlay.classList.remove('hidden');
 }
-function fulfillOrder(i){SoundMgr.play('click');pycmd(`farm:fulfill_order:${i}`)}
+function fulfillOrder(i){SoundMgr.play('collect');pycmd(`farm:fulfill_order:${i}`)}
 
 function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification(LANG.come_back)}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
@@ -1746,11 +1836,12 @@ function showReward(d){
     const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
     showFloatingReward(`+${d.coins}`,cx,cy);
     showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
+    SoundMgr.play('coin');
   }
   // XP: appears slightly after coins for staggered feel
   if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
-  // Material/item drops: staggered notifications
-  if(d.items){let delay=300;Object.entries(d.items).forEach(([id,qty])=>{setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'),delay);delay+=200})}
+  // Material/item drops: staggered notifications (first drop gets collect sound)
+  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
   // Mystery box appearance
   if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
 }
@@ -1762,7 +1853,7 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('click')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
   (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
@@ -1811,12 +1902,30 @@ function updateTutorialStep() {
   document.getElementById('tutorial-btn').textContent = tutorialStep === TUTORIAL_STEPS - 1 ? 'Commencer !' : 'Suivant';
 }
 
+// --- Ambient Particles (floating seeds, pollen — makes farm feel alive) ---
+function startAmbientParticles() {
+  const world = document.getElementById('farm-world');
+  if (!world) return;
+  const types = ['ambient-seed', 'ambient-pollen', 'ambient-leaf'];
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    const type = types[Math.floor(Math.random() * types.length)];
+    p.className = `ambient-particle ${type}`;
+    p.style.left = Math.random() * 90 + 5 + '%';
+    p.style.top = Math.random() * 60 + 10 + '%';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.animationDuration = (8 + Math.random() * 10) + 's';
+    world.appendChild(p);
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('tab-farm').classList.add('active');
   drawWheel();
   renderFarmer();
   pycmd('farm:get_state');
   SoundMgr.playMusic();
+  startAmbientParticles();
   // Show tutorial on first visit
   if (!localStorage.getItem('adfarm_tutorial_done')) {
     setTimeout(showTutorial, 800);
