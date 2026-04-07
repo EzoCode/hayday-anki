@@ -462,6 +462,23 @@ const EXPANSION_LEVELS = [
   {lvl:60,plots:1},{lvl:70,plots:1},{lvl:80,plots:1},{lvl:90,plots:1},{lvl:100,plots:1}
 ];
 
+// --- Event Banner Icons (thematic SVGs per event type) ---
+const EVENT_ICONS = {
+  'weekend_bonus': 'party', 'early_bird': 'sunrise', 'night_owl': 'owl',
+  'lunch_rush': 'lunch', 'first_session': 'sprout',
+  'streak_milestone': 'fire', 'level_milestone': 'confetti',
+};
+const EVENT_ICON_SVGS = {
+  party: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 14L6 2l4 5-3 1 4 4' fill='%23f4922a'/%3E%3Cpath d='M6 2l1.5 4L6 7' fill='%23ffd700'/%3E%3Ccircle cx='10' cy='3' r='1' fill='%23ff4081'/%3E%3Ccircle cx='12' cy='5' r='.7' fill='%234fc3f7'/%3E%3Ccircle cx='13' cy='2' r='.8' fill='%23ffd700'/%3E%3C/svg%3E",
+  sunrise: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='0' y='11' width='16' height='5' rx='1' fill='%234caf50'/%3E%3Csemicircle cx='8' cy='11'/%3E%3Ccircle cx='8' cy='11' r='4' fill='%23ffd700'/%3E%3Cpath d='M8 11 A4 4 0 0 1 12 11' fill='%23ffc107'/%3E%3Cline x1='8' y1='4' x2='8' y2='6' stroke='%23ffd700' stroke-width='1.2'/%3E%3Cline x1='4' y1='7' x2='5.5' y2='8.5' stroke='%23ffd700' stroke-width='1'/%3E%3Cline x1='12' y1='7' x2='10.5' y2='8.5' stroke='%23ffd700' stroke-width='1'/%3E%3C/svg%3E",
+  owl: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cellipse cx='8' cy='9' rx='5' ry='6' fill='%238b6914'/%3E%3Cellipse cx='8' cy='9' rx='4' ry='5' fill='%23a08552'/%3E%3Ccircle cx='6' cy='7' r='2' fill='%23fff'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%23fff'/%3E%3Ccircle cx='6' cy='7' r='1' fill='%23333'/%3E%3Ccircle cx='10' cy='7' r='1' fill='%23333'/%3E%3Cpath d='M7.5 9.5L8 10.5 8.5 9.5' fill='%23f4922a'/%3E%3Cpath d='M4 4L6 6M12 4L10 6' stroke='%238b6914' stroke-width='1.2'/%3E%3C/svg%3E",
+  lunch: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='9' r='6' fill='%23e8d5b0'/%3E%3Ccircle cx='8' cy='9' r='5' fill='%23f5edd8'/%3E%3Cellipse cx='8' cy='9' rx='3.5' ry='2' fill='%23c9884a'/%3E%3Cpath d='M5 7 Q8 4 11 7' fill='%23daa06d' opacity='.5'/%3E%3Cpath d='M6 3 Q6 1 7 1 Q7 3 7 3M9 2 Q9 0 10 0 Q10 2 10 2' stroke='%23999' stroke-width='.6' fill='none' opacity='.4'/%3E%3C/svg%3E",
+  fire: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1 Q12 5 12 9 Q12 13 8 14 Q4 13 4 9 Q4 5 8 1z' fill='%23ff6b00'/%3E%3Cpath d='M8 5 Q10 7 10 9.5 Q10 12 8 13 Q6 12 6 9.5 Q6 7 8 5z' fill='%23ffc107'/%3E%3Cpath d='M8 8 Q9 9.5 9 10.5 Q9 12 8 12.5 Q7 12 7 10.5 Q7 9.5 8 8z' fill='%23fff' opacity='.6'/%3E%3C/svg%3E",
+  confetti: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='3' width='3' height='3' fill='%23ff4081' rx='.5' transform='rotate(15 4.5 4.5)'/%3E%3Crect x='10' y='2' width='2.5' height='2.5' fill='%234fc3f7' rx='.5' transform='rotate(-10 11 3)'/%3E%3Crect x='7' y='6' width='3' height='3' fill='%23ffd700' rx='.5' transform='rotate(25 8.5 7.5)'/%3E%3Crect x='2' y='10' width='2' height='2' fill='%234caf50' rx='.5' transform='rotate(-20 3 11)'/%3E%3Crect x='11' y='9' width='2.5' height='2.5' fill='%23f4922a' rx='.5' transform='rotate(30 12 10)'/%3E%3Crect x='6' y='12' width='2' height='2' fill='%239c27b0' rx='.5' transform='rotate(-15 7 13)'/%3E%3C/svg%3E",
+  sprout: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 14V8' stroke='%234caf50' stroke-width='1.5'/%3E%3Cellipse cx='5.5' cy='7' rx='3' ry='4' fill='%2366bb6a' transform='rotate(30 5.5 7)'/%3E%3Cellipse cx='10.5' cy='6' rx='2.5' ry='3.5' fill='%234caf50' transform='rotate(-25 10.5 6)'/%3E%3Cellipse cx='8' cy='14' rx='3' ry='1.5' fill='%235a3520'/%3E%3C/svg%3E",
+  default: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23ffd700'/%3E%3Cpath d='M8 3l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10.5 4.5 12.5l.5-3.5L2.5 6.5 6 6z' fill='%23fff' opacity='.8'/%3E%3C/svg%3E",
+};
+
 // --- Visual Effects ---
 function createSparkleRain() {
   const layer = document.getElementById('sparkle-layer');
@@ -640,11 +657,36 @@ function updateHUD() {
   } else if (nextEl) {
     nextEl.style.display = 'none';
   }
-  // Active events banner
+  // Daily goal progress bar
+  const goalBar = document.getElementById('daily-goal-bar');
+  const goal = d.daily_goal;
+  if (goalBar && goal) {
+    const goalPct = Math.min(100, Math.round((goal.done / Math.max(1, goal.target)) * 100));
+    document.getElementById('daily-goal-fill').style.width = goalPct + '%';
+    document.getElementById('daily-goal-count').textContent = `${Math.min(goal.done, goal.target)}/${goal.target}`;
+    const rewardEl = document.getElementById('daily-goal-reward');
+    if (goal.claimed) {
+      goalBar.classList.add('daily-goal-complete');
+      rewardEl.textContent = 'Terminé !';
+    } else {
+      goalBar.classList.remove('daily-goal-complete');
+      rewardEl.textContent = '+50 p. +2 gemmes';
+    }
+    goalBar.style.display = '';
+  }
+  // Active events banner with thematic icons
   const banner = document.getElementById('event-banner');
   const events = d.active_events || [];
   if (events.length > 0) {
-    banner.innerHTML = events.map(e => `<span class="event-tag"><span class="event-icon"></span> ${e.name}</span>`).join('');
+    banner.innerHTML = events.map(e => {
+      const iconKey = EVENT_ICONS[e.id] || EVENT_ICONS[e.id?.split('_')[0] + '_' + e.id?.split('_')[1]] || 'default';
+      const iconSvg = EVENT_ICON_SVGS[iconKey] || EVENT_ICON_SVGS['default'];
+      const mult = [];
+      if (e.coin_multiplier && e.coin_multiplier > 1) mult.push(`x${e.coin_multiplier} pièces`);
+      if (e.xp_multiplier && e.xp_multiplier > 1) mult.push(`x${e.xp_multiplier} XP`);
+      const multLabel = mult.length ? ` <span class="event-mult">${mult.join(' · ')}</span>` : '';
+      return `<span class="event-tag"><img src="${iconSvg}" width="14" height="14" class="event-tag-icon"> ${e.name}${multLabel}</span>`;
+    }).join('');
     banner.style.display = '';
   } else {
     banner.style.display = 'none';
@@ -1189,25 +1231,25 @@ let currentWeather = null;
 function updateWeather() {
   const now = new Date();
   const hour = now.getHours();
-  let weather = 'day';
-  if (hour >= 21 || hour < 6) weather = 'night';
-  else if (hour >= 18) weather = 'sunset';
-  else if (hour >= 6 && hour < 8) weather = 'dawn';
-  // Random rain chance (seeded by day)
+  // Time of day determines base atmosphere
+  let timeOfDay = 'day';
+  if (hour >= 21 || hour < 6) timeOfDay = 'night';
+  else if (hour >= 18) timeOfDay = 'sunset';
+  else if (hour >= 6 && hour < 8) timeOfDay = 'dawn';
+  // Rain is an overlay on top of the time-of-day, not a replacement
   const dayOfYear = Math.floor((now - new Date(now.getFullYear(),0,0))/(1000*60*60*24));
-  if (dayOfYear % 7 === 3 || dayOfYear % 7 === 5) weather = 'rain';
-  if (weather === currentWeather) return;
-  currentWeather = weather;
-  const sky = document.querySelector('.farm-sky');
-  const world = document.getElementById('farm-world');
-  const atm = document.querySelector('.farm-atmosphere');
+  const isRaining = (dayOfYear % 7 === 3 || dayOfYear % 7 === 5);
+  const weatherKey = timeOfDay + (isRaining ? '+rain' : '');
+  if (weatherKey === currentWeather) return;
+  currentWeather = weatherKey;
   // Remove existing weather classes
   document.body.classList.remove('weather-day','weather-night','weather-sunset','weather-dawn','weather-rain');
-  document.body.classList.add('weather-' + weather);
+  document.body.classList.add('weather-' + timeOfDay);
+  if (isRaining) document.body.classList.add('weather-rain');
   // Remove existing rain layer
   const oldRain = document.getElementById('rain-layer');
   if (oldRain) oldRain.remove();
-  if (weather === 'rain') {
+  if (isRaining) {
     const rainLayer = document.createElement('div'); rainLayer.id = 'rain-layer';
     for (let i = 0; i < 40; i++) {
       const drop = document.createElement('div'); drop.className = 'rain-drop';
@@ -1275,7 +1317,7 @@ function renderInventory() {
     }
     const icon = itemIcon(id, 36);
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="5" r="1.2" fill="currentColor"/><rect x="7" y="7" width="2" height="5" rx=".8" fill="currentColor"/></svg></span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1371,7 +1413,7 @@ function renderOrders() {
       ${!canDo?`<div class="order-progress-wrap"><div class="order-prog-bar"><div class="order-prog-fill${almostDone?' almost':''}" style="width:${pct}%"></div></div><span class="order-prog-text">${pct}%</span></div>`:''}
       <div class="order-items">${items}</div>
       <button class="order-fulfill-btn${canDo?' order-btn-ready':''}" ${canDo?'':'disabled'} onclick="fulfillOrder(${i})">
-        ${canDo?'\u2714 Livrer maintenant !':'Items manquants'}
+        ${canDo?'Livrer maintenant !':'Items manquants'}
       </button>
     `;
     if (canDo) card.style.borderColor = 'rgba(106,191,71,.4)';
@@ -1442,10 +1484,10 @@ function showAnimalShopInfo(aid) {
   const needsLand = !hasPasture;
   const landFree = (farmData.land_total||20) - (farmData.land_used||0);
   const reqs = [
-    {label: `Niveau ${info.lvl}`, value: level >= info.lvl ? `\u2713 (${level})` : `\u2717 (${level})`, met: level >= info.lvl},
-    {label: `${cost} pi\u00E8ces`, value: (farmData.coins||0) >= cost ? '\u2713' : `\u2717 (${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
-    {label: 'Terrain', value: needsLand ? (landFree >= 2 ? `\u2713 (2 requis)` : `\u2717 (${landFree} libre)`) : '\u2713 (enclos existant)', met: !needsLand || landFree >= 2},
-    {label: `Possédés`, value: `${count}/${maxN}`, met: count < maxN},
+    {label: `Niveau ${info.lvl}`, value: level >= info.lvl ? `OK (${level})` : `(${level})`, met: level >= info.lvl},
+    {label: `${cost} pi\u00E8ces`, value: (farmData.coins||0) >= cost ? 'OK' : `(${farmData.coins||0})`, met: (farmData.coins||0) >= cost},
+    {label: 'Terrain', value: needsLand ? (landFree >= 2 ? `OK (2 requis)` : `(${landFree} libre)`) : 'OK (enclos existant)', met: !needsLand || landFree >= 2},
+    {label: `Poss\u00E9d\u00E9s`, value: `${count}/${maxN}`, met: count < maxN},
   ];
   showInfo({
     icon: (()=>{const s=S(`hayday_${aid}-lbl`)||S(`hayday_${aid}`);return s?`<img src="${s}" width="40" height="40">`:itemIcon(aid, 40);})(),
@@ -1484,7 +1526,7 @@ function renderShopAnimals(grid){
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
       <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="5" r="1.2" fill="currentColor"/><rect x="7" y="7" width="2" height="5" rx=".8" fill="currentColor"/></svg></span>
     `;
     grid.appendChild(el);
   });
@@ -1534,7 +1576,7 @@ function renderShopUpgrades(grid){
       ${buildingImg(u.id,40)}
       <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="5" r="1.2" fill="currentColor"/><rect x="7" y="7" width="2" height="5" rx=".8" fill="currentColor"/></svg></span>
     `;
     grid.appendChild(el);
   });
@@ -1589,8 +1631,8 @@ function renderShopLand(grid){
     </div>
     <div style="font-size:11px">
       <span style="font-weight:700">Co\u00fbt :</span>
-      ${cost} pi\u00e8ces ${coins>=cost?'<span style="color:#4caf50">\u2713</span>':'<span style="color:#e74c3c">\u2717 ('+coins+')</span>'}
-      \u2022 Titre x1 ${deeds>=1?'<span style="color:#4caf50">\u2713</span>':'<span style="color:#e74c3c">\u2717 ('+deeds+')</span>'}
+      ${cost} pi\u00e8ces ${coins>=cost?'<span style="color:#4caf50;font-weight:900">OK</span>':'<span style="color:#e74c3c;font-weight:700">('+coins+' / '+cost+')</span>'}
+      &middot; Titre x1 ${deeds>=1?'<span style="color:#4caf50;font-weight:900">OK</span>':'<span style="color:#e74c3c;font-weight:700">('+deeds+'/1)</span>'}
     </div>
   `;
   grid.appendChild(el);
@@ -1860,16 +1902,46 @@ function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
     const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
-    showFloatingReward(`+${d.coins}`,cx,cy);
+    // Show coin amount with icon
+    const coinSrc = S('ui_coin');
+    const coinImg = coinSrc ? `<img src="${coinSrc}" width="18" height="18" style="vertical-align:middle;margin-right:2px">` : '';
+    showFloatingRewardHTML(`${coinImg}+${d.coins}`,cx,cy);
     showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
     SoundMgr.play('coin');
   }
-  // XP: appears slightly after coins for staggered feel
-  if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
-  // Material/item drops: staggered notifications (first drop gets collect sound)
-  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
+  // XP: appears slightly after coins for staggered feel, with green color
+  if(d.xp) setTimeout(()=>{
+    showFloatingRewardHTML(`<span style="color:#81c784">+${d.xp} XP</span>`,window.innerWidth/2+40,window.innerHeight/2-10);
+  },150);
+  // Material/item drops: staggered notifications with item icon
+  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{const icon=itemIcon(id,14);showNotification(`${icon?'':''} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
+  if(d.mystery_box){
+    const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;
+    setTimeout(()=>{
+      showNotification(`Une ${sz} boîte mystère est apparue !`,'reward');
+      SoundMgr.play('collect');
+    },500);
+  }
+  // Daily goal complete celebration
+  if(d.daily_goal_complete){
+    setTimeout(()=>{
+      SoundMgr.play('levelup');
+      showCoinBurst(window.innerWidth/2, 60, 6);
+      showNotification(`Objectif quotidien atteint ! +${d.daily_goal_complete.coins} pièces, +${d.daily_goal_complete.gems} gemmes`, 'reward');
+    }, 600);
+  }
+}
+// Enhanced floating reward that supports HTML (for icons in rewards)
+function showFloatingRewardHTML(html,x,y){
+  const layer=document.getElementById('reward-layer');
+  const el=document.createElement('div');
+  el.className='floating-reward';
+  el.innerHTML=html;
+  el.style.left=(x||window.innerWidth/2)+'px';
+  el.style.top=(y||window.innerHeight/2)+'px';
+  layer.appendChild(el);
+  setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200);
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
@@ -1879,7 +1951,7 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">!</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
   (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');

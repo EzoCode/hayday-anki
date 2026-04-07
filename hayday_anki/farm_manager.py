@@ -245,6 +245,12 @@ class FarmState:
             })
         self.num_plots = len(self.fields)
 
+        # Daily goal (review target for bonus rewards)
+        self.daily_goal_target: int = 20  # Reviews per day
+        self.daily_goal_done: int = 0
+        self.daily_goal_claimed: bool = False
+        self.daily_goal_date: Optional[str] = None
+
         # Lifetime tracking counters (for achievements)
         self.total_harvests: int = 0
         self.total_coins_earned: int = 0
@@ -372,6 +378,10 @@ class FarmState:
             "early_bird_count": self.early_bird_count,
             "night_owl_count": self.night_owl_count,
             "weekend_review_count": self.weekend_review_count,
+            "daily_goal_target": self.daily_goal_target,
+            "daily_goal_done": self.daily_goal_done,
+            "daily_goal_claimed": self.daily_goal_claimed,
+            "daily_goal_date": self.daily_goal_date,
         }
 
     @classmethod
@@ -437,6 +447,10 @@ class FarmState:
         state.early_bird_count = 0
         state.night_owl_count = 0
         state.weekend_review_count = 0
+        state.daily_goal_target = 20
+        state.daily_goal_done = 0
+        state.daily_goal_claimed = False
+        state.daily_goal_date = None
 
         saved_version = data.get("_schema_version", 1)
 
@@ -755,7 +769,41 @@ class FarmManager:
 
         self._pending_notifications.extend(rewards["notifications"])
 
+        # Track daily goal progress
+        self._reset_daily_goal_if_new_day()
+        if not self.state.daily_goal_claimed:
+            self.state.daily_goal_done += 1
+            if self.state.daily_goal_done >= self.state.daily_goal_target and not self.state.daily_goal_claimed:
+                self.state.daily_goal_claimed = True
+                # Bonus: 50 coins + 2 gems for completing daily goal
+                bonus_coins = 50
+                bonus_gems = 2
+                self.state.coins += bonus_coins
+                self.state.gems += bonus_gems
+                self.state.total_coins_earned += bonus_coins
+                self.state.session_coins_earned += bonus_coins
+                rewards["daily_goal_complete"] = {
+                    "coins": bonus_coins,
+                    "gems": bonus_gems,
+                }
+                rewards["notifications"].append({
+                    "type": "daily_goal",
+                    "message": f"Objectif quotidien atteint ! +{bonus_coins} pièces, +{bonus_gems} gemmes",
+                })
+
         return rewards
+
+    def _reset_daily_goal_if_new_day(self):
+        """Reset daily goal if it's a new day."""
+        today = date.today().isoformat()
+        if self.state.daily_goal_date != today:
+            self.state.daily_goal_date = today
+            self.state.daily_goal_done = 0
+            self.state.daily_goal_claimed = False
+            # Scale target with level (slightly harder as you progress)
+            base = 20
+            level_bonus = min(self.state.level // 5 * 5, 30)
+            self.state.daily_goal_target = base + level_bonus
 
     def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
         """Roll for a crop drop based on unlocked crops.
@@ -1653,6 +1701,8 @@ class FarmManager:
         # Update streak at session start so the correct bonus applies during reviews
         self.update_streak()
         self.check_events()
+        # Reset daily goal on new day
+        self._reset_daily_goal_if_new_day()
 
     def end_session(self) -> Dict:
         """End session and return summary."""
@@ -1812,7 +1862,12 @@ class FarmManager:
             "session_xp": self.state.session_xp_earned,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
             "active_events": [
-                {"name": e.get("name", "")}
+                {
+                    "id": e.get("id", ""),
+                    "name": e.get("name", ""),
+                    "coin_multiplier": e.get("coin_multiplier", 1),
+                    "xp_multiplier": e.get("xp_multiplier", 1),
+                }
                 for e in self.state.active_events
                 if self._is_event_active(e)
             ],
@@ -1824,6 +1879,11 @@ class FarmManager:
             "total_correct": self.state.total_correct,
             "field_cost": self.get_field_cost(),
             "next_unlock": self._get_next_unlock_preview(),
+            "daily_goal": {
+                "target": self.state.daily_goal_target,
+                "done": self.state.daily_goal_done,
+                "claimed": self.state.daily_goal_claimed,
+            },
         }
 
     def _get_next_unlock_preview(self) -> Optional[Dict]:

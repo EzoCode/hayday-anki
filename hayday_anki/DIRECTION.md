@@ -158,8 +158,26 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Deco tiles ameliores** : effet de lumiere (pseudo-element radial-gradient), hover plus prononce, image scale au hover.
 - **Planted plots** : pseudo-element de lumiere subtile sur les parcelles en croissance.
 
+## Ameliorations (session 11 â€” fondations solides et addictivite)
+- **Banniere evenements enrichie** : chaque type d'evenement (Weekend, Leve-tot, Couche-tard, Pause dejeuner, Serie, Niveau, Nouveau depart) a son propre icone SVG thematique au lieu d'une etoile generique. Les multiplicateurs (x1.5 pieces, x2 XP) sont maintenant affiches dans la banniere pour que le joueur sache exactement son bonus actif.
+- **Objectif quotidien** : barre de progression dans le HUD montrant un objectif de reviews par jour (adapte au niveau). Recompense de 50 pieces + 2 gemmes a la completion avec celebration (fanfare + coin burst). Donne un but clair au joueur chaque jour.
+- **Systeme meteo corrige** : la pluie est maintenant un overlay qui se combine avec l'heure du jour (nuit+pluie, coucher de soleil+pluie) au lieu de remplacer l'atmosphere.
+- **Feedback de recompense ameliore** : les pieces gagnees par review affichent l'icone de piece, l'XP est en vert. Le reward burst est plus satisfaisant avec des icones HTML.
+- **Info button SVG** : le bouton info (i) dans l'inventaire et la boutique utilise maintenant un SVG propre au lieu du caractere Unicode (i).
+- **Symboles Unicode remplaces** : les check/cross marks dans la boutique animaux et terrain sont remplaces par du texte style "OK" avec coloration.
+- **Barre de progression des cultures amelioree** : plus epaisse (5px), avec reflet en haut pour un look premium.
+- **Level-up celebration premium** : carte avec gradient plus riche, glow elargi, nombre de niveau avec animation bounce plus dynamique, etoiles avec rotation.
+- **Session summary polish** : stats avec ombres et animations pop plus expressives, labels en majuscules.
+- **Bonus quotidien ameliore** : carte login avec gradient plus profond, points de jours plus gros avec glow.
+- **Toolbar polish** : icones plus grosses (26px), hover scale, active glow plus prononce.
+- **Zones de ferme** : inner glow subtil par zone pour plus de profondeur.
+- **Overlay cards premium** : padding, border-radius et ombres augmentes pour un look plus luxueux.
+- **Action buttons** : padding plus genereux et letter-spacing pour un look de vrai jeu.
+- **Next unlock hint** : animation pulse subtile pour attirer l'attention.
+- **Data evenements enrichies** : les donnees envoyees au JS incluent maintenant l'id et les multiplicateurs (pas juste le nom).
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
-- [ ] Evenements saisonniers avec bonus temporaires
-- [ ] Systeme de quetes quotidiennes/hebdomadaires
+- [ ] Evenements saisonniers avec bonus temporaires (Noel, Halloween, etc.)
 - [ ] Tutoriel ameliore avec guidage contextuel
+- [ ] Objectifs hebdomadaires avec recompenses speciales
