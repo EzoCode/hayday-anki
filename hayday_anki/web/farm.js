@@ -513,7 +513,7 @@ function updateFarm(data) {
   oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather(); renderFarmer();
+  updateHUD(); renderQuests(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather(); renderFarmer();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   let anyGrew = false, anyReady = false;
@@ -651,6 +651,33 @@ function updateHUD() {
   }
 }
 
+function renderQuests() {
+  const bar = document.getElementById('quest-bar');
+  if (!bar) return;
+  const quests = farmData.daily_quests || [];
+  if (quests.length === 0) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+  bar.innerHTML = '<span style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);padding:2px 4px;white-space:nowrap">QUÊTES</span>';
+  quests.forEach(q => {
+    const pct = Math.min(100, Math.round(q.progress / Math.max(1, q.target) * 100));
+    const done = q.progress >= q.target;
+    const claimed = q.claimed;
+    const cls = claimed ? 'quest-chip-claimed' : done ? 'quest-chip-done' : 'quest-chip-active';
+    const rewardText = q.reward_gems > 0 ? `${q.reward_gems} gem` : q.reward_coins > 0 ? `${q.reward_coins} p.` : '';
+    const el = document.createElement('div');
+    el.className = `quest-chip ${cls}`;
+    if (done && !claimed) {
+      el.onclick = () => { pycmd(`farm:claim_quest:${q.id}`); };
+      el.innerHTML = `<span class="quest-check">✓</span><span>${q.name}</span><span class="quest-reward-badge">${rewardText}</span>`;
+    } else if (claimed) {
+      el.innerHTML = `<span>${q.name}</span>`;
+    } else {
+      el.innerHTML = `<span>${q.desc}</span><div class="quest-progress-mini"><div class="quest-progress-mini-fill" style="width:${pct}%"></div></div><span style="font-size:8px;color:rgba(255,255,255,.4)">${q.progress}/${q.target}</span>`;
+    }
+    bar.appendChild(el);
+  });
+}
+
 function renderFields() {
   const grid = document.getElementById('fields-grid');
   grid.innerHTML = '';
@@ -750,6 +777,7 @@ function renderFields() {
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 40 : 52;
       const cName = cropName(field.crop);
+      el.dataset.stage = stage;
       el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft} rev.</span>`;
       el.onclick = () => showItemInfo(field.crop);
     }
@@ -1286,7 +1314,7 @@ function renderInventory() {
       el.onclick = () => showItemInfo(id);
     }
     const icon = itemIcon(id, 36);
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">i</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1377,7 +1405,7 @@ function renderOrders() {
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type"><img src="${order.type==='boat'?ITEM_ICONS._icon_boat:ITEM_ICONS._icon_truck_color}" width="28" height="28" style="vertical-align:middle"> ${order.type==='boat'?'Bateau':'Camion'}</span>
-        <span class="order-reward"><span class="order-coin-reward"><span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.coin_reward}</span> <span class="order-xp-reward">+${order.xp_reward} XP</span></span>
+        <span class="order-reward"><span class="order-coin-reward"><span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.coin_reward}</span>${order.gem_reward>0?` <span class="order-gem-reward"><span class="css-gem" style="width:10px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.gem_reward}</span>`:''} <span class="order-xp-reward">+${order.xp_reward} XP</span></span>
       </div>
       ${!canDo?`<div class="order-progress-wrap"><div class="order-prog-bar"><div class="order-prog-fill${almostDone?' almost':''}" style="width:${pct}%"></div></div><span class="order-prog-text">${pct}%</span></div>`:''}
       <div class="order-items">${items}</div>
@@ -1495,7 +1523,7 @@ function renderShopAnimals(grid){
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
       <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">i</span>
     `;
     grid.appendChild(el);
   });
@@ -1545,7 +1573,7 @@ function renderShopUpgrades(grid){
       ${buildingImg(u.id,40)}
       <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">i</span>
     `;
     grid.appendChild(el);
   });
@@ -1833,7 +1861,7 @@ function showSessionSummary(d){
 }
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
-function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
+function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');
@@ -1876,12 +1904,20 @@ function showReward(d){
     showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
     SoundMgr.play('coin');
   }
-  // XP: appears slightly after coins for staggered feel
-  if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
-  // Material/item drops: staggered notifications (first drop gets collect sound)
-  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
+  // XP: appears slightly after coins for staggered feel — positioned below coins
+  if(d.xp) setTimeout(()=>{
+    const xpEl = document.createElement('div');
+    xpEl.className = 'floating-reward floating-xp';
+    xpEl.textContent = `+${d.xp} XP`;
+    xpEl.style.left = (window.innerWidth/2) + 'px';
+    xpEl.style.top = (window.innerHeight/2 + 5) + 'px';
+    document.getElementById('reward-layer').appendChild(xpEl);
+    setTimeout(()=>{if(xpEl.parentNode)xpEl.parentNode.removeChild(xpEl)},1400);
+  },180);
+  // Material/item drops: staggered notifications with icons (first drop gets collect sound)
+  if(d.items){let delay=350;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{const icon=itemIcon(id,14);const name=itemName(id);showNotification(`${icon?icon+' ':''}+${qty} ${name}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=300})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),600)}
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}

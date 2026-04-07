@@ -470,6 +470,29 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "claim_quest":
+                quest_id = parts[2] if len(parts) > 2 else ""
+                result = self.manager.claim_quest(quest_id)
+                if result:
+                    coins = result.get("coins", 0)
+                    xp = result.get("xp", 0)
+                    gems = result.get("gems", 0)
+                    reward_parts = []
+                    if coins > 0:
+                        reward_parts.append(f"+{coins} pièces")
+                    if xp > 0:
+                        reward_parts.append(f"+{xp} XP")
+                    if gems > 0:
+                        reward_parts.append(f"+{gems} gemmes")
+                    reward_str = ", ".join(reward_parts)
+                    self._js("SoundMgr.play('collect')")
+                    self._js(f"showNotification({json.dumps(f'Quête terminée ! {reward_str}')}, 'reward')")
+                    if coins > 0:
+                        self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 6)")
+                    self._check_and_show_level_up()
+                self._send_state()
+                self.manager.save()
+
             elif action == "get_achievements":
                 self._send_achievements()
 
@@ -550,6 +573,7 @@ class FarmWebView:
         prod_mgr = production.ProductionManager(self.manager.state)
         result = prod_mgr.start_production(building_id, recipe_id)
         if result:
+            self.manager.update_quest_progress("productions", 1)
             r_name = result["name"]
             msg = f"Production de {r_name} lancée !"
             self._js(f"showNotification({json.dumps(msg)})")

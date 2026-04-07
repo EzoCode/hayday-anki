@@ -226,6 +226,10 @@ class FarmState:
         # Events
         self.active_events: List[Dict] = []
 
+        # Daily Quests
+        self.daily_quests: List[Dict] = []
+        self.daily_quests_date: Optional[str] = None
+
         # Orders (truck/boat)
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
@@ -354,6 +358,8 @@ class FarmState:
             "production_queues": self.production_queues,
             "achievements": self.achievements,
             "active_events": self.active_events,
+            "daily_quests": self.daily_quests,
+            "daily_quests_date": self.daily_quests_date,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
             "land_total": self.land_total,
@@ -419,6 +425,8 @@ class FarmState:
         state.last_login_date = None
         state.login_streak = 0
         state.active_events = []
+        state.daily_quests = []
+        state.daily_quests_date = None
         state.active_orders = []
         state.orders_completed = 0
         state.land_total = 20
@@ -755,6 +763,10 @@ class FarmManager:
 
         self._pending_notifications.extend(rewards["notifications"])
 
+        # Track daily quest progress
+        self.update_quest_progress("reviews", 1)
+        self.update_quest_progress("coins_earned", coins)
+
         return rewards
 
     def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
@@ -932,6 +944,7 @@ class FarmManager:
         field["growth_stage"] = 0
         field["reviews_needed"] = reviews_per_stage
         field["reviews_done"] = 0
+        self.update_quest_progress("plants", 1)
         return True
 
     def get_field_cost(self) -> int:
@@ -1127,6 +1140,7 @@ class FarmManager:
         self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
         self.state.session_harvests += 1
+        self.update_quest_progress("harvests", 1)
 
         # Reset field — remember last crop for quick replant
         last_crop = field["crop"]
@@ -1185,6 +1199,7 @@ class FarmManager:
         self.state.coins += coins
         self.state.total_coins_earned += coins
         self.state.total_items_sold += actual
+        self.update_quest_progress("sells", actual)
         return coins
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
@@ -1374,11 +1389,15 @@ class FarmManager:
                 for i, q in items_needed.items()
             )
 
+            # Boat orders show potential gem reward (1-3 gems)
+            gem_preview = random.randint(1, 3) if order_type == "boat" else 0
+
             self.state.active_orders.append({
                 "id": len(self.state.active_orders) + self.state.orders_completed,
                 "items_needed": items_needed,
                 "coin_reward": coin_reward,
                 "xp_reward": xp_reward,
+                "gem_reward": gem_preview,
                 "type": order_type,
             })
 
@@ -1405,11 +1424,11 @@ class FarmManager:
         self.state.session_coins_earned += order["coin_reward"]
         self.state.session_xp_earned += order["xp_reward"]
         self.state.orders_completed += 1
+        self.update_quest_progress("orders", 1)
 
-        # Boat orders have a chance to give gems (like Hay Day)
-        gem_reward = 0
-        if order["type"] == "boat":
-            gem_reward = random.choice([0, 0, 1, 1, 2])
+        # Boat orders give gems (like Hay Day)
+        gem_reward = order.get("gem_reward", 0)
+        if gem_reward > 0:
             self.state.gems += gem_reward
 
         result = {
@@ -1477,6 +1496,81 @@ class FarmManager:
             (i for i, (p, n, w) in enumerate(prizes) if n == prize_name), 0
         )
         return {"prize": prize_data, "name": prize_name, "index": prize_index}
+
+    # --- Daily Quests ---
+
+    QUEST_TEMPLATES = [
+        {"id": "review_10", "name": "Réviseur", "desc": "Révise 10 cartes", "target": 10, "track": "reviews", "reward_coins": 20, "reward_xp": 10},
+        {"id": "review_20", "name": "Studieux", "desc": "Révise 20 cartes", "target": 20, "track": "reviews", "reward_coins": 40, "reward_xp": 20},
+        {"id": "review_30", "name": "Assidu", "desc": "Révise 30 cartes", "target": 30, "track": "reviews", "reward_coins": 60, "reward_xp": 30},
+        {"id": "harvest_3", "name": "Fermier", "desc": "Récolte 3 cultures", "target": 3, "track": "harvests", "reward_coins": 25, "reward_xp": 15},
+        {"id": "harvest_5", "name": "Moissonneur", "desc": "Récolte 5 cultures", "target": 5, "track": "harvests", "reward_coins": 40, "reward_xp": 25},
+        {"id": "plant_3", "name": "Semeur", "desc": "Plante 3 cultures", "target": 3, "track": "plants", "reward_coins": 15, "reward_xp": 10},
+        {"id": "plant_5", "name": "Jardinier", "desc": "Plante 5 cultures", "target": 5, "track": "plants", "reward_coins": 30, "reward_xp": 15},
+        {"id": "sell_5", "name": "Marchand", "desc": "Vends 5 items", "target": 5, "track": "sells", "reward_coins": 30, "reward_xp": 15},
+        {"id": "order_1", "name": "Livreur", "desc": "Livre 1 commande", "target": 1, "track": "orders", "reward_coins": 50, "reward_gems": 1},
+        {"id": "produce_1", "name": "Artisan", "desc": "Lance 1 production", "target": 1, "track": "productions", "reward_coins": 30, "reward_xp": 20},
+        {"id": "earn_50", "name": "Prospère", "desc": "Gagne 50 pièces", "target": 50, "track": "coins_earned", "reward_coins": 25, "reward_xp": 15},
+        {"id": "earn_100", "name": "Riche", "desc": "Gagne 100 pièces", "target": 100, "track": "coins_earned", "reward_coins": 50, "reward_gems": 1},
+    ]
+
+    def generate_daily_quests(self):
+        """Generate 3 daily quests if needed. Called on profile load."""
+        today = date.today().isoformat()
+        if self.state.daily_quests_date == today and len(self.state.daily_quests) > 0:
+            return  # Already generated today
+
+        # Pick 3 quests with different track types
+        templates = list(self.QUEST_TEMPLATES)
+        random.shuffle(templates)
+        selected = []
+        used_tracks = set()
+        for t in templates:
+            if t["track"] not in used_tracks and len(selected) < 3:
+                selected.append(t)
+                used_tracks.add(t["track"])
+
+        self.state.daily_quests = [
+            {
+                "id": t["id"],
+                "name": t["name"],
+                "desc": t["desc"],
+                "target": t["target"],
+                "track": t["track"],
+                "progress": 0,
+                "claimed": False,
+                "reward_coins": t.get("reward_coins", 0),
+                "reward_xp": t.get("reward_xp", 0),
+                "reward_gems": t.get("reward_gems", 0),
+            }
+            for t in selected
+        ]
+        self.state.daily_quests_date = today
+
+    def update_quest_progress(self, track: str, amount: int = 1):
+        """Update progress on daily quests matching the given track type."""
+        for quest in self.state.daily_quests:
+            if quest["track"] == track and not quest["claimed"]:
+                quest["progress"] = min(quest["target"], quest["progress"] + amount)
+
+    def claim_quest(self, quest_id: str) -> Optional[Dict]:
+        """Claim a completed quest's reward. Returns reward dict or None."""
+        for quest in self.state.daily_quests:
+            if quest["id"] == quest_id and not quest["claimed"]:
+                if quest["progress"] >= quest["target"]:
+                    quest["claimed"] = True
+                    coins = quest.get("reward_coins", 0)
+                    xp = quest.get("reward_xp", 0)
+                    gems = quest.get("reward_gems", 0)
+                    if coins > 0:
+                        self.state.coins += coins
+                        self.state.total_coins_earned += coins
+                    if xp > 0:
+                        self.state.xp += xp
+                    if gems > 0:
+                        self.state.gems += gems
+                    return {"coins": coins, "xp": xp, "gems": gems, "quest_name": quest["name"]}
+        return None
 
     # --- Auto Events ---
 
@@ -1824,6 +1918,7 @@ class FarmManager:
             "total_correct": self.state.total_correct,
             "field_cost": self.get_field_cost(),
             "next_unlock": self._get_next_unlock_preview(),
+            "daily_quests": self.state.daily_quests,
         }
 
     def _get_next_unlock_preview(self) -> Optional[Dict]:
