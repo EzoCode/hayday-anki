@@ -519,19 +519,37 @@ function updateFarm(data) {
   let anyGrew = false, anyReady = false;
   if (Object.keys(oldGrowth).length > 0) {
     const allPlots = document.querySelectorAll('#fields-grid .plot');
+    const readyCrops = [];
     newFields.forEach((f, idx) => {
       const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
       if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
         allPlots[idx].classList.add('plot-grew');
-        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 1200);
         anyGrew = true;
-        // Check if this plot just became ready
+        // Show floating growth indicator on each growing plot
+        const rect = allPlots[idx].getBoundingClientRect();
+        const oldStage = parseInt(oldGrowth[f.id].split(':')[0]);
         const oldState = oldGrowth[f.id].split(':')[2];
-        if (f.state === 'ready' && oldState !== 'ready') anyReady = true;
+        if (f.state === 'ready' && oldState !== 'ready') {
+          anyReady = true;
+          readyCrops.push({crop: f.crop, x: rect.left + rect.width/2, y: rect.top});
+        } else if ((f.growth_stage||0) > oldStage) {
+          // Stage advanced — show stage label
+          showFloatingReward(GROWTH_LABEL[Math.min(f.growth_stage||0, 4)], rect.left + rect.width/2, rect.top + rect.height/4);
+        }
       }
     });
-    if (anyReady) setTimeout(() => SoundMgr.play('harvest'), 400);
-    else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
+    if (anyReady) {
+      setTimeout(() => SoundMgr.play('collect'), 300);
+      readyCrops.forEach((rc, i) => {
+        setTimeout(() => {
+          const name = cropName(rc.crop);
+          showNotification(`${name} prêt à récolter !`, 'reward');
+        }, 400 + i * 300);
+      });
+    } else if (anyGrew) {
+      setTimeout(() => SoundMgr.play('grow'), 300);
+    }
   }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
