@@ -435,6 +435,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty-label{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3px}
 .plot-replant{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;opacity:.65;transition:opacity .2s}
 .plot-replant-label{font-size:9px;color:rgba(255,255,255,.8);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.plot-replant-cost{font-size:7px;color:rgba(255,215,0,.85);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.2);padding:0 4px;border-radius:4px}
 .plot-empty:hover .plot-replant{opacity:1}
 
 @keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
@@ -584,7 +585,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .order-card:hover{transform:translateY(-1px)}
 .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
-.order-reward{font-size:11px;font-weight:800;color:#2e7d32}
+.order-reward{font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px}
+.order-coin-reward{color:var(--gold-d);display:flex;align-items:center;gap:2px;background:rgba(255,215,0,.1);padding:2px 6px;border-radius:6px}
+.order-xp-reward{color:#2e7d32;background:rgba(76,175,80,.1);padding:2px 6px;border-radius:6px}
 .order-items{display:flex;flex-wrap:wrap;gap:4px}
 .order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
 .order-item img{max-width:18px;max-height:18px}
@@ -884,5 +887,23 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}
 .item-cell:hover::before{opacity:1}
 .item-cell{position:relative}
+
+/* ===== CROP NAME ON GROWING PLOTS ===== */
+.plot-crop-name{position:absolute;top:3px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:3;letter-spacing:.3px;text-transform:uppercase;pointer-events:none}
+
+/* ===== CROP PLANTING COST BADGE ===== */
+.crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
+.crop-cost-badge.free{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.08));color:#2e7d32;border-color:rgba(76,175,80,.2)}
+.crop-profit{color:#2e7d32;font-weight:800}
+.crop-choice-locked{opacity:.45;cursor:not-allowed !important}
+.crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
+
+/* ===== PANEL CLOSE ANIMATION ===== */
+.panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
+.panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
+@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+
+/* ===== READY PLOT CROP NAME ===== */
+.plot-ready-crop-name{color:rgba(255,255,255,1) !important;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 10px rgba(255,215,0,.5) !important;font-size:8px !important;top:auto !important;bottom:18px !important}
 
 .hidden{display:none!important}
