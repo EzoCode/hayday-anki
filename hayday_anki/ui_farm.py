@@ -306,6 +306,7 @@ class FarmWebView:
             elif action == "plant_all_empty":
                 count = self.manager.plant_all_empty()
                 if count > 0:
+                    self._js("SoundMgr.play('plant')")
                     self._js(f"showNotification({json.dumps(f'{count} cultures plantées !')})")
                 else:
                     self._js("showNotification('Aucune parcelle à replanter !')")

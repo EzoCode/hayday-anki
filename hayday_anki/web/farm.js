@@ -1275,7 +1275,7 @@ function renderInventory() {
     }
     const icon = itemIcon(id, 36);
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')"><span class="info-i"></span></span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1859,17 +1859,23 @@ function showCoinBurst(x,y,n){
 function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
-    const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
+    const cx=window.innerWidth/2, cy=window.innerHeight/2-50;
     showFloatingReward(`+${d.coins}`,cx,cy);
     showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
     SoundMgr.play('coin');
   }
-  // XP: appears slightly after coins for staggered feel
-  if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
+  // XP: appears slightly after coins for staggered feel — offset to avoid overlap
+  if(d.xp) setTimeout(()=>{
+    const xpEl = document.querySelector('.xp-bar-track');
+    const xpRect = xpEl ? xpEl.getBoundingClientRect() : null;
+    const x = xpRect ? xpRect.left + xpRect.width/2 : window.innerWidth/2+40;
+    const y = xpRect ? xpRect.bottom + 20 : window.innerHeight/2-10;
+    showFloatingReward(`+${d.xp} XP`,x,y);
+  },180);
   // Material/item drops: staggered notifications (first drop gets collect sound)
-  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
+  if(d.items){let delay=350;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=280})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),600)}
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
