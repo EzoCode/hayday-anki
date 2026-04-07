@@ -127,6 +127,16 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
   - Items inventaire : hover avec outline dore, meilleur feedback tactile
   - Crop sprites : transitions sur transform et filter pour changements fluides
 
+## Ameliorations (session 9 — visual uniqueness et bugs critiques)
+- **CRITIQUE: Batiments tous identiques** : HD_BUILDINGS mappait TOUS les batiments de production (bakery, dairy, pizzeria, etc.) aux memes 3 sprites generiques (barn, silo, shop). Le joueur ne pouvait pas distinguer ses 9 batiments. Corrige : les BUILDING_SVGS uniques (SVG detaille pour chaque batiment) sont maintenant prioritaires. Seuls barn/silo/shop/chicken_coop utilisent les vrais PNG.
+- **BUG: Production notification crash** : `_start_production` utilisait `f"showNotification('Production de {r_name} lancée !')"` sans escaper. Les recettes "Tarte à l'orange" et "Jus d'orange" (apostrophes) cassaient le JS. Corrige : utilise `json.dumps()`.
+- **Bug similaire corrige** : `can_craft` raison non echappee dans `_start_production`.
+- **Pig pasture display** : `animalLbl()` ne trouvait jamais `hayday_pig-lbl` (fichier inexistant). Ameliore : fallback vers le SVG de ITEM_ICONS (haute qualite), coherent avec les autres animaux.
+- **animalImg() ameliore** : si aucun PNG sprite, utilise le SVG handcrafted de ITEM_ICONS au lieu d'un carre "?" generique.
+- **Harvest sound** : `harvestPlot()` jouait un simple "click". Maintenant joue "levelup" pour un feedback plus satisfaisant.
+- **Harvest All** : ajout de son "levelup" + coin burst visuel lors de la recolte groupee.
+- **Plant dialog enrichi** : affiche maintenant le stock en silo et le nombre de champs en culture pour chaque crop. Le joueur voit immediatement ce qu'il fait pousser et ce qu'il a en stock.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

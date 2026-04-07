@@ -315,39 +315,45 @@ const BUILDING_SVGS = {
 // Get building icon <img> tag (small, for menus/lists)
 function buildingIcon(id, w) {
   w = w || 28;
-  // Prefer real PNG sprites over SVG fallbacks
+  // Use unique SVGs for production buildings (each has a distinct design)
+  if (BUILDING_SVGS[id]) return `<img src="${BUILDING_SVGS[id]}" width="${w}" height="${w}" style="object-fit:contain">`;
+  // Fall back to real PNG for barn/silo/shop
   const sprSrc = S(HD_BUILDINGS[id]) || S(`buildings_${id}`);
   if (sprSrc) return `<img src="${sprSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
-  if (BUILDING_SVGS[id]) return `<img src="${BUILDING_SVGS[id]}" width="${w}" height="${w}" style="object-fit:contain">`;
   return '';
 }
 
+// Only map buildings that have UNIQUE real sprites (not shared/generic)
 const HD_BUILDINGS = {
-  // All buildings use HayDay isometric sprites (transparent bg, high quality)
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_mill-dark', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_shop',
-  pastry_shop:'hayday_barn', jam_maker:'hayday_mill-dark',
-  pizzeria:'hayday_shop', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  barn:'hayday_barn', silo:'hayday_silo', shop:'hayday_shop',
+  chicken_coop:'hayday_chicken_coop', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
-  // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
-  const key = HD_BUILDINGS[id] || `buildings_${id}`;
-  const sprSrc = S(key);
-  if (sprSrc) return `<img src="${sprSrc}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
+  // Use unique SVGs for production buildings (each has its own design)
   if (BUILDING_SVGS[id]) {
     return `<img src="${BUILDING_SVGS[id]}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
   }
+  // Only fall back to real PNG for barn/silo/shop (which have unique real sprites)
+  const key = HD_BUILDINGS[id] || `buildings_${id}`;
+  const sprSrc = S(key);
+  if (sprSrc) return `<img src="${sprSrc}" width="${w||100}" height="${w ? Math.round(w*0.83) : 83}" class="building-img" draggable="false">`;
   return img(key, w||100, w ? Math.round(w*0.83) : 83, 'building-img');
 }
 
 function animalImg(id, w) {
   const src = S(`hayday_${id}`) || S(`animals_${id}`);
+  // If no PNG sprite, try the handcrafted SVG from ITEM_ICONS (e.g. pig)
+  if (!src && ITEM_ICONS[id]) return `<img src="${ITEM_ICONS[id]}" width="${w||50}" height="${w?Math.round(w*.85):42}" class="animal-img" draggable="false">`;
   if (!src) return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w||50}" height="${w?Math.round(w*.85):42}" style="object-fit:contain">`;
   return `<img src="${src}" width="${w||50}" height="${w?Math.round(w*.85):42}" class="animal-img" draggable="false">`;
 }
-function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
+function animalLbl(id, w) {
+  // Try hayday label sprite first, then high-quality SVG from ITEM_ICONS
+  const lblSrc = S(`hayday_${id}-lbl`);
+  if (lblSrc) return `<img src="${lblSrc}" width="${w||45}" height="${w||45}" class="animal-lbl">`;
+  if (ITEM_ICONS[id]) return `<img src="${ITEM_ICONS[id]}" width="${w||45}" height="${w||45}" class="animal-lbl">`;
+  return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl');
+}
 
 function fieldBg(state) {
   if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
@@ -1519,10 +1525,18 @@ function getAchCategoryIcon(cat) {
 }
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';(farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';
+  // Count how many fields are currently growing each crop
+  const growingCounts = {};
+  (farmData.fields||[]).forEach(f => {
+    if (f.crop && f.state !== 'empty' && f.state !== 'wilted') {
+      growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
+    }
+  });
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · '+stock+' en stock':''}${growing>0?' · '+growing+' en culture':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
-  SoundMgr.play('click');
+  SoundMgr.play('levelup');
   // Find the plot element and create harvest burst from it
   const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);

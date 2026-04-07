@@ -267,6 +267,8 @@ class FarmWebView:
                         f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
                         for iid, qty in result["items"].items()
                     )
+                    self._js("SoundMgr.play('levelup')")
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(10, result['count'] * 2)})")
                     self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
                     msg = f"{result['count']} récoltes : {items_text}"
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
@@ -535,10 +537,11 @@ class FarmWebView:
         result = prod_mgr.start_production(building_id, recipe_id)
         if result:
             r_name = result["name"]
-            self._js(f"showNotification('Production de {r_name} lancée !')")
+            msg = f"Production de {r_name} lancée !"
+            self._js(f"showNotification({json.dumps(msg)})")
         else:
             can, reason = prod_mgr.can_craft(building_id, recipe_id)
-            self._js(f"showNotification('{reason}')")
+            self._js(f"showNotification({json.dumps(reason)})")
 
     def _collect_building(self, building_id: str):
         from . import production
