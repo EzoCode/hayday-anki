@@ -1232,6 +1232,39 @@ function updateWeather() {
     }
     document.getElementById('farm-container').appendChild(rainLayer);
   }
+  // Spawn ambient particles (seeds, pollen, leaves) — makes farm feel alive
+  spawnAmbientParticles(weather);
+}
+
+let _ambientInterval = null;
+function spawnAmbientParticles(weather) {
+  if (_ambientInterval) { clearTimeout(_ambientInterval); clearInterval(_ambientInterval); }
+  // Remove old particles
+  document.querySelectorAll('.ambient-particle').forEach(el => el.remove());
+  if (weather === 'night') return; // No particles at night
+  const world = document.getElementById('farm-world');
+  if (!world) return;
+  const types = weather === 'rain' ? ['ambient-leaf'] : ['ambient-seed', 'ambient-pollen', 'ambient-leaf'];
+  const maxParticles = weather === 'rain' ? 3 : 6;
+  let count = 0;
+  function spawn() {
+    if (count >= maxParticles) return;
+    const el = document.createElement('div');
+    const t = types[Math.floor(Math.random() * types.length)];
+    el.className = `ambient-particle ${t}`;
+    el.style.left = (10 + Math.random() * 80) + '%';
+    el.style.top = (10 + Math.random() * 60) + '%';
+    world.appendChild(el);
+    count++;
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); count--; }, 12000 + Math.random() * 6000);
+  }
+  // Initial batch
+  for (let i = 0; i < 3; i++) setTimeout(spawn, i * 800);
+  // Continuous spawning with variable interval
+  function scheduleNext() {
+    _ambientInterval = setTimeout(() => { spawn(); scheduleNext(); }, 3000 + Math.random() * 3000);
+  }
+  scheduleNext();
 }
 
 function showTab(tab) {
@@ -1314,7 +1347,8 @@ function renderInventory() {
       el.onclick = () => showItemInfo(id);
     }
     const icon = itemIcon(id, 36);
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    const sellBtn = (it.sell_price||0) > 0 && qty > 0 ? `<span class="item-sell-btn" onclick="event.stopPropagation();pycmd('farm:sell:${id}:1');SoundMgr.play('coin')">Vendre 1</span>` : '';
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>${sellBtn}`;
     grid.appendChild(el);
   });
   if (!sortedItems.length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1811,7 +1845,7 @@ function showWheelResult(r){
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:auto">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
 function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
@@ -1847,15 +1881,23 @@ function hideLoginBonus(){document.getElementById('login-bonus-overlay').classLi
 function showSessionSummary(d){
   SoundMgr.play('levelup');
   const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20" style="vertical-align:middle">` : '<span class="css-coin" style="width:16px;height:16px;display:inline-block;vertical-align:middle"></span>';
-  const gemIcon = S('ui_gem') ? `<img src="${S('ui_gem')}" width="18" height="18" style="vertical-align:middle">` : '';
+  const starSrc = S('hayday_star');
   const accuracy = d.reviews > 0 ? Math.round((d.correct||0)/d.reviews*100) : 0;
-  document.getElementById('session-stats').innerHTML = `
+  // Star rating based on accuracy (like Hay Day)
+  const starCount = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : accuracy >= 50 ? 1 : 0;
+  let starsHtml = '';
+  if (starSrc && starCount > 0) {
+    starsHtml = '<div class="session-stars">';
+    for (let i = 0; i < starCount; i++) starsHtml += `<img src="${starSrc}" width="28" height="28" style="animation-delay:${i*0.15}s">`;
+    starsHtml += '</div>';
+  }
+  document.getElementById('session-stats').innerHTML = `${starsHtml}
     <div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div>
     <div class="session-stat"><div class="session-stat-value">${coinIcon} ${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">+${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">${accuracy}%</div><div class="session-stat-label">${LANG.accuracy}</div></div>
     <div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>
-    ${d.harvests_count>0?`<div class="session-stat"><div class="session-stat-value">${d.harvests_count}</div><div class="session-stat-label">${LANG.harvests}</div></div>`:''}
+    ${d.harvests_count>0?`<div class="session-stat"><div class="session-stat-value">${d.harvests_count}</div><div class="session-stat-label">Récoltes</div></div>`:''}
   `;
   let items='';
   Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,14)} ${itemName(id)} x${qty}</span>`});

@@ -115,8 +115,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   overflow: hidden;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,0.08);
   transition: transform 0.2s;
+}
+.farm-zone + .farm-zone {
+  margin-top: 14px;
 }
 
 .zone-fields {
@@ -723,28 +726,34 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .recipe-ingredient.has{background:rgba(76,175,80,.12);color:#2e7d32;border-color:rgba(76,175,80,.15)}
 .recipe-ingredient.need{background:rgba(244,67,54,.08);color:#c62828;border-color:rgba(244,67,54,.12)}
 
-/* Session summary */
-#session-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.session-stat{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;padding:10px 8px;border:1px solid rgba(106,191,71,.1);animation:statPop .4s cubic-bezier(.34,1.56,.64,1) both}
+/* Session summary — Hay Day end-of-session reward card */
+#session-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.session-stat{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;padding:10px 8px;border:1px solid rgba(106,191,71,.1);animation:statPop .4s cubic-bezier(.34,1.56,.64,1) both;text-align:center}
 .session-stat:nth-child(1){animation-delay:0s}.session-stat:nth-child(2){animation-delay:.08s}.session-stat:nth-child(3){animation-delay:.16s}.session-stat:nth-child(4){animation-delay:.24s}.session-stat:nth-child(5){animation-delay:.32s}.session-stat:nth-child(6){animation-delay:.4s}
-@keyframes statPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
-.session-stat-value{font-size:22px;font-weight:900;color:#2e7d32;display:flex;align-items:center;justify-content:center;gap:3px}
-.session-stat-label{font-size:9px;color:#888;font-weight:700;margin-top:2px}
-#session-items{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:8px}
-.session-item-tag{background:rgba(255,255,255,.5);padding:4px 10px;border-radius:12px;font-size:10px;border:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:3px;font-weight:600}
+@keyframes statPop{0%{opacity:0;transform:scale(.7) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.session-stat-value{font-size:20px;font-weight:900;color:#2e7d32;display:flex;align-items:center;justify-content:center;gap:3px}
+.session-stat-label{font-size:8px;color:#888;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
+#session-items{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:8px;padding:6px 0}
+.session-item-tag{background:rgba(255,255,255,.5);padding:4px 10px;border-radius:12px;font-size:10px;border:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:3px;font-weight:600;animation:statPop .3s cubic-bezier(.34,1.56,.64,1) both}
+.session-item-tag:nth-child(1){animation-delay:.5s}.session-item-tag:nth-child(2){animation-delay:.6s}.session-item-tag:nth-child(3){animation-delay:.7s}.session-item-tag:nth-child(4){animation-delay:.8s}
+/* Session summary stars decoration */
+.session-stars{display:flex;justify-content:center;gap:6px;margin-bottom:4px;animation:starsGlow 2s ease-in-out infinite}
+.session-stars img{filter:drop-shadow(0 1px 4px rgba(255,215,0,.6))}
 
-/* ===== DAILY LOGIN BONUS ===== */
-.login-bonus-card{background:linear-gradient(135deg,#2e7d32,#388e3c,#43a047)!important;color:#fff!important;box-shadow:0 0 50px rgba(76,175,80,.4),0 16px 50px rgba(0,0,0,.45)!important;overflow:hidden}
-.login-bonus-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 80%,rgba(255,215,0,.12),transparent 50%);pointer-events:none}
-.login-bonus-card h2{color:#fff!important}
-.login-days-row{display:flex;gap:6px;justify-content:center;margin:12px 0}
-.login-day-dot{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.08);transition:all .3s}
-.login-day-dot.claimed{background:rgba(255,215,0,.5);color:#fff;border-color:rgba(255,215,0,.7)}
-.login-day-dot.today{background:var(--gold);color:#333;border-color:#fff;box-shadow:0 0 14px rgba(255,215,0,.7);animation:todayPulse 1.5s ease-in-out infinite}
-@keyframes todayPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-.login-day-big{font-size:42px;font-weight:900;color:var(--gold);text-shadow:0 2px 10px rgba(255,215,0,.5);margin:8px 0}
-.login-reward-detail{display:flex;gap:12px;justify-content:center;margin:8px 0}
-.login-reward-item{font-size:18px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+/* ===== DAILY LOGIN BONUS — Hay Day calendar ===== */
+.login-bonus-card{background:linear-gradient(180deg,#2e7d32 0%,#1b5e20 50%,#0d3610 100%)!important;color:#fff!important;box-shadow:0 0 60px rgba(76,175,80,.5),0 16px 50px rgba(0,0,0,.5)!important;overflow:hidden;border:3px solid rgba(76,175,80,.6)!important}
+.login-bonus-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,215,0,.15),transparent 50%),radial-gradient(circle at 70% 80%,rgba(76,175,80,.2),transparent 50%);pointer-events:none}
+.login-bonus-card h2{color:#ffd700!important;text-shadow:0 2px 6px rgba(0,0,0,.4)!important;font-size:18px!important}
+.login-days-row{display:flex;gap:5px;justify-content:center;margin:12px 0;padding:10px 8px;background:rgba(0,0,0,.15);border-radius:14px}
+.login-day-dot{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.06);transition:all .3s}
+.login-day-dot.claimed{background:linear-gradient(135deg,rgba(255,215,0,.6),rgba(255,215,0,.35));color:#fff;border-color:rgba(255,215,0,.8);box-shadow:0 2px 6px rgba(255,215,0,.3)}
+.login-day-dot.today{background:linear-gradient(135deg,#ffd700,#f4922a);color:#333;border-color:#fff;box-shadow:0 0 16px rgba(255,215,0,.8),0 4px 8px rgba(0,0,0,.3);animation:todayPulse 1.5s ease-in-out infinite;transform:scale(1.1)}
+@keyframes todayPulse{0%,100%{transform:scale(1.1);box-shadow:0 0 14px rgba(255,215,0,.6)}50%{transform:scale(1.2);box-shadow:0 0 24px rgba(255,215,0,1)}}
+.login-day-big{font-size:48px;font-weight:900;color:var(--gold);text-shadow:0 2px 10px rgba(255,215,0,.5),0 4px 20px rgba(0,0,0,.3);margin:6px 0;animation:levelPop .6s cubic-bezier(.34,1.56,.64,1)}
+.login-reward-detail{display:flex;gap:14px;justify-content:center;margin:10px 0;padding:8px 0}
+.login-reward-item{font-size:20px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.4);background:rgba(255,255,255,.1);padding:6px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:4px;animation:statPop .4s cubic-bezier(.34,1.56,.64,1) both}
+.login-reward-item:nth-child(1){animation-delay:.3s}
+.login-reward-item:nth-child(2){animation-delay:.45s}
 
 /* ===== ACTION BUTTONS — Hay Day Green Style ===== */
 .action-btn{background:linear-gradient(180deg,#f7c948 0%,#f4a22a 30%,#f4922a 60%,#e07c18 100%);color:#fff;border:2px solid rgba(255,255,255,.3);padding:12px 32px;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(244,146,42,.45),inset 0 2px 0 rgba(255,255,255,.35),0 3px 0 #b86a12;transition:all .15s;margin-top:10px;letter-spacing:.4px;text-shadow:0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
@@ -809,9 +818,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes decoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
 
 /* ===== FARMER CHARACTER ===== */
-#farmer-character{position:absolute;bottom:8px;right:12px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.35))}
-.farmer-sprite{image-rendering:pixelated}
-@keyframes farmerBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+#farmer-character{position:absolute;bottom:12px;right:16px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.4));cursor:pointer;transition:transform .2s}
+#farmer-character:hover{transform:scale(1.1)}
+.farmer-sprite{image-rendering:auto;max-width:44px;max-height:52px;object-fit:contain}
+@keyframes farmerBob{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-3px) rotate(.5deg)}50%{transform:translateY(-5px) rotate(0deg)}75%{transform:translateY(-2px) rotate(-.5deg)}}
 
 /* ===== TUTORIAL ===== */
 .tutorial-card{max-width:320px}
@@ -901,5 +911,38 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== READY PLOT CROP NAME ===== */
 .plot-ready-crop-name{color:rgba(255,255,255,1) !important;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 10px rgba(255,215,0,.5) !important;font-size:8px !important;top:auto !important;bottom:18px !important}
+
+/* ===== WEATHER SYSTEM — Time-of-day atmosphere ===== */
+.weather-sunset .farm-sky{background:linear-gradient(180deg,#e87040 0%,#f4a460 25%,#ffc880 50%,#d8c090 80%,rgba(216,192,144,0) 100%)}
+.weather-sunset #farm-world{background-color:#4a8830;background-image:
+  radial-gradient(ellipse at 30% 20%,rgba(232,112,64,.08) 0%,transparent 50%),
+  radial-gradient(ellipse at 70% 60%,rgba(56,142,60,.08) 0%,transparent 40%),
+  linear-gradient(160deg,#5a9830 0%,#4a8828 25%,#3d7820 50%,#4a8828 75%,#5a9830 100%)}
+.weather-sunset .farm-atmosphere{background:radial-gradient(ellipse at 50% 20%,rgba(255,180,100,.1) 0%,transparent 50%),radial-gradient(ellipse at center,transparent 55%,rgba(60,30,0,.15) 100%)}
+
+.weather-night .farm-sky{background:linear-gradient(180deg,#1a2a4a 0%,#2a3a5a 25%,#3a4a6a 50%,#4a5a70 80%,rgba(74,90,112,0) 100%)}
+.weather-night #farm-world{background-color:#2a4a1a;background-image:
+  radial-gradient(ellipse at 30% 20%,rgba(40,80,40,.1) 0%,transparent 50%),
+  linear-gradient(160deg,#3a6a24 0%,#2a5a1a 25%,#224a14 50%,#2a5a1a 75%,#3a6a24 100%)}
+.weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,20,.25) 100%)}
+.weather-night .farm-zone{filter:brightness(.85) saturate(.85)}
+.weather-night .building-tile{filter:brightness(.85)}
+.weather-night .plot{filter:brightness(.88)}
+
+.weather-dawn .farm-sky{background:linear-gradient(180deg,#6a8ab0 0%,#a0b8d0 25%,#d0c8b0 50%,#c8d8b0 80%,rgba(200,216,176,0) 100%)}
+.weather-dawn .farm-atmosphere{background:radial-gradient(ellipse at 30% 0%,rgba(255,220,160,.08) 0%,transparent 40%)}
+
+/* Rain */
+#rain-layer{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
+.rain-drop{position:absolute;top:-20px;width:1.5px;height:15px;background:linear-gradient(180deg,transparent,rgba(100,160,200,.5));border-radius:0 0 2px 2px;animation:rainFall .6s linear infinite}
+@keyframes rainFall{0%{transform:translateY(-20px)}100%{transform:translateY(100vh)}}
+.weather-rain .farm-sky{background:linear-gradient(180deg,#6a7a8a 0%,#8a9aaa 25%,#9aabb8 50%,#a8b8c0 80%,rgba(168,184,192,0) 100%)}
+.weather-rain .farm-atmosphere{background:rgba(100,120,140,.06)}
+.weather-rain #farm-world{filter:brightness(.9) saturate(.85)}
+.weather-rain .farm-zone{box-shadow:0 4px 16px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)}
+
+/* ===== QUICK-SELL BUTTON IN INVENTORY ===== */
+.item-sell-btn{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#6abf47,#4a9e2f);color:#fff;border:none;border-radius:6px;font-size:7px;font-weight:800;padding:2px 8px;cursor:pointer;opacity:0;transition:opacity .15s;z-index:5;text-shadow:0 1px 1px rgba(0,0,0,.3);white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.item-cell:hover .item-sell-btn{opacity:1}
 
 .hidden{display:none!important}
