@@ -902,7 +902,7 @@ class FarmManager:
         return True
 
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
-        """Plant a crop on a field (identified by ID)."""
+        """Plant a crop on a field (identified by ID). Costs coins based on crop."""
         # Look up field by ID in the new fields list
         field = next((f for f in self.state.fields if f["id"] == plot_id), None)
         if field is None:
@@ -914,6 +914,15 @@ class FarmManager:
 
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+
+        # Deduct planting cost
+        plant_cost = crop_def.get("plant_cost", 0)
+        if self.state.coins < plant_cost:
+            return False
+        if plant_cost > 0:
+            self.state.coins -= plant_cost
+            self.state.total_coins_spent += plant_cost
+
         # growth_reviews = reviews PER STAGE (x4 stages = total)
         reviews_per_stage = max(1, crop_def.get("growth_reviews", 3))
 
@@ -1732,6 +1741,7 @@ class FarmManager:
                 "harvest_max": cdef.get("harvest_max", 4),
                 "sell_price": cdef.get("sell_price", 2),
                 "xp_per_harvest": cdef.get("xp_per_harvest", 3),
+                "plant_cost": cdef.get("plant_cost", 0),
             }
             for cid, cdef in progression.CROP_DEFINITIONS.items()
         }

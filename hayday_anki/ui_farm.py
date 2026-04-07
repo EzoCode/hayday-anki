@@ -283,16 +283,23 @@ class FarmWebView:
             elif action == "plant":
                 plot_id = int(parts[2])
                 crop_id = parts[3]
+                from . import progression
+                crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+                plant_cost = crop_def.get("plant_cost", 0)
                 if self.manager.plant_crop(plot_id, crop_id):
-                    from . import progression
-                    crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
                     crop_name = crop_def.get("name", crop_id)
                     total_reviews = crop_def.get("growth_reviews", 3) * 4
-                    msg = f"{crop_name} planté(e) ! ({total_reviews} reviews pour mûrir)"
+                    cost_str = f" (-{plant_cost} p.)" if plant_cost > 0 else ""
+                    msg = f"{crop_name} planté(e) !{cost_str} ({total_reviews} rev.)"
                     self._js("SoundMgr.play('plant')")
                     self._js(f"showNotification({json.dumps(msg)})")
                 else:
-                    self._js("showNotification('Impossible de planter ici !')")
+                    if self.manager.state.coins < plant_cost:
+                        crop_name = crop_def.get("name", crop_id)
+                        msg = f"Pas assez de pièces pour {crop_name} ({plant_cost} p. requis)"
+                        self._js(f"showNotification({json.dumps(msg)})")
+                    else:
+                        self._js("showNotification('Impossible de planter ici !')")
                 self._send_state()
                 self.manager.save()
 
