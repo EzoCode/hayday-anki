@@ -1649,23 +1649,61 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  // Calculate efficiency for each crop to show ranking
+  const cropData = (farmData.unlocked_crops||[]).map(id => {
+    const def = (farmData.crop_defs||{})[id]||{};
+    const gr = def.growth_reviews||3;
+    const totalReviews = gr*4;
+    const sellPrice = def.sell_price||2;
+    const harvestMin = def.harvest_min||2;
+    const harvestMax = def.harvest_max||4;
+    const avgYield = Math.round((harvestMin+harvestMax)/2);
+    const plantCost = def.plant_cost||0;
+    const profit = avgYield*sellPrice - plantCost;
+    const efficiency = totalReviews > 0 ? profit / totalReviews : 0;
+    return { id, def, totalReviews, sellPrice, harvestMin, harvestMax, avgYield, plantCost, profit, efficiency, xpPerHarvest: def.xp_per_harvest||3 };
+  });
+  const maxEff = Math.max(...cropData.map(c => c.efficiency), 1);
+  cropData.forEach(c => {
+    const id = c.id;
+    const name = cropName(id);
+    const stock = (farmData.inventory||{})[id]||0;
+    const growing = growingCounts[id]||0;
+    const coins = farmData.coins||0;
+    const canAfford = coins >= c.plantCost;
+    const el = document.createElement('div');
+    el.className = 'crop-choice';
+    if (!canAfford) el.classList.add('crop-choice-locked');
+    el.onclick = () => { if (!canAfford) { showNotification(`Pas assez de pièces (${c.plantCost} requis)`); return; } pycmd(`farm:plant:${plotId}:${id}`); hideOverlay(); SoundMgr.play('plant'); };
+    const costBadge = c.plantCost > 0 ? `<span class="crop-cost-badge">${c.plantCost} p.</span>` : `<span class="crop-cost-badge free">Gratuit</span>`;
+    // Efficiency bar (coins per review)
+    const effPct = Math.round((c.efficiency / maxEff) * 100);
+    const effBar = `<div class="crop-eff-bar"><div class="crop-eff-fill" style="width:${effPct}%"></div></div>`;
+    const stockInfo = stock > 0 ? `<span class="crop-stock-tag">${stock} stock</span>` : '';
+    const growInfo = growing > 0 ? `<span class="crop-growing-tag">${growing} cult.</span>` : '';
+    el.innerHTML = `<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${c.totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${c.sellPrice}/u</span></div><div class="crop-yield-info">${c.harvestMin}-${c.harvestMax}x · +${c.xpPerHarvest} XP · <span class="crop-profit">+${c.profit} net</span></div>${effBar}<div class="crop-yield-info">${stockInfo}${growInfo}</div>`;
+    choices.appendChild(el);
+  });document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
   // Find the plot element and create harvest burst from it
-  const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
-  if (field && plots.length > 0) {
-    // Find the matching plot element
-    const allPlots = document.querySelectorAll('.plot');
-    const idx = (farmData.fields||[]).findIndex(f => f.id === id);
-    const plotEl = allPlots[idx];
-    if (plotEl) {
+  const allPlots = document.querySelectorAll('.plot');
+  const idx = (farmData.fields||[]).findIndex(f => f.id === id);
+  const plotEl = allPlots[idx];
+  if (plotEl) {
+    // Scale-down pop animation on the plot itself
+    plotEl.style.transition = 'transform .15s cubic-bezier(.34,1.56,.64,1)';
+    plotEl.style.transform = 'scale(0.85)';
+    setTimeout(() => {
+      plotEl.style.transform = 'scale(1.1)';
+      setTimeout(() => { plotEl.style.transform = ''; }, 150);
+    }, 100);
+    if (field) {
       const rect = plotEl.getBoundingClientRect();
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
-      // Create harvest burst particles
       showHarvestBurst(cx, cy, field.crop);
     }
   }
@@ -1781,8 +1819,27 @@ function showLevelUp(d){
   document.getElementById('levelup-overlay').classList.remove('hidden');
   createSparkleRain();
   createConfetti();
+  // Screen shake for impact
+  document.body.classList.add('screen-shake');
+  setTimeout(() => document.body.classList.remove('screen-shake'), 600);
 }
 function hideLevelUp(){document.getElementById('levelup-overlay').classList.add('hidden')}
+
+function showStreakMilestone(streak) {
+  SoundMgr.play('levelup');
+  const bonusPct = Math.min(streak * 5, 50);
+  const rewards = {3: '10 pièces', 7: '25 pièces + 1 gemme', 14: '50 pièces + 3 gemmes', 21: '75 pièces + 5 gemmes', 30: '100 pièces + 10 gemmes', 50: '200 pièces + 25 gemmes', 100: '500 pièces + 50 gemmes'};
+  const reward = rewards[streak] || `${streak * 5} pièces`;
+  showNotification(`Série de ${streak} jours ! Bonus: +${bonusPct}% · ${reward}`, 'reward');
+  // Grant streak milestone reward
+  const gemRewards = {3:0, 7:1, 14:3, 21:5, 30:10, 50:25, 100:50};
+  const coinRewards = {3:10, 7:25, 14:50, 21:75, 30:100, 50:200, 100:500};
+  pycmd(`farm:streak_bonus:${coinRewards[streak]||0}:${gemRewards[streak]||0}`);
+  createConfetti();
+  // Animate streak counter
+  hudBump('hud-streak');
+  setTimeout(() => hudBump('hud-streak'), 300);
+}
 
 function showDailyLoginBonus(d){
   SoundMgr.play('levelup');
@@ -1886,13 +1943,80 @@ function showProductionDialog(data){
 }
 
 function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000)return Math.round(n/1000)+'k';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}
-// --- Farmer Character ---
+// --- Farmer Character with Contextual Tips ---
+let _farmerTipTimer = null;
+let _lastTipTime = 0;
 function renderFarmer() {
   const el = document.getElementById('farmer-character');
   if (!el) return;
   const src = S('hayday_farmer-woman') || S('hayday_farmer-man');
   if (src) el.innerHTML = `<img src="${src}" width="40" height="48" class="farmer-sprite">`;
   else el.innerHTML = '';
+  el.onclick = () => showFarmerTip(true);
+  // Show contextual tip after state updates (throttled)
+  const now = Date.now();
+  if (now - _lastTipTime > 30000) { // Max 1 tip per 30 seconds
+    setTimeout(() => showFarmerTip(false), 2000);
+  }
+}
+function showFarmerTip(forced) {
+  const el = document.getElementById('farmer-character');
+  if (!el || el.querySelector('.farmer-tip')) return;
+  const tip = getFarmerTip(forced);
+  if (!tip) return;
+  _lastTipTime = Date.now();
+  const bubble = document.createElement('div');
+  bubble.className = 'farmer-tip';
+  bubble.textContent = tip;
+  el.appendChild(bubble);
+  clearTimeout(_farmerTipTimer);
+  _farmerTipTimer = setTimeout(() => { if (bubble.parentNode) bubble.parentNode.removeChild(bubble); }, forced ? 5000 : 4000);
+}
+function getFarmerTip(forced) {
+  const d = farmData;
+  const fields = d.fields || [];
+  const readyCount = fields.filter(f => f.state === 'ready').length;
+  const emptyCount = fields.filter(f => f.state === 'empty').length;
+  const growingCount = fields.filter(f => f.state === 'planted' || f.state === 'growing').length;
+  const wiltedCount = fields.filter(f => f.state === 'wilted').length;
+  const queues = d.production_queues || {};
+  const readyProducts = Object.values(queues).reduce((s, q) => s + q.filter(i => i.ready).length, 0);
+  const orders = (d.active_orders || []);
+  const inv = d.inventory || {};
+  const fulfillable = orders.filter(o => Object.entries(o.items_needed || {}).every(([id, qty]) => (inv[id] || 0) >= qty)).length;
+  const barnPct = (d.barn_used || 0) / Math.max(1, d.barn_capacity || 50);
+  const siloPct = (d.silo_used || 0) / Math.max(1, d.silo_capacity || 50);
+  const boxes = (d.mystery_boxes || []).length;
+  const canSpin = d.can_spin_wheel;
+
+  // Priority-ordered tips (most urgent first)
+  const tips = [];
+  if (wiltedCount > 0) tips.push(`${wiltedCount} culture${wiltedCount>1?'s':''} fané${wiltedCount>1?'es':'e'} ! Clique dessus pour nettoyer.`);
+  if (readyCount >= 3) tips.push(`${readyCount} récoltes prêtes ! Utilise "Tout récolter" !`);
+  else if (readyCount > 0) tips.push(`${readyCount} récolte${readyCount>1?'s':''} prête${readyCount>1?'s':''} ! Clique pour récolter.`);
+  if (readyProducts > 0) tips.push(`${readyProducts} produit${readyProducts>1?'s':''} prêt${readyProducts>1?'s':''} dans l'atelier ! Va les récupérer.`);
+  if (fulfillable > 0) tips.push(`${fulfillable} commande${fulfillable>1?'s':''} prête${fulfillable>1?'s':''} à livrer ! Gros bonus à la clé.`);
+  if (emptyCount >= 3 && emptyCount > growingCount) tips.push(`${emptyCount} parcelles vides ! Plante des cultures pour progresser.`);
+  if (barnPct >= 0.9) tips.push('Ta grange déborde ! Vends des matériaux ou améliore-la.');
+  if (siloPct >= 0.9) tips.push('Ton silo est presque plein ! Vends des récoltes ou améliore-le.');
+  if (boxes > 0) tips.push(`${boxes} boîte${boxes>1?'s':''} mystère${boxes>1?'s':''} ! Clique sur l'onglet Ferme.`);
+  if (canSpin) tips.push('La roue de la fortune est disponible ! Tente ta chance.');
+  if ((d.level || 1) < 5 && growingCount > 0) tips.push('Continue à réviser pour faire pousser tes cultures !');
+  if (d.unlocked_buildings?.length > 0 && (d.placed_buildings || []).length === 0) tips.push('Tu peux construire un bâtiment ! Va dans "+ Construire".');
+
+  // Forced (click) = show a random tip even if nothing urgent
+  if (tips.length === 0 && forced) {
+    const generic = [
+      'Révise des cartes pour gagner des pièces et de l\'XP !',
+      'Les cultures rares se vendent plus cher.',
+      'Les bâtiments transforment tes récoltes en produits de valeur.',
+      'Continue ta série quotidienne pour un bonus de +5% par jour !',
+      'Les commandes donnent 2x le prix normal !',
+      `Tu as ${d.total_harvests || 0} récoltes au total. Impressionnant !`,
+    ];
+    return generic[Math.floor(Math.random() * generic.length)];
+  }
+  return tips.length > 0 ? tips[0] : null;
 }
 
 // --- Tutorial ---

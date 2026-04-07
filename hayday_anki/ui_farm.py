@@ -468,6 +468,17 @@ class FarmWebView:
             elif action == "get_achievements":
                 self._send_achievements()
 
+            elif action == "streak_bonus":
+                coins = int(parts[2]) if len(parts) > 2 else 0
+                gems = int(parts[3]) if len(parts) > 3 else 0
+                if coins > 0:
+                    self.manager.state.coins += coins
+                    self.manager.state.total_coins_earned += coins
+                if gems > 0:
+                    self.manager.state.gems += gems
+                self._send_state()
+                self.manager.save()
+
         except Exception as e:
             print(f"[ADFarm] Bridge error: {e}")
             import traceback

@@ -73,8 +73,16 @@ def on_reviewer_did_answer(reviewer, card, ease):
         mgr = _get_manager()
 
         if not _session_active:
+            old_streak = mgr.state.current_streak
             mgr.start_session()
             _session_active = True
+            # Detect streak milestone
+            new_streak = mgr.state.current_streak
+            if new_streak > old_streak and new_streak in (3, 7, 14, 21, 30, 50, 100):
+                view = _get_view()
+                if view.web:
+                    import json
+                    view._js(f"showStreakMilestone({new_streak})")
 
         card_ivl = card.ivl if hasattr(card, "ivl") else 0
         card_factor = card.factor if hasattr(card, "factor") else 2500
