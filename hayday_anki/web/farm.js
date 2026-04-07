@@ -384,7 +384,7 @@ function itemIcon(id, w) {
 // --- Inline SVG Building Icons (distinct identity per building) ---
 const BUILDING_SVGS = {
   bakery: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='32' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='10' y='53' width='60' height='22' rx='2' fill='%23c9884a' stroke='%23a06a30' stroke-width='.8'/%3E%3Crect x='11' y='54' width='28' height='20' fill='%23daa06d' opacity='.2'/%3E%3Cpath d='M5 53L40 23l35 30z' fill='%23d4534a' stroke='%23b03a32' stroke-width='.6'/%3E%3Cpath d='M12 53L40 28l28 25z' fill='%23e8665e'/%3E%3Cpath d='M14 53L40 30l26 23z' fill='%23ef8a84' opacity='.3'/%3E%3Crect x='28' y='56' width='24' height='19' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='30' y='58' width='20' height='13' rx='1' fill='%23ffd54f' opacity='.35'/%3E%3Cpath d='M30 64h20' stroke='%238b5e3c' stroke-width='.5' opacity='.3'/%3E%3Crect x='15' y='40' width='12' height='11' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='16' y='41' width='10' height='9' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='53' y='40' width='12' height='11' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='54' y='41' width='10' height='9' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='36' y='18' width='8' height='12' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.4'/%3E%3Cellipse cx='40' cy='15' rx='3' ry='4' fill='%23ccc' opacity='.5'/%3E%3Cellipse cx='40' cy='13' rx='2' ry='3' fill='%23ddd' opacity='.35'/%3E%3Ccircle cx='40' cy='64' r='5' fill='%23e8b87a' stroke='%23c9884a' stroke-width='.4'/%3E%3Ccircle cx='40' cy='63' r='3.5' fill='%23daa06d'/%3E%3Cellipse cx='38' cy='62' rx='1.5' ry='1' fill='%23fff' opacity='.2'/%3E%3C/svg%3E",
-  sugar_mill: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='15' y='35' width='50' height='40' rx='3' fill='%23e0d5c0'/%3E%3Cpath d='M10 35L40 15l30 20z' fill='%23c9884a'/%3E%3Cpath d='M15 35L40 19l25 16z' fill='%23daa06d'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Ccircle cx='55' cy='30' r='10' fill='%23c9884a'/%3E%3Cpath d='M55 20v20M45 30h20' stroke='%23a06a30' stroke-width='2.5'/%3E%3Cpath d='M48 23l14 14M48 37l14-14' stroke='%23a06a30' stroke-width='1.5'/%3E%3Ccircle cx='55' cy='30' r='3' fill='%23daa06d'/%3E%3C/svg%3E",
+  sugar_mill: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='32' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='15' y='35' width='50' height='40' rx='3' fill='%23e0d5c0' stroke='%23c8b8a0' stroke-width='.5'/%3E%3Crect x='16' y='36' width='24' height='38' fill='%23ebe0d0' opacity='.3'/%3E%3Cpath d='M10 35L40 15l30 20z' fill='%23c9884a' stroke='%23a06a30' stroke-width='.5'/%3E%3Cpath d='M15 35L40 19l25 16z' fill='%23daa06d'/%3E%3Cpath d='M18 35L40 22l22 13z' fill='%23e8c87a' opacity='.3'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='18' y='44' width='10' height='9' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.3'/%3E%3Crect x='19' y='45' width='8' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='52' y='44' width='10' height='9' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.3'/%3E%3Crect x='53' y='45' width='8' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Ccircle cx='55' cy='28' r='12' fill='%23c9884a' stroke='%23a06a30' stroke-width='.8'/%3E%3Cpath d='M55 16v24M43 28h24' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M47 20l16 16M47 36l16-16' stroke='%23a06a30' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='55' cy='28' r='4' fill='%23daa06d' stroke='%23a06a30' stroke-width='.5'/%3E%3Ccircle cx='55' cy='28' r='1.5' fill='%23e8c87a'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23f5f5f0' stroke='%23ddd' stroke-width='.4'/%3E%3Ccircle cx='40' cy='63' r='2.5' fill='%23fff' opacity='.7'/%3E%3C/svg%3E",
   dairy: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='30' ry='4' fill='%23000' opacity='.08'/%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23f0f0f0' stroke='%23ddd' stroke-width='.6'/%3E%3Crect x='13' y='39' width='26' height='35' fill='%23f5f5f5' opacity='.3'/%3E%3Cpath d='M8 38L40 16l32 22z' fill='%234fc3f7' stroke='%230288d1' stroke-width='.5'/%3E%3Cpath d='M14 38L40 20l26 18z' fill='%2381d4fa'/%3E%3Cpath d='M18 38L40 23l22 15z' fill='%23b3e5fc' opacity='.4'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='16' y='46' width='11' height='10' rx='1' fill='%23bbb' stroke='%23999' stroke-width='.3'/%3E%3Crect x='17' y='47' width='9' height='8' rx='1' fill='%23e3f2fd'/%3E%3Crect x='53' y='46' width='11' height='10' rx='1' fill='%23bbb' stroke='%23999' stroke-width='.3'/%3E%3Crect x='54' y='47' width='9' height='8' rx='1' fill='%23e3f2fd'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='40' cy='64' r='2.5' fill='%2381d4fa' opacity='.5'/%3E%3C/svg%3E",
   bbq: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='30' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='12' y='40' width='56' height='35' rx='3' fill='%23795548' stroke='%234e342e' stroke-width='.5'/%3E%3Crect x='13' y='41' width='26' height='33' fill='%238d6e63' opacity='.2'/%3E%3Cpath d='M8 40L40 18l32 22z' fill='%23e53935' stroke='%23c62828' stroke-width='.5'/%3E%3Cpath d='M14 40L40 22l26 18z' fill='%23ef5350'/%3E%3Cpath d='M18 40L40 25l22 15z' fill='%23ef9a9a' opacity='.3'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%235d4037' stroke='%234e342e' stroke-width='.4'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='34' y='14' width='4' height='10' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Crect x='43' y='12' width='4' height='12' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Cellipse cx='36' cy='12' rx='3' ry='4' fill='%23bbb' opacity='.25'/%3E%3Cellipse cx='45' cy='10' rx='3.5' ry='4.5' fill='%23bbb' opacity='.2'/%3E%3Cellipse cx='36' cy='10' rx='2' ry='3' fill='%23ccc' opacity='.15'/%3E%3C/svg%3E",
   pastry_shop: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='32' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='10' y='42' width='60' height='33' rx='3' fill='%23fff8e1' stroke='%23e8c87a' stroke-width='.6'/%3E%3Crect x='11' y='43' width='28' height='31' fill='%23fffde7' opacity='.3'/%3E%3Cpath d='M5 42L40 18l35 24z' fill='%23ff9800' stroke='%23e68900' stroke-width='.5'/%3E%3Cpath d='M12 42L40 22l28 20z' fill='%23ffb74d'/%3E%3Cpath d='M16 42L40 26l24 16z' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='28' y='52' width='24' height='23' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='30' y='54' width='20' height='16' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='14' y='48' width='11' height='9' rx='1.5' fill='%238b5e3c'/%3E%3Crect x='15' y='49' width='9' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='55' y='48' width='11' height='9' rx='1.5' fill='%238b5e3c'/%3E%3Crect x='56' y='49' width='9' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Ccircle cx='35' cy='63' r='4.5' fill='%23ffc107' stroke='%23e6a800' stroke-width='.4'/%3E%3Ccircle cx='35' cy='62' r='3' fill='%23ffe082'/%3E%3Ccircle cx='35' cy='60.5' r='1.5' fill='%23e74c3c'/%3E%3Ccircle cx='46' cy='65' r='3.5' fill='%23efebe9' stroke='%23d7ccc8' stroke-width='.4'/%3E%3Ccircle cx='46' cy='64' r='2.5' fill='%23fce4ec'/%3E%3Cpath d='M44 62h4' stroke='%23e91e63' stroke-width='.6'/%3E%3Crect x='36' y='14' width='8' height='10' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Cellipse cx='40' cy='12' rx='3' ry='4' fill='%23ccc' opacity='.4'/%3E%3C/svg%3E",
@@ -841,7 +841,9 @@ function updateTabBadges() {
   let readyCount = 0;
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
-  setBadge('tab-farm', (d.mystery_boxes||[]).length);
+  const readyCrops = (d.fields||[]).filter(f => f.state === 'ready').length;
+  const farmBadgeCount = readyCrops + (d.mystery_boxes||[]).length;
+  setBadge('tab-farm', farmBadgeCount);
   setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
   // Wheel icon only rotates when free spin available
   const wheelBtn = document.getElementById('tab-wheel');
@@ -853,8 +855,14 @@ function setBadge(tabId, count) {
   if (!tab) return;
   let badge = tab.querySelector('.tab-badge');
   if (count > 0) {
-    if (!badge) { badge = document.createElement('span'); badge.className = 'tab-badge'; tab.appendChild(badge); }
-    badge.textContent = count;
+    const isNew = !badge;
+    if (isNew) { badge = document.createElement('span'); badge.className = 'tab-badge'; tab.appendChild(badge); }
+    if (badge.textContent !== String(count)) {
+      badge.textContent = count;
+      badge.classList.remove('updated');
+      void badge.offsetWidth;
+      badge.classList.add('updated');
+    }
   } else if (badge) {
     badge.remove();
   }
@@ -1237,18 +1245,21 @@ function renderInventory() {
   const siloColor = siloPct >= 90 ? '#e74c3c' : siloPct >= 70 ? '#ff9800' : '#4caf50';
   document.getElementById('barn-status').innerHTML = `${barnIcon}Grange ${barnUsed}/${barnCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${barnPct}%;height:100%;background:${barnColor};border-radius:3px"></span></span>`;
   document.getElementById('silo-status').innerHTML = `${siloIcon}Silo ${siloUsed}/${siloCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${siloPct}%;height:100%;background:${siloColor};border-radius:3px"></span></span>`;
-  Object.entries(inv).forEach(([id,qty]) => {
-    if (qty<=0) return; const it = cat[id]||{};
+  // Sort inventory by category for clean display (crops → processed → animal → material)
+  const catOrder = {crop:0, processed:1, animal_product:2, material:3, decoration:4};
+  const sorted = Object.entries(inv).filter(([,qty])=>qty>0).sort((a,b)=>{
+    const ca = catOrder[(cat[a[0]]||{}).category]??5, cb = catOrder[(cat[b[0]]||{}).category]??5;
+    return ca !== cb ? ca - cb : a[0].localeCompare(b[0]);
+  });
+  sorted.forEach(([id,qty]) => {
+    const it = cat[id]||{};
     const el = document.createElement('div'); el.className = 'item-cell';
-    // Tap = show item info, info card has sell button
-    // Click tile = sell if sellable, otherwise show info
     if ((it.sell_price||0) > 0 && qty > 0) {
       el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
     } else {
       el.onclick = () => showItemInfo(id);
     }
     const icon = itemIcon(id, 36);
-    // Add info button
     el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
     grid.appendChild(el);
   });
@@ -1593,7 +1604,8 @@ function renderSettings() {
         <div class="stat-row"><span>${LANG.orders_done}</span><strong>${d.orders_completed||0}</strong></div>
         <div class="stat-row"><span>${LANG.items_sold}</span><strong>${d.total_items_sold||0}</strong></div>
         <div class="stat-row"><span>${LANG.total_sessions_label}</span><strong>${d.total_sessions||0}</strong></div>
-      </div>`;
+      </div>
+      <p style="margin-top:10px;font-size:9px;color:#bbb">ADFarm v1.0 — Hay Day pour Anki</p>`;
   }
 }
 
@@ -1623,7 +1635,7 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · '+stock+' en stock':''}${growing>0?' · '+growing+' en culture':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-growth-bar"><div class="crop-growth-fill" style="width:${Math.min(100,totalReviews/56*100)}%"></div></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?` · <span class="crop-stock">${stock} stock</span>`:''}${growing>0?` · <span class="crop-stock">${growing} en culture</span>`:''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');

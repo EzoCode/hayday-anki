@@ -254,6 +254,11 @@ class FarmWebView:
                 result = self.manager.harvest_plot(plot_id)
                 if result:
                     self._js(f"showReward({json.dumps(result)})")
+                    # Show harvested items notification
+                    from .farm_manager import ITEM_CATALOG as _IC2
+                    for iid, qty in result.get("items", {}).items():
+                        iname = _IC2.get(iid, {}).get("name", iid)
+                        self._js(f"showNotification('+{qty} {iname}', 'reward')")
                     self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
