@@ -203,13 +203,16 @@ def _process_animals(mgr):
                         view._js(f"showNotification({json.dumps(msg)})")
     # Sync animals dict from pastures (single source of truth)
     mgr._sync_animals_from_pastures()
-    # Show notifications for collected animal products
+    # Show notifications for collected animal products (with item icons)
     if collected_products:
         view = _get_view()
         if view.web:
             for p in collected_products:
-                msg = f"+{p['qty']} {p['name']}"
-                view._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                product_id = p["product"]
+                qty = p["qty"]
+                name = p["name"]
+                text_part = json.dumps(f" +{qty} {name}")
+                view._js(f"showNotification(itemIcon({json.dumps(product_id)}, 14) + {text_part}, 'reward')")
 
 
 def _check_achievements(mgr):

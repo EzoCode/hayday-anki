@@ -617,6 +617,21 @@ function updateHUD() {
   else streakCountEl.textContent = newStreak;
   _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct };
 
+  // Session review counter — shows during active review sessions
+  const sessionReviews = d.session_reviews || 0;
+  const sessionEl = document.getElementById('hud-session-reviews');
+  const sessionCountEl = document.getElementById('session-review-count');
+  if (sessionEl && sessionCountEl) {
+    if (sessionReviews > 0) {
+      sessionCountEl.textContent = sessionReviews;
+      sessionEl.style.display = '';
+      if (sessionReviews > (_prevHud.sessionReviews || 0)) hudBump('hud-session-reviews');
+    } else {
+      sessionEl.style.display = 'none';
+    }
+  }
+  _prevHud.sessionReviews = sessionReviews;
+
   // Streak bonus indicator — show percentage when active
   const streakWrap = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
@@ -1263,22 +1278,46 @@ function renderInventory() {
   const siloColor = siloPct >= 90 ? '#e74c3c' : siloPct >= 70 ? '#ff9800' : '#4caf50';
   document.getElementById('barn-status').innerHTML = `${barnIcon}Grange ${barnUsed}/${barnCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${barnPct}%;height:100%;background:${barnColor};border-radius:3px"></span></span>`;
   document.getElementById('silo-status').innerHTML = `${siloIcon}Silo ${siloUsed}/${siloCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${siloPct}%;height:100%;background:${siloColor};border-radius:3px"></span></span>`;
-  Object.entries(inv).forEach(([id,qty]) => {
-    if (qty<=0) return; const it = cat[id]||{};
+
+  // Sort items by category: crops → animal products → processed → materials → decorations
+  const CATEGORY_ORDER = {crop: 0, animal_product: 1, processed: 2, material: 3, decoration: 4};
+  const CATEGORY_LABELS = {crop: 'Récoltes', animal_product: 'Produits animaux', processed: 'Produits transformés', material: 'Matériaux', decoration: 'Décorations'};
+  const sortedItems = Object.entries(inv)
+    .filter(([id, qty]) => qty > 0)
+    .sort((a, b) => {
+      const catA = (cat[a[0]]||{}).category||'material';
+      const catB = (cat[b[0]]||{}).category||'material';
+      const orderA = CATEGORY_ORDER[catA] ?? 5;
+      const orderB = CATEGORY_ORDER[catB] ?? 5;
+      if (orderA !== orderB) return orderA - orderB;
+      return ((cat[b[0]]||{}).sell_price||0) - ((cat[a[0]]||{}).sell_price||0);
+    });
+
+  let lastCategory = null;
+  sortedItems.forEach(([id, qty]) => {
+    const it = cat[id]||{};
+    const itemCat = it.category || 'material';
+
+    // Insert section header when category changes
+    if (itemCat !== lastCategory) {
+      lastCategory = itemCat;
+      const sep = document.createElement('div');
+      sep.className = 'inv-section-header';
+      sep.textContent = CATEGORY_LABELS[itemCat] || itemCat;
+      grid.appendChild(sep);
+    }
+
     const el = document.createElement('div'); el.className = 'item-cell';
-    // Tap = show item info, info card has sell button
-    // Click tile = sell if sellable, otherwise show info
     if ((it.sell_price||0) > 0 && qty > 0) {
       el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
     } else {
       el.onclick = () => showItemInfo(id);
     }
     const icon = itemIcon(id, 36);
-    // Add info button
     el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
     grid.appendChild(el);
   });
-  if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
+  if (!sortedItems.length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
 }
 
 function renderBuildingsPanel() {
@@ -1654,20 +1693,18 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
 function harvestPlot(id){
   SoundMgr.play('harvest');
   // Find the plot element and create harvest burst from it
-  const plots = document.querySelectorAll('.plot-ready');
   const field = farmData.fields?.find(f => f.id === id);
-  if (field && plots.length > 0) {
-    // Find the matching plot element
-    const allPlots = document.querySelectorAll('.plot');
-    const idx = (farmData.fields||[]).findIndex(f => f.id === id);
-    const plotEl = allPlots[idx];
-    if (plotEl) {
-      const rect = plotEl.getBoundingClientRect();
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top + rect.height/2;
-      // Create harvest burst particles
-      showHarvestBurst(cx, cy, field.crop);
-    }
+  const allPlots = document.querySelectorAll('.plot');
+  const idx = (farmData.fields||[]).findIndex(f => f.id === id);
+  const plotEl = allPlots[idx];
+  if (field && plotEl) {
+    const rect = plotEl.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    // Create harvest burst particles from actual plot position
+    showHarvestBurst(cx, cy, field.crop);
+    // Coin fly from plot to HUD (satisfying collection feel)
+    showCoinBurst(cx, cy, 4);
   }
   pycmd(`farm:harvest:${id}`);
 }
@@ -1701,6 +1738,13 @@ function showHarvestBurst(x, y, cropId) {
     layer.appendChild(sp);
     setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
   }
+}
+function showHarvestAllBurst(n, xp) {
+  const zone = document.querySelector('.zone-fields');
+  let cx = window.innerWidth/2, cy = window.innerHeight/3;
+  if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
+  showCoinBurst(cx, cy, n);
+  showFloatingReward('+' + xp + ' XP', cx, cy);
 }
 function plantAllEmpty(){SoundMgr.play('plant');pycmd('farm:plant_all_empty')}
 function sellItem(id){
@@ -1821,7 +1865,7 @@ function showSessionSummary(d){
 }
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
-function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.textContent=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
+function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');
@@ -1866,8 +1910,8 @@ function showReward(d){
   }
   // XP: appears slightly after coins for staggered feel
   if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
-  // Material/item drops: staggered notifications (first drop gets collect sound)
-  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`+${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
+  // Material/item drops: staggered notifications with item icons
+  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
   // Mystery box appearance
   if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
 }

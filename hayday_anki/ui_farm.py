@@ -267,12 +267,13 @@ class FarmWebView:
                         f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
                         for iid, qty in result["items"].items()
                     )
+                    count = result["count"]
+                    burst = min(10, count * 2)
                     self._js("SoundMgr.play('harvest')")
-                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(10, result['count'] * 2)})")
-                    self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
-                    msg = f"{result['count']} récoltes : {items_text}"
+                    self._js(f"showHarvestAllBurst({burst}, {total_xp})")
+                    msg = f"{count} récoltes : {items_text}"
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
-                    if result["count"] >= 3:
+                    if count >= 3:
                         self._js("createConfetti()")
                     self._check_and_show_level_up()
                 else:
