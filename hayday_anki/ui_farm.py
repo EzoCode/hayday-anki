@@ -254,8 +254,6 @@ class FarmWebView:
                 result = self.manager.harvest_plot(plot_id)
                 if result:
                     self._js(f"showReward({json.dumps(result)})")
-                    xp_val = result.get("xp", 0)
-                    self._js(f"showFloatingReward('+{xp_val} XP', window.innerWidth/2, window.innerHeight/3)")
                     self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()

@@ -614,22 +614,21 @@ function renderFields() {
     if (field.state === 'empty') {
       if (field.last_crop && (farmData.unlocked_crops||[]).includes(field.last_crop)) {
         const lcName = cropName(field.last_crop);
-        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 24) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
+        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span></div>`;
         el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('click'); };
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
         const plusSrc = S('hayday_plus');
-        const plusIcon = plusSrc ? `<img src="${plusSrc}" width="24" height="24" style="opacity:.5">` : '<span class="plot-plus">+</span>';
+        const plusIcon = plusSrc ? `<img src="${plusSrc}" width="28" height="28" style="opacity:.6">` : '<span class="plot-plus">+</span>';
         el.innerHTML += `<div class="plot-empty-prompt">${plusIcon}<span class="plot-empty-label">Planter</span></div>`;
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
-      const name = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 50)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 32)}</div><span class="plot-label">Fané</span>`;
+      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
@@ -640,10 +639,9 @@ function renderFields() {
       const totalDone = stage * reviewsPerStage + done;
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
-      const name = cropName(field.crop);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 36 : 44;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${name} — ${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      const cropSize = stage <= 1 ? 40 : 52;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft} rev.</span>`;
     }
     grid.appendChild(el);
   });
@@ -749,6 +747,9 @@ function updateTabBadges() {
   setBadge('tab-buildings', readyCount);
   setBadge('tab-farm', (d.mystery_boxes||[]).length);
   setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
+  // Wheel icon only rotates when free spin available
+  const wheelBtn = document.getElementById('tab-wheel');
+  if (wheelBtn) wheelBtn.classList.toggle('has-spin', !!d.can_spin_wheel);
 }
 
 function setBadge(tabId, count) {
