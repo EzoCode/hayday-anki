@@ -1147,22 +1147,41 @@ function renderInventory() {
   const siloColor = siloPct >= 90 ? '#e74c3c' : siloPct >= 70 ? '#ff9800' : '#4caf50';
   document.getElementById('barn-status').innerHTML = `${barnIcon}Grange ${barnUsed}/${barnCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${barnPct}%;height:100%;background:${barnColor};border-radius:3px"></span></span>`;
   document.getElementById('silo-status').innerHTML = `${siloIcon}Silo ${siloUsed}/${siloCap} <span style="display:inline-block;width:40px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;vertical-align:middle;margin-left:4px"><span style="display:block;width:${siloPct}%;height:100%;background:${siloColor};border-radius:3px"></span></span>`;
+
+  // Group items by category for organized display
+  const groups = {crop:[],animal_product:[],processed:[],material:[],decoration:[]};
+  const groupLabels = {crop:'Récoltes',animal_product:'Produits animaux',processed:'Produits transformés',material:'Matériaux',decoration:'Décorations'};
   Object.entries(inv).forEach(([id,qty]) => {
-    if (qty<=0) return; const it = cat[id]||{};
-    const el = document.createElement('div'); el.className = 'item-cell';
-    // Tap = show item info, info card has sell button
-    // Click tile = sell if sellable, otherwise show info
-    if ((it.sell_price||0) > 0 && qty > 0) {
-      el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
-    } else {
-      el.onclick = () => showItemInfo(id);
-    }
-    const icon = itemIcon(id, 36);
-    // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
-    grid.appendChild(el);
+    if (qty<=0) return;
+    const it = cat[id]||{};
+    const category = it.category || 'material';
+    if (!groups[category]) groups[category] = [];
+    groups[category].push({id, qty, it});
   });
-  if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
+
+  let hasItems = false;
+  Object.entries(groups).forEach(([category, items]) => {
+    if (items.length === 0) return;
+    hasItems = true;
+    // Category header
+    const header = document.createElement('div');
+    header.className = 'inv-category-header';
+    header.textContent = groupLabels[category] || category;
+    grid.appendChild(header);
+    // Items in this category
+    items.forEach(({id, qty, it}) => {
+      const el = document.createElement('div'); el.className = 'item-cell';
+      if ((it.sell_price||0) > 0 && qty > 0) {
+        el.onclick = () => { SoundMgr.play('click'); showSellDialog(id, qty); };
+      } else {
+        el.onclick = () => showItemInfo(id);
+      }
+      const icon = itemIcon(id, 36);
+      el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+      grid.appendChild(el);
+    });
+  });
+  if (!hasItems) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
 }
 
 function renderBuildingsPanel() {
@@ -1533,7 +1552,7 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · '+stock+' en stock':''}${growing>0?' · '+growing+' en culture':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const el=document.createElement('div');el.className='crop-choice';el.onclick=()=>{pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('click')};el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,44)||itemIcon(id,44)}</div><div class="crop-choice-info"><strong>${name}</strong><div class="crop-badges"><span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}</span></div><span class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP${stock>0?' · <b>'+stock+'</b> en stock':''}${growing>0?' · '+growing+' en culture':''}</span></div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('levelup');
@@ -1649,7 +1668,64 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=128;
+  const segs=[
+    {l:'25',sub:'pièces',c1:'#e8453c',c2:'#c62828',icon:'coin'},
+    {l:'50',sub:'pièces',c1:'#f06292',c2:'#d81b60',icon:'coin'},
+    {l:'100',sub:'pièces',c1:'#ab47bc',c2:'#8e24aa',icon:'coin'},
+    {l:'1',sub:'gemme',c1:'#5c6bc0',c2:'#3949ab',icon:'gem'},
+    {l:'3',sub:'gemmes',c1:'#42a5f5',c2:'#1e88e5',icon:'gem'},
+    {l:'5',sub:'gemmes',c1:'#29b6f6',c2:'#0288d1',icon:'gem'},
+    {l:'3',sub:'matériaux',c1:'#26a69a',c2:'#00897b',icon:'mat'},
+    {l:'3',sub:'matériaux',c1:'#66bb6a',c2:'#43a047',icon:'mat'},
+    {l:'1',sub:'titre',c1:'#ffa726',c2:'#f57c00',icon:'deed'}
+  ];
+  ctx.clearRect(0,0,280,280);
+  const sa=2*Math.PI/segs.length;
+  // Outer decorative ring
+  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
+  ctx.fillStyle='#8b5e3c';ctx.fill();
+  // Draw segments
+  segs.forEach((s,i)=>{
+    const a=rot+i*sa;
+    // Gradient fill for each segment
+    const midAngle=a+sa/2;
+    const gx=cx+Math.cos(midAngle)*r*0.3, gy=cy+Math.sin(midAngle)*r*0.3;
+    const grad=ctx.createLinearGradient(cx,cy,gx+Math.cos(midAngle)*r*0.7,gy+Math.sin(midAngle)*r*0.7);
+    grad.addColorStop(0,s.c1);grad.addColorStop(1,s.c2);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();
+    ctx.fillStyle=grad;ctx.fill();
+    // Segment border
+    ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;ctx.stroke();
+    // Inner shine
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r*0.85,a+sa*0.1,a+sa*0.3);ctx.closePath();
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+    // Text
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);
+    ctx.fillStyle='#fff';ctx.textAlign='center';
+    ctx.font='bold 16px Nunito, sans-serif';ctx.shadowColor='rgba(0,0,0,0.4)';ctx.shadowBlur=3;
+    ctx.fillText(s.l,r*0.58,-2);
+    ctx.font='bold 8px Nunito, sans-serif';ctx.fillStyle='rgba(255,255,255,0.75)';
+    ctx.fillText(s.sub,r*0.58,9);
+    ctx.shadowBlur=0;
+    // Mini icon
+    const iconX=r*0.82, iconR=7;
+    if(s.icon==='coin'){ctx.beginPath();ctx.arc(iconX,0,iconR,0,2*Math.PI);ctx.fillStyle='#ffd700';ctx.fill();ctx.strokeStyle='#c5a200';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#a08000';ctx.font='bold 9px sans-serif';ctx.fillText('$',iconX,3);}
+    else if(s.icon==='gem'){ctx.beginPath();const gx2=iconX;ctx.moveTo(gx2,0-iconR);ctx.lineTo(gx2+iconR,0-iconR*0.35);ctx.lineTo(gx2+iconR*0.8,0+iconR);ctx.lineTo(gx2-iconR*0.8,0+iconR);ctx.lineTo(gx2-iconR,0-iconR*0.35);ctx.closePath();ctx.fillStyle='#4fc3f7';ctx.fill();ctx.strokeStyle='#0288d1';ctx.lineWidth=0.8;ctx.stroke();}
+    else if(s.icon==='mat'){ctx.fillStyle='#daa06d';ctx.fillRect(iconX-8,0-3,16,6);ctx.strokeStyle='#8b5e3c';ctx.lineWidth=0.8;ctx.strokeRect(iconX-8,0-3,16,6);}
+    else if(s.icon==='deed'){ctx.fillStyle='#f5e6c8';ctx.fillRect(iconX-5,0-7,10,14);ctx.strokeStyle='#c9a66b';ctx.lineWidth=0.8;ctx.strokeRect(iconX-5,0-7,10,14);}
+    ctx.restore();
+  });
+  // Center hub with 3D effect
+  const hubGrad=ctx.createRadialGradient(cx-3,cy-3,2,cx,cy,22);
+  hubGrad.addColorStop(0,'#ffe082');hubGrad.addColorStop(0.5,'#ffd700');hubGrad.addColorStop(1,'#c5a200');
+  ctx.beginPath();ctx.arc(cx,cy,20,0,2*Math.PI);ctx.fillStyle=hubGrad;ctx.fill();
+  ctx.strokeStyle='#a08000';ctx.lineWidth=2;ctx.stroke();
+  // Hub shine
+  ctx.beginPath();ctx.arc(cx-4,cy-4,8,0,2*Math.PI);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fill();
+  // Hub inner dot
+  ctx.beginPath();ctx.arc(cx,cy,5,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#c5a200';ctx.lineWidth=1;ctx.stroke();
+}
 
 function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
@@ -1673,23 +1749,42 @@ function showDailyLoginBonus(d){
   const day=d.day||1, reward=d.reward||{};
   const el=document.getElementById('login-bonus-overlay');
   document.getElementById('login-day').textContent=day;
+  // Day rewards preview (escalating rewards for 7 days)
+  const dayRewards = [
+    {coins:10},{coins:15},{coins:20,gems:1},{coins:25},{coins:30,gems:2},{coins:40},{coins:50,gems:5}
+  ];
+  const coinSrc=S('ui_coin'), gemSrc=S('ui_gem');
   let dots='';
-  for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
+  for(let i=1;i<=7;i++){
+    const dr=dayRewards[i-1]||{coins:10};
+    const isClaimed=i<day, isToday=i===day, isFuture=i>day;
+    let preview='';
+    if(dr.gems) preview=gemSrc?`<img src="${gemSrc}" width="14" height="14">`:`<span class="css-gem" style="width:10px;height:12px"></span>`;
+    else preview=coinSrc?`<img src="${coinSrc}" width="14" height="14">`:`<span class="css-coin" style="width:10px;height:10px"></span>`;
+    dots+=`<div class="login-day-cell ${isClaimed?'claimed':''} ${isToday?'today':''} ${isFuture?'future':''}"><span class="login-day-num">${i}</span><span class="login-day-icon">${preview}</span>${isClaimed?'<span class="login-check">✓</span>':''}</div>`;
+  }
   document.getElementById('login-days-row').innerHTML=dots;
   let rw='';
-  if(reward.coins){const cSrc=S('ui_coin');rw+=`<span class="login-reward-item">${cSrc?`<img src="${cSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.coins}</span>`;}
-  if(reward.gems){const gSrc=S('ui_gem');rw+=`<span class="login-reward-item">${gSrc?`<img src="${gSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.gems}</span>`;}
+  if(reward.coins){rw+=`<span class="login-reward-item">${coinSrc?`<img src="${coinSrc}" width="22" height="22" style="vertical-align:middle">`:''} <b>+${reward.coins}</b> pièces</span>`;}
+  if(reward.gems){rw+=`<span class="login-reward-item">${gemSrc?`<img src="${gemSrc}" width="20" height="20" style="vertical-align:middle">`:''} <b>+${reward.gems}</b> gemmes</span>`;}
   document.getElementById('login-reward-detail').innerHTML=rw;
   el.classList.remove('hidden');
+  createSparkleRain();
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
 function showSessionSummary(d){
   SoundMgr.play('levelup');
   const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20" style="vertical-align:middle">` : '<span class="css-coin" style="width:16px;height:16px;display:inline-block;vertical-align:middle"></span>';
-  const gemIcon = S('ui_gem') ? `<img src="${S('ui_gem')}" width="18" height="18" style="vertical-align:middle">` : '';
   const accuracy = d.reviews > 0 ? Math.round((d.correct||0)/d.reviews*100) : 0;
+  // Performance rating based on accuracy
+  let rating = '', ratingClass = '';
+  if (accuracy >= 95) { rating = 'Parfait !'; ratingClass = 'rating-perfect'; }
+  else if (accuracy >= 80) { rating = 'Excellent !'; ratingClass = 'rating-great'; }
+  else if (accuracy >= 60) { rating = 'Bien !'; ratingClass = 'rating-good'; }
+  else { rating = 'Continue !'; ratingClass = 'rating-ok'; }
   document.getElementById('session-stats').innerHTML = `
+    ${rating?`<div class="session-rating ${ratingClass}">${rating}</div>`:''}
     <div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div>
     <div class="session-stat"><div class="session-stat-value">${coinIcon} ${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">+${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div>
@@ -1698,7 +1793,7 @@ function showSessionSummary(d){
     ${d.harvests_count>0?`<div class="session-stat"><div class="session-stat-value">${d.harvests_count}</div><div class="session-stat-label">${LANG.harvests}</div></div>`:''}
   `;
   let items='';
-  Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,14)} ${itemName(id)} x${qty}</span>`});
+  Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,16)} ${itemName(id)} x${qty}</span>`});
   document.getElementById('session-items').innerHTML=items;
   document.getElementById('session-overlay').classList.remove('hidden');
   createConfetti();
@@ -1744,15 +1839,32 @@ function showReward(d){
   // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
   if(d.coins){
     const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
+    // Scale burst intensity with coin amount
+    const burstCount = Math.min(10, Math.max(3, Math.floor(d.coins/2)));
     showFloatingReward(`+${d.coins}`,cx,cy);
-    showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
+    showCoinBurst(cx,cy+20,burstCount);
+    // Extra sparkle for high rewards (4+ coins = good/easy answer)
+    if(d.coins >= 4) setTimeout(()=>{
+      const sparkleCount = Math.min(5, d.coins - 2);
+      for(let i=0;i<sparkleCount;i++){
+        const el=document.createElement('div');
+        el.className='harvest-sparkle';
+        el.style.left=(cx+((Math.random()-.5)*100))+'px';
+        el.style.top=(cy+((Math.random()-.5)*60))+'px';
+        el.style.setProperty('--dx',((Math.random()-.5)*80)+'px');
+        el.style.setProperty('--dy',(-(Math.random()*50+20))+'px');
+        el.style.animationDelay=(i*60)+'ms';
+        document.getElementById('reward-layer').appendChild(el);
+        setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},900);
+      }
+    },50);
   }
   // XP: appears slightly after coins for staggered feel
   if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
-  // Material/item drops: staggered notifications
-  if(d.items){let delay=300;Object.entries(d.items).forEach(([id,qty])=>{setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'),delay);delay+=200})}
+  // Material/item drops: staggered notifications with item icon
+  if(d.items){let delay=300;Object.entries(d.items).forEach(([id,qty])=>{setTimeout(()=>showNotification(`+${qty} ${itemName(id)}`,'reward'),delay);delay+=250})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),600)}
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
