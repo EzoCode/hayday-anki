@@ -33,16 +33,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .xp-bar-fill{height:100%;background:linear-gradient(180deg,#81c784,var(--xp));border-radius:6px;transition:width .5s;box-shadow:0 0 6px rgba(76,175,80,.4);position:relative}
 .xp-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:6px 6px 0 0}
 .xp-text{position:absolute;top:8px;left:34px;right:8px;height:12px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:3}
-.hud-currency{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.35);padding:3px 10px 3px 6px;border-radius:16px;border:1px solid rgba(255,255,255,.12);color:var(--text-l);font-weight:800;font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,.5);/* no blur */}
-.hud-coins{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,215,0,.2)}
-.hud-gems{background:linear-gradient(135deg,rgba(79,195,247,.15),rgba(0,0,0,.35));border:1px solid rgba(79,195,247,.2)}
-.hud-streak{background:linear-gradient(135deg,rgba(255,100,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,100,0,.2)}
+.hud-currency{display:flex;align-items:center;gap:3px;padding:3px 10px 3px 6px;border-radius:16px;font-weight:800;font-size:13px;text-shadow:0 1px 0 rgba(255,255,255,.4);
+  background:linear-gradient(180deg,rgba(220,200,160,.95) 0%,rgba(190,170,130,.9) 100%);border:1.5px solid rgba(160,120,60,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 3px rgba(0,0,0,.3);color:var(--text-d)}
+.hud-coins{background:linear-gradient(180deg,rgba(240,220,160,.95),rgba(210,185,120,.9));border-color:rgba(180,140,50,.4)}
+.hud-gems{background:linear-gradient(180deg,rgba(180,220,240,.95),rgba(150,200,230,.9));border-color:rgba(60,150,200,.3)}
+.hud-streak{background:linear-gradient(180deg,rgba(240,190,140,.95),rgba(220,160,100,.9));border-color:rgba(200,120,40,.3)}
 .currency-icon{font-size:14px;display:flex;align-items:center}
 .streak-fire{display:flex;align-items:center;animation:flame 1.5s ease-in-out infinite}
 .hud-settings{background:none;border:none;font-size:16px;cursor:pointer;padding:2px;opacity:.6;transition:opacity .2s;display:flex;align-items:center}
 .hud-settings:hover{opacity:1}
 @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.25) translateY(-1px);filter:brightness(1.4)}}
-.streak-bonus{font-size:8px;font-weight:900;color:#ff6;background:rgba(255,100,0,.4);padding:0 4px;border-radius:6px;margin-left:2px;letter-spacing:.3px}
+.streak-bonus{font-size:8px;font-weight:900;color:#c53;background:rgba(255,100,0,.2);padding:0 4px;border-radius:6px;margin-left:2px;letter-spacing:.3px}
 
 /* ===== CSS-only icons (replacing emojis) ===== */
 .css-fire{display:inline-block;width:11px;height:14px;background:linear-gradient(0deg,#ffd700 0%,#ff8c00 35%,#ff4500 65%,#e00 100%);border-radius:50% 50% 50% 50% / 60% 60% 30% 30%;box-shadow:0 0 5px rgba(255,140,0,.6);position:relative}
@@ -87,16 +88,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 #farm-world{position:relative;min-height:100%;padding:12px 10px 20px;
   background-color:#5a9d3a;
-  background-image:
-    radial-gradient(ellipse at 30% 20%, rgba(129,199,132,.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(56,142,60,.1) 0%, transparent 40%),
-    repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 2px,transparent 2px,transparent 22px),
-    repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0px,rgba(0,0,0,.025) 1px,transparent 1px,transparent 18px),
-    repeating-linear-gradient(45deg,transparent 0px,transparent 40px,rgba(255,255,255,.015) 40px,rgba(255,255,255,.015) 42px),
-    linear-gradient(160deg,#6db844 0%,#5a9d3a 25%,#4c8c32 50%,#5a9d3a 75%,#6db844 100%);
   background-size:cover;background-position:center top;background-repeat:no-repeat}
-#farm-world::before{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(0deg,rgba(40,80,20,.15) 0%,transparent 100%);pointer-events:none;z-index:0}
-#farm-world::after{content:'';position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(135,206,235,.08) 0%,transparent 100%);pointer-events:none;z-index:0}
+#farm-world::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.08) 100%);pointer-events:none;z-index:0}
+#farm-world::after{content:'';position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(135,206,235,.06) 0%,transparent 100%);pointer-events:none;z-index:0}
 
 .section-label{color:rgba(255,255,255,.75);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:4px 12px;margin-bottom:6px;text-shadow:0 1px 3px rgba(0,0,0,.4);position:relative;z-index:1}
 
@@ -112,24 +106,28 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 }
 
 .zone-fields {
-  background: linear-gradient(180deg, #4a8c32 0%, #3d7828 50%, #357020 100%);
+  background: linear-gradient(180deg, rgba(74,140,50,.7) 0%, rgba(61,120,40,.75) 50%, rgba(53,112,32,.8) 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-bottom: 3px solid rgba(30,60,15,0.5);
+  backdrop-filter: blur(2px);
 }
 .zone-workshop {
-  background: linear-gradient(180deg, #7d5535 0%, #6b4520 50%, #5a3818 100%);
+  background: linear-gradient(180deg, rgba(125,85,53,.75) 0%, rgba(107,69,32,.8) 50%, rgba(90,56,24,.85) 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(70,40,15,0.5);
+  backdrop-filter: blur(2px);
 }
 .zone-pasture {
-  background: linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
+  background: linear-gradient(180deg, rgba(90,157,58,.65) 0%, rgba(76,140,50,.7) 50%, rgba(64,130,40,.75) 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(35,70,18,0.45);
+  backdrop-filter: blur(2px);
 }
 .zone-village {
-  background: linear-gradient(180deg, #a08552 0%, #8a7040 50%, #7a6335 100%);
+  background: linear-gradient(180deg, rgba(160,133,82,.7) 0%, rgba(138,112,64,.75) 50%, rgba(122,99,53,.8) 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(80,55,25,0.45);
+  backdrop-filter: blur(2px);
 }
 
 .zone-header {
@@ -373,65 +371,63 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Item info button — small circle, precise hitbox */
 .item-info-btn {
   position: absolute;
-  top: 2px; right: 2px;
-  width: 18px; height: 18px;
-  font-size: 11px; line-height: 18px;
-  text-align: center;
-  color: #fff;
-  background: rgba(0,0,0,.25);
+  top: 3px; right: 3px;
+  width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.15);
   border-radius: 50%;
   cursor: pointer;
   z-index: 5;
-  transition: background .15s;
-  /* prevent button from stretching to fill cell */
+  transition: background .15s, transform .15s;
   pointer-events: auto;
+  padding: 1px;
 }
-.item-info-btn:hover { background: rgba(0,0,0,.5); }
+.item-info-btn:hover { background: rgba(0,0,0,.35); transform: scale(1.15); }
 .item-cell { position: relative; }
 
 /* ===== PLOTS — 3D Depth ===== */
-#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(0,110px));gap:10px;padding:12px;min-height:60px;justify-content:center}
-#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(0,100px))}
-#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(0,88px))}
+#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(0,130px));gap:6px;padding:12px;min-height:60px;justify-content:center}
+#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(0,115px))}
+#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(0,100px))}
 
-.plot{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;max-width:120px;
-  box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.15)}
-.plot:hover{transform:translateY(-3px) scale(1.04);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
+.plot{position:relative;border-radius:6px;overflow:visible;cursor:pointer;transition:transform .15s,filter .15s;aspect-ratio:2/1;display:flex;align-items:center;justify-content:center;flex-direction:column;max-width:140px;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.3))}
+.plot:hover{transform:translateY(-3px) scale(1.05);filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
 .plot:active{transform:scale(.95)}
 
-.plot-empty{background:linear-gradient(160deg,#a08552 0%,#8b7040 40%,#7a6235 100%);border:2px dashed rgba(255,255,255,.25);transition:border-color .2s,background .2s}
-.plot-empty:hover{border-color:rgba(106,191,71,.6);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%)}
-.plot-empty .field-img{filter:brightness(.85) saturate(.8)}
-.plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2)}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer}
-.plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
-.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
-.plot-wilted{background:linear-gradient(145deg,#8a7a5a,#6b5a3a);border:2px solid rgba(139,69,19,.4);filter:saturate(.3) brightness(.75);cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
-.plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
-@keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
+.plot-empty{transition:filter .2s;opacity:.7}
+.plot-empty:hover{filter:drop-shadow(0 4px 8px rgba(106,191,71,.4)) brightness(1.1);opacity:1}
+.plot-planted,.plot-growing{}
+.plot-ready{animation:readyGlow 2s ease-in-out infinite;cursor:pointer}
+.plot-ready::after{content:'';position:absolute;top:2px;right:8px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
+.plot-wilted{filter:saturate(.3) brightness(.7) drop-shadow(0 3px 5px rgba(0,0,0,.3));cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
+.plot-wilted:hover{filter:saturate(.5) brightness(.85) drop-shadow(0 4px 8px rgba(244,146,42,.4))}
+@keyframes wiltPulse{0%,100%{opacity:.65}50%{opacity:.85}}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
-.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;margin-bottom:4px}
-.plot-crop img{max-width:60px;max-height:60px;width:auto;height:auto;transition:transform .3s ease}
-.plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2;letter-spacing:.2px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 14px 14px}
-.plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047,#81c784);transition:width .5s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 4px rgba(76,175,80,.4)}
-.plot-pct{position:absolute;top:3px;right:5px;font-size:9px;font-weight:900;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3}
-.plot-reviews-left{position:absolute;top:3px;left:5px;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);text-shadow:0 1px 2px rgba(0,0,0,.7);z-index:3}
+.field-img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0;image-rendering:auto}
+.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s,transform .3s;margin-top:-12px}
+.plot-crop img{max-width:52px;max-height:52px;width:auto;height:auto;transition:transform .3s ease}
+/* .plot-crop-bounce defined below in READY CROP BOUNCE section */
+.plot-label{position:absolute;bottom:-2px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.5);z-index:2;letter-spacing:.2px}
+/* .plot-ready-label defined below in READY CROP BOUNCE section */
+.plot-progress{position:absolute;bottom:2px;left:15%;right:15%;height:3px;background:rgba(0,0,0,.4);z-index:2;border-radius:2px}
+.plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047,#81c784);transition:width .5s cubic-bezier(.25,.46,.45,.94);border-radius:2px;box-shadow:0 0 4px rgba(76,175,80,.4)}
+.plot-pct{position:absolute;top:0;right:8px;font-size:8px;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);z-index:3}
+.plot-reviews-left{position:absolute;top:0;left:8px;font-size:7px;font-weight:700;color:rgba(255,255,255,.7);text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:3}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
-.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
+.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:2px;opacity:.5;transition:opacity .2s;margin-top:-8px}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
-.plot-empty-label{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3px}
-.plot-replant{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;opacity:.65;transition:opacity .2s}
-.plot-replant-label{font-size:9px;color:rgba(255,255,255,.8);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.plot-empty-label{font-size:9px;color:#fff;font-weight:700;letter-spacing:.3px;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.5;transition:opacity .2s;margin-top:-8px}
+.plot-replant-label{font-size:8px;color:#fff;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7)}
 .plot-empty:hover .plot-replant{opacity:1}
 
-@keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
+@keyframes readyGlow{0%,100%{filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)) drop-shadow(0 0 8px rgba(255,215,0,.3)) brightness(1)}50%{filter:drop-shadow(0 3px 5px rgba(0,0,0,.3)) drop-shadow(0 0 16px rgba(255,215,0,.7)) brightness(1.08)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes sparkle{0%,100%{opacity:0;transform:scale(.6) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(180deg)}}
 
-.plot-locked{background:rgba(0,0,0,.35);border:2px dashed rgba(255,255,255,.12);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;aspect-ratio:2/1;transition:all .15s;opacity:.5;/* no blur */}
-.plot-locked:hover{opacity:.85;border-color:rgba(255,215,0,.4);box-shadow:0 0 12px rgba(255,215,0,.2)}
+.plot-locked{background:rgba(0,0,0,.35);border:2px dashed rgba(255,255,255,.12);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;aspect-ratio:2/1;transition:all .15s;opacity:.5}
+.plot-locked:hover{opacity:.85;border-color:rgba(255,215,0,.4);filter:drop-shadow(0 0 8px rgba(255,215,0,.2))}
 .lock-icon{width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
 .lock-label{font-size:8px;color:rgba(255,255,255,.5);font-weight:700;margin-top:2px}
 
@@ -756,7 +752,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== WEATHER SYSTEM ===== */
 .weather-night .farm-sky{background:linear-gradient(180deg,#0f1e3d 0%,#1e3358 40%,#2a4a6b 70%,rgba(42,74,107,0) 100%)}
-.weather-night #farm-world{filter:brightness(.7) saturate(.75) hue-rotate(5deg)}
+.weather-night #farm-world{filter:brightness(.65) saturate(.7) hue-rotate(8deg)}
 .weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,20,.3) 100%)}
 .weather-night .section-label{color:rgba(180,200,255,.6)}
 .weather-night .building-name{color:rgba(220,225,255,.9)}
@@ -789,8 +785,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes decoIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
 
 /* ===== FARMER CHARACTER ===== */
-#farmer-character{position:absolute;bottom:8px;right:12px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.35))}
-.farmer-sprite{image-rendering:pixelated}
+#farmer-character{position:absolute;bottom:8px;right:12px;z-index:4;animation:farmerBob 3s ease-in-out infinite;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.35));pointer-events:none}
+.farmer-sprite{image-rendering:auto}
 @keyframes farmerBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* ===== TUTORIAL ===== */
@@ -833,17 +829,15 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes growPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03) translateY(-1px)}}
 
 /* Growth feedback — triggered when a plot advances after review */
-.plot-grew{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew .plot-crop{animation:cropGrew .8s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew::after{content:'';position:absolute;inset:-4px;border-radius:16px;background:radial-gradient(circle,rgba(106,191,71,.5),transparent 70%);animation:growGlow 1s ease-out forwards;pointer-events:none;z-index:10}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}20%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.35),inset -2px -2px 6px rgba(0,0,0,.2),0 0 24px rgba(106,191,71,.7),0 4px 8px rgba(0,0,0,.2);transform:scale(1.06)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
-@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}20%{transform:scale(1.25);filter:brightness(1.3)}100%{transform:scale(1);filter:brightness(1)}}
-@keyframes growGlow{0%{opacity:1;transform:scale(.8)}100%{opacity:0;transform:scale(1.3)}}
+.plot-grew{animation:plotGrew .8s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew .plot-crop{animation:cropGrew .7s cubic-bezier(.34,1.56,.64,1) !important}
+@keyframes plotGrew{0%{filter:drop-shadow(0 3px 5px rgba(0,0,0,.3))}20%{filter:drop-shadow(0 0 16px rgba(106,191,71,.7)) brightness(1.15);transform:scale(1.08)}100%{filter:drop-shadow(0 3px 5px rgba(0,0,0,.3));transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}20%{transform:scale(1.3);filter:brightness(1.3)}100%{transform:scale(1);filter:brightness(1)}}
 
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
 @keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}15%{transform:scale(1.14) translateY(-6px)}30%{transform:scale(1.02) translateY(-1px)}45%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(255,215,0,.95),rgba(244,146,42,.95));padding:2px 10px;border-radius:8px;font-size:9px !important;letter-spacing:.5px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 8px rgba(255,215,0,.6),0 0 12px rgba(255,215,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
+.plot-ready .plot-label.plot-ready-label{font-weight:900;color:#fff;background:linear-gradient(135deg,rgba(255,215,0,.95),rgba(244,146,42,.95));padding:2px 10px;border-radius:8px;font-size:9px;letter-spacing:.5px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 8px rgba(255,215,0,.6),0 0 12px rgba(255,215,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.5);bottom:0;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap;z-index:5;position:absolute}
 @keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(255,215,0,.4),0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 2px 8px rgba(255,215,0,.7),0 0 16px rgba(255,215,0,.5)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */

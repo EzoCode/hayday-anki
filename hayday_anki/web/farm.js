@@ -32,11 +32,15 @@ function applyHayDayAssets() {
       SPRITES['_icon_gear'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='none' stroke='%23d4a056' stroke-width='2'/%3E%3Cpath d='M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12' stroke='%23d4a056' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E";
     }
   }
-  // Background
+  // Background — use real Hay Day background with subtle vignette overlay
   const bgSrc = S('hayday_background');
   if (bgSrc) {
     const world = document.getElementById('farm-world');
-    if (world) world.style.backgroundImage = `url(${bgSrc})`;
+    if (world) {
+      world.style.backgroundImage = `url(${bgSrc})`;
+      world.style.backgroundSize = 'cover';
+      world.style.backgroundPosition = 'center top';
+    }
   }
   // HUD XP bar background
   const xpBgSrc = S('hayday_xp_pbar_bg');
@@ -350,10 +354,12 @@ function animalImg(id, w) {
 function animalLbl(id, w) { return img(`hayday_${id}-lbl`, w||45, w||45, 'animal-lbl'); }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('tiles_dirt_planted') || S('hayday_field');
-  if (state === 'empty') return S('tiles_dirt') || S('hayday_field');
-  return S('hayday_field') || S('tiles_grass');
+  // Use isometric Hay Day field sprites for authentic look
+  if (state === 'ready') return S('hayday_wheat-field') || S('hayday_field');
+  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('hayday_field');
+  if (state === 'empty') return S('hayday_field');
+  if (state === 'wilted') return S('hayday_field');
+  return S('hayday_field');
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
@@ -625,14 +631,13 @@ function renderFields() {
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 48)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label">Fané</span>`;
+      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 28)}</div><span class="plot-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
-      // Total progress across ALL 4 stages (not just current stage)
       const cropDef = (farmData.crop_defs||{})[field.crop]||{};
       const reviewsPerStage = cropDef.growth_reviews || needed;
       const totalNeeded = reviewsPerStage * 4;
@@ -640,8 +645,10 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 40 : 52;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft} rev.</span>`;
+      // Scale crop size with stage for satisfying visual growth
+      const cropSizes = [24, 30, 38, 44, 48];
+      const cropSize = cropSizes[Math.min(stage, 4)];
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft}</span>`;
     }
     grid.appendChild(el);
   });
@@ -1153,7 +1160,7 @@ function renderInventory() {
     }
     const icon = itemIcon(id, 36);
     // Add info button
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='rgba(255,255,255,.9)'/%3E%3Ccircle cx='8' cy='5' r='1.2' fill='%23666'/%3E%3Crect x='7' y='7' width='2' height='5' rx='.8' fill='%23666'/%3E%3C/svg%3E" width="14" height="14" style="vertical-align:middle"</span>`;
     grid.appendChild(el);
   });
   if (!Object.keys(inv).length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1362,7 +1369,7 @@ function renderShopAnimals(grid){
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
       <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='rgba(255,255,255,.9)'/%3E%3Ccircle cx='8' cy='5' r='1.2' fill='%23666'/%3E%3Crect x='7' y='7' width='2' height='5' rx='.8' fill='%23666'/%3E%3C/svg%3E" width="14" height="14" style="vertical-align:middle"</span>
     `;
     grid.appendChild(el);
   });
@@ -1412,7 +1419,7 @@ function renderShopUpgrades(grid){
       ${buildingImg(u.id,40)}
       <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='rgba(255,255,255,.9)'/%3E%3Ccircle cx='8' cy='5' r='1.2' fill='%23666'/%3E%3Crect x='7' y='7' width='2' height='5' rx='.8' fill='%23666'/%3E%3C/svg%3E" width="14" height="14" style="vertical-align:middle"</span>
     `;
     grid.appendChild(el);
   });

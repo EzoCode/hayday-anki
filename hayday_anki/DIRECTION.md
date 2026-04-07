@@ -127,6 +127,16 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
   - Items inventaire : hover avec outline dore, meilleur feedback tactile
   - Crop sprites : transitions sur transform et filter pour changements fluides
 
+## Ameliorations (session 9 — visual overhaul, Hay Day authentique)
+- **Background reel** : le vrai fond Hay Day isometrique (background.png) est maintenant visible au lieu d'etre cache sous des gradients CSS. Vignette subtile preservee.
+- **Parcelles isometriques** : les champs utilisent les sprites isometriques (field.png = vide, alfalfa-field.png = en croissance, wheat-field.png = pret) au lieu de carres. Aspect ratio 2:1, overflow visible, drop-shadow au lieu de box-shadow.
+- **Croissance visible** : la taille du crop sprite augmente avec chaque stade (24→30→38→44→48px) pour un feedback de progression satisfaisant.
+- **HUD Hay Day** : les capsules de devises (coins, gems, streak) utilisent des fonds parchemin clairs avec bordures dorees — style Hay Day authentique au lieu de fonds noirs.
+- **Zones semi-transparentes** : les zones (Champs, Atelier, Paturage, Village) sont semi-transparentes avec backdrop-filter blur pour laisser voir le fond.
+- **Emoji supprime** : le bouton info `i` utilise un SVG propre au lieu de l'emoji unicode.
+- **Animations corrigees** : plot-grew, readyGlow, wiltPulse utilisent filter/drop-shadow compatibles avec les sprites isometriques.
+- **Meteo compatible** : le systeme meteo (nuit, pluie, coucher de soleil) fonctionne comme overlay sur le vrai fond au lieu de le remplacer.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
