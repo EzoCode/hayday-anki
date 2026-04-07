@@ -664,6 +664,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 .crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 .crop-yield-info{font-size:7px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
+.plant-cost{background:rgba(255,215,0,.2);color:var(--gold-d);font-weight:800;padding:0 3px;border-radius:4px}
+.plant-cost.cant-afford{background:rgba(231,76,60,.15);color:#c62828}
+.crop-choice.disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.3)}
+.crop-choice.disabled:hover{transform:none;box-shadow:0 2px 8px rgba(0,0,0,.06);border-color:rgba(212,160,86,.15)}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}

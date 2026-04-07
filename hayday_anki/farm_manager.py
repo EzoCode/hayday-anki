@@ -693,21 +693,6 @@ class FarmManager:
         if now.weekday() >= 5:  # Saturday=5, Sunday=6
             self.state.weekend_review_count += 1
 
-        # Determine crop drop based on level
-        crop_drop = self._roll_crop_drop()
-        if crop_drop:
-            item_id, qty = crop_drop
-            if self.state.add_item(item_id, qty):
-                rewards["items"][item_id] = qty
-                self.state.session_items_earned[item_id] = \
-                    self.state.session_items_earned.get(item_id, 0) + qty
-            else:
-                crop_name = ITEM_CATALOG.get(item_id, {}).get("name", item_id)
-                rewards["notifications"].append({
-                    "type": "storage_full",
-                    "message": f"Silo plein ! {crop_name} perdu(e). Vendez ou améliorez le silo.",
-                })
-
         # Random material drop (variable ratio reinforcement)
         if random.random() < 0.12:  # ~12% chance per review
             mat_id = self._roll_material_drop()
@@ -748,6 +733,9 @@ class FarmManager:
         crop_notifs = self._advance_plots()
         rewards["notifications"].extend(crop_notifs)
 
+        # Advance production queues per review
+        self._advance_production()
+
         # Check level up
         level_up = self._check_level_up()
         if level_up:
@@ -756,16 +744,6 @@ class FarmManager:
         self._pending_notifications.extend(rewards["notifications"])
 
         return rewards
-
-    def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
-        """Roll for a crop drop based on unlocked crops.
-        Low chance (10%) — farming fields should be the primary crop source."""
-        if random.random() < 0.10:
-            available = self.state.unlocked_crops
-            if available:
-                crop = random.choice(available)
-                return (crop, 1)
-        return None
 
     def _roll_material_drop(self) -> Optional[str]:
         """Roll for a material drop from the drop table."""
@@ -902,7 +880,7 @@ class FarmManager:
         return True
 
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
-        """Plant a crop on a field (identified by ID)."""
+        """Plant a crop on a field (identified by ID). Costs coins (like Hay Day seeds)."""
         # Look up field by ID in the new fields list
         field = next((f for f in self.state.fields if f["id"] == plot_id), None)
         if field is None:
@@ -914,6 +892,15 @@ class FarmManager:
 
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
+
+        # Charge planting cost (like buying seeds in Hay Day)
+        plant_cost = crop_def.get("plant_cost", 0)
+        if plant_cost > 0 and self.state.coins < plant_cost:
+            return False
+        if plant_cost > 0:
+            self.state.coins -= plant_cost
+            self.state.total_coins_spent += plant_cost
+
         # growth_reviews = reviews PER STAGE (x4 stages = total)
         reviews_per_stage = max(1, crop_def.get("growth_reviews", 3))
 
@@ -1495,7 +1482,6 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": "weekend_bonus",
                     "name": "Bonus Weekend !",
-                    "emoji": "\U0001F389",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 2.0,
                     "ends_at": end.isoformat(),
@@ -1507,7 +1493,6 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "early_bird",
                 "name": "Lève-tôt !",
-                "emoji": "\U0001F305",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
                 "ends_at": end,
@@ -1519,7 +1504,6 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "night_owl",
                 "name": "Couche-tard !",
-                "emoji": "\U0001F989",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
                 "ends_at": end,
@@ -1531,7 +1515,6 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "lunch_rush",
                 "name": "Pause déjeuner !",
-                "emoji": "\U0001F35C",
                 "coin_multiplier": 1.2,
                 "xp_multiplier": 1.3,
                 "ends_at": end,
@@ -1545,7 +1528,6 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": evt_id,
                     "name": f"Série de {self.state.current_streak} jours !",
-                    "emoji": "\U0001F525",
                     "coin_multiplier": 2.0,
                     "xp_multiplier": 2.0,
                     "ends_at": end,
@@ -1559,7 +1541,6 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": evt_id,
                     "name": f"Niveau {self.state.level} !",
-                    "emoji": "\U0001F38A",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 1.5,
                     "ends_at": end,
@@ -1575,7 +1556,6 @@ class FarmManager:
                     self.state.active_events.append({
                         "id": "first_session",
                         "name": "Nouveau départ !",
-                        "emoji": "\U0001F331",
                         "coin_multiplier": 1.25,
                         "xp_multiplier": 1.25,
                         "ends_at": end,
@@ -1650,9 +1630,6 @@ class FarmManager:
         self.state.total_sessions += 1
         self.generate_orders()
 
-        # Process production queues
-        self._process_production()
-
         summary = {
             "reviews": self.state.session_reviews,
             "correct": self.state.session_correct,
@@ -1671,14 +1648,18 @@ class FarmManager:
         self.save()
         return summary
 
-    def _process_production(self):
-        """Process production queues - advance items that waited a session."""
+    def _advance_production(self):
+        """Advance production queues by 1 review. Called every review."""
         for building_id, queue in self.state.production_queues.items():
             for item in queue:
                 if not item.get("ready", False):
-                    sessions_waited = item.get("sessions_waited", 0) + 1
-                    item["sessions_waited"] = sessions_waited
-                    if sessions_waited >= item.get("sessions_required", 1):
+                    # Migrate old session-based items to review-based
+                    if "sessions_required" in item and "reviews_required" not in item:
+                        item["reviews_required"] = item.pop("sessions_required", 1) * 5
+                        item["reviews_waited"] = item.pop("sessions_waited", 0) * 5
+                    reviews_waited = item.get("reviews_waited", 0) + 1
+                    item["reviews_waited"] = reviews_waited
+                    if reviews_waited >= item.get("reviews_required", 5):
                         item["ready"] = True
 
     # --- Data for UI ---
@@ -1732,6 +1713,7 @@ class FarmManager:
                 "harvest_max": cdef.get("harvest_max", 4),
                 "sell_price": cdef.get("sell_price", 2),
                 "xp_per_harvest": cdef.get("xp_per_harvest", 3),
+                "plant_cost": cdef.get("plant_cost", 0),
             }
             for cid, cdef in progression.CROP_DEFINITIONS.items()
         }

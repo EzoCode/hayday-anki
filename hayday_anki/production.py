@@ -1,9 +1,9 @@
 """
 Production System — Buildings, recipes, and production chains.
 
-Production is gated by sessions, NOT real-time clocks.
-A recipe that takes "1 session" completes after the player's next review session.
-This prevents incentivizing waiting instead of studying.
+Production is gated by reviews, NOT real-time clocks.
+A recipe that requires N reviews completes after N card reviews.
+This makes progress visible and predictable, like Hay Day timers.
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Tuple
 # =============================================================================
 # RECIPE DEFINITIONS
 # =============================================================================
-# sessions_required: how many review sessions must pass for production to complete
+# reviews_required: how many card reviews must pass for production to complete
 
 RECIPES: Dict[str, List[Dict]] = {
     "bakery": [
@@ -21,7 +21,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Pain",
             "ingredients": {"wheat": 3},
             "output": {"bread": 1},
-            "sessions_required": 1,
+            "reviews_required": 5,
             "xp": 5,
         },
         {
@@ -29,7 +29,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Cookie",
             "ingredients": {"wheat": 2, "egg": 1},
             "output": {"cookie": 1},
-            "sessions_required": 1,
+            "reviews_required": 8,
             "xp": 8,
         },
     ],
@@ -39,7 +39,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Sucre",
             "ingredients": {"rice": 3},
             "output": {"sugar": 1},
-            "sessions_required": 1,
+            "reviews_required": 5,
             "xp": 4,
         },
     ],
@@ -49,7 +49,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Beurre",
             "ingredients": {"milk": 2},
             "output": {"butter": 1},
-            "sessions_required": 1,
+            "reviews_required": 6,
             "xp": 6,
         },
         {
@@ -57,7 +57,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Fromage",
             "ingredients": {"milk": 3},
             "output": {"cheese": 1},
-            "sessions_required": 2,
+            "reviews_required": 12,
             "xp": 7,
         },
         {
@@ -65,7 +65,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Crème",
             "ingredients": {"milk": 2},
             "output": {"cream": 1},
-            "sessions_required": 1,
+            "reviews_required": 6,
             "xp": 6,
         },
     ],
@@ -75,7 +75,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Burger",
             "ingredients": {"bread": 1, "bacon": 1},
             "output": {"burger": 1},
-            "sessions_required": 2,
+            "reviews_required": 15,
             "xp": 18,
         },
     ],
@@ -85,7 +85,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Gâteau",
             "ingredients": {"bread": 1, "butter": 1, "egg": 1},
             "output": {"cake": 1},
-            "sessions_required": 2,
+            "reviews_required": 15,
             "xp": 12,
         },
         {
@@ -93,7 +93,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Tarte à l'orange",
             "ingredients": {"wheat": 2, "orange": 2, "sugar": 1},
             "output": {"pie": 1},
-            "sessions_required": 2,
+            "reviews_required": 15,
             "xp": 14,
         },
     ],
@@ -103,7 +103,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Confiture de fraises",
             "ingredients": {"strawberry": 3, "sugar": 1},
             "output": {"jam": 1},
-            "sessions_required": 1,
+            "reviews_required": 8,
             "xp": 10,
         },
         {
@@ -111,7 +111,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Confiture de raisin",
             "ingredients": {"grapes": 3, "sugar": 1},
             "output": {"grape_jam": 1},
-            "sessions_required": 1,
+            "reviews_required": 8,
             "xp": 12,
         },
     ],
@@ -121,7 +121,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Pizza",
             "ingredients": {"bread": 1, "tomato": 2, "cheese": 1},
             "output": {"pizza": 1},
-            "sessions_required": 2,
+            "reviews_required": 15,
             "xp": 15,
         },
     ],
@@ -131,7 +131,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Jus d'orange",
             "ingredients": {"orange": 3},
             "output": {"juice": 1},
-            "sessions_required": 1,
+            "reviews_required": 6,
             "xp": 8,
         },
         {
@@ -139,7 +139,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Limonade",
             "ingredients": {"lemon": 3, "sugar": 1},
             "output": {"lemonade": 1},
-            "sessions_required": 1,
+            "reviews_required": 8,
             "xp": 10,
         },
     ],
@@ -149,7 +149,7 @@ RECIPES: Dict[str, List[Dict]] = {
             "name": "Tarte au melon",
             "ingredients": {"melon": 2, "wheat": 2, "cream": 1},
             "output": {"melon_pie": 1},
-            "sessions_required": 2,
+            "reviews_required": 18,
             "xp": 18,
         },
     ],
@@ -233,8 +233,8 @@ class ProductionManager:
             "name": recipe["name"],
             "output": recipe["output"],
             "xp": recipe["xp"],
-            "sessions_required": recipe["sessions_required"],
-            "sessions_waited": 0,
+            "reviews_required": recipe["reviews_required"],
+            "reviews_waited": 0,
             "ready": False,
         }
 
@@ -244,7 +244,7 @@ class ProductionManager:
             "building": building_id,
             "recipe": recipe_id,
             "name": recipe["name"],
-            "sessions_required": recipe["sessions_required"],
+            "reviews_required": recipe["reviews_required"],
         }
 
     def collect_ready(self, building_id: str) -> List[Dict]:
@@ -299,11 +299,11 @@ class ProductionManager:
                     "recipe_id": item["recipe_id"],
                     "name": item["name"],
                     "ready": item.get("ready", False),
-                    "sessions_waited": item.get("sessions_waited", 0),
-                    "sessions_required": item.get("sessions_required", 1),
+                    "reviews_waited": item.get("reviews_waited", 0),
+                    "reviews_required": item.get("reviews_required", 1),
                     "progress_pct": min(100, int(
-                        item.get("sessions_waited", 0) /
-                        max(1, item.get("sessions_required", 1)) * 100
+                        item.get("reviews_waited", 0) /
+                        max(1, item.get("reviews_required", 1)) * 100
                     )),
                 })
         return result

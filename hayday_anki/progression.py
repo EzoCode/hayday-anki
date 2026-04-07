@@ -330,6 +330,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 2,
         "xp_per_harvest": 3,
+        "plant_cost": 1,        # Coins to plant (like Hay Day seed cost)
     },
     "corn": {
         "name": "Maïs",
@@ -339,6 +340,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 3,
         "xp_per_harvest": 4,
+        "plant_cost": 2,
     },
     "turnip": {
         "name": "Navet",
@@ -348,6 +350,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 4,
         "xp_per_harvest": 5,
+        "plant_cost": 3,
     },
     "tomato": {
         "name": "Tomate",
@@ -357,6 +360,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 5,
         "xp_per_harvest": 6,
+        "plant_cost": 4,
     },
     "cucumber": {
         "name": "Concombre",
@@ -366,6 +370,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 5,
         "sell_price": 4,
         "xp_per_harvest": 4,
+        "plant_cost": 3,
     },
     "potato": {
         "name": "Patate",
@@ -375,6 +380,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 5,
         "sell_price": 4,
         "xp_per_harvest": 5,
+        "plant_cost": 3,
     },
     "rice": {
         "name": "Riz",
@@ -384,6 +390,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 5,
         "xp_per_harvest": 6,
+        "plant_cost": 4,
     },
     "strawberry": {
         "name": "Fraise",
@@ -393,6 +400,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 7,
         "xp_per_harvest": 8,
+        "plant_cost": 5,
     },
     "eggplant": {
         "name": "Aubergine",
@@ -402,6 +410,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 5,
         "xp_per_harvest": 6,
+        "plant_cost": 4,
     },
     "lemon": {
         "name": "Citron",
@@ -411,6 +420,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 6,
         "xp_per_harvest": 7,
+        "plant_cost": 5,
     },
     "orange": {
         "name": "Orange",
@@ -420,6 +430,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 5,
         "sell_price": 6,
         "xp_per_harvest": 7,
+        "plant_cost": 6,
     },
     "sunflower": {
         "name": "Tournesol",
@@ -429,6 +440,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 8,
         "xp_per_harvest": 9,
+        "plant_cost": 6,
     },
     "pineapple": {
         "name": "Ananas",
@@ -438,6 +450,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 9,
         "xp_per_harvest": 10,
+        "plant_cost": 7,
     },
     "melon": {
         "name": "Melon",
@@ -447,6 +460,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 8,
         "xp_per_harvest": 10,
+        "plant_cost": 7,
     },
     "grapes": {
         "name": "Raisin",
@@ -456,6 +470,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 4,
         "sell_price": 9,
         "xp_per_harvest": 11,
+        "plant_cost": 8,
     },
     "coffee": {
         "name": "Café",
@@ -465,6 +480,7 @@ CROP_DEFINITIONS = {
         "harvest_max": 3,
         "sell_price": 12,
         "xp_per_harvest": 14,
+        "plant_cost": 10,
     },
 }
 
