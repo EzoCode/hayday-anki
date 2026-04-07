@@ -192,9 +192,9 @@ function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
 function S(key) {
-  // Check high-quality SVG crops first, then PNG atlas
-  if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
+  // Prefer real PNG sprites over generated SVGs — PNG crops are hand-painted
   if (typeof SPRITES !== 'undefined' && SPRITES[key]) return SPRITES[key];
+  if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
   return null;
 }
 function img(key, w, h, cls) {
@@ -205,7 +205,13 @@ function img(key, w, h, cls) {
 
 // Crop IDs now match sprite filenames directly — no remapping needed
 const CROP_SPRITE_MAP = {};
-function cropImg(id, stage, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_${stage}`, w||44, w||44, 'plot-crop'); }
+function cropImg(id, stage, w) {
+  const s = CROP_SPRITE_MAP[id]||id;
+  // PNG sprites are numbered backwards: 0=mature, 4=seed. Code expects 0=seed, 4=mature.
+  // Map: code stage 0->PNG 4, 1->3, 2->2, 3->1, 4->0
+  const pngStage = 4 - Math.min(stage, 4);
+  return img(`crops_${s}_${pngStage}`, w||44, w||44, 'plot-crop');
+}
 function cropPortrait(id, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_portrait`, w||28, w||28); }
 
 // --- Inline SVG Item Icons (replace emojis) ---
@@ -277,8 +283,8 @@ function itemIcon(id, w) {
   // Try crop portrait (dedicated small icon for each crop)
   const cp = cropPortrait(id, w);
   if (cp) return cp;
-  // Try mature crop sprite (stage 4 = ready) as icon — real game feel
-  const cropReady = S(`crops_${id}_4`);
+  // Try mature crop sprite as icon — PNG sprites are reversed (0=mature)
+  const cropReady = S(`crops_${id}_0`);
   if (cropReady) return `<img src="${cropReady}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try inline SVG icon (handcrafted per item)
   const svgSrc = ITEM_ICONS[id];
@@ -323,13 +329,9 @@ function buildingIcon(id, w) {
 }
 
 const HD_BUILDINGS = {
-  // All buildings use HayDay isometric sprites (transparent bg, high quality)
-  bakery:'hayday_barn', barn:'hayday_barn', silo:'hayday_silo',
-  shop:'hayday_shop', sugar_mill:'hayday_mill-dark', dairy:'hayday_silo',
-  chicken_coop:'hayday_chicken_coop', bbq:'hayday_shop',
-  pastry_shop:'hayday_barn', jam_maker:'hayday_mill-dark',
-  pizzeria:'hayday_shop', juice_press:'hayday_silo',
-  pie_oven:'hayday_barn', windmill:'hayday_mill-dark', coop:'hayday_chicken_coop',
+  // Only map buildings to their MATCHING real sprite — others use unique BUILDING_SVGS
+  barn:'hayday_barn', silo:'hayday_silo', shop:'hayday_shop',
+  chicken_coop:'hayday_chicken_coop', coop:'hayday_chicken_coop',
 };
 function buildingImg(id, w) {
   // Prefer real PNG sprites (high-quality isometric) over SVG fallbacks
@@ -598,7 +600,7 @@ function renderFields() {
   }
 
   if (fields.length === 0) {
-    const wheatSrc = S('crops_wheat_portrait') || S('crops_wheat_4');
+    const wheatSrc = S('crops_wheat_portrait') || S('crops_wheat_0');
     const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="28" height="28" style="vertical-align:middle;margin-right:4px">` : '';
     grid.innerHTML = `<div class="zone-empty-msg">${wheatIcon}Ajoute ton premier champ pour commencer !</div>`;
     return;

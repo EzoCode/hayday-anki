@@ -127,6 +127,12 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
   - Items inventaire : hover avec outline dore, meilleur feedback tactile
   - Crop sprites : transitions sur transform et filter pour changements fluides
 
+## Bugs corriges (2026-04-07, session 9 â€” fondations visuelles et gameplay)
+1. **Sprites PNG ignores** : `S()` prioritisait les SVG generes (CROP_SVGS) sur les vrais PNG pixel-art. Inverse : les PNG sont maintenant utilises partout pour les cultures, les animaux, et les items. Le jeu utilise enfin les vrais sprites au lieu de substituts vectoriels.
+2. **Crop stages inverses (BUG MAJEUR)** : Les sprites PNG des cultures sont numerotes a l'envers (0=mature, 4=graine) mais le code attendait (0=graine, 4=mature). Une culture plantee montrait le sprite mature et vice-versa. Corrige : `cropImg()` inverse l'index (4-stage) pour mapper correctement.
+3. **growth_reviews incoherent (BUG MAJEUR)** : `growth_reviews` est defini comme reviews PAR STADE dans progression.py et utilise ainsi dans le JS. Mais `plant_crop()` et `_advance_plots()` en Python le divisaient par 4, traitant la valeur comme un total. Resultat : toutes les cultures murissaient 4x plus vite que ce que le joueur voyait affiche. Corrige : Python utilise maintenant `growth_reviews` directement comme per-stage.
+4. **Batiments tous identiques** : `HD_BUILDINGS` mappait 9 batiments sur seulement 4 sprites PNG (3 buildings = barn, 3 = silo, etc.). Les batiments de production etaient visuellement indistinguables. Corrige : seuls barn/silo/shop/chicken_coop utilisent des PNG reels. Les autres utilisent leurs SVG uniques (boulangerie avec four, pizzeria avec pizza, etc.).
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
