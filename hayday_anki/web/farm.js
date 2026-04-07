@@ -732,25 +732,23 @@ function renderFields() {
         el.onclick = () => showPlantDialog(field.id);
       }
     } else if (field.state === 'ready') {
-      const readyCropName = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-crop-name plot-ready-crop-name">${readyCropName}</span><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 60)}</div><div class="plot-harvest-btn">Récolter</div>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label">Fané</span>`;
+      el.innerHTML += `<div class="plot-crop plot-wilted-crop">${cropImg(field.crop, 0, 36)}</div><div class="plot-wilted-btn">Nettoyer</div>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
-      // Total progress across ALL 4 stages (not just current stage)
       const cropDef = (farmData.crop_defs||{})[field.crop]||{};
       const reviewsPerStage = cropDef.growth_reviews || needed;
       const totalNeeded = reviewsPerStage * 4;
       const totalDone = stage * reviewsPerStage + done;
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
-      const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 40 : 52;
-      const cName = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft} rev.</span>`;
+      const cropSize = stage <= 1 ? 38 : stage <= 2 ? 46 : 54;
+      const stageColors = ['#81d4fa','#66bb6a','#fdd835','#ff9800'];
+      const stageColor = stageColors[Math.min(stage, 3)];
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-grow-info"><span class="plot-grow-reviews">${reviewsLeft}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%;background:linear-gradient(90deg,${stageColor},${stageColor}dd)"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);

@@ -107,12 +107,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ZONES ===== */
 .farm-zone {
-  margin: 10px 8px;
+  margin: 8px 8px;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
   transition: transform 0.2s;
 }
 
@@ -141,13 +141,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.15) 100%),
-    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
-  border-bottom: 2px solid rgba(90,53,32,.6);
-  border-top: 1px solid rgba(255,220,160,.2);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
+    linear-gradient(180deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.04) 25%, transparent 45%, rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg, #b07e4e, #9a6838 35%, #8b5e3c 65%, #6b4520);
+  border-bottom: 2px solid rgba(80,45,22,.6);
+  border-top: 1px solid rgba(255,220,160,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.18);
 }
 
 .zone-title {
@@ -408,35 +408,68 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot:hover{transform:translateY(-3px) scale(1.04);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
 .plot:active{transform:scale(.95)}
 
-.plot-empty{background:linear-gradient(160deg,#a08552 0%,#8b7040 40%,#7a6235 100%);border:2px dashed rgba(255,255,255,.25);transition:border-color .2s,background .2s}
-.plot-empty:hover{border-color:rgba(106,191,71,.7);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 16px rgba(106,191,71,.25),0 4px 12px rgba(0,0,0,.3)}
-.plot-empty .field-img{filter:brightness(.85) saturate(.8)}
-.plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
-.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%);pointer-events:none;z-index:0;border-radius:16px}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
-.plot-ready:hover{transform:translateY(-4px) scale(1.08) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff}
-.plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
-.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
-.plot-wilted{background:linear-gradient(145deg,#8a7a5a,#6b5a3a);border:2px solid rgba(139,69,19,.4);filter:saturate(.3) brightness(.75);cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
-.plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
-@keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
+/* --- Plot States --- */
+.plot-empty{
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.03) 0px,transparent 3px,transparent 8px),
+    linear-gradient(160deg,#9e8050 0%,#8b7040 35%,#7a6235 70%,#6d5830 100%);
+  border:2px dashed rgba(255,255,255,.2);transition:border-color .2s,background .2s,box-shadow .2s}
+.plot-empty:hover{border-color:rgba(106,191,71,.65);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 16px rgba(106,191,71,.25),0 6px 14px rgba(0,0,0,.3)}
+.plot-empty .field-img{filter:brightness(.85) saturate(.7)}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
-.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;margin-bottom:4px}
-.plot-crop img{max-width:60px;max-height:60px;width:auto;height:auto;transition:transform .3s ease}
-.plot-label{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:7px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:2;letter-spacing:.2px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 14px 14px}
+.plot-planted,.plot-growing{
+  background:
+    radial-gradient(ellipse at 50% 80%,rgba(0,0,0,.15) 0%,transparent 60%),
+    linear-gradient(160deg,#6b8a4e 0%,#568040 30%,#4a6b30 70%,#3d5e28 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.25);
+  border:1.5px solid rgba(106,191,71,.15);overflow:hidden}
+.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 40%);pointer-events:none;z-index:0;border-radius:16px}
+
+.plot-ready{
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(255,215,0,.08) 0%,transparent 60%),
+    linear-gradient(160deg,#7daa56 0%,#68964a 30%,#5a8c3a 70%,#4d7d30 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 10px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.45),0 0 40px rgba(255,215,0,.12);
+  border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
+.plot-ready:hover{transform:translateY(-4px) scale(1.08) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff}
+.plot-ready:hover .plot-harvest-btn{transform:translateX(-50%) scale(1.1);box-shadow:0 2px 12px rgba(255,179,0,.9),0 0 24px rgba(255,215,0,.5)}
+.plot-ready:active .plot-harvest-btn{transform:translateX(-50%) scale(.95)}
+.plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:8px;height:8px;background:radial-gradient(circle,#fff 0%,#ffd700 40%,transparent 70%);border-radius:50%;box-shadow:0 0 6px 2px rgba(255,215,0,.7);animation:sparkle 1.5s ease-in-out infinite;z-index:3}
+.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);background-size:200% 100%;animation:readyShine 3s linear infinite;z-index:0}
+
+.plot-wilted{
+  background:
+    repeating-linear-gradient(135deg,rgba(0,0,0,.04) 0px,transparent 2px,transparent 6px),
+    linear-gradient(145deg,#8a7a5a 0%,#7a6a48 40%,#6b5a3a 100%);
+  border:2px solid rgba(139,69,19,.35);cursor:pointer;overflow:hidden}
+.plot-wilted:hover{border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.25),0 4px 10px rgba(0,0,0,.2)}
+
+.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px;opacity:.35;mix-blend-mode:overlay}
+.plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s,transform .3s}
+.plot-crop img{max-width:64px;max-height:64px;width:auto;height:auto;transition:transform .3s ease}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:5px;background:rgba(0,0,0,.45);z-index:2;border-radius:0 0 14px 14px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047,#81c784);transition:width .5s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 4px rgba(76,175,80,.4)}
-.plot-pct{position:absolute;top:3px;right:5px;font-size:9px;font-weight:900;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:3}
-.plot-reviews-left{position:absolute;top:3px;left:5px;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);text-shadow:0 1px 2px rgba(0,0,0,.7);z-index:3}
-.plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
-.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
-.plot-empty:hover .plot-empty-prompt{opacity:1}
-.plot-empty-label{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3px}
-.plot-replant{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;opacity:.65;transition:opacity .2s}
-.plot-replant-label{font-size:9px;color:rgba(255,255,255,.8);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
-.plot-replant-cost{font-size:7px;color:rgba(255,215,0,.85);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.2);padding:0 4px;border-radius:4px}
-.plot-empty:hover .plot-replant{opacity:1}
+/* Growing plot - reviews remaining badge */
+.plot-grow-info{position:absolute;top:3px;right:4px;z-index:3;display:flex;align-items:center;gap:2px}
+.plot-grow-reviews{font-size:9px;font-weight:900;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9);background:rgba(0,0,0,.35);padding:1px 5px;border-radius:6px;letter-spacing:.2px}
+.plot-grow-reviews::after{content:' rev';font-size:7px;font-weight:700;opacity:.7}
+/* Harvest button on ready plots */
+.plot-harvest-btn{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);z-index:5;background:linear-gradient(180deg,#ffd54f,#ffb300,#ff8f00);color:#5a3520;font-size:9px;font-weight:900;padding:3px 12px;border-radius:10px;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 2px 8px rgba(255,179,0,.6),0 0 12px rgba(255,215,0,.3),inset 0 1px 0 rgba(255,255,255,.4);animation:harvestBtnPulse 2s ease-in-out infinite;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+@keyframes harvestBtnPulse{0%,100%{box-shadow:0 2px 6px rgba(255,179,0,.4),0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 2px 10px rgba(255,179,0,.8),0 0 20px rgba(255,215,0,.5);transform:translateX(-50%) scale(1.05)}}
+/* Wilted plot button */
+.plot-wilted-crop{opacity:.35;filter:grayscale(.8) !important}
+.plot-wilted-btn{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);z-index:5;background:rgba(139,69,19,.6);color:rgba(255,255,255,.7);font-size:8px;font-weight:700;padding:2px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);white-space:nowrap}
+.plot-plus{font-size:28px;color:rgba(255,255,255,.25);font-weight:200;position:relative;z-index:1;transition:color .2s,transform .2s}
+.plot-empty:hover .plot-plus{color:rgba(255,255,255,.6);transform:scale(1.2)}
+.plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.55;transition:opacity .2s,transform .2s}
+.plot-empty:hover .plot-empty-prompt{opacity:1;transform:scale(1.05)}
+.plot-empty-label{font-size:9px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.6;transition:opacity .2s,transform .2s}
+.plot-replant img{transition:transform .2s}
+.plot-replant-label{font-size:9px;color:rgba(255,255,255,.85);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.5);letter-spacing:.2px}
+.plot-replant-cost{font-size:8px;color:rgba(255,215,0,.9);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
+.plot-empty:hover .plot-replant{opacity:1;transform:scale(1.05)}
+.plot-empty:hover .plot-replant img{transform:scale(1.15)}
 
 @keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -532,9 +565,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
 
 /* ===== PANELS — Premium Sliding Sheet ===== */
-.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.5)}
+.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;border-top:3px solid rgba(212,160,86,.5)}
 .panel.hidden{display:none}
-@keyframes panelIn{0%{opacity:0;transform:translateY(100%)}55%{transform:translateY(-6px)}75%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px}
 .panel-header h2{font-size:16px;color:var(--text-d);font-weight:900;letter-spacing:.3px}
@@ -870,16 +902,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
 @keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}15%{transform:scale(1.14) translateY(-6px)}30%{transform:scale(1.02) translateY(-1px)}45%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(255,215,0,.95),rgba(244,146,42,.95));padding:2px 10px;border-radius:8px;font-size:9px !important;letter-spacing:.5px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 8px rgba(255,215,0,.6),0 0 12px rgba(255,215,0,.3);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
-@keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(255,215,0,.4),0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 2px 8px rgba(255,215,0,.7),0 0 16px rgba(255,215,0,.5)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}
 .item-cell:hover::before{opacity:1}
 .item-cell{position:relative}
 
-/* ===== CROP NAME ON GROWING PLOTS ===== */
-.plot-crop-name{position:absolute;top:3px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:3;letter-spacing:.3px;text-transform:uppercase;pointer-events:none}
+/* (plot-crop-name removed - cleaner plot layout) */
 
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
@@ -889,11 +918,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
 
 /* ===== PANEL CLOSE ANIMATION ===== */
-.panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
-.panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
-@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.panel:not(.panel-closing){animation:panelSlideIn .35s cubic-bezier(.34,1.56,.64,1) both}
+.panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none;transition:transform .25s cubic-bezier(.4,0,1,1),opacity .2s ease}
+@keyframes panelSlideIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
 
-/* ===== READY PLOT CROP NAME ===== */
-.plot-ready-crop-name{color:rgba(255,255,255,1) !important;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 10px rgba(255,215,0,.5) !important;font-size:8px !important;top:auto !important;bottom:18px !important}
+/* (plot-ready-crop-name removed - cleaner harvest layout) */
 
 .hidden{display:none!important}
