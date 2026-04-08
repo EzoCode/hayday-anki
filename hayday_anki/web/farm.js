@@ -794,7 +794,8 @@ function renderFields() {
     } else if (field.state === 'ready') {
       const readyCropName = cropName(field.crop);
       el.title = `${readyCropName} — Prêt à récolter !`;
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 64)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      const sickleIcon = `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13 3Q8 3 5 8l2 2Q10 7 13 7' fill='%23c0c0c0' stroke='%23888' stroke-width='.5'/%3E%3Cpath d='M5 8l-2 5 1 .5 3-4z' fill='%238b5e3c' stroke='%236b3a1a' stroke-width='.5'/%3E%3C/svg%3E" width="12" height="12" style="vertical-align:middle;margin-right:2px">`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 64)}</div><span class="plot-ready-action">${sickleIcon}Récolter</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -813,7 +814,7 @@ function renderFields() {
       const cropSize = stage <= 1 ? 44 : 58;
       const cName = cropName(field.crop);
       el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-crop-name"><span>${cName}</span></span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1735,7 +1736,29 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{
+    const name=cropName(id);
+    const def=(farmData.crop_defs||{})[id]||{};
+    const gr=def.growth_reviews||3;
+    const totalReviews=gr*4;
+    const sellPrice=def.sell_price||2;
+    const plantCost=def.plant_cost||0;
+    const growing=growingCounts[id]||0;
+    const coins=farmData.coins||0;
+    const canAfford=coins>=plantCost;
+    const el=document.createElement('div');
+    el.className='crop-choice';
+    if(!canAfford)el.classList.add('crop-choice-locked');
+    el.onclick=()=>{
+      if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}
+      pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant');
+    };
+    const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;
+    const growingBadge=growing>0?`<span class="crop-growing-badge">${growing} en cours</span>`:'';
+    el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,52)||itemIcon(id,52)}</div><strong class="crop-choice-name">${name}</strong><div class="crop-choice-meta">${costBadge}<span class="crop-reviews-badge">${totalReviews} rev.</span></div><div class="crop-choice-bottom"><span class="crop-price-badge">${sellPrice} p.</span>${growingBadge}</div>`;
+    choices.appendChild(el);
+  });
+  document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
@@ -1750,8 +1773,10 @@ function harvestPlot(id){
     const cy = rect.top + rect.height/2;
     // Create harvest burst particles from actual plot position
     showHarvestBurst(cx, cy, field.crop);
-    // Coin fly from plot to HUD (satisfying collection feel)
-    showCoinBurst(cx, cy, 4);
+    // Show XP gain floating text
+    const cropDef = (farmData.crop_defs||{})[field.crop]||{};
+    const xpGain = cropDef.xp_per_harvest || 3;
+    showFloatingReward(`+${xpGain} XP`, cx, cy - 20);
   }
   pycmd(`farm:harvest:${id}`);
 }
@@ -1963,11 +1988,11 @@ function showReward(d){
       const zone = document.querySelector('.zone-fields');
       let cx = window.innerWidth/2, cy = window.innerHeight/3;
       if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
-      showFloatingReward(`+${coins}`, cx, cy);
+      if (coins > 0) showFloatingReward(`+${coins}`, cx, cy);
       showCoinBurst(cx, cy + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
       SoundMgr.play('coin');
       if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, cx + 30, cy + 15), 180);
-    } else if (isSpecial) {
+    } else if (isSpecial && coins > 0) {
       // Special: small floating text near HUD, subtle sound
       const hudEl = document.getElementById('hud-coins');
       let cx = window.innerWidth / 2, cy = 60;
