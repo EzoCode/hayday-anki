@@ -6,7 +6,7 @@
 let farmData = {};
 let _staticDefs = {};  // Cached static definitions (item_catalog, building_defs, etc.)
 let currentPanel = null;
-let currentShopCategory = 'decorations';
+let currentShopCategory = 'upgrades';
 let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
@@ -561,7 +561,12 @@ function updateFarm(data) {
         if (f.state === 'ready' && oldState !== 'ready') anyReady = true;
       }
     });
-    if (anyReady) setTimeout(() => SoundMgr.play('harvest'), 400);
+    if (anyReady) {
+      setTimeout(() => SoundMgr.play('harvest'), 400);
+      // Pulse the farm tab to draw attention to ready crops
+      const farmTab = document.getElementById('tab-farm');
+      if (farmTab) { farmTab.classList.add('tab-pulse'); setTimeout(() => farmTab.classList.remove('tab-pulse'), 2000); }
+    }
     else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
   }
   if (currentPanel) {
@@ -656,7 +661,16 @@ function updateHUD() {
     if (sessionReviews > 0) {
       sessionCountEl.textContent = sessionReviews;
       sessionEl.style.display = '';
-      if (sessionReviews > (_prevHud.sessionReviews || 0)) hudBump('hud-session-reviews');
+      const prev = _prevHud.sessionReviews || 0;
+      if (sessionReviews > prev) {
+        hudBump('hud-session-reviews');
+        // Session milestones — celebrate every 10 cards to keep momentum
+        if (sessionReviews >= 10 && sessionReviews % 10 === 0 && prev < sessionReviews) {
+          showNotification(`${sessionReviews} cartes cette session ! Continue !`, 'reward');
+          SoundMgr.play('collect');
+          if (sessionReviews >= 50) createConfetti();
+        }
+      }
     } else {
       sessionEl.style.display = 'none';
     }
@@ -799,7 +813,7 @@ function renderFields() {
       const cropSize = stage <= 1 ? 44 : 58;
       const cName = cropName(field.crop);
       el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-crop-name"><span>${cName}</span></span>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1454,7 +1468,7 @@ function renderOrders() {
 
 function renderShop() {
   const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
-  const shopCats=['decorations','animals','upgrades','land'];
+  const shopCats=['upgrades','animals','land','decorations'];
   document.querySelectorAll('.shop-tab').forEach((b,i)=>b.classList.toggle('active',shopCats[i]===currentShopCategory));
   if(currentShopCategory==='decorations')renderShopDeco(grid);else if(currentShopCategory==='animals')renderShopAnimals(grid);
   else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
@@ -1934,26 +1948,54 @@ function showCoinBurst(x,y,n){
   }
 }
 function showReward(d){
-  // Coins: satisfying burst from the farm area (where the action is)
-  if(d.coins){
-    const zone = document.querySelector('.zone-fields');
-    let cx = window.innerWidth/2, cy = window.innerHeight/3;
-    if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
-    showFloatingReward(`+${d.coins}`,cx,cy);
-    showCoinBurst(cx,cy+15,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
-    SoundMgr.play('coin');
+  const coins = d.coins || 0;
+  const xp = d.xp || 0;
+  const hasItems = d.items && Object.keys(d.items).length > 0;
+  const hasBox = !!d.mystery_box;
+  // Determine reward tier: normal review = subtle HUD-only feedback,
+  // good reward = small floating text, big reward = full burst
+  const isSpecial = hasItems || hasBox || coins >= 15;
+  const isBig = coins >= 25 || hasBox;
+
+  if (coins > 0 || xp > 0) {
+    if (isBig) {
+      // Big reward: full coin burst + floating text + sound (rare, exciting)
+      const zone = document.querySelector('.zone-fields');
+      let cx = window.innerWidth/2, cy = window.innerHeight/3;
+      if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
+      showFloatingReward(`+${coins}`, cx, cy);
+      showCoinBurst(cx, cy + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
+      SoundMgr.play('coin');
+      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, cx + 30, cy + 15), 180);
+    } else if (isSpecial) {
+      // Special: small floating text near HUD, subtle sound
+      const hudEl = document.getElementById('hud-coins');
+      let cx = window.innerWidth / 2, cy = 60;
+      if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 8; }
+      showFloatingReward(`+${coins}`, cx, cy);
+      SoundMgr.play('coin');
+    }
+    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
+    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
   }
-  // XP: appears slightly after coins for staggered cascade feel
-  if(d.xp) setTimeout(()=>{
-    const zone = document.querySelector('.zone-fields');
-    let cx = window.innerWidth/2+30, cy = window.innerHeight/3+15;
-    if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2 + 30; cy = Math.max(75, r.top + r.height/2 + 15); }
-    showFloatingReward(`+${d.xp} XP`,cx,cy);
-  },180);
-  // Material/item drops: staggered notifications with item icons
-  if(d.items){let delay=350;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=280})}
-  // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),550)}
+  // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
+  if (hasItems) {
+    let delay = isSpecial ? 350 : 200;
+    let first = true;
+    Object.entries(d.items).forEach(([id, qty]) => {
+      const playSound = first; first = false;
+      setTimeout(() => {
+        showNotification(`${itemIcon(id, 14)} +${qty} ${itemName(id)}`, 'reward');
+        if (playSound) SoundMgr.play('collect');
+      }, delay);
+      delay += 280;
+    });
+  }
+  // Mystery box appearance (rare ~5%, always dramatic)
+  if (hasBox) {
+    const sz = {small:'petite', medium:'moyenne', large:'grande'}[d.mystery_box.size] || d.mystery_box.size;
+    setTimeout(() => showNotification(`Une ${sz} boîte mystère est apparue !`, 'reward'), 550);
+  }
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
