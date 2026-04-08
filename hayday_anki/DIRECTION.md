@@ -158,6 +158,19 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - **Deco tiles ameliores** : effet de lumiere (pseudo-element radial-gradient), hover plus prononce, image scale au hover.
 - **Planted plots** : pseudo-element de lumiere subtile sur les parcelles en croissance.
 
+## Ameliorations (session 11 — gameplay clarity et polish)
+- **Farmer character visible** : le personnage fermier etait `position:absolute;bottom:8px` dans le `#farm-world` scrollable — invisible sauf si on scrollait tout en bas. Change en `position:fixed;bottom:68px` (au-dessus de la toolbar), toujours visible.
+- **Growing plots simplifies** : les parcelles en croissance avaient 6 elements visuels (nom, label stade, %, reviews restantes, barre, sprite) sur ~100px carres — illisible. Reduit a 3 : sprite crop (avec animation vent), nom (bottom), progress bar + % (top-right avec pill sombre). Le reste disponible au hover via tooltip natif.
+- **Ready plots clarifies** : les parcelles pretes avaient le nom de la culture ET le badge "Recolter !" empiles l'un sur l'autre. Simplifie : seulement le sprite rebondissant + badge dore "Recolter !". Le nom est dans le tooltip.
+- **Tooltips natifs** : chaque parcelle en croissance, prete ou fanee a maintenant un tooltip (`title=`) montrant le nom, stade, % et reviews restantes. Info disponible sans encombrer l'affichage.
+- **Replant hover ameliore** : les parcelles vides avec derniere culture ont un hover plus prononce (scale 1.08, crop preview scale 1.15). Plus invitant.
+- **Building name lisibility** : les noms de batiments sur la ferme ont maintenant un fond sombre (`background:rgba(0,0,0,.2)`) et border-radius pour se detacher du fond.
+- **Order cards gem bonus** : les commandes bateau affichent maintenant un badge "Bonus" avec icone gemme. L'explication corrigee : "Camion = 2x, Bateau = 3x + gemmes".
+- **Pasture labels** : taille augmentee de 7px a 8px, couleur plus lisible.
+- **Progress bar** : epaisseur augmentee de 4px a 5px, z-index corrige pour etre toujours au-dessus.
+- **Plot labels** : refactored avec fond semi-transparent et centrage precise (`transform:translateX(-50%)`).
+- **Plot percentage** : fond sombre pill (`background:rgba(0,0,0,.25)`) pour lisibilite sur n'importe quel fond, taille 10px.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

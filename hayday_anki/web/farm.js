@@ -748,9 +748,11 @@ function renderFields() {
       }
     } else if (field.state === 'ready') {
       const readyCropName = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-crop-name plot-ready-crop-name">${readyCropName}</span><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.title = `${readyCropName} — Prêt à récolter !`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
+      el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
       el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
@@ -765,7 +767,8 @@ function renderFields() {
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 40 : 52;
       const cName = cropName(field.crop);
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><span class="plot-label">${GROWTH_LABEL[Math.min(stage,4)]}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span><span class="plot-reviews-left">${reviewsLeft} rev.</span>`;
+      el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1370,7 +1373,7 @@ function renderOrders() {
   // Explanation header
   const header = document.createElement('div');
   header.style.cssText = 'padding:8px 12px;font-size:11px;color:#888;line-height:1.4';
-  header.innerHTML = '<strong>Les commandes</strong> te rapportent <strong>2x le prix normal</strong> en pièces et XP. Remplis les items demandés et livre !';
+  header.innerHTML = '<strong>Camion</strong> = 2x le prix · <strong>Bateau</strong> = 3x le prix + gemmes bonus ! Remplis et livre.';
   list.appendChild(header);
 
   if (!orders.length) {
@@ -1405,7 +1408,7 @@ function renderOrders() {
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type"><img src="${order.type==='boat'?ITEM_ICONS._icon_boat:ITEM_ICONS._icon_truck_color}" width="28" height="28" style="vertical-align:middle"> ${order.type==='boat'?'Bateau':'Camion'}</span>
-        <span class="order-reward"><span class="order-coin-reward"><span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.coin_reward}</span> <span class="order-xp-reward">+${order.xp_reward} XP</span></span>
+        <span class="order-reward"><span class="order-coin-reward"><span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.coin_reward}</span> <span class="order-xp-reward">+${order.xp_reward} XP</span>${order.type==='boat'?'<span class="order-gem-reward"><span class="css-gem" style="width:10px;height:12px;display:inline-block;vertical-align:middle"></span> Bonus</span>':''}</span>
       </div>
       ${!canDo?`<div class="order-progress-wrap"><div class="order-prog-bar"><div class="order-prog-fill${almostDone?' almost':''}" style="width:${pct}%"></div></div><span class="order-prog-text">${pct}%</span></div>`:''}
       <div class="order-items">${items}</div>
