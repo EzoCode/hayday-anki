@@ -7,7 +7,6 @@ let farmData = {};
 let _staticDefs = {};  // Cached static definitions (item_catalog, building_defs, etc.)
 let currentPanel = null;
 let currentShopCategory = 'decorations';
-let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
 let notificationsEnabled = true;
@@ -1241,15 +1240,28 @@ function showTab(tab) {
   if (tab === currentPanel) { hidePanel(); return; }
   if (tab === 'farm') { hidePanel(); pycmd('farm:get_state'); return; }
   currentPanel = tab;
-  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
   const tabEl = document.getElementById(`tab-${tab}`);
   if (tabEl) tabEl.classList.add('active');
-  document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+  // Hide other panels instantly (skip exit transition to avoid overlap)
+  document.querySelectorAll('.panel').forEach(p => {
+    if (!p.classList.contains('hidden')) {
+      p.style.transition = 'none';
+      p.classList.add('hidden');
+    }
+  });
   const panel = document.getElementById(`panel-${tab}`);
-  if (panel) { panel.classList.remove('hidden');
-    if(tab==='inventory')renderInventory();if(tab==='buildings')renderBuildingsPanel();
-    if(tab==='orders')renderOrders();if(tab==='shop')renderShop();
-    if(tab==='achievements')renderAchievements();if(tab==='settings')renderSettings();
+  if (panel) {
+    // Force browser to apply the hidden state, then re-enable transitions
+    void panel.offsetHeight;
+    panel.style.transition = '';
+    panel.classList.remove('hidden');
+    if (tab === 'inventory') renderInventory();
+    if (tab === 'buildings') renderBuildingsPanel();
+    if (tab === 'orders') renderOrders();
+    if (tab === 'shop') renderShop();
+    if (tab === 'achievements') renderAchievements();
+    if (tab === 'settings') renderSettings();
   }
   SoundMgr.play('click');
 }
@@ -1257,13 +1269,8 @@ function hidePanel() {
   currentPanel=null;
   document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-farm')?.classList.add('active');
-  // Animate panels out
-  const visiblePanels = document.querySelectorAll('.panel:not(.hidden)');
-  if (visiblePanels.length === 0) return;
-  visiblePanels.forEach(p => {
-    p.classList.add('panel-closing');
-    setTimeout(() => { p.classList.add('hidden'); p.classList.remove('panel-closing'); }, 300);
-  });
+  // CSS transition handles the slide-out animation via .hidden class
+  document.querySelectorAll('.panel:not(.hidden)').forEach(p => p.classList.add('hidden'));
 }
 
 function renderInventory() {
@@ -1683,15 +1690,81 @@ function getAchCategoryIcon(cat) {
 }
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';
-  // Count how many fields are currently growing each crop
+function showPlantDialog(plotId) {
+  SoundMgr.play('click');
+  const choices = document.getElementById('crop-choices');
+  choices.innerHTML = '';
+
+  // Count fields currently growing each crop
   const growingCounts = {};
-  (farmData.fields||[]).forEach(f => {
+  (farmData.fields || []).forEach(f => {
     if (f.crop && f.state !== 'empty' && f.state !== 'wilted') {
-      growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
+      growingCounts[f.crop] = (growingCounts[f.crop] || 0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+
+  const coins = farmData.coins || 0;
+
+  (farmData.unlocked_crops || []).forEach(id => {
+    const def = (farmData.crop_defs || {})[id] || {};
+    const name = cropName(id);
+    const gr = def.growth_reviews || 3;
+    const totalReviews = gr * 4;
+    const sellPrice = def.sell_price || 2;
+    const harvestMin = def.harvest_min || 2;
+    const harvestMax = def.harvest_max || 4;
+    const xpPerHarvest = def.xp_per_harvest || 3;
+    const plantCost = def.plant_cost || 0;
+    const stock = (farmData.inventory || {})[id] || 0;
+    const growing = growingCounts[id] || 0;
+    const canAfford = coins >= plantCost;
+    const avgYield = Math.round((harvestMin + harvestMax) / 2);
+    const profit = avgYield * sellPrice - plantCost;
+
+    const el = document.createElement('div');
+    el.className = 'crop-choice';
+    if (!canAfford) el.classList.add('crop-choice-locked');
+
+    el.onclick = () => {
+      if (!canAfford) {
+        showNotification(`Pas assez de pièces (${plantCost} requis)`);
+        return;
+      }
+      pycmd(`farm:plant:${plotId}:${id}`);
+      hideOverlay();
+      SoundMgr.play('plant');
+    };
+
+    const costBadge = plantCost > 0
+      ? `<span class="crop-cost-badge">${plantCost} p.</span>`
+      : `<span class="crop-cost-badge free">Gratuit</span>`;
+
+    // Tags for stock/growing info
+    const stockTag = stock > 0 ? `<span class="crop-tag crop-tag-stock">${stock} stock</span>` : '';
+    const growTag = growing > 0 ? `<span class="crop-tag crop-tag-growing">${growing} en cours</span>` : '';
+
+    el.innerHTML = `
+      <div class="crop-choice-icon">${cropPortrait(id, 48) || itemIcon(id, 48)}</div>
+      <div class="crop-choice-info">
+        <div class="crop-choice-header">
+          <strong>${name}</strong>${costBadge}
+        </div>
+        <div class="crop-choice-stats">
+          <span class="crop-stat"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span>
+          <span class="crop-stat"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span>
+          <span class="crop-stat">+${xpPerHarvest} XP</span>
+        </div>
+        <div class="crop-choice-details">
+          <span class="crop-yield">${harvestMin}-${harvestMax}x</span>
+          <span class="crop-profit ${profit > 0 ? 'positive' : ''}">+${profit} net</span>
+          ${stockTag}${growTag}
+        </div>
+      </div>`;
+    choices.appendChild(el);
+  });
+
+  document.getElementById('plant-overlay').classList.remove('hidden');
+}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');

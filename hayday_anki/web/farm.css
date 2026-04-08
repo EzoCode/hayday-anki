@@ -430,7 +430,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty .field-img{filter:brightness(.85) saturate(.8)}
 .plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
 .plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(0,0,0,.06) 6px,rgba(0,0,0,.06) 7px);pointer-events:none;z-index:0;border-radius:16px}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
+.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 22px rgba(255,215,0,.55),0 0 44px rgba(255,215,0,.18);border:2.5px solid var(--gold);animation:readyGlow 1.8s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-4px) scale(1.08) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
@@ -536,23 +536,25 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #toolbar{display:flex;justify-content:space-around;align-items:center;padding:3px 2px 6px;height:58px;flex-shrink:0;z-index:100;
   background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
-.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 5px;border-radius:8px;transition:all .2s;min-width:40px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
-.tool-btn.active{color:#f4a42a;transform:translateY(-1px)}
+.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;padding:4px 6px;border-radius:10px;transition:all .2s;min-width:42px;position:relative}
+.tool-btn:hover{color:rgba(255,255,255,.85);transform:translateY(-2px);background:rgba(255,255,255,.06)}
+.tool-btn:active{transform:scale(.92);transition:transform .08s}
+.tool-btn.active{color:#f4a42a;transform:translateY(-1px);background:rgba(244,164,42,.08)}
 .tool-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
 .tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:24px}
 .tool-icon img{max-width:24px;max-height:24px;object-fit:contain}
-.tool-label{font-size:8px;font-weight:700;letter-spacing:.3px}
+.tool-label{font-size:9px;font-weight:800;letter-spacing:.3px;opacity:.9}
 .wheel-btn.has-spin .tool-icon{animation:wheelIdle 4s linear infinite}
 .wheel-btn:not(.has-spin) .tool-icon{animation:none}
 @keyframes wheelIdle{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
 
 /* ===== PANELS — Premium Sliding Sheet ===== */
-.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.5)}
-.panel.hidden{display:none}
-@keyframes panelIn{0%{opacity:0;transform:translateY(100%)}55%{transform:translateY(-6px)}75%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
+.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;border-top:3px solid rgba(212,160,86,.5);
+  transform:translateY(0);opacity:1;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .25s ease,visibility 0s linear 0s}
+.panel.hidden{display:flex !important;transform:translateY(100%);opacity:0;visibility:hidden;pointer-events:none;transition:transform .3s cubic-bezier(.4,0,1,1),opacity .2s ease,visibility 0s linear .3s}
+/* panelIn removed — panels now use CSS transitions via .hidden class */
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px}
 .panel-header h2{font-size:16px;color:var(--text-d);font-weight:900;letter-spacing:.3px}
@@ -644,13 +646,15 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .achievement-gem-reward{font-size:10px;color:var(--gem);font-weight:800;display:flex;align-items:center;gap:2px}
 
 /* ===== OVERLAYS — Premium Modals ===== */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:300;animation:overlayIn .25s ease}
-.overlay.hidden{display:none}
-@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:300;
+  opacity:1;visibility:visible;transition:opacity .3s ease,visibility 0s linear 0s}
+.overlay.hidden{display:flex !important;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+.overlay.hidden .overlay-card{transform:scale(0.88);opacity:0}
 .overlay-close{position:absolute;top:10px;right:10px}
-.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
+.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);position:relative;
+  transform:scale(1);opacity:1;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .25s ease}
 .overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
-@keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
+/* popIn removed — overlay-card now uses CSS transitions */
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
 
 /* Wheel */
@@ -685,21 +689,28 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 
 /* Plant dialog — Hay Day style seed selector */
-#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;padding:4px 0;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
-.crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-3px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
-.crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
+#crop-choices{display:flex;flex-direction:column;gap:6px;padding:4px 0;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:row;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(250,240,220,.6));border-radius:14px;padding:10px 12px;border:1.5px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
+.crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-2px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
+.crop-choice:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);pointer-events:none;border-radius:14px 14px 0 0}
+.crop-choice-icon{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s;background:rgba(76,175,80,.06);border-radius:12px;padding:2px}
 .crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain}
-.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
-.crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
-.crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
+.crop-choice-icon img{max-width:46px;max-height:46px;object-fit:contain}
+.crop-choice-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.crop-choice-header{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.crop-choice-info strong{font-size:12px;color:var(--text-d);line-height:1.2}
+.crop-choice-stats{display:flex;gap:6px;flex-wrap:wrap}
+.crop-stat{font-size:9px;color:#777;font-weight:700;display:inline-flex;align-items:center;gap:2px;background:rgba(0,0,0,.04);padding:1px 6px;border-radius:6px}
+.crop-choice-details{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.crop-yield{font-size:9px;color:#666;font-weight:700}
+.crop-tag{font-size:8px;font-weight:700;padding:1px 5px;border-radius:5px}
+.crop-tag-stock{background:rgba(33,150,243,.1);color:#1976d2}
+.crop-tag-growing{background:rgba(76,175,80,.1);color:#2e7d32}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
-.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-yield-info{font-size:7px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
+.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
+.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
+.crop-yield-info{font-size:8px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -889,8 +900,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
 @keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}15%{transform:scale(1.14) translateY(-6px)}30%{transform:scale(1.02) translateY(-1px)}45%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(56,172,60,.95),rgba(46,125,50,.95));padding:2px 10px;border-radius:8px;font-size:9px !important;letter-spacing:.5px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 8px rgba(76,175,80,.6),0 0 12px rgba(76,175,80,.3);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
-@keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(76,175,80,.4),0 0 8px rgba(76,175,80,.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 2px 10px rgba(76,175,80,.7),0 0 18px rgba(76,175,80,.5);transform:translateX(-50%) scale(1.06)}}
+.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,#4caf50,#388e3c);padding:4px 14px;border-radius:10px;font-size:10px !important;letter-spacing:.6px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 3px 10px rgba(76,175,80,.7),0 0 16px rgba(76,175,80,.4),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
+@keyframes labelPulse{0%,100%{box-shadow:0 3px 8px rgba(76,175,80,.5),0 0 10px rgba(76,175,80,.25);transform:translateX(-50%) scale(1)}50%{box-shadow:0 3px 14px rgba(76,175,80,.8),0 0 22px rgba(76,175,80,.5);transform:translateX(-50%) scale(1.08)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}
@@ -907,14 +918,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
 .crop-cost-badge.free{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.08));color:#2e7d32;border-color:rgba(76,175,80,.2)}
-.crop-profit{color:#2e7d32;font-weight:800}
+.crop-profit{color:#888;font-size:9px;font-weight:800}
+.crop-profit.positive{color:#2e7d32}
 .crop-choice-locked{opacity:.45;cursor:not-allowed !important}
 .crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
 
-/* ===== PANEL CLOSE ANIMATION ===== */
-.panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
-.panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
-@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+/* ===== PANEL TRANSITIONS ===== */
+/* Panel enter/exit now handled by .hidden class transitions above */
 
 /* ===== READY PLOT CROP NAME ===== */
 /* (removed — ready plots show crop via sprite + "Récolter !" badge only) */
