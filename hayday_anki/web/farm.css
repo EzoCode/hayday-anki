@@ -19,8 +19,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== HUD ===== */
 #hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:54px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 20%,transparent 40%,rgba(0,0,0,.12) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
-  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 12px, rgba(255,255,255,.02) 12px, rgba(255,255,255,.02) 13px),
+    linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 20%,transparent 40%,rgba(0,0,0,.15) 100%),
+    linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
+  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45)}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
 .hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 10px rgba(255,215,0,.5),0 0 20px rgba(255,215,0,.15),inset 0 0 4px rgba(255,215,0,.3);
@@ -63,11 +66,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== DAILY QUESTS BAR ===== */
 #daily-quests-bar{
-  margin:0;padding:6px 10px 8px;
-  background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 30%,rgba(0,0,0,.08) 100%),
+  margin:0;padding:7px 10px 9px;
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 14px, rgba(255,255,255,.015) 14px, rgba(255,255,255,.015) 15px),
+    linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 30%,rgba(0,0,0,.1) 100%),
     linear-gradient(180deg,#5a4020,#4a3318 60%,#3a2510);
-  border-bottom:2px solid rgba(0,0,0,.25);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 8px rgba(0,0,0,.2);
+  border-bottom:2px solid rgba(0,0,0,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 3px 10px rgba(0,0,0,.25);
   position:relative;z-index:50;
 }
 .quest-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
@@ -204,23 +209,30 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .zone-fields {
   background:
+    radial-gradient(ellipse at 30% 40%, rgba(129,199,132,.1), transparent 50%),
     linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
     linear-gradient(180deg, #4a8c32 0%, #3d7828 50%, #357020 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-bottom: 3px solid rgba(30,60,15,0.5);
 }
 .zone-workshop {
-  background: linear-gradient(180deg, #7d5535 0%, #6b4520 50%, #5a3818 100%);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(200,160,100,.08), transparent 50%),
+    linear-gradient(180deg, #845a38 0%, #6b4520 50%, #5a3818 100%);
+  border: 1.5px solid rgba(255,220,160,0.1);
   border-bottom: 3px solid rgba(70,40,15,0.5);
 }
 .zone-pasture {
-  background: linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(100,180,100,.08), transparent 50%),
+    linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(35,70,18,0.45);
 }
 .zone-village {
-  background: linear-gradient(180deg, #a08552 0%, #8a7040 50%, #7a6335 100%);
+  background:
+    radial-gradient(ellipse at 40% 60%, rgba(200,170,100,.08), transparent 50%),
+    linear-gradient(180deg, #a08552 0%, #8a7040 50%, #7a6335 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(80,55,25,0.45);
 }
@@ -229,17 +241,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 9px 14px;
   background:
     /* Wood grain texture */
     repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
-    repeating-linear-gradient(85deg, transparent 0px, transparent 12px, rgba(0,0,0,.02) 12px, rgba(0,0,0,.02) 13px),
+    repeating-linear-gradient(85deg, transparent 0px, transparent 14px, rgba(0,0,0,.02) 14px, rgba(0,0,0,.02) 15px),
     /* Base wood */
-    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.15) 100%),
-    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
-  border-bottom: 2px solid rgba(90,53,32,.6);
-  border-top: 1px solid rgba(255,220,160,.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
+    linear-gradient(180deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.04) 25%, transparent 50%, rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg, #b0824a, #9a6e3c 40%, #7d5530 70%, #6b4520);
+  border-bottom: 2.5px solid rgba(90,53,32,.6);
+  border-top: 1px solid rgba(255,220,160,.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.2);
 }
 
 .zone-title {
@@ -555,7 +567,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
 .plot-empty:hover .plot-replant img{transform:scale(1.15)}
 
-@keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
+@keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 14px rgba(255,215,0,.35),0 0 30px rgba(255,215,0,.1)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 4px 8px rgba(0,0,0,.25),0 0 28px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.2)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes sparkle{0%{opacity:.2;transform:scale(.5) rotate(0deg)}25%{opacity:1;transform:scale(1.2) rotate(90deg)}50%{opacity:.9;transform:scale(.8) rotate(180deg)}75%{opacity:1;transform:scale(1.1) rotate(270deg)}100%{opacity:.2;transform:scale(.5) rotate(360deg)}}
 
@@ -567,11 +579,14 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== BUILDINGS ON FARM — Card Style ===== */
 #buildings-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6px}
 .building-tile{position:relative;cursor:pointer;transition:transform .15s, box-shadow .15s;display:flex;flex-direction:column;align-items:center;
-  background:linear-gradient(180deg,rgba(160,114,74,.35) 0%,rgba(139,94,60,.25) 40%,rgba(90,56,24,.3) 100%);border-radius:16px;padding:10px 12px 8px;border:1.5px solid rgba(255,220,160,.15);min-width:105px;
-  box-shadow:0 3px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -1px 0 rgba(0,0,0,.15)}
-.building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1)}
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 30%,rgba(0,0,0,.1) 100%),
+    linear-gradient(180deg,rgba(180,130,70,.4) 0%,rgba(139,94,60,.3) 40%,rgba(90,56,24,.35) 100%);
+  border-radius:18px;padding:12px 14px 10px;border:1.5px solid rgba(255,220,160,.18);min-width:120px;
+  box-shadow:0 4px 14px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.15)}
+.building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15)}
 .building-tile:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.2)}
-.building-tile::after{content:'';position:absolute;bottom:6px;left:18%;right:18%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,.25),transparent);border-radius:50%;z-index:0}
+.building-tile::after{content:'';position:absolute;bottom:6px;left:15%;right:15%;height:10px;background:radial-gradient(ellipse,rgba(0,0,0,.3),transparent);border-radius:50%;z-index:0}
 .building-img{max-width:120px;max-height:100px;object-fit:contain;filter:drop-shadow(2px 4px 6px rgba(0,0,0,.45));position:relative;z-index:1;transition:transform .2s;image-rendering:auto}
 .building-tile:hover .building-img{transform:scale(1.05)}
 /* Active building subtle breathing — feels alive when producing */
@@ -580,11 +595,16 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Building with ready items — golden glow to attract attention */
 .building-tile.has-ready{box-shadow:0 3px 10px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08),0 0 16px rgba(255,215,0,.4);border-color:rgba(255,215,0,.5);animation:buildingReady 2s ease-in-out infinite}
 @keyframes buildingReady{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 10px rgba(255,215,0,.3)}50%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 24px rgba(255,215,0,.6)}}
-.building-name{font-size:9px;color:var(--text-l);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-top:3px;text-align:center;letter-spacing:.3px;background:rgba(0,0,0,.2);padding:1px 6px;border-radius:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.building-name{font-size:10px;color:var(--text-l);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-top:4px;text-align:center;letter-spacing:.3px;background:rgba(0,0,0,.25);padding:2px 8px;border-radius:8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .building-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#6abf47,#4a9e2f);color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(106,191,71,.6);animation:badgePulse 1.5s ease-in-out infinite;z-index:10}
 @keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 2px 6px rgba(231,76,60,.4)}50%{transform:scale(1.15);box-shadow:0 2px 12px rgba(231,76,60,.7)}}
-.building-prod-bar{position:absolute;bottom:4px;left:12%;right:12%;height:4px;background:rgba(0,0,0,.2);border-radius:2px;overflow:hidden;z-index:5}
-.building-prod-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:2px;transition:width .4s;box-shadow:0 0 4px rgba(76,175,80,.3)}
+.building-prod-bar{position:absolute;bottom:4px;left:10%;right:10%;height:5px;background:rgba(0,0,0,.3);border-radius:3px;overflow:hidden;z-index:5}
+.building-prod-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:3px;transition:width .4s;box-shadow:0 0 6px rgba(76,175,80,.4)}
+.building-status{font-size:7px;font-weight:800;letter-spacing:.3px;margin-top:2px;text-align:center;z-index:5;position:relative}
+.building-status-ready{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5),0 1px 2px rgba(0,0,0,.6);animation:statusReadyPulse 1.5s ease-in-out infinite;text-transform:uppercase}
+@keyframes statusReadyPulse{0%,100%{opacity:.8}50%{opacity:1;text-shadow:0 0 10px rgba(255,215,0,.8),0 1px 2px rgba(0,0,0,.6)}}
+.building-status-prod{color:rgba(255,255,255,.5);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.building-status-idle{color:rgba(255,255,255,.3);text-shadow:0 1px 2px rgba(0,0,0,.4);font-style:italic}
 
 /* ===== ANIMALS ===== */
 #animals-area{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 6px}
@@ -632,23 +652,34 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}}
 
 /* ===== TOOLBAR — Mobile Tab Bar ===== */
-#toolbar{display:flex;justify-content:space-around;align-items:center;padding:4px 8px 6px;height:58px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
-  border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
-.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border-radius:12px;transition:all .2s;min-width:52px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
-.tool-btn.active{color:#f4a42a;transform:translateY(-1px);background:rgba(244,164,42,.08)}
-.tool-btn.active::after{content:'';position:absolute;bottom:0px;left:50%;transform:translateX(-50%);width:24px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
-.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
-.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:26px}
-.tool-icon img{max-width:26px;max-height:26px;object-fit:contain}
-.tool-label{font-size:9px;font-weight:700;letter-spacing:.3px}
+#toolbar{display:flex;justify-content:space-around;align-items:flex-end;padding:0 6px 4px;height:62px;flex-shrink:0;z-index:100;
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 10px, rgba(255,255,255,.02) 10px, rgba(255,255,255,.02) 11px),
+    linear-gradient(180deg,rgba(255,255,255,.15) 0%,rgba(255,255,255,.04) 20%,transparent 40%,rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg,#c8944a,#a07038 25%,#7d5530 55%,#5a3818 80%,#3a2210);
+  border-top:3px solid #4a2810;
+  box-shadow:0 -6px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,220,160,.2),inset 0 -1px 0 rgba(0,0,0,.2)}
+.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;padding:6px 8px 4px;border-radius:14px;transition:all .2s;min-width:54px;position:relative}
+.tool-btn:hover{color:rgba(255,255,255,.8);transform:translateY(-2px)}
+.tool-btn.active{color:#fff;transform:translateY(-3px);background:linear-gradient(180deg,rgba(244,164,42,.2),rgba(244,164,42,.05))}
+.tool-btn.active::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:28px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 6px rgba(244,164,42,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.tool-btn.active .tool-label{color:#ffd54f;text-shadow:0 0 6px rgba(244,164,42,.4)}
+.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4));display:flex;align-items:center;justify-content:center;height:28px}
+.tool-icon img{max-width:28px;max-height:28px;object-fit:contain}
+.tool-label{font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
 .tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
 .tool-btn.tab-pulse{animation:tabPulseGlow 1s ease-in-out 2;color:var(--gold) !important}
 @keyframes tabPulseGlow{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(255,215,0,.6),inset 0 0 8px rgba(255,215,0,.2)}}
 
 /* ===== PANELS — Premium Sliding Sheet ===== */
-.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.5)}
+.panel{position:fixed;bottom:62px;left:0;right:0;max-height:52vh;
+  background:linear-gradient(180deg,#fcf6ea 0%,#f5edd8 30%,#efe5cc 60%,#e8dcbe 100%);
+  border-radius:24px 24px 0 0;
+  box-shadow:0 -8px 36px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5);
+  z-index:90;display:flex;flex-direction:column;overflow:hidden;
+  animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);
+  border-top:3px solid rgba(212,160,86,.6)}
 .panel.hidden{display:none}
 @keyframes panelIn{0%{opacity:0;transform:translateY(100%)}55%{transform:translateY(-6px)}75%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
@@ -672,12 +703,16 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ITEM GRID — Polished Cards ===== */
 .item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
-.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.6));border-radius:14px;padding:8px 4px;border:1px solid rgba(212,160,86,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:76px;box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
-.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.2)}
+.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(250,240,220,.6));
+  border-radius:16px;padding:10px 6px 8px;border:1.5px solid rgba(212,160,86,.15);
+  cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:82px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
+.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.25)}
 .item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.item-cell img{image-rendering:pixelated;image-rendering:crisp-edges;max-width:40px;max-height:40px;object-fit:contain}
-.item-name{font-size:9px;font-weight:700;color:#666;margin-top:1px;text-align:center}
-.item-qty{font-size:11px;font-weight:900;color:var(--text-d);background:rgba(0,0,0,.05);padding:0 6px;border-radius:8px}
+.item-cell img{image-rendering:pixelated;image-rendering:crisp-edges;max-width:38px;max-height:38px;object-fit:contain;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.2))}
+.item-name{font-size:8px;font-weight:700;color:#777;margin-top:1px;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.item-qty{font-size:12px;font-weight:900;color:#fff;background:linear-gradient(135deg,#8b5e3c,#6b4520);padding:1px 8px;border-radius:10px;text-shadow:0 1px 2px rgba(0,0,0,.3);box-shadow:0 1px 3px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.15);min-width:26px;text-align:center}
 .item-price{font-size:9px;color:var(--gold-d);font-weight:700}
 
 /* ===== BUILDINGS LIST ===== */
@@ -695,18 +730,21 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ORDERS ===== */
 #orders-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
-.order-card:hover{transform:translateY(-1px)}
-.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.order-card{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:14px;padding:12px;border:1.5px solid rgba(0,0,0,.06);box-shadow:0 3px 10px rgba(0,0,0,.08);transition:all .15s;margin-bottom:8px;position:relative;overflow:hidden}
+.order-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.order-card:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.order-card-truck::before{background:linear-gradient(90deg,#d4a056,#c5a200,#d4a056)}
+.order-card-boat::before{background:linear-gradient(90deg,#4fc3f7,#0288d1,#4fc3f7)}
+.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
 .order-reward{font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px}
 .order-coin-reward{color:var(--gold-d);display:flex;align-items:center;gap:2px;background:rgba(255,215,0,.1);padding:2px 6px;border-radius:6px}
 .order-xp-reward{color:#2e7d32;background:rgba(76,175,80,.1);padding:2px 6px;border-radius:6px}
 .order-gem-reward{color:#0288d1;background:rgba(79,195,247,.12);padding:2px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;font-weight:800}
-.order-items{display:flex;flex-wrap:wrap;gap:4px}
-.order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
-.order-item img{max-width:18px;max-height:18px}
-.order-item.fulfilled{opacity:.65;background:rgba(76,175,80,.08)}
+.order-items{display:flex;flex-direction:column;gap:4px;margin-bottom:4px}
+.order-item{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.03);padding:5px 8px;border-radius:8px;font-size:11px;transition:background .15s}
+.order-item img{max-width:20px;max-height:20px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.order-item.fulfilled{background:rgba(76,175,80,.08);border-left:3px solid rgba(76,175,80,.4)}
 .order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(74,158,47,.4)}
 .order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
@@ -748,12 +786,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .achievement-gem-reward{font-size:10px;color:var(--gem);font-weight:800;display:flex;align-items:center;gap:2px}
 
 /* ===== OVERLAYS — Premium Modals ===== */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:300;animation:overlayIn .25s ease}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:300;animation:overlayIn .25s ease}
 .overlay.hidden{display:none}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 .overlay-close{position:absolute;top:10px;right:10px}
-.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
-.overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
+.overlay-card{
+  background:linear-gradient(180deg,#fcf6ea 0%,#f5edd8 25%,#f0e5cc 55%,#e8dcc0 100%);
+  border-radius:26px;padding:26px;text-align:center;min-width:280px;max-width:380px;
+  box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.25),inset 0 2px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);
+  border:3px solid rgba(212,160,86,.55);
+  animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent);border-radius:24px 24px 0 0;pointer-events:none}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
 
@@ -789,15 +832,20 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 
 /* Plant dialog — Hay Day style seed selector */
-#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;padding:6px 2px;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
-.crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-3px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
+#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;padding:8px 4px;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(250,240,220,.6));
+  border-radius:18px;padding:12px 8px 10px;border:1.5px solid rgba(212,160,86,.12);
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 2px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6);
+  position:relative;overflow:hidden}
+.crop-choice:hover{background:rgba(255,252,245,.95);border-color:rgba(106,191,71,.5);transform:translateY(-3px) scale(1.02);box-shadow:0 6px 18px rgba(106,191,71,.2),0 0 0 1px rgba(106,191,71,.15),inset 0 1px 0 rgba(255,255,255,.6)}
 .crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
-.crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
-.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
+.crop-choice-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(2px 3px 4px rgba(0,0,0,.3));transition:transform .2s}
+.crop-choice:hover .crop-choice-icon{transform:scale(1.12)}
+.crop-choice-icon img{max-width:56px;max-height:56px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
+.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%}
 .crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
 .crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
@@ -984,9 +1032,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-grew{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
 .plot-grew .plot-crop{animation:cropGrew .9s cubic-bezier(.34,1.56,.64,1) !important}
 .plot-grew::after{content:'';position:absolute;inset:-6px;border-radius:20px;background:radial-gradient(circle,rgba(106,191,71,.6),rgba(255,255,255,.1) 50%,transparent 70%);animation:growGlow 1.2s ease-out forwards;pointer-events:none;z-index:10}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}15%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.5),inset -2px -2px 6px rgba(0,0,0,.1),0 0 28px rgba(106,191,71,.8),0 4px 8px rgba(0,0,0,.2);transform:scale(1.08)}40%{transform:scale(.98)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
-@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}15%{transform:scale(1.3);filter:brightness(1.4) saturate(1.3)}40%{transform:scale(.95);filter:brightness(1.1)}100%{transform:scale(1);filter:brightness(1)}}
-@keyframes growGlow{0%{opacity:1;transform:scale(.7)}40%{opacity:.8;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
+@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}12%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.5),inset -2px -2px 6px rgba(0,0,0,.1),0 0 32px rgba(106,191,71,.9),0 0 50px rgba(255,215,0,.3),0 4px 8px rgba(0,0,0,.2);transform:scale(1.1)}35%{transform:scale(.97)}55%{transform:scale(1.02)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}12%{transform:scale(1.35);filter:brightness(1.5) saturate(1.4)}30%{transform:scale(.93);filter:brightness(1.15)}50%{transform:scale(1.05);filter:brightness(1.05)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes growGlow{0%{opacity:1;transform:scale(.6)}30%{opacity:.9;transform:scale(1.15)}100%{opacity:0;transform:scale(1.5)}}
 
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}

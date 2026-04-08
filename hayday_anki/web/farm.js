@@ -440,6 +440,7 @@ function buildingIcon(id, w) {
 const HD_BUILDINGS = {
   barn:'hayday_barn', silo:'hayday_silo', shop:'hayday_shop',
   chicken_coop:'hayday_chicken_coop', coop:'hayday_chicken_coop',
+  sugar_mill:'hayday_mill-dark',
 };
 function buildingImg(id, w) {
   // Use unique SVGs for production buildings (each has its own design)
@@ -922,12 +923,18 @@ function renderWorkshop() {
     let statusHtml = '';
     if (ready > 0) {
       statusHtml = `<span class="building-badge">${ready}</span>`;
+      statusHtml += `<span class="building-status building-status-ready">Prêt !</span>`;
     } else if (producing > 0) {
       const q = queue.find(item=>!item.ready);
       const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
+      const reviewsDone = (q?.sessions_waited||0)*10;
+      const reviewsTotal = (q?.sessions_required||1)*10;
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
+      statusHtml += `<span class="building-status building-status-prod">${reviewsDone}/${reviewsTotal} rev.</span>`;
+    } else {
+      statusHtml = `<span class="building-status building-status-idle">Tap pour produire</span>`;
     }
-    el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${statusHtml}`;
+    el.innerHTML = `${buildingImg(bid,80)}<span class="building-name">${name}</span>${statusHtml}`;
     grid.appendChild(el);
   });
 }
@@ -1499,7 +1506,7 @@ function renderOrders() {
   });
   sortedOrders.forEach(order => {
     const i = order._idx;
-    const card = document.createElement('div'); card.className = 'order-card';
+    const card = document.createElement('div'); card.className = `order-card order-card-${order.type||'truck'}`;
     const inv = farmData.inventory||{}; let canDo=true, items='', totalNeeded=0, totalHave=0;
     Object.entries(order.items_needed||{}).forEach(([id,qty]) => {
       const have=inv[id]||0;
