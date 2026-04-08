@@ -19,8 +19,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== HUD ===== */
 #hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:54px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 20%,transparent 40%,rgba(0,0,0,.12) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
-  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
+  background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 15%,transparent 35%,rgba(0,0,0,.15) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 35%,#8b5e3c 70%,#6b3a1a);
+  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 16px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.15) inset;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 15%,transparent 35%,rgba(0,0,0,.15) 100%),repeating-linear-gradient(90deg,transparent,transparent 30px,rgba(0,0,0,.03) 30px,rgba(0,0,0,.03) 31px),linear-gradient(180deg,#ddb06a,#b87d3e 35%,#8b5e3c 70%,#6b3a1a)}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
 .hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 10px rgba(255,215,0,.5),0 0 20px rgba(255,215,0,.15),inset 0 0 4px rgba(255,215,0,.3);
@@ -74,7 +75,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== NOTIFICATIONS ===== */
 #notification-area{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-.notification{background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(60,35,15,.96));color:var(--text-l);padding:8px 22px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid rgba(255,200,100,.25);box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);animation:notifIn .4s cubic-bezier(.34,1.56,.64,1),notifOut .4s ease 2.5s forwards;pointer-events:auto;letter-spacing:.2px;max-width:320px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;gap:4px}
+.notification{background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(60,35,15,.96));color:var(--text-l);padding:9px 24px;border-radius:22px;font-size:12px;font-weight:700;border:1.5px solid rgba(255,200,100,.3);box-shadow:0 6px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);animation:notifIn .4s cubic-bezier(.34,1.56,.64,1),notifOut .4s ease 2.5s forwards;pointer-events:auto;letter-spacing:.2px;max-width:320px;text-align:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;gap:5px}
 .notification img{vertical-align:middle;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 @keyframes notifIn{from{opacity:0;transform:translateY(-12px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes notifOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
@@ -509,8 +510,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== REWARD LAYER ===== */
 #reward-layer{position:fixed;inset:0;pointer-events:none;z-index:150}
-.floating-reward{position:absolute;font-size:20px;font-weight:900;color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.8),0 2px 4px rgba(0,0,0,.7),0 0 20px rgba(255,215,0,.3);animation:floatUp 1.4s ease-out forwards;pointer-events:none;letter-spacing:.5px}
-@keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(.5)}10%{opacity:1;transform:translateY(0) scale(1.3)}40%{opacity:1;transform:translateY(-25px) scale(1.1)}100%{opacity:0;transform:translateY(-60px) scale(.7)}}
+.floating-reward{position:absolute;font-size:20px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,.9),0 2px 4px rgba(0,0,0,.8),0 0 24px rgba(255,215,0,.35);animation:floatUp 1.5s ease-out forwards;pointer-events:none;letter-spacing:.6px;z-index:160}
+@keyframes floatUp{0%{opacity:0;transform:translateY(8px) scale(.4)}8%{opacity:1;transform:translateY(-4px) scale(1.4)}20%{opacity:1;transform:translateY(-12px) scale(1.15)}50%{opacity:1;transform:translateY(-30px) scale(1.05)}100%{opacity:0;transform:translateY(-65px) scale(.6)}}
 .coin-particle{position:absolute;animation:coinBurst .8s ease-out forwards;pointer-events:none}
 @keyframes coinBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
 .harvest-particle{position:absolute;pointer-events:none;z-index:155;animation:harvestBurst .8s ease-out forwards}
@@ -656,9 +657,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .overlay.hidden{display:none}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 .overlay-close{position:absolute;top:10px;right:10px}
-.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
-.overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
-@keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
+.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.25),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -2px 6px rgba(0,0,0,.05);border:3px solid rgba(212,160,86,.55);animation:popIn .4s cubic-bezier(.34,1.56,.64,1);position:relative}
+.overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);border-radius:22px 22px 0 0;pointer-events:none}
+.overlay-card::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:3px;background:linear-gradient(90deg,transparent,rgba(212,160,86,.3),transparent);border-radius:0 0 24px 24px;pointer-events:none}
+@keyframes popIn{0%{opacity:0;transform:scale(.75) translateY(20px)}50%{transform:scale(1.04) translateY(-2px)}75%{transform:scale(.99) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
 
 /* Wheel */
@@ -771,7 +773,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .login-reward-item{font-size:18px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.4)}
 
 /* ===== ACTION BUTTONS — Hay Day Green Style ===== */
-.action-btn{background:linear-gradient(180deg,#f7c948 0%,#f4a22a 30%,#f4922a 60%,#e07c18 100%);color:#fff;border:2px solid rgba(255,255,255,.3);padding:12px 32px;border-radius:24px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(244,146,42,.45),inset 0 2px 0 rgba(255,255,255,.35),0 3px 0 #b86a12;transition:all .15s;margin-top:10px;letter-spacing:.4px;text-shadow:0 1px 2px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.action-btn{background:linear-gradient(180deg,#f7c948 0%,#f4a22a 25%,#f4922a 55%,#e07c18 100%);color:#fff;border:2.5px solid rgba(255,255,255,.35);padding:13px 34px;border-radius:26px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(244,146,42,.5),inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #b86a12,inset 0 -1px 0 rgba(0,0,0,.1);transition:all .15s;margin-top:10px;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.35);position:relative;overflow:hidden}
 .action-btn::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .4s;pointer-events:none}
 .action-btn:hover::before{left:100%}
 .action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,146,42,.55),inset 0 1px 0 rgba(255,255,255,.4),0 3px 0 #b86a12}
@@ -864,10 +866,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== REWARD NOTIFICATION (gold) ===== */
 .notification.reward-notif{
-  background:linear-gradient(135deg,rgba(40,25,10,.92),rgba(80,50,10,.95));
-  border:1px solid rgba(255,215,0,.4);
+  background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(80,50,10,.96));
+  border:1.5px solid rgba(255,215,0,.45);
   color:var(--gold);
-  box-shadow:0 4px 14px rgba(255,215,0,.2),0 4px 14px rgba(0,0,0,.4)}
+  box-shadow:0 4px 16px rgba(255,215,0,.25),0 6px 18px rgba(0,0,0,.45);
+  animation:notifIn .4s cubic-bezier(.34,1.56,.64,1),rewardGlow 2s ease-in-out 1,notifOut .4s ease 2.5s forwards}
+@keyframes rewardGlow{0%{box-shadow:0 4px 16px rgba(255,215,0,.2),0 6px 18px rgba(0,0,0,.4)}50%{box-shadow:0 4px 20px rgba(255,215,0,.5),0 6px 18px rgba(0,0,0,.4),0 0 16px rgba(255,215,0,.2)}100%{box-shadow:0 4px 16px rgba(255,215,0,.25),0 6px 18px rgba(0,0,0,.45)}}
 
 /* ===== RESPONSIVE TOUCH TARGETS ===== */
 @media(max-width:400px){
@@ -885,18 +889,21 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* Growth feedback — triggered when a plot advances after review */
 /* THIS IS THE KEY FEEDBACK: player sees crops grow with each review */
-.plot-grew{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
-.plot-grew .plot-crop{animation:cropGrew .9s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew::after{content:'';position:absolute;inset:-6px;border-radius:20px;background:radial-gradient(circle,rgba(106,191,71,.6),rgba(255,255,255,.1) 50%,transparent 70%);animation:growGlow 1.2s ease-out forwards;pointer-events:none;z-index:10}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}15%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.5),inset -2px -2px 6px rgba(0,0,0,.1),0 0 28px rgba(106,191,71,.8),0 4px 8px rgba(0,0,0,.2);transform:scale(1.08)}40%{transform:scale(.98)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
-@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}15%{transform:scale(1.3);filter:brightness(1.4) saturate(1.3)}40%{transform:scale(.95);filter:brightness(1.1)}100%{transform:scale(1);filter:brightness(1)}}
-@keyframes growGlow{0%{opacity:1;transform:scale(.7)}40%{opacity:.8;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
+.plot-grew{animation:plotGrew 1.2s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
+.plot-grew .plot-crop{animation:cropGrew 1s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew::after{content:'';position:absolute;inset:-8px;border-radius:22px;background:radial-gradient(circle,rgba(106,191,71,.7),rgba(255,255,255,.15) 45%,transparent 70%);animation:growGlow 1.4s ease-out forwards;pointer-events:none;z-index:10}
+/* Green sparkle ring on growth */
+.plot-grew::before{content:'';position:absolute;inset:-4px;border-radius:18px;border:2px solid rgba(106,191,71,.6);animation:growRing 1s ease-out forwards;pointer-events:none;z-index:11}
+@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}10%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.6),inset -2px -2px 4px rgba(0,0,0,.1),0 0 32px rgba(106,191,71,.9),0 4px 8px rgba(0,0,0,.2);transform:scale(1.1)}35%{transform:scale(.97)}60%{transform:scale(1.02)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}10%{transform:scale(1.35);filter:brightness(1.5) saturate(1.4)}30%{transform:scale(.93);filter:brightness(1.15)}55%{transform:scale(1.05);filter:brightness(1.05)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes growGlow{0%{opacity:1;transform:scale(.6)}30%{opacity:.9;transform:scale(1.15)}100%{opacity:0;transform:scale(1.5)}}
+@keyframes growRing{0%{opacity:1;transform:scale(.8);border-color:rgba(106,191,71,.8)}50%{opacity:.6;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3);border-color:rgba(255,215,0,.3)}}
 
 /* ===== READY CROP BOUNCE ===== */
-.plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
-@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}15%{transform:scale(1.14) translateY(-6px)}30%{transform:scale(1.02) translateY(-1px)}45%{transform:scale(1.08) translateY(-3px)}60%{transform:scale(1) translateY(0)}}
-.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(56,172,60,.95),rgba(46,125,50,.95));padding:2px 10px;border-radius:8px;font-size:9px !important;letter-spacing:.5px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 8px rgba(76,175,80,.6),0 0 12px rgba(76,175,80,.3);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
-@keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(76,175,80,.4),0 0 8px rgba(76,175,80,.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 2px 10px rgba(76,175,80,.7),0 0 18px rgba(76,175,80,.5);transform:translateX(-50%) scale(1.06)}}
+.plot-crop-bounce{animation:readyBounce 2s ease-in-out infinite !important}
+@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}12%{transform:scale(1.16) translateY(-8px)}24%{transform:scale(1) translateY(0)}36%{transform:scale(1.1) translateY(-5px)}48%{transform:scale(1) translateY(0)}}
+.plot-ready-label{font-weight:900;color:#fff !important;background:linear-gradient(135deg,rgba(56,172,60,.95),rgba(46,125,50,.95));padding:3px 12px;border-radius:10px;font-size:9px !important;letter-spacing:.6px;text-transform:uppercase;animation:labelPulse 2s ease-in-out infinite;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 2px 8px rgba(76,175,80,.6),0 0 14px rgba(76,175,80,.3);text-shadow:0 1px 2px rgba(0,0,0,.5) !important;bottom:6px !important;left:50% !important;right:auto !important;transform:translateX(-50%);white-space:nowrap;z-index:5 !important}
+@keyframes labelPulse{0%,100%{box-shadow:0 2px 6px rgba(76,175,80,.4),0 0 8px rgba(76,175,80,.2);transform:translateX(-50%) scale(1)}50%{box-shadow:0 2px 12px rgba(76,175,80,.8),0 0 20px rgba(76,175,80,.5);transform:translateX(-50%) scale(1.08)}}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}
