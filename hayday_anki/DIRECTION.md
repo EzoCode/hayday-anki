@@ -171,6 +171,14 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - **Plot labels** : refactored avec fond semi-transparent et centrage precise (`transform:translateX(-50%)`).
 - **Plot percentage** : fond sombre pill (`background:rgba(0,0,0,.25)`) pour lisibilite sur n'importe quel fond, taille 10px.
 
+## Ameliorations (session 12 — fondations visuelles et UX cleanup)
+- **Sprite priority fix** : `S()` prefere maintenant les PNG pour portraits/UI/batiments mais garde les SVG vectoriels pour les stades de croissance des cultures (les PNG de stades font ~12px, trop petits pour affichage 58px). Les portraits PNG Hay Day sont utilises dans le plant dialog et l'inventaire avec `image-rendering: pixelated`.
+- **Toolbar simplifie** : 5 boutons au lieu de 7 (retire Batir et Roue). La roue est accessible depuis le panel Succes. Les batiments sont accessibles via les tuiles de l'atelier sur la ferme + bouton "+ Construire". Plus d'espace par bouton, labels plus lisibles (9px), active state avec fond subtil.
+- **Farmer character retire** : le personnage fixe en bas a droite prenait de la place sans valeur gameplay. Retire du DOM et du CSS.
+- **Crops display nettoye** : les parcelles en croissance n'affichent plus le nom ni le pourcentage en overlay — juste le sprite (plus gros: 44-58px) et la barre de progression au sol. Info complete dans le tooltip natif. Les parcelles pretes montrent le sprite a 64px.
+- **Hay Day assets integres** : `coin-box.png` utilise comme fond du compteur de pieces dans le HUD. `details-bg.png` (gradient vert Hay Day) utilise comme fond des overlay cards. `xp_pbar_bg.png` et `star.png` deja utilises pour le HUD XP.
+- **CSS cleanup** : code mort du farmer character supprime, toolbar plus spacieux avec padding ameliore, crop images avec meilleur centrage flex.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

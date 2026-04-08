@@ -103,7 +103,6 @@
     <!-- Floating layers -->
     <div id="decorations-layer"></div>
     <div id="mystery-boxes-layer"></div>
-    <div id="farmer-character"></div>
     <div id="reward-layer"></div>
   </div>
   <div class="farm-atmosphere"></div>
@@ -116,9 +115,6 @@
   <button class="tool-btn active" onclick="showTab('farm')" id="tab-farm">
     <span class="tool-icon" id="icon-farm"></span><span class="tool-label">Ferme</span>
   </button>
-  <button class="tool-btn" onclick="showTab('buildings')" id="tab-buildings">
-    <span class="tool-icon" id="icon-buildings"></span><span class="tool-label">Bâtir</span>
-  </button>
   <button class="tool-btn" onclick="showTab('inventory')" id="tab-inventory">
     <span class="tool-icon" id="icon-inventory"></span><span class="tool-label">Sac</span>
   </button>
@@ -130,9 +126,6 @@
   </button>
   <button class="tool-btn" onclick="showTab('achievements')" id="tab-achievements">
     <span class="tool-icon" id="icon-achievements"></span><span class="tool-label">Succès</span>
-  </button>
-  <button class="tool-btn wheel-btn" onclick="spinWheel()" id="tab-wheel">
-    <span class="tool-icon" id="icon-wheel"></span><span class="tool-label">Roue</span>
   </button>
 </div>
 
@@ -174,6 +167,12 @@
 <div id="panel-achievements" class="panel hidden">
   <div class="panel-handle"></div>
   <div class="panel-header"><h2>Succès</h2><button class="close-btn" onclick="hidePanel()"><span class="close-x"></span></button></div>
+  <div class="panel-actions">
+    <button class="panel-action-btn" id="wheel-panel-btn" onclick="spinWheel()">
+      <span class="tool-icon" id="icon-wheel-panel"></span>
+      <span>Roue de la Fortune</span>
+    </button>
+  </div>
   <div id="achievements-list"></div>
 </div>
 

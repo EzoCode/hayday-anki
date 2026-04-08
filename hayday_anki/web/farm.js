@@ -44,6 +44,18 @@ function applyHayDayAssets() {
     const xpEl = document.getElementById('xp-bar-bg-img');
     if (xpEl) { xpEl.src = xpBgSrc; xpEl.style.display = 'block'; }
   }
+  // Coin display — use coin-box sprite as background if available
+  const coinBoxSrc = S('hayday_coin-box');
+  const hudCoins = document.getElementById('hud-coins');
+  if (coinBoxSrc && hudCoins) {
+    hudCoins.style.backgroundImage = `url(${coinBoxSrc})`;
+    hudCoins.style.backgroundSize = 'cover';
+    hudCoins.style.backgroundPosition = 'center';
+    hudCoins.style.background = `url(${coinBoxSrc}) center/cover no-repeat`;
+    hudCoins.style.border = 'none';
+    hudCoins.style.minWidth = '80px';
+    hudCoins.style.paddingLeft = '24px';
+  }
   // Coin icon from sprite
   const coinSrc = S('ui_coin');
   const coinEl = document.getElementById('coin-icon');
@@ -92,12 +104,10 @@ function applyHayDayAssets() {
   // Toolbar icons — use sprites (with SVG fallbacks for missing ones)
   const toolbarIcons = {
     'icon-farm': {sprite: 'hayday_wheat-icon'},
-    'icon-buildings': {sprite: 'hayday_barn'},
     'icon-inventory': {sprite: 'hayday_silo'},
     'icon-orders': {sprite: '_icon_truck'},
     'icon-shop': {sprite: 'hayday_shop'},
     'icon-achievements': {sprite: 'hayday_star'},
-    'icon-wheel': {sprite: '_icon_wheel'},
   };
   for (const [elId, cfg] of Object.entries(toolbarIcons)) {
     const el = document.getElementById(elId);
@@ -120,6 +130,23 @@ function applyHayDayAssets() {
     if (src && el) {
       el.innerHTML = `<img src="${src}" width="18" height="18" style="vertical-align:middle;margin-right:4px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))"> ${el.textContent}`;
     }
+  }
+  // Wheel icon inside achievements panel
+  const wheelPanelIcon = document.getElementById('icon-wheel-panel');
+  const wheelSrc = S('_icon_wheel');
+  if (wheelPanelIcon && wheelSrc) {
+    wheelPanelIcon.innerHTML = `<img src="${wheelSrc}" width="22" height="22" style="object-fit:contain">`;
+  }
+  // Use Hay Day green gradient for overlay cards
+  const detailsBg = S('hayday_details-bg');
+  if (detailsBg) {
+    document.querySelectorAll('.overlay-card').forEach(card => {
+      if (!card.classList.contains('levelup-card') && !card.classList.contains('login-bonus-card')) {
+        card.style.backgroundImage = `url(${detailsBg})`;
+        card.style.backgroundSize = 'cover';
+        card.style.backgroundPosition = 'center bottom';
+      }
+    });
   }
 }
 
@@ -274,9 +301,13 @@ function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
 function S(key) {
-  // Check high-quality SVG crops first, then PNG atlas
-  if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
+  // For crop growth stages (tiny pixel art PNGs), prefer generated SVGs which scale cleanly
+  const isCropStage = key.startsWith('crops_') && !key.endsWith('_portrait');
+  if (isCropStage && typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
+  // For everything else (buildings, UI, backgrounds, portraits), prefer real PNG assets
   if (typeof SPRITES !== 'undefined' && SPRITES[key]) return SPRITES[key];
+  // Fallback to generated SVG if no PNG
+  if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
   return null;
 }
 function img(key, w, h, cls) {
@@ -513,7 +544,7 @@ function updateFarm(data) {
   oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather(); renderFarmer();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   let anyGrew = false, anyReady = false;
@@ -749,7 +780,7 @@ function renderFields() {
     } else if (field.state === 'ready') {
       const readyCropName = cropName(field.crop);
       el.title = `${readyCropName} — Prêt à récolter !`;
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 64)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -765,10 +796,10 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 40 : 52;
+      const cropSize = stage <= 1 ? 44 : 58;
       const cName = cropName(field.crop);
       el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -875,10 +906,9 @@ function updateTabBadges() {
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
   setBadge('tab-farm', (d.mystery_boxes||[]).length);
-  setBadge('tab-wheel', d.can_spin_wheel ? 1 : 0);
-  // Wheel icon only rotates when free spin available
-  const wheelBtn = document.getElementById('tab-wheel');
-  if (wheelBtn) wheelBtn.classList.toggle('has-spin', !!d.can_spin_wheel);
+  // Show wheel badge on achievements if free spin available
+  const achBadgeCount = (document.getElementById('tab-achievements')?.querySelector('.tab-badge')?.textContent||0);
+  if (d.can_spin_wheel) setBadge('tab-achievements', Math.max(parseInt(achBadgeCount)||0, 1));
 }
 
 function setBadge(tabId, count) {
@@ -2002,7 +2032,6 @@ function startAmbientParticles() {
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('tab-farm').classList.add('active');
   drawWheel();
-  renderFarmer();
   pycmd('farm:get_state');
   SoundMgr.playMusic();
   startAmbientParticles();
