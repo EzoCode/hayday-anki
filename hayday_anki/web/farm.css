@@ -461,33 +461,34 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .item-cell { position: relative; }
 
 /* ===== PLOTS — 3D Depth ===== */
-#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(82px,110px));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start}
-#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(72px,100px))}
-#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(64px,88px))}
+#fields-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start;max-width:520px;margin:0 auto}
 
-.plot{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:64px;max-width:115px;
+.plot{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  border:2px solid rgba(90,60,20,.5);border-top-color:rgba(200,170,100,.3);
   box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.15)}
-.plot::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 40% 35%,rgba(255,255,255,.08),transparent 55%),radial-gradient(ellipse at 70% 70%,rgba(0,0,0,.12),transparent 50%);pointer-events:none;z-index:0;border-radius:16px}
+.plot::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 40% 35%,rgba(255,255,255,.08),transparent 55%),radial-gradient(ellipse at 70% 70%,rgba(0,0,0,.12),transparent 50%);pointer-events:none;z-index:0;border-radius:14px}
 .plot:hover{transform:translateY(-3px) scale(1.04);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35);z-index:2}
 .plot:active{transform:scale(.92);box-shadow:inset 2px 2px 4px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2);transition:transform .08s}
 
-.plot-empty{background:linear-gradient(160deg,#a08552 0%,#8b7040 40%,#7a6235 100%);border:2px dashed rgba(255,255,255,.25);transition:border-color .2s,background .2s}
-.plot-empty:hover{border-color:rgba(106,191,71,.7);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 16px rgba(106,191,71,.25),0 4px 12px rgba(0,0,0,.3)}
-.plot-empty .field-img{filter:brightness(.85) saturate(.8)}
-.plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
-.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(0,0,0,.06) 6px,rgba(0,0,0,.06) 7px);pointer-events:none;z-index:0;border-radius:16px}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
+.plot-empty{background:linear-gradient(160deg,#a08552 0%,#8b7040 40%,#7a6235 100%);border:2px dashed rgba(255,255,255,.2);transition:border-color .2s,background .2s}
+.plot-empty:hover{border-color:rgba(106,191,71,.6);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 14px rgba(106,191,71,.2),0 4px 12px rgba(0,0,0,.3)}
+.plot-empty .field-img{filter:brightness(.9) saturate(.7)}
+.plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:2px solid rgba(60,100,30,.6);border-top-color:rgba(140,200,80,.25);overflow:hidden}
+.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%);pointer-events:none;z-index:0;border-radius:14px}
+.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 16px rgba(255,215,0,.5),0 0 32px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-5px) scale(1.1) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff;z-index:5 !important}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
-.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
+.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:15px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
 .plot-wilted{background:linear-gradient(145deg,#8a7a5a,#6b5a3a);border:2px solid rgba(139,69,19,.4);filter:saturate(.3) brightness(.75);cursor:pointer;animation:wiltPulse 3s ease-in-out infinite}
 .plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
 @keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
+.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:pixelated;border-radius:14px;opacity:.85}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
-.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+.plot-crop img{max-width:68px;max-height:68px;width:auto;height:auto;transition:transform .3s ease;image-rendering:pixelated}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
+.plot-ready-label{background:linear-gradient(135deg,rgba(255,215,0,.9),rgba(255,180,0,.9));color:var(--text-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.4);box-shadow:0 2px 6px rgba(255,215,0,.5);animation:readyLabelPulse 1.5s ease-in-out infinite;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+@keyframes readyLabelPulse{0%,100%{box-shadow:0 2px 6px rgba(255,215,0,.4);transform:translateX(-50%) scale(1)}50%{box-shadow:0 2px 12px rgba(255,215,0,.7),0 0 16px rgba(255,215,0,.4);transform:translateX(-50%) scale(1.06)}}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,.5);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
@@ -556,6 +557,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(.5)}10%{opacity:1;transform:translateY(0) scale(1.3)}40%{opacity:1;transform:translateY(-25px) scale(1.1)}100%{opacity:0;transform:translateY(-60px) scale(.7)}}
 .coin-particle{position:absolute;animation:coinBurst .8s ease-out forwards;pointer-events:none}
 @keyframes coinBurst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.plot-harvesting{animation:plotHarvest .5s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
+@keyframes plotHarvest{0%{transform:scale(1)}20%{transform:scale(1.15)}50%{transform:scale(.9);opacity:.7}100%{transform:scale(1);opacity:1}}
 .harvest-particle{position:absolute;pointer-events:none;z-index:155;animation:harvestBurst .8s ease-out forwards}
 @keyframes harvestBurst{0%{opacity:1;transform:translate(0,0) scale(1.3)}30%{opacity:1;transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5)) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3) rotate(15deg)}}
 .harvest-sparkle{position:absolute;pointer-events:none;z-index:156;width:6px;height:6px;background:radial-gradient(circle,#fff,#ffd700);border-radius:50%;box-shadow:0 0 6px #ffd700;animation:harvestBurst .7s ease-out forwards}

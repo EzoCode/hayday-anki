@@ -301,22 +301,22 @@ function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
 function S(key) {
-  // For crop growth stages (tiny pixel art PNGs), prefer generated SVGs which scale cleanly
-  const isCropStage = key.startsWith('crops_') && !key.endsWith('_portrait');
-  if (isCropStage && typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
-  // For everything else (buildings, UI, backgrounds, portraits), prefer real PNG assets
+  // Always prefer real PNG assets — they have authentic Hay Day pixel art style
   if (typeof SPRITES !== 'undefined' && SPRITES[key]) return SPRITES[key];
-  // Fallback to generated SVG if no PNG
+  // Fallback to generated SVG only if no real PNG exists
   if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
   return null;
 }
 function img(key, w, h, cls) {
   const src = S(key);
   if (!src) return '';
-  return `<img src="${src}" width="${w||48}" height="${h||48}" class="${cls||''}" draggable="false">`;
+  // Use pixelated rendering for small pixel-art sprites (crops, tiles)
+  const isPx = key.startsWith('crops_') || key.startsWith('tiles_') || key.startsWith('animals_');
+  const style = isPx ? 'image-rendering:pixelated' : '';
+  return `<img src="${src}" width="${w||48}" height="${h||48}" class="${cls||''}" draggable="false" style="${style}">`;
 }
 
-// Crop IDs now match sprite filenames directly — no remapping needed
+// Crop IDs match sprite filenames directly — no remapping needed
 const CROP_SPRITE_MAP = {};
 function cropImg(id, stage, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_${stage}`, w||44, w||44, 'plot-crop'); }
 function cropPortrait(id, w) { const s = CROP_SPRITE_MAP[id]||id; return img(`crops_${s}_portrait`, w||28, w||28); }
@@ -469,10 +469,12 @@ function animalLbl(id, w) {
 }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('tiles_dirt_planted') || S('hayday_field');
+  // Prefer flat 64x64 tile textures (fit square tiles perfectly)
+  // Isometric hayday sprites get awkwardly cropped in square containers
+  if (state === 'ready') return S('tiles_grass') || S('hayday_wheat-field');
+  if (state === 'growing' || state === 'planted') return S('tiles_dirt_planted') || S('hayday_alfalfa-field');
   if (state === 'empty') return S('tiles_dirt') || S('hayday_field');
-  return S('hayday_field') || S('tiles_grass');
+  return S('tiles_dirt') || S('hayday_field');
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
@@ -716,10 +718,7 @@ function renderFields() {
   grid.innerHTML = '';
   const fields = farmData.fields || farmData.plots || [];
 
-  // Responsive grid columns based on field count
-  grid.classList.remove('cols-4', 'cols-5');
-  if (fields.length >= 15) grid.classList.add('cols-5');
-  else if (fields.length >= 8) grid.classList.add('cols-4');
+  // Grid columns handled automatically by CSS auto-fill
 
   document.getElementById('fields-count').textContent = fields.length;
 
@@ -1745,18 +1744,20 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
-  // Find the plot element and create harvest burst from it
   const field = farmData.fields?.find(f => f.id === id);
-  const allPlots = document.querySelectorAll('.plot');
+  const allPlots = document.querySelectorAll('#fields-grid .plot');
   const idx = (farmData.fields||[]).findIndex(f => f.id === id);
   const plotEl = allPlots[idx];
   if (field && plotEl) {
     const rect = plotEl.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
-    // Create harvest burst particles from actual plot position
+    // Satisfying pop animation on the plot tile itself
+    plotEl.classList.add('plot-harvesting');
+    setTimeout(() => plotEl.classList.remove('plot-harvesting'), 600);
+    // Harvest burst particles from actual plot position
     showHarvestBurst(cx, cy, field.crop);
-    // Coin fly from plot to HUD (satisfying collection feel)
+    // Coin fly from plot to HUD
     showCoinBurst(cx, cy, 4);
   }
   pycmd(`farm:harvest:${id}`);
