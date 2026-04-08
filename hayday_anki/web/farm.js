@@ -201,19 +201,20 @@ const SoundMgr = {
     if (!this._ctx) try { this._ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
     return this._ctx;
   },
-  play(id) {
+  play(id, volMult) {
     if (!this.enabled) return;
+    const vm = volMult || 1;
     // Try HTML audio element first
     const el = document.getElementById(`snd-${id}`);
-    if (el && el.src) { el.volume = this.volume; el.currentTime = 0; el.play().catch(()=>{}); return; }
+    if (el && el.src) { el.volume = Math.min(1, this.volume * vm); el.currentTime = 0; el.play().catch(()=>{}); return; }
     // Fallback: synth sounds via Web Audio API
-    this._synth(id);
+    this._synth(id, vm);
   },
   // Synthesized game sounds - each action has a unique feel
-  _synth(id) {
+  _synth(id, volMult) {
     const ctx = this._getCtx();
     if (!ctx) return;
-    const vol = this.volume * 0.4;
+    const vol = this.volume * 0.4 * (volMult || 1);
     const t = ctx.currentTime;
     if (id === 'harvest') {
       // Satisfying pluck + ascending chime (like picking fruit)
@@ -1920,6 +1921,17 @@ function showSessionSummary(d){
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
 function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
+function showMicroReward(text,x,y){
+  const layer=document.getElementById('reward-layer');
+  const coinSrc=S('ui_coin');
+  const el=document.createElement('div');
+  el.className='micro-reward';
+  el.innerHTML=(coinSrc?`<img src="${coinSrc}" width="12" height="12"> `:'')+text;
+  el.style.left=(x||window.innerWidth/2)+'px';
+  el.style.top=(y||window.innerHeight/2)+'px';
+  layer.appendChild(el);
+  setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},900);
+}
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');
   const coinSrc=S('ui_coin');
@@ -1980,9 +1992,19 @@ function showReward(d){
       if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 8; }
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
+    } else {
+      // Normal review: subtle micro-reward near HUD coin display
+      // Every review must feel rewarding — this is the addictive core
+      const hudEl = document.getElementById('hud-coins');
+      if (hudEl) {
+        const r = hudEl.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.bottom + 6;
+        showMicroReward(`+${coins}`, cx, cy);
+        // Subtle coin sound for every review (quieter than special)
+        SoundMgr.play('coin', 0.25);
+      }
     }
-    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
-    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
   }
   // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
   if (hasItems) {
