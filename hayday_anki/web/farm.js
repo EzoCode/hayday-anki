@@ -1317,7 +1317,7 @@ function renderInventory() {
       el.onclick = () => showItemInfo(id);
     }
     const icon = itemIcon(id, 36);
-    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')">ⓘ</span>`;
+    el.innerHTML = `${icon}<span class="item-name">${itemName(id)}</span><span class="item-qty">x${qty}</span>${(it.sell_price||0)>0?`<span class="item-price">${it.sell_price} p.</span>`:''}<span class="item-info-btn" onclick="event.stopPropagation();showItemInfo('${id}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23a08060' stroke-width='1.5'/%3E%3Ctext x='8' y='11.5' text-anchor='middle' font-size='10' font-weight='bold' fill='%23a08060'%3Ei%3C/text%3E%3C/svg%3E" width="12" height="12"></span>`;
     grid.appendChild(el);
   });
   if (!sortedItems.length) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:#999;font-size:12px">${LANG.review_to_earn}</div>`;
@@ -1526,7 +1526,7 @@ function renderShopAnimals(grid){
       ${animalLbl(aid,36)||animalImg(aid,36)}
       <span class="item-name">${name}${count>0?' ('+count+')':''}</span>
       <span class="item-price">${unlocked?`${cost} p.`:`Niv.${info.lvl}`}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showAnimalShopInfo('${aid}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23a08060' stroke-width='1.5'/%3E%3Ctext x='8' y='11.5' text-anchor='middle' font-size='10' font-weight='bold' fill='%23a08060'%3Ei%3C/text%3E%3C/svg%3E" width="12" height="12"></span>
     `;
     grid.appendChild(el);
   });
@@ -1576,7 +1576,7 @@ function renderShopUpgrades(grid){
       ${buildingImg(u.id,40)}
       <span class="item-name">${u.name} Niv.${u.level}</span>
       <span class="item-price">${u.cap}→${u.newCap}</span>
-      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')">ⓘ</span>
+      <span class="item-info-btn" onclick="event.stopPropagation();showUpgradeInfo('${u.id}')"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23a08060' stroke-width='1.5'/%3E%3Ctext x='8' y='11.5' text-anchor='middle' font-size='10' font-weight='bold' fill='%23a08060'%3Ei%3C/text%3E%3C/svg%3E" width="12" height="12"></span>
     `;
     grid.appendChild(el);
   });
@@ -1904,19 +1904,26 @@ function showCoinBurst(x,y,n){
   }
 }
 function showReward(d){
-  // Coins: satisfying burst + fly-to-HUD (the addictive core feedback)
+  // Coins: satisfying burst from the farm area (where the action is)
   if(d.coins){
-    const cx=window.innerWidth/2, cy=window.innerHeight/2-30;
+    const zone = document.querySelector('.zone-fields');
+    let cx = window.innerWidth/2, cy = window.innerHeight/3;
+    if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
     showFloatingReward(`+${d.coins}`,cx,cy);
-    showCoinBurst(cx,cy+20,Math.min(8,Math.max(3,Math.floor(d.coins/2))));
+    showCoinBurst(cx,cy+15,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
     SoundMgr.play('coin');
   }
-  // XP: appears slightly after coins for staggered feel
-  if(d.xp) setTimeout(()=>showFloatingReward(`+${d.xp} XP`,window.innerWidth/2+40,window.innerHeight/2-10),150);
+  // XP: appears slightly after coins for staggered cascade feel
+  if(d.xp) setTimeout(()=>{
+    const zone = document.querySelector('.zone-fields');
+    let cx = window.innerWidth/2+30, cy = window.innerHeight/3+15;
+    if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2 + 30; cy = Math.max(75, r.top + r.height/2 + 15); }
+    showFloatingReward(`+${d.xp} XP`,cx,cy);
+  },180);
   // Material/item drops: staggered notifications with item icons
-  if(d.items){let delay=300;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=250})}
+  if(d.items){let delay=350;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=280})}
   // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),500)}
+  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),550)}
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
@@ -1926,7 +1933,7 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge">\u2713</span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
   (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');

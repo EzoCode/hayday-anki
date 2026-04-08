@@ -642,11 +642,11 @@ class FarmManager:
 
         # Base rewards by ease — reward correct SRS behavior
         # Again(1)=minimal, Hard(2)=less, Good(3)=standard, Easy(4)=mastery bonus
-        coin_map = {1: 1, 2: 2, 3: 3, 4: 4}
-        xp_map = {1: 1, 2: 3, 3: 5, 4: 6}
+        coin_map = {1: 2, 2: 3, 3: 5, 4: 7}
+        xp_map = {1: 2, 2: 4, 3: 6, 4: 8}
 
-        base_coins = coin_map.get(ease, 2)
-        base_xp = xp_map.get(ease, 3)
+        base_coins = coin_map.get(ease, 3)
+        base_xp = xp_map.get(ease, 4)
 
         # Difficulty bonus: harder cards (low factor) give more
         if card_factor > 0:
@@ -657,8 +657,11 @@ class FarmManager:
         # Interval bonus: mature cards give slightly more
         maturity_bonus = min(card_ivl / 30, 2.0) if card_ivl > 0 else 0
 
-        coins = int(base_coins * difficulty_mult + maturity_bonus)
-        xp = int(base_xp * difficulty_mult + maturity_bonus)
+        # Session momentum: small bonus for consecutive reviews (encourages longer sessions)
+        session_bonus = min(self.state.session_reviews * 0.02, 0.30)  # up to +30%
+
+        coins = int((base_coins * difficulty_mult + maturity_bonus) * (1.0 + session_bonus))
+        xp = int((base_xp * difficulty_mult + maturity_bonus) * (1.0 + session_bonus))
 
         # Streak bonus: +5% per streak day, up to +50%
         streak_mult = 1.0 + min(self.state.current_streak * 0.05, 0.50)
@@ -693,23 +696,8 @@ class FarmManager:
         if now.weekday() >= 5:  # Saturday=5, Sunday=6
             self.state.weekend_review_count += 1
 
-        # Determine crop drop based on level
-        crop_drop = self._roll_crop_drop()
-        if crop_drop:
-            item_id, qty = crop_drop
-            if self.state.add_item(item_id, qty):
-                rewards["items"][item_id] = qty
-                self.state.session_items_earned[item_id] = \
-                    self.state.session_items_earned.get(item_id, 0) + qty
-            else:
-                crop_name = ITEM_CATALOG.get(item_id, {}).get("name", item_id)
-                rewards["notifications"].append({
-                    "type": "storage_full",
-                    "message": f"Silo plein ! {crop_name} perdu(e). Vendez ou améliorez le silo.",
-                })
-
-        # Random material drop (variable ratio reinforcement)
-        if random.random() < 0.12:  # ~12% chance per review
+        # Random material drop (variable ratio reinforcement — the addictive core)
+        if random.random() < 0.15:  # ~15% chance per review
             mat_id = self._roll_material_drop()
             if mat_id:
                 if self.state.add_item(mat_id, 1):
@@ -756,16 +744,6 @@ class FarmManager:
         self._pending_notifications.extend(rewards["notifications"])
 
         return rewards
-
-    def _roll_crop_drop(self) -> Optional[Tuple[str, int]]:
-        """Roll for a crop drop based on unlocked crops.
-        Low chance (10%) — farming fields should be the primary crop source."""
-        if random.random() < 0.10:
-            available = self.state.unlocked_crops
-            if available:
-                crop = random.choice(available)
-                return (crop, 1)
-        return None
 
     def _roll_material_drop(self) -> Optional[str]:
         """Roll for a material drop from the drop table."""
