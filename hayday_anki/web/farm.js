@@ -545,29 +545,42 @@ function updateFarm(data) {
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
-  // Animate plots that grew
+  // Animate plots that grew — two tiers:
+  // 1. Stage advance (growth_stage changed) = big dramatic "plot-grew" animation
+  // 2. Review progress (reviews_done changed) = subtle "plot-ticked" shimmer
+  // 3. Became ready = golden glow + harvest sound
   const newFields = farmData.fields || farmData.plots || [];
-  let anyGrew = false, anyReady = false;
+  let anyGrew = false, anyStageUp = false, anyReady = false;
   if (Object.keys(oldGrowth).length > 0) {
     const allPlots = document.querySelectorAll('#fields-grid .plot');
     newFields.forEach((f, idx) => {
       const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
       if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
-        allPlots[idx].classList.add('plot-grew');
-        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+        const oldParts = oldGrowth[f.id].split(':');
+        const oldStage = parseInt(oldParts[0])||0;
+        const oldState = oldParts[2];
+        const stageAdvanced = (f.growth_stage||0) > oldStage;
+        const becameReady = f.state === 'ready' && oldState !== 'ready';
+        if (becameReady || stageAdvanced) {
+          // Big animation for stage advance or harvest-ready
+          allPlots[idx].classList.add('plot-grew');
+          setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 1000);
+          anyStageUp = true;
+        } else {
+          // Subtle shimmer for review progress within a stage
+          allPlots[idx].classList.add('plot-ticked');
+          setTimeout(() => allPlots[idx]?.classList.remove('plot-ticked'), 600);
+        }
         anyGrew = true;
-        // Check if this plot just became ready
-        const oldState = oldGrowth[f.id].split(':')[2];
-        if (f.state === 'ready' && oldState !== 'ready') anyReady = true;
+        if (becameReady) anyReady = true;
       }
     });
     if (anyReady) {
       setTimeout(() => SoundMgr.play('harvest'), 400);
-      // Pulse the farm tab to draw attention to ready crops
       const farmTab = document.getElementById('tab-farm');
       if (farmTab) { farmTab.classList.add('tab-pulse'); setTimeout(() => farmTab.classList.remove('tab-pulse'), 2000); }
     }
-    else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
+    else if (anyStageUp) setTimeout(() => SoundMgr.play('grow'), 300);
   }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
@@ -618,7 +631,7 @@ function hudBump(elId) {
   el.classList.add('hud-bump');
   setTimeout(() => el.classList.remove('hud-bump'), 500);
 }
-let _prevHud = { coins: 0, gems: 0, streak: 0, level: 0, xp_percent: 0 };
+let _prevHud = { coins: 0, gems: 0, streak: 0, level: 0, xp_percent: 0, sessionReviews: 0 };
 
 function updateHUD() {
   const d = farmData;
@@ -651,7 +664,7 @@ function updateHUD() {
   else gemEl.textContent = formatNum(newGems);
   if (newStreak !== _prevHud.streak && _prevHud.streak > 0) { streakCountEl.textContent = newStreak; hudBump('hud-streak'); }
   else streakCountEl.textContent = newStreak;
-  _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct };
+  _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct, sessionReviews: _prevHud.sessionReviews || 0 };
 
   // Session review counter — shows during active review sessions
   const sessionReviews = d.session_reviews || 0;
@@ -876,6 +889,8 @@ function renderFields() {
       for (let s = 0; s < 4; s++) {
         stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
       }
+      // Almost ready glow (stage 3 = last stage before harvest)
+      if (stage >= 3) el.classList.add('plot-almost-ready');
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
       // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom
       el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
@@ -1977,7 +1992,24 @@ function showSessionSummary(d){
 }
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
-function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
+let _notifQueue = [];
+let _notifTimer = null;
+function showNotification(msg,type){
+  if(!notificationsEnabled&&type!=='reward')return;
+  _notifQueue.push({msg,type});
+  if(!_notifTimer) _drainNotifQueue();
+}
+function _drainNotifQueue(){
+  if(!_notifQueue.length){_notifTimer=null;return;}
+  const {msg,type}=_notifQueue.shift();
+  const area=document.getElementById('notification-area');
+  const el=document.createElement('div');el.className='notification';
+  if(type==='reward')el.classList.add('reward-notif');
+  el.innerHTML=msg;area.appendChild(el);
+  setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000);
+  // Stagger next notification by 350ms to avoid visual clutter
+  _notifTimer=setTimeout(_drainNotifQueue, _notifQueue.length>0?350:0);
+}
 function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');

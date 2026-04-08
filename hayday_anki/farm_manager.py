@@ -241,13 +241,23 @@ class FarmState:
         self.placed_buildings: List[Dict] = []  # [{id, building_type}]
         self.pastures: List[Dict] = []  # [{id, animal_type, count, reviews_since_last}]
 
-        # Initialize 3 starter fields for new players
-        for i in range(3):
-            self.fields.append({
-                "id": i, "crop": None, "state": "empty",
-                "growth_stage": 0, "reviews_needed": 0,
-                "reviews_done": 0, "planted_at": None,
-            })
+        # Initialize 3 starter fields for new players — pre-plant wheat
+        # so new players immediately see the grow→harvest cycle
+        self.fields.append({
+            "id": 0, "crop": "wheat", "state": "growing",
+            "growth_stage": 3, "reviews_needed": 3,
+            "reviews_done": 2, "planted_at": None, "last_crop": "wheat",
+        })
+        self.fields.append({
+            "id": 1, "crop": "wheat", "state": "growing",
+            "growth_stage": 1, "reviews_needed": 3,
+            "reviews_done": 1, "planted_at": None, "last_crop": "wheat",
+        })
+        self.fields.append({
+            "id": 2, "crop": None, "state": "empty",
+            "growth_stage": 0, "reviews_needed": 0,
+            "reviews_done": 0, "planted_at": None,
+        })
         self.num_plots = len(self.fields)
 
         # Lifetime tracking counters (for achievements)
@@ -526,12 +536,21 @@ class FarmState:
                 })
         # Brand new save (no fields AND no plots) — create starter fields
         if not state.fields and not state.plots:
-            for i in range(3):
-                state.fields.append({
-                    "id": i, "crop": None, "state": "empty",
-                    "growth_stage": 0, "reviews_needed": 0,
-                    "reviews_done": 0, "planted_at": None,
-                })
+            state.fields.append({
+                "id": 0, "crop": "wheat", "state": "growing",
+                "growth_stage": 3, "reviews_needed": 3,
+                "reviews_done": 2, "planted_at": None, "last_crop": "wheat",
+            })
+            state.fields.append({
+                "id": 1, "crop": "wheat", "state": "growing",
+                "growth_stage": 1, "reviews_needed": 3,
+                "reviews_done": 1, "planted_at": None, "last_crop": "wheat",
+            })
+            state.fields.append({
+                "id": 2, "crop": None, "state": "empty",
+                "growth_stage": 0, "reviews_needed": 0,
+                "reviews_done": 0, "planted_at": None,
+            })
         # Migrate old buildings dict to placed_buildings
         if not state.placed_buildings and state.buildings:
             for bid, bdata in state.buildings.items():
@@ -925,6 +944,7 @@ class FarmManager:
 
         field["state"] = "planted"
         field["crop"] = crop_id
+        field["last_crop"] = crop_id  # Remember for quick replant after harvest
         field["planted_at"] = datetime.now().isoformat()
         field["growth_stage"] = 0
         field["reviews_needed"] = reviews_per_stage

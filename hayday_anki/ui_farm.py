@@ -253,8 +253,8 @@ class FarmWebView:
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)
                 if result:
-                    self._js(f"showReward({json.dumps(result)})")
-                    # Show harvest quantity notification with crop icon
+                    # JS harvestPlot() already plays sound + burst animation
+                    # Just show the harvest notification with item icon + XP
                     from .farm_manager import ITEM_CATALOG as _IC
                     for item_id, qty in result.get("items", {}).items():
                         item_name = _IC.get(item_id, {}).get("name", item_id)
