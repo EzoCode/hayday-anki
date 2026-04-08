@@ -798,15 +798,37 @@ class FarmManager:
                     # growth_reviews = reviews PER STAGE
                     field["reviews_needed"] = max(1, crop_def.get("growth_reviews", 3))
 
+        # Build notifications list
+        notifs = []
+
         # Wilt check on all ready fields (crops wilt after 50 reviews unharvested)
+        WILT_THRESHOLD = 50
+        WILT_WARNING = 35  # Start warning at 70% of threshold
         for field in self.state.fields:
             if field["state"] == "ready":
                 ready_since = field.get("_ready_since", 0)
-                if ready_since > 0 and self.state.total_reviews - ready_since > 50:
+                if ready_since <= 0:
+                    continue
+                reviews_unharvested = self.state.total_reviews - ready_since
+                if reviews_unharvested > WILT_THRESHOLD:
                     field["state"] = "wilted"
+                elif reviews_unharvested >= WILT_WARNING:
+                    # Mark as warning (still harvestable, but visually urgent)
+                    field["_wilt_warning"] = True
+                    field["_wilt_remaining"] = WILT_THRESHOLD - reviews_unharvested
+                    # Notify once when entering warning
+                    if not field.get("_wilt_warned"):
+                        field["_wilt_warned"] = True
+                        crop_name = ITEM_CATALOG.get(field.get("crop", ""), {}).get("name", "")
+                        if crop_name:
+                            notifs.append({
+                                "type": "wilt_warning",
+                                "message": f"{crop_name} va faner ! Récolte vite !",
+                            })
+                else:
+                    field["_wilt_warning"] = False
 
-        # Build notifications for newly ready crops
-        notifs = []
+        # Notifications for newly ready crops
         if newly_ready:
             crop_counts = {}
             for crop_id in newly_ready:
@@ -896,6 +918,9 @@ class FarmManager:
         field["reviews_done"] = 0
         field["last_crop"] = last_crop
         field.pop("_ready_since", None)
+        field.pop("_wilt_warning", None)
+        field.pop("_wilt_warned", None)
+        field.pop("_wilt_remaining", None)
         return True
 
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
@@ -1137,6 +1162,9 @@ class FarmManager:
         field["reviews_done"] = 0
         field["last_crop"] = last_crop
         field.pop("_ready_since", None)
+        field.pop("_wilt_warning", None)
+        field.pop("_wilt_warned", None)
+        field.pop("_wilt_remaining", None)
 
         return {"items": harvested, "xp": xp_gain}
 

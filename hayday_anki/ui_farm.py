@@ -331,7 +331,7 @@ class FarmWebView:
                     self._js("SoundMgr.play('coin')")
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/2, {burst_count})")
                     self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
-                    self._js(f"showNotification('Vendu pour {coins} pièces !')")
+                    self._js(f"showNotification({json.dumps(f'+{coins} pièces')}, 'reward')")
                 self._send_state()
                 self.manager.save()
 
@@ -386,6 +386,30 @@ class FarmWebView:
 
             elif action == "collect":
                 self._collect_building(parts[2])
+                self._check_and_show_level_up()
+                self._send_state()
+                self.manager.save()
+
+            elif action == "collect_all_buildings":
+                from . import production
+                total_collected = []
+                total_xp = 0
+                for building_id, queue in list(self.manager.state.production_queues.items()):
+                    if any(item.get("ready") for item in queue):
+                        prod_mgr = production.ProductionManager(self.manager.state)
+                        collected = prod_mgr.collect_ready(building_id)
+                        for item in collected:
+                            if not item.get("storage_full"):
+                                total_collected.append(item["name"])
+                                total_xp += item.get("xp", 0)
+                if total_collected:
+                    names_str = ", ".join(total_collected)
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(10, len(total_collected) * 3)})")
+                    self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
+                    self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")
+                    self.manager.advance_quest("produce", len(total_collected))
+                    if len(total_collected) >= 3:
+                        self._js("createConfetti()")
                 self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
@@ -640,6 +664,9 @@ class FarmWebView:
                     self._js(f"showNotification({json.dumps(msg)})")
                 elif ntype == "crop_ready":
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                elif ntype == "wilt_warning":
+                    self._js(f"showNotification({json.dumps('⚠ ' + msg)}, 'reward')")
+                    self._js("SoundMgr.play('error')")
                 elif ntype == "production_ready":
                     recipe_id = notif.get("recipe_id", "")
                     self._js(f"showNotification(itemIcon({json.dumps(recipe_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")

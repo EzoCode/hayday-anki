@@ -850,9 +850,17 @@ function renderFields() {
       }
     } else if (field.state === 'ready') {
       const readyCropName = cropName(field.crop);
-      el.title = `${readyCropName} — Prêt à récolter !`;
+      const wiltWarning = field._wilt_warning;
+      const wiltLeft = field._wilt_remaining || 0;
+      if (wiltWarning) {
+        el.classList.add('plot-wilt-warning');
+        el.title = `${readyCropName} — Récolte vite ! Fane dans ${wiltLeft} révisions`;
+      } else {
+        el.title = `${readyCropName} — Prêt à récolter !`;
+      }
       // Hay Day style: big bouncing crop with golden sparkle, no text clutter
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>`;
+      const wiltBadge = wiltWarning ? `<span class="wilt-warning-badge">${wiltLeft}</span>` : '';
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -896,6 +904,32 @@ function renderWorkshop() {
   if (placed.length === 0 && (farmData.unlocked_buildings||[]).length === 0) {
     zone.style.display = 'none';
     return;
+  }
+
+  // Count total ready products across all buildings for Collect All button
+  let totalReady = 0;
+  const readyBuildings = [];
+  placed.forEach(b => {
+    const bid = b.building_type;
+    const queue = (farmData.production_queues||{})[bid]||[];
+    const ready = queue.filter(q=>q.ready).length;
+    if (ready > 0) { totalReady += ready; readyBuildings.push(bid); }
+  });
+  // Show/hide Collect All button in zone header
+  let collectAllBtn = document.getElementById('collect-all-buildings-btn');
+  if (!collectAllBtn) {
+    collectAllBtn = document.createElement('button');
+    collectAllBtn.id = 'collect-all-buildings-btn';
+    collectAllBtn.className = 'zone-add-btn harvest-all-btn';
+    const header = zone.querySelector('.zone-header');
+    if (header) header.insertBefore(collectAllBtn, header.querySelector('.zone-add-btn'));
+  }
+  if (totalReady >= 2) {
+    collectAllBtn.textContent = `Tout récupérer (${totalReady})`;
+    collectAllBtn.style.display = '';
+    collectAllBtn.onclick = () => { pycmd('farm:collect_all_buildings'); SoundMgr.play('collect'); };
+  } else {
+    collectAllBtn.style.display = 'none';
   }
   zone.style.display = '';
 

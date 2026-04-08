@@ -194,6 +194,14 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 - **Tracking de progression des quetes** : chaque action du jeu (revision, recolte, plantation, vente, production, livraison) avance automatiquement les quetes correspondantes.
 - **UI des quetes** : barre de quetes integree sous le HUD avec design bois Hay Day, icones SVG par type, barres de progression orange->vert, bouton de reclamation avec animation pulse.
 
+## Bugs corriges et ameliorations (session 14 â€” fondations gameplay solides)
+1. **BUG CRITIQUE: Notification spam animaux** : quand le silo etait plein, les animaux retentaient la production a chaque review et envoyaient une notification a chaque fois. Corrige : le compteur est fige a `produce_every` (retente 1x par review), et la notification ne s'affiche qu'une seule fois par episode silo-plein (`_silo_full_notified` flag).
+2. **BUG CRITIQUE: Variable non initialisee** : `notifs` etait utilisee dans le wilt warning avant d'etre initialisee (`notifs = []` etait apres la boucle de wilt). Corrige : initialisation deplacee avant la boucle.
+3. **Avertissement de fanage** : les cultures pretes fanaient silencieusement apres 50 reviews sans avertissement. Ajout d'un etat visuel "wilt warning" a partir de 35 reviews (70% du seuil). Badge orange pulse avec compte a rebours, animation shake sur la culture, notification sonore unique. Le joueur a le temps de reagir.
+4. **Tout recuperer (batiments)** : bouton "Tout recuperer" dans la zone Atelier quand 2+ batiments ont des produits prets. Action batch unique `collect_all_buildings` au lieu de multiples clics individuels. Confettis si 3+ items collectes.
+5. **Vente amelioree** : la notification de vente utilise maintenant le style "reward" (dore) au lieu du style neutre.
+6. **Nettoyage des champs** : `harvest_plot` et `clear_wilted` nettoient maintenant tous les champs temporaires (`_wilt_warning`, `_wilt_warned`, `_wilt_remaining`).
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

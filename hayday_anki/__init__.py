@@ -188,6 +188,7 @@ def _process_animals(mgr):
             if product:
                 if mgr.state.add_item(product, count):
                     pasture["reviews_since_last"] = 0
+                    pasture["_silo_full_notified"] = False
                     item_info = ITEM_CATALOG.get(product, {})
                     collected_products.append({
                         "product": product,
@@ -195,13 +196,18 @@ def _process_animals(mgr):
                         "qty": count,
                     })
                 else:
-                    # Silo full — notify but DON'T reset counter (retry next review)
-                    item_info = ITEM_CATALOG.get(product, {})
-                    product_name = item_info.get("name", product)
-                    view = _get_view()
-                    if view.web:
-                        msg = f"Silo plein ! {product_name} perdu(e). Vendez ou améliorez le silo."
-                        view._js(f"showNotification({json.dumps(msg)})")
+                    # Silo full — pause production (don't keep incrementing)
+                    # Reset to produce_every so it retries next review without spam
+                    pasture["reviews_since_last"] = produce_every
+                    # Only notify once per silo-full episode
+                    if not pasture.get("_silo_full_notified"):
+                        pasture["_silo_full_notified"] = True
+                        item_info = ITEM_CATALOG.get(product, {})
+                        product_name = item_info.get("name", product)
+                        view = _get_view()
+                        if view.web:
+                            msg = f"Silo plein ! {product_name} en attente. Vendez ou améliorez le silo."
+                            view._js(f"showNotification({json.dumps(msg)})")
     # Sync animals dict from pastures (single source of truth)
     mgr._sync_animals_from_pastures()
     # Show notifications for collected animal products (with item icons)
