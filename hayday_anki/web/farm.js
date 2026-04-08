@@ -522,8 +522,14 @@ function updateFarm(data) {
     newFields.forEach((f, idx) => {
       const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
       if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
-        allPlots[idx].classList.add('plot-grew');
-        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+        // Detect stage change (more dramatic animation) vs just review progress
+        const oldStage = parseInt(oldGrowth[f.id].split(':')[0], 10);
+        const newStage = f.growth_stage || 0;
+        const isStageUp = newStage > oldStage;
+        const animClass = isStageUp ? 'plot-stage-up' : 'plot-grew';
+        const animDuration = isStageUp ? 1500 : 1200;
+        allPlots[idx].classList.add(animClass);
+        setTimeout(() => allPlots[idx]?.classList.remove(animClass), animDuration);
         anyGrew = true;
         // Check if this plot just became ready
         const oldState = oldGrowth[f.id].split(':')[2];
@@ -767,8 +773,16 @@ function renderFields() {
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 40 : 52;
       const cName = cropName(field.crop);
-      el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><span class="plot-crop-name">${cName}</span><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${pctRound}%</span>`;
+      const stageName = GROWTH_LABEL[Math.min(stage, 4)];
+      el.title = `${cName} — ${stageName}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
+      // Stage dots: visual indicator of which growth stage we're in (like Hay Day)
+      let stageDots = '<div class="plot-stage-dots">';
+      for (let s = 0; s < 4; s++) {
+        const dotClass = s < stage ? 'filled' : s === stage ? 'current' : '';
+        stageDots += `<span class="stage-dot ${dotClass}"></span>`;
+      }
+      stageDots += '</div>';
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${stageDots}<div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-pct">${reviewsLeft}<span class="plot-pct-icon"></span></span>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1704,50 +1718,85 @@ function harvestPlot(id){
     const rect = plotEl.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
+    // Flash the plot white briefly (satisfying "pop" feel)
+    plotEl.classList.add('plot-harvesting');
+    setTimeout(() => plotEl.classList.remove('plot-harvesting'), 400);
     // Create harvest burst particles from actual plot position
     showHarvestBurst(cx, cy, field.crop);
-    // Coin fly from plot to HUD (satisfying collection feel)
-    showCoinBurst(cx, cy, 4);
+    // Coins fly from crop to HUD with slight delay for cascade
+    setTimeout(() => showCoinBurst(cx, cy, 6), 200);
   }
   pycmd(`farm:harvest:${id}`);
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
-  const portrait = cropPortrait(cropId, 22) || itemIcon(cropId, 20);
-  // Main crop burst (8 particles fanning out)
-  for (let i = 0; i < 8; i++) {
+  const portrait = cropPortrait(cropId, 24) || itemIcon(cropId, 22);
+  // Main crop burst (10 particles fanning out in a satisfying arc)
+  for (let i = 0; i < 10; i++) {
     const el = document.createElement('div');
     el.className = 'harvest-particle';
     el.innerHTML = portrait;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    const angle = (i / 8) * Math.PI * 2;
-    const dist = 60 + Math.random() * 50;
+    const angle = (i / 10) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+    const dist = 70 + Math.random() * 60;
     el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-    el.style.setProperty('--dy', (Math.sin(angle) * dist - 40) + 'px');
-    el.style.animationDelay = (i * 40) + 'ms';
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 50) + 'px');
+    el.style.animationDelay = (i * 35) + 'ms';
     layer.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1100);
   }
-  // Gold sparkles around the harvest
-  for (let i = 0; i < 5; i++) {
+  // Gold sparkles (more of them, wider spread)
+  for (let i = 0; i < 8; i++) {
     const sp = document.createElement('div');
     sp.className = 'harvest-sparkle';
     sp.style.left = x + 'px';
     sp.style.top = y + 'px';
-    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
-    sp.style.setProperty('--dy', (-(Math.random() * 60 + 20)) + 'px');
-    sp.style.animationDelay = (100 + i * 50) + 'ms';
+    const angle = (i / 8) * Math.PI * 2;
+    sp.style.setProperty('--dx', (Math.cos(angle) * (40 + Math.random() * 50)) + 'px');
+    sp.style.setProperty('--dy', (Math.sin(angle) * (40 + Math.random() * 50) - 30) + 'px');
+    sp.style.animationDelay = (50 + i * 40) + 'ms';
     layer.appendChild(sp);
-    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 1000);
   }
+  // Center flash (white burst at harvest point)
+  const flash = document.createElement('div');
+  flash.className = 'harvest-flash';
+  flash.style.left = (x - 30) + 'px';
+  flash.style.top = (y - 30) + 'px';
+  layer.appendChild(flash);
+  setTimeout(() => { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 500);
 }
 function showHarvestAllBurst(n, xp) {
   const zone = document.querySelector('.zone-fields');
   let cx = window.innerWidth/2, cy = window.innerHeight/3;
   if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
-  showCoinBurst(cx, cy, n);
-  showFloatingReward('+' + xp + ' XP', cx, cy);
+  // Create a burst of mixed crop particles from all ready fields
+  const readyFields = (farmData.fields||[]).filter(f => f.state === 'ready');
+  if (readyFields.length > 0) {
+    const layer = document.getElementById('reward-layer');
+    readyFields.forEach((f, i) => {
+      setTimeout(() => {
+        const portrait = cropPortrait(f.crop, 20) || itemIcon(f.crop, 18);
+        for (let j = 0; j < 3; j++) {
+          const el = document.createElement('div');
+          el.className = 'harvest-particle';
+          el.innerHTML = portrait;
+          el.style.left = cx + 'px';
+          el.style.top = cy + 'px';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 50 + Math.random() * 70;
+          el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+          el.style.setProperty('--dy', (Math.sin(angle) * dist - 40) + 'px');
+          el.style.animationDelay = (j * 30) + 'ms';
+          layer.appendChild(el);
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1100);
+        }
+      }, i * 80);
+    });
+  }
+  showCoinBurst(cx, cy, Math.min(12, n));
+  setTimeout(() => showFloatingReward('+' + xp + ' XP', cx, cy + 20), 250);
 }
 function plantAllEmpty(){SoundMgr.play('plant');pycmd('farm:plant_all_empty')}
 function sellItem(id){
@@ -1812,7 +1861,74 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){
+  rot=rot||0;
+  const c=document.getElementById('wheel-canvas');if(!c)return;
+  const ctx=c.getContext('2d'),cx=140,cy=140,r=130;
+  const segs=[
+    {l:'25',icon:'p.',c:'#d32f2f',c2:'#b71c1c'},
+    {l:'50',icon:'p.',c:'#c2185b',c2:'#ad1457'},
+    {l:'100',icon:'p.',c:'#7b1fa2',c2:'#6a1b9a'},
+    {l:'1',icon:'gem',c:'#512da8',c2:'#4527a0'},
+    {l:'3',icon:'gem',c:'#303f9f',c2:'#283593'},
+    {l:'5',icon:'gem',c:'#1565c0',c2:'#0d47a1'},
+    {l:'3',icon:'mat.',c:'#00796b',c2:'#00695c'},
+    {l:'3',icon:'mat.',c:'#2e7d32',c2:'#1b5e20'},
+    {l:'Titre',icon:'!',c:'#e65100',c2:'#bf360c'},
+  ];
+  ctx.clearRect(0,0,280,280);
+  const sa=2*Math.PI/segs.length;
+
+  // Outer ring shadow
+  ctx.save();
+  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
+  ctx.fillStyle='rgba(0,0,0,.15)';ctx.fill();
+  ctx.restore();
+
+  // Draw segments with gradient fills
+  segs.forEach((s,i)=>{
+    const a=rot+i*sa;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();
+    // Create radial gradient for each segment
+    const grd = ctx.createLinearGradient(
+      cx+Math.cos(a+sa/2)*r*.3, cy+Math.sin(a+sa/2)*r*.3,
+      cx+Math.cos(a+sa/2)*r, cy+Math.sin(a+sa/2)*r
+    );
+    grd.addColorStop(0, s.c);
+    grd.addColorStop(1, s.c2);
+    ctx.fillStyle=grd;ctx.fill();
+    // Segment border
+    ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=1.5;ctx.stroke();
+    // Inner highlight line
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=r;ctx.stroke();
+    // Text
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);
+    ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=3;ctx.shadowOffsetY=1;
+    ctx.font='bold 15px Nunito, sans-serif';ctx.textAlign='center';
+    ctx.fillText(s.l, r*.55, 2);
+    ctx.font='bold 9px Nunito, sans-serif';
+    ctx.fillStyle='rgba(255,255,255,.8)';
+    ctx.fillText(s.icon, r*.55, 13);
+    ctx.shadowBlur=0;ctx.restore();
+  });
+
+  // Inner decorative ring
+  ctx.beginPath();ctx.arc(cx,cy,r*.25,0,2*Math.PI);
+  const innerGrd = ctx.createRadialGradient(cx-3,cy-3,2,cx,cy,r*.25);
+  innerGrd.addColorStop(0,'#ffd54f');innerGrd.addColorStop(.5,'#ffb300');innerGrd.addColorStop(1,'#ff8f00');
+  ctx.fillStyle=innerGrd;ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=2;ctx.stroke();
+  // Center dot highlight
+  ctx.beginPath();ctx.arc(cx-4,cy-4,6,0,2*Math.PI);
+  ctx.fillStyle='rgba(255,255,255,.3)';ctx.fill();
+  // Outer decorative dots (like light bulbs around the wheel)
+  for(let i=0;i<segs.length;i++){
+    const a=rot+i*sa+sa/2;const dx=Math.cos(a)*(r+6),dy=Math.sin(a)*(r+6);
+    ctx.beginPath();ctx.arc(cx+dx,cy+dy,3,0,2*Math.PI);
+    ctx.fillStyle=i%2===0?'#ffd700':'rgba(255,255,255,.6)';ctx.fill();
+  }
+}
 
 function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
@@ -1850,14 +1966,15 @@ function hideLoginBonus(){document.getElementById('login-bonus-overlay').classLi
 function showSessionSummary(d){
   SoundMgr.play('levelup');
   const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20" style="vertical-align:middle">` : '<span class="css-coin" style="width:16px;height:16px;display:inline-block;vertical-align:middle"></span>';
-  const gemIcon = S('ui_gem') ? `<img src="${S('ui_gem')}" width="18" height="18" style="vertical-align:middle">` : '';
   const accuracy = d.reviews > 0 ? Math.round((d.correct||0)/d.reviews*100) : 0;
+  const accuracyColor = accuracy >= 90 ? '#2e7d32' : accuracy >= 70 ? '#f57c00' : '#d32f2f';
+  const streakBonus = d.streak > 0 ? `<span style="font-size:10px;color:#ff6;margin-left:2px">+${Math.min(d.streak*5,50)}%</span>` : '';
   document.getElementById('session-stats').innerHTML = `
     <div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div>
     <div class="session-stat"><div class="session-stat-value">${coinIcon} ${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">+${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div>
-    <div class="session-stat"><div class="session-stat-value">${accuracy}%</div><div class="session-stat-label">${LANG.accuracy}</div></div>
-    <div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}</div><div class="session-stat-label">${LANG.streak_label}</div></div>
+    <div class="session-stat"><div class="session-stat-value" style="color:${accuracyColor}">${accuracy}%</div><div class="session-stat-label">${LANG.accuracy}</div></div>
+    <div class="session-stat"><div class="session-stat-value"><span class="css-fire" style="display:inline-block;vertical-align:middle;margin-right:2px"></span>${d.streak||0}${streakBonus}</div><div class="session-stat-label">${LANG.streak_label}</div></div>
     ${d.harvests_count>0?`<div class="session-stat"><div class="session-stat-value">${d.harvests_count}</div><div class="session-stat-label">${LANG.harvests}</div></div>`:''}
   `;
   let items='';
@@ -1910,7 +2027,8 @@ function showReward(d){
     let cx = window.innerWidth/2, cy = window.innerHeight/3;
     if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
     showFloatingReward(`+${d.coins}`,cx,cy);
-    showCoinBurst(cx,cy+15,Math.min(8,Math.max(3,Math.floor(d.coins/3))));
+    const coinCount = Math.min(10, Math.max(3, Math.floor(d.coins / 2)));
+    showCoinBurst(cx, cy + 15, coinCount);
     SoundMgr.play('coin');
   }
   // XP: appears slightly after coins for staggered cascade feel
@@ -1919,11 +2037,17 @@ function showReward(d){
     let cx = window.innerWidth/2+30, cy = window.innerHeight/3+15;
     if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2 + 30; cy = Math.max(75, r.top + r.height/2 + 15); }
     showFloatingReward(`+${d.xp} XP`,cx,cy);
-  },180);
-  // Material/item drops: staggered notifications with item icons
-  if(d.items){let delay=350;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=280})}
-  // Mystery box appearance
-  if(d.mystery_box){const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;setTimeout(()=>showNotification(`Une ${sz} boîte mystère est apparue !`,'reward'),550)}
+  },200);
+  // Material/item drops: staggered notifications with item icons and satisfying cascade
+  if(d.items){let delay=400;let first=true;Object.entries(d.items).forEach(([id,qty])=>{const playSound=first;first=false;setTimeout(()=>{showNotification(`${itemIcon(id,14)} +${qty} ${itemName(id)}`,'reward');if(playSound)SoundMgr.play('collect')},delay);delay+=320})}
+  // Mystery box appearance — extra dramatic
+  if(d.mystery_box){
+    const sz={small:'petite',medium:'moyenne',large:'grande'}[d.mystery_box.size]||d.mystery_box.size;
+    setTimeout(()=>{
+      showNotification(`${itemIcon('chest_small',14)} Une ${sz} boîte mystère est apparue !`,'reward');
+      SoundMgr.play('collect');
+    },600);
+  }
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
