@@ -1790,17 +1790,152 @@ function getAchCategoryIcon(cat) {
   const key = (cat||'').toLowerCase().replace(/[^a-z]/g,'');
   return ACH_CATEGORY_ICONS[ACH_CAT_ALIASES[key]||key] || ACH_CATEGORY_ICONS.reviews;
 }
-function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
+function updateAchievements(achs) {
+  const list = document.getElementById('achievements-list');
+  list.innerHTML = '';
+  const gemSrc = S('ui_gem');
+  const starSrc = S('hayday_star');
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';
-  // Count how many fields are currently growing each crop
+  // Group achievements by category
+  const categories = {};
+  (achs || []).forEach(a => {
+    const cat = a.category || 'other';
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(a);
+  });
+
+  // Sort: unlocked first within each category, then by progress
+  Object.entries(categories).forEach(([cat, items]) => {
+    items.sort((a, b) => {
+      if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1;
+      return (b.progress_pct || 0) - (a.progress_pct || 0);
+    });
+
+    // Category header
+    const catHeader = document.createElement('div');
+    catHeader.className = 'ach-category-header';
+    const catIcon = getAchCategoryIcon(cat);
+    const catName = cat.charAt(0).toUpperCase() + cat.slice(1);
+    const unlockedCount = items.filter(i => i.unlocked).length;
+    catHeader.innerHTML = `<img src="${catIcon}" width="18" height="18" style="object-fit:contain;vertical-align:middle"> <span>${catName}</span> <span class="ach-cat-count">${unlockedCount}/${items.length}</span>`;
+    list.appendChild(catHeader);
+
+    items.forEach(a => {
+      const card = document.createElement('div');
+      card.className = `achievement-card ${a.unlocked ? 'unlocked' : 'locked'}`;
+      const pct = Math.min(100, a.progress_pct || 0);
+      const achCatIcon = getAchCategoryIcon(a.category);
+      const tierLabel = {bronze: 'Bronze', silver: 'Argent', gold: 'Or'}[a.tier] || a.tier;
+
+      let progressHtml = '';
+      if (!a.unlocked) {
+        progressHtml = `
+          <div class="achievement-progress">
+            <div class="achievement-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="ach-progress-text">${a.current}/${a.target}</span>`;
+      } else {
+        progressHtml = `<span class="ach-done-text">${LANG.done}</span>`;
+      }
+
+      const gemHtml = a.gems > 0
+        ? `<span class="achievement-gem-reward">${gemSrc ? `<img src="${gemSrc}" width="14" height="14" style="vertical-align:middle">` : '<span class="css-gem"></span>'} ${a.gems}</span>`
+        : '';
+
+      card.innerHTML = `
+        <span class="achievement-icon">
+          <img src="${achCatIcon}" width="28" height="28" style="object-fit:contain">
+        </span>
+        <div class="achievement-info">
+          <h4>${a.name} <span class="achievement-tier tier-${a.tier}">${tierLabel}</span></h4>
+          <p>${a.description}</p>
+          ${progressHtml}
+        </div>
+        ${gemHtml}`;
+      list.appendChild(card);
+    });
+  });
+}
+
+function showPlantDialog(plotId) {
+  SoundMgr.play('click');
+  plantingPlotId = plotId;
+  const choices = document.getElementById('crop-choices');
+  choices.innerHTML = '';
+
+  // Count growing crops for context
   const growingCounts = {};
-  (farmData.fields||[]).forEach(f => {
+  (farmData.fields || []).forEach(f => {
     if (f.crop && f.state !== 'empty' && f.state !== 'wilted') {
-      growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
+      growingCounts[f.crop] = (growingCounts[f.crop] || 0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+
+  const coins = farmData.coins || 0;
+  const coinSrc = S('ui_coin');
+  const coinMini = coinSrc ? `<img src="${coinSrc}" width="10" height="10" style="vertical-align:middle">` : '';
+
+  (farmData.unlocked_crops || []).forEach(id => {
+    const name = cropName(id);
+    const def = (farmData.crop_defs || {})[id] || {};
+    const gr = def.growth_reviews || 3;
+    const totalReviews = gr * 4;
+    const sellPrice = def.sell_price || 2;
+    const harvestMin = def.harvest_min || 2;
+    const harvestMax = def.harvest_max || 4;
+    const xpPerHarvest = def.xp_per_harvest || 3;
+    const plantCost = def.plant_cost || 0;
+    const stock = (farmData.inventory || {})[id] || 0;
+    const growing = growingCounts[id] || 0;
+    const canAfford = coins >= plantCost;
+    const avgYield = Math.round((harvestMin + harvestMax) / 2);
+    const profit = avgYield * sellPrice - plantCost;
+
+    const el = document.createElement('div');
+    el.className = 'crop-choice';
+    if (!canAfford) el.classList.add('crop-choice-locked');
+
+    el.onclick = () => {
+      if (!canAfford) {
+        showNotification(`Pas assez de pièces (${plantCost} requis)`);
+        return;
+      }
+      pycmd(`farm:plant:${plotId}:${id}`);
+      hideOverlay();
+      SoundMgr.play('plant');
+    };
+
+    const costBadge = plantCost > 0
+      ? `<span class="crop-cost-badge">${coinMini} ${plantCost}</span>`
+      : `<span class="crop-cost-badge free">Gratuit</span>`;
+
+    // Info badges
+    const badges = [];
+    badges.push(`<span class="crop-stat-badge crop-reviews-badge">${totalReviews} rev.</span>`);
+    badges.push(`<span class="crop-stat-badge crop-price-badge">${coinMini} ${sellPrice}/u</span>`);
+
+    // Context: stock and growing count
+    const context = [];
+    if (growing > 0) context.push(`<span class="crop-growing-tag">${growing} en cours</span>`);
+    if (stock > 0) context.push(`<span class="crop-stock-tag">${stock} en stock</span>`);
+
+    el.innerHTML = `
+      <div class="crop-choice-icon">${cropPortrait(id, 52) || itemIcon(id, 52)}</div>
+      <div class="crop-choice-info">
+        <strong>${name}</strong>
+        ${costBadge}
+        <div class="crop-badges">${badges.join('')}</div>
+      </div>
+      <div class="crop-yield-info">
+        ${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>
+      </div>
+      ${context.length ? `<div class="crop-context">${context.join(' ')}</div>` : ''}`;
+
+    choices.appendChild(el);
+  });
+
+  document.getElementById('plant-overlay').classList.remove('hidden');
+}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
@@ -2012,38 +2147,51 @@ function showCoinBurst(x,y,n){
     setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
   }
 }
-function showReward(d){
+function showReward(d) {
   const coins = d.coins || 0;
   const xp = d.xp || 0;
   const hasItems = d.items && Object.keys(d.items).length > 0;
   const hasBox = !!d.mystery_box;
-  // Determine reward tier: normal review = subtle HUD-only feedback,
-  // good reward = small floating text, big reward = full burst
-  const isSpecial = hasItems || hasBox || coins >= 15;
+
+  // 3-tier reward feedback like Hay Day:
+  // Tier 1 (normal): subtle coin fly to HUD + soft click sound
+  // Tier 2 (good): floating text + coin sound
+  // Tier 3 (big): full burst + confetti + loud sound
   const isBig = coins >= 25 || hasBox;
+  const isSpecial = hasItems || hasBox || coins >= 15;
 
   if (coins > 0 || xp > 0) {
     if (isBig) {
-      // Big reward: full coin burst + floating text + sound (rare, exciting)
+      // Tier 3: Full celebration — rare, exciting
       const zone = document.querySelector('.zone-fields');
-      let cx = window.innerWidth/2, cy = window.innerHeight/3;
-      if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
+      let cx = window.innerWidth / 2, cy = window.innerHeight / 3;
+      if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width / 2; cy = Math.max(60, r.top + r.height / 2); }
       showFloatingReward(`+${coins}`, cx, cy);
       showCoinBurst(cx, cy + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
       SoundMgr.play('coin');
       if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, cx + 30, cy + 15), 180);
     } else if (isSpecial) {
-      // Special: small floating text near HUD, subtle sound
+      // Tier 2: Noticeable reward — material drops, good scores
       const hudEl = document.getElementById('hud-coins');
       let cx = window.innerWidth / 2, cy = 60;
       if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 8; }
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
+    } else {
+      // Tier 1: Every review feels rewarding — subtle but present
+      // Single coin flies to HUD + soft grow sound = Hay Day "tap" satisfaction
+      const hudEl = document.getElementById('hud-coins');
+      if (hudEl) {
+        const r = hudEl.getBoundingClientRect();
+        const startX = r.left + r.width / 2 + (Math.random() - 0.5) * 40;
+        const startY = r.bottom + 30 + Math.random() * 20;
+        showCoinBurst(startX, startY, 1);
+      }
+      SoundMgr.play('grow');
     }
-    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
-    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
   }
-  // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
+
+  // Material/item drops: staggered notifications with item icons (~15%, always exciting)
   if (hasItems) {
     let delay = isSpecial ? 350 : 200;
     let first = true;
@@ -2056,24 +2204,106 @@ function showReward(d){
       delay += 280;
     });
   }
-  // Mystery box appearance (rare ~5%, always dramatic)
+
+  // Mystery box appearance (~5%, dramatic)
   if (hasBox) {
-    const sz = {small:'petite', medium:'moyenne', large:'grande'}[d.mystery_box.size] || d.mystery_box.size;
+    const sz = {small: 'petite', medium: 'moyenne', large: 'grande'}[d.mystery_box.size] || d.mystery_box.size;
     setTimeout(() => showNotification(`Une ${sz} boîte mystère est apparue !`, 'reward'), 550);
   }
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
-function showProductionDialog(data){
+function showProductionDialog(data) {
   const bldIcon = buildingIcon(data.building_id, 22);
-  document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
-  const list=document.getElementById('production-recipes');list.innerHTML='';
-  const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const reviewsDone=(q.sessions_waited||0)*10;const reviewsTotal=(q.sessions_required||1)*10;const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:reviewsDone+'/'+reviewsTotal+' rev.'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
-  const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});const reviewsNeeded=(r.sessions_required||1)*10;c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
-  list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
+  document.getElementById('production-title').innerHTML =
+    `${bldIcon ? bldIcon + ' ' : ''}${data.building_name || 'Production'}`;
+
+  const list = document.getElementById('production-recipes');
+  list.innerHTML = '';
+  const queue = data.queue || [];
+
+  // Current production queue
+  if (queue.length > 0) {
+    const qd = document.createElement('div');
+    qd.innerHTML = `<h3>${LANG.in_progress}</h3>`;
+
+    queue.forEach(q => {
+      const pct = Math.min(100, ((q.sessions_waited || 0) / Math.max(1, q.sessions_required || 1)) * 100);
+      const reviewsDone = (q.sessions_waited || 0) * 10;
+      const reviewsTotal = (q.sessions_required || 1) * 10;
+      const s = document.createElement('div');
+      s.className = `production-queue-item ${q.ready ? 'ready' : ''}`;
+
+      const checkSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%234caf50'/%3E%3Cpath d='M4.5 8l2.5 2.5 4.5-5' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+
+      s.innerHTML = `
+        <span class="pq-emoji">${itemIcon(q.recipe_id || '', 24)}</span>
+        <div class="pq-info">
+          <strong>${q.name}</strong>
+          <span>${q.ready ? LANG.ready : reviewsDone + '/' + reviewsTotal + ' rev.'}</span>
+        </div>
+        ${!q.ready
+          ? `<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`
+          : `<span class="pq-ready-badge"><img src="${checkSvg}" width="18" height="18"></span>`
+        }`;
+      qd.appendChild(s);
+    });
+
+    if (queue.some(q => q.ready)) {
+      const btn = document.createElement('button');
+      btn.className = 'action-btn';
+      btn.textContent = LANG.collect_all;
+      btn.style.marginTop = '6px';
+      btn.onclick = () => {
+        pycmd(`farm:collect:${data.building_id}`);
+        hideOverlay();
+        SoundMgr.play('collect');
+      };
+      qd.appendChild(btn);
+    }
+    list.appendChild(qd);
+  }
+
+  // Available recipes
+  const rd = document.createElement('div');
+  rd.innerHTML = `<h3>${LANG.recipes}</h3>`;
+
+  (data.recipes || []).forEach(r => {
+    const c = document.createElement('div');
+    c.className = `recipe-card ${r.can_craft ? '' : 'disabled'}`;
+
+    let ing = '';
+    Object.entries(r.ingredients || {}).forEach(([id, qty]) => {
+      const have = (farmData.inventory || {})[id] || 0;
+      const cls = have >= qty ? 'has' : 'need';
+      ing += `<span class="recipe-ingredient ${cls}">${itemIcon(id, 14)} ${itemName(id)} ${have}/${qty}</span>`;
+    });
+
+    const reviewsNeeded = (r.sessions_required || 1) * 10;
+    c.innerHTML = `
+      <div class="recipe-header">
+        <span class="recipe-emoji">${itemIcon(r.id, 28)}</span>
+        <div class="recipe-info">
+          <strong>${r.name}</strong>
+          <span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span>
+        </div>
+      </div>
+      <div class="recipe-ingredients">${ing}</div>
+      ${r.reason && !r.can_craft ? `<span class="recipe-reason">${r.reason}</span>` : ''}`;
+
+    if (r.can_craft) {
+      c.onclick = () => {
+        pycmd(`farm:start_production:${data.building_id}:${r.id}`);
+        hideOverlay();
+        SoundMgr.play('click');
+      };
+    }
+    rd.appendChild(c);
+  });
+
+  list.appendChild(rd);
+  document.getElementById('production-overlay').classList.remove('hidden');
 }
 
 function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000)return Math.round(n/1000)+'k';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}

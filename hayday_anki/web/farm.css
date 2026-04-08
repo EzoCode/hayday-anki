@@ -751,7 +751,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:300;animation:overlayIn .25s ease}
 .overlay.hidden{display:none}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
-.overlay-close{position:absolute;top:10px;right:10px}
+.overlay-close{position:absolute;top:10px;right:10px;z-index:10;background:rgba(0,0,0,.25) !important;border:1px solid rgba(255,255,255,.15) !important}
+.overlay-close .close-x::before,.overlay-close .close-x::after{background:#fff !important}
 .overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
 .overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
@@ -1013,18 +1014,293 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes dotPulse{0%,100%{transform:scale(1);box-shadow:0 0 3px rgba(255,215,0,.4)}50%{transform:scale(1.4);box-shadow:0 0 8px rgba(255,215,0,.9)}}
 
 /* ===== CROP PLANTING COST BADGE ===== */
-.crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
-.crop-cost-badge.free{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.08));color:#2e7d32;border-color:rgba(76,175,80,.2)}
-.crop-profit{color:#2e7d32;font-weight:800}
-.crop-choice-locked{opacity:.45;cursor:not-allowed !important}
-.crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
+.crop-cost-badge {
+  background: linear-gradient(135deg, rgba(255,215,0,.2), rgba(255,215,0,.1));
+  color: var(--gold-d);
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,215,0,.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.crop-cost-badge.free {
+  background: linear-gradient(135deg, rgba(76,175,80,.15), rgba(76,175,80,.08));
+  color: #2e7d32;
+  border-color: rgba(76,175,80,.2);
+}
+.crop-profit { color: #2e7d32; font-weight: 800; }
+.crop-choice-locked { opacity: .45; cursor: not-allowed !important; }
+.crop-choice-locked:hover { transform: none !important; border-color: rgba(0,0,0,.08) !important; box-shadow: 0 2px 8px rgba(0,0,0,.06) !important; }
+
+/* Crop stat badges in plant dialog */
+.crop-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+.crop-stat-badge {
+  font-size: 8px;
+  font-weight: 700;
+  color: #888;
+  background: rgba(0,0,0,.04);
+  padding: 1px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.crop-reviews-badge { color: #4caf50; background: rgba(76,175,80,.08); }
+.crop-price-badge { color: var(--gold-d); background: rgba(255,215,0,.08); }
+.crop-yield-info {
+  font-size: 8px;
+  color: #999;
+  text-align: center;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+.crop-context {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 3px;
+}
+.crop-growing-tag {
+  font-size: 7px;
+  font-weight: 800;
+  color: #4caf50;
+  background: rgba(76,175,80,.1);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+.crop-stock-tag {
+  font-size: 7px;
+  font-weight: 800;
+  color: #8b6914;
+  background: rgba(139,105,20,.1);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+/* ===== ACHIEVEMENT CATEGORY HEADERS ===== */
+.ach-category-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-d);
+  letter-spacing: .3px;
+  border-bottom: 1.5px solid rgba(212,160,86,.15);
+  margin-top: 4px;
+}
+.ach-category-header:first-child { margin-top: 0; }
+.ach-cat-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
+  background: rgba(0,0,0,.05);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+.achievement-icon { flex-shrink: 0; }
+.achievement-icon img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.15)); }
+.achievement-info { flex: 1; min-width: 0; }
+.achievement-info h4 { font-size: 12px; color: var(--text-d); margin: 0 0 2px; }
+.achievement-info p { font-size: 10px; color: #888; margin: 0; line-height: 1.3; }
+.achievement-tier {
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.tier-bronze { background: linear-gradient(135deg, #cd7f32, #b8722e); color: #fff; }
+.tier-silver { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #444; }
+.tier-gold, .tier-or { background: linear-gradient(135deg, #ffd700, #daa520); color: #5a3520; box-shadow: 0 0 6px rgba(255,215,0,.4); }
+.achievement-progress {
+  height: 4px;
+  background: rgba(0,0,0,.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.achievement-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9800, #ffc107);
+  border-radius: 2px;
+  transition: width .5s;
+}
+.unlocked .achievement-progress-fill {
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+}
+.ach-progress-text {
+  font-size: 8px;
+  color: #aaa;
+  margin-top: 2px;
+  display: block;
+}
+.ach-done-text {
+  font-size: 9px;
+  color: #4caf50;
+  font-weight: 800;
+  display: block;
+  margin-top: 2px;
+}
+.achievement-gem-reward {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--gem);
+  text-shadow: 0 1px 2px rgba(0,0,0,.15);
+  flex-shrink: 0;
+  background: rgba(79,195,247,.08);
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(79,195,247,.15);
+}
+
+/* ===== RECIPE REASON (production dialog) ===== */
+.recipe-reason {
+  font-size: 8px;
+  color: #c62828;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ===== OVERLAY CARDS — Hay Day Wood Header ===== */
+/* Apply to standard overlays that benefit from the wood banner header */
+#wheel-overlay .overlay-card h2,
+#mystery-box-overlay .overlay-card h2,
+#plant-overlay .overlay-card h2,
+#sell-overlay .overlay-card h2,
+#session-overlay .overlay-card h2 {
+  position: relative;
+  margin: -24px -24px 14px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
+    linear-gradient(180deg, rgba(255,255,255,.12) 0%, transparent 40%, rgba(0,0,0,.12) 100%),
+    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
+  border-radius: 21px 21px 0 0;
+  border-bottom: 2px solid rgba(90,53,32,.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.15);
+}
+/* Production dialog wood header (accounts for custom padding-top) */
+.production-card h2 {
+  position: relative;
+  margin: -30px -24px 14px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
+    linear-gradient(180deg, rgba(255,255,255,.12) 0%, transparent 40%, rgba(0,0,0,.12) 100%),
+    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
+  border-radius: 21px 21px 0 0;
+  border-bottom: 2px solid rgba(90,53,32,.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 6px rgba(0,0,0,.15);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Keep level-up celebration special */
+.levelup-card h1 {
+  color: #fff;
+  font-size: 22px;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6), 0 0 20px rgba(255,215,0,.4);
+}
+
+/* ===== ORDER CARD POLISH ===== */
+.order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.order-type {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-d);
+}
+.order-reward {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.order-coin-reward { color: var(--gold-d); }
+.order-xp-reward { color: #4caf50; }
+.order-gem-reward { color: var(--gem); }
+.order-items { display: flex; flex-direction: column; gap: 3px; }
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,.4);
+  border-radius: 8px;
+  font-size: 11px;
+  transition: background .15s;
+}
+.order-item.fulfilled { background: rgba(76,175,80,.08); }
+.order-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.order-prog-bar {
+  flex: 1;
+  height: 5px;
+  background: rgba(0,0,0,.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.order-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9800, #ffc107);
+  border-radius: 3px;
+  transition: width .4s;
+}
+.order-prog-fill.almost {
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+  box-shadow: 0 0 6px rgba(76,175,80,.3);
+}
+.order-prog-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #888;
+  min-width: 28px;
+  text-align: right;
+}
+.order-btn-ready {
+  background: linear-gradient(180deg, #6abf47, #4a9e2f, #3d8a26) !important;
+  animation: harvestPulse 2s ease-in-out infinite;
+}
 
 /* ===== PANEL CLOSE ANIMATION ===== */
-.panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
-.panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
-@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.panel { transition: transform .3s cubic-bezier(.4,0,1,1), opacity .25s ease; }
+.panel.panel-closing { transform: translateY(100%); opacity: 0; pointer-events: none; }
+@keyframes panelIn { from { transform: translateY(100%); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
 
-/* ===== READY PLOT CROP NAME ===== */
-/* (removed — ready plots show crop via sprite + "Récolter !" badge only) */
-
-.hidden{display:none!important}
+.hidden { display: none !important; }
