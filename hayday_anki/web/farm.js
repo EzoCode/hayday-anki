@@ -1834,7 +1834,24 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{
+    const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};
+    const gr=def.growth_reviews||3;const totalReviews=gr*4;
+    const sellPrice=def.sell_price||2;
+    const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;
+    const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;
+    const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;
+    const coins=farmData.coins||0;const canAfford=coins>=plantCost;
+    const el=document.createElement('div');el.className='crop-choice';
+    if(!canAfford)el.classList.add('crop-choice-locked');
+    el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};
+    const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;
+    const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;
+    const stockBadge=stock>0?`<span class="crop-stock-badge">${stock} en stock</span>`:'';
+    const growBadge=growing>0?`<span class="crop-growing-badge">${growing} en cours</span>`:'';
+    el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name} ${costBadge}</strong><div class="crop-choice-stats"><span class="crop-reviews-badge">${totalReviews} rev.</span><span class="crop-price-badge">${sellPrice} p./u</span><span class="crop-reviews-badge">+${xpPerHarvest} XP</span></div><div class="crop-yield-info"><span>${harvestMin}-${harvestMax}x récolte</span><span class="crop-profit">+${profit} net</span>${stockBadge}${growBadge}</div></div>`;
+    choices.appendChild(el)
+  });document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');

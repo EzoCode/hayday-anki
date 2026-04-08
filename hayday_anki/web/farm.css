@@ -18,20 +18,25 @@
 body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;user-select:none;background:var(--grass-2)}
 
 /* ===== HUD ===== */
-#hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:54px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 20%,transparent 40%,rgba(0,0,0,.12) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
-  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
+#hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:56px;flex-shrink:0;z-index:100;
+  background:
+    repeating-linear-gradient(95deg, transparent 0px, transparent 10px, rgba(255,255,255,.02) 10px, rgba(255,255,255,.02) 11px),
+    linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 20%,transparent 40%,rgba(0,0,0,.12) 100%),
+    linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
+  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 14px rgba(0,0,0,.45)}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
-.hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 10px rgba(255,215,0,.5),0 0 20px rgba(255,215,0,.15),inset 0 0 4px rgba(255,215,0,.3);
-  background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.15),transparent 60%)}
+.hud-level{position:relative;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 12px rgba(255,215,0,.5),0 0 24px rgba(255,215,0,.12),inset 0 0 4px rgba(255,215,0,.3),0 2px 6px rgba(0,0,0,.3);
+  background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.2),transparent 60%),radial-gradient(circle at center,rgba(0,0,0,.1),transparent 70%)}
 .hud-star{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .level-num{position:relative;z-index:1;font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .hud-xp{position:relative;width:140px;height:30px}
 .xp-bar-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;display:none;pointer-events:none}
 .xp-bar-track{position:absolute;top:8px;left:34px;right:8px;height:12px;background:#1a1a1a;border-radius:6px;overflow:hidden;border:1px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 4px rgba(0,0,0,.6);z-index:1}
-.xp-bar-fill{height:100%;background:linear-gradient(180deg,#81c784,var(--xp));border-radius:6px;transition:width .5s;box-shadow:0 0 6px rgba(76,175,80,.4);position:relative}
-.xp-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:6px 6px 0 0}
+.xp-bar-fill{height:100%;background:linear-gradient(180deg,#81c784,var(--xp));border-radius:6px;transition:width .5s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 6px rgba(76,175,80,.5);position:relative;overflow:hidden}
+.xp-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);border-radius:6px 6px 0 0}
+.xp-bar-fill::before{content:'';position:absolute;top:0;bottom:0;left:-100%;width:60%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:xpShine 3s ease-in-out infinite}
+@keyframes xpShine{0%{left:-100%}50%{left:100%}100%{left:100%}}
 .xp-text{position:absolute;top:8px;left:34px;right:8px;height:12px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:3}
 .hud-currency{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.35);padding:3px 10px 3px 6px;border-radius:16px;border:1px solid rgba(255,255,255,.12);color:var(--text-l);font-weight:800;font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,.5);/* no blur */}
 .hud-coins{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(0,0,0,.35));border:1px solid rgba(255,215,0,.2)}
@@ -91,7 +96,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .quest-desc{font-size:10px;font-weight:700;color:rgba(255,255,255,.85);display:block;line-height:1.2;margin-bottom:2px}
 .quest-done .quest-desc{text-decoration:line-through;color:rgba(255,255,255,.5)}
 .quest-progress-bar{height:4px;background:rgba(0,0,0,.3);border-radius:2px;overflow:hidden}
-.quest-progress-fill{height:100%;background:linear-gradient(90deg,#ff9800,#ffc107);border-radius:2px;transition:width .5s cubic-bezier(.25,.46,.45,.94)}
+.quest-progress-fill{height:100%;background:linear-gradient(90deg,#ff9800,#ffc107);border-radius:2px;transition:width .5s cubic-bezier(.25,.46,.45,.94);position:relative}
+.quest-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:2px}
 .quest-done .quest-progress-fill{background:linear-gradient(90deg,#4caf50,#66bb6a)}
 .quest-count{font-size:9px;font-weight:800;color:rgba(255,255,255,.6);white-space:nowrap;min-width:32px;text-align:right}
 .quest-done .quest-count{color:rgba(76,175,80,.9)}
@@ -174,33 +180,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ZONES ===== */
 .farm-zone {
-  margin: 10px 8px;
-  border-radius: 16px;
+  margin: 10px 8px 0;
+  border-radius: 18px;
   overflow: hidden;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
   transition: transform 0.2s;
 }
-.farm-zone + .farm-zone { margin-top: 0; }
+.farm-zone + .farm-zone { margin-top: 10px; }
 
-/* Hay Day-style dirt path connector between zones */
-.farm-zone + .farm-zone::before {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 18px;
-  margin: -4px auto -2px;
-  position: relative;
-  top: -8px;
-  background:
-    linear-gradient(180deg, rgba(160,130,80,.6) 0%, rgba(139,105,20,.5) 50%, rgba(160,130,80,.6) 100%);
-  border-radius: 0 0 8px 8px;
-  box-shadow:
-    inset 0 2px 3px rgba(0,0,0,.15),
-    0 2px 4px rgba(0,0,0,.1);
-  z-index: 2;
-}
+/* Zone connectors removed for cleaner look */
 
 .zone-fields {
   background:
@@ -229,17 +219,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 10px 14px;
   background:
     /* Wood grain texture */
     repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
     repeating-linear-gradient(85deg, transparent 0px, transparent 12px, rgba(0,0,0,.02) 12px, rgba(0,0,0,.02) 13px),
     /* Base wood */
-    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.15) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.12) 100%),
     linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
-  border-bottom: 2px solid rgba(90,53,32,.6);
-  border-top: 1px solid rgba(255,220,160,.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
+  border-bottom: 2px solid rgba(90,53,32,.5);
+  border-top: 1px solid rgba(255,220,160,.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.12);
 }
 
 .zone-title {
@@ -316,10 +306,18 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .zone-empty-msg {
   width: 100%;
   text-align: center;
-  color: rgba(255,255,255,0.4);
-  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  font-weight: 600;
   font-style: italic;
-  padding: 10px;
+  padding: 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0,0,0,.06);
+  border-radius: 12px;
+  border: 1px dashed rgba(255,255,255,.15);
 }
 
 /* Land bar */
@@ -519,7 +517,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #fields-grid.cols-5{grid-template-columns:repeat(5,minmax(64px,88px))}
 
 .plot{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:64px;max-width:115px;
-  box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.15)}
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.25),0 5px 12px rgba(0,0,0,.2),0 1px 2px rgba(0,0,0,.1)}
 .plot::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 40% 35%,rgba(255,255,255,.08),transparent 55%),radial-gradient(ellipse at 70% 70%,rgba(0,0,0,.12),transparent 50%);pointer-events:none;z-index:0;border-radius:16px}
 .plot:hover{transform:translateY(-3px) scale(1.04);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35);z-index:2}
 .plot:active{transform:scale(.92);box-shadow:inset 2px 2px 4px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2);transition:transform .08s}
@@ -547,9 +545,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-wilted:hover{filter:saturate(.5) brightness(.85);border-color:rgba(244,146,42,.5);box-shadow:0 0 12px rgba(244,146,42,.3)}
 @keyframes wiltPulse{0%,100%{opacity:.6}50%{opacity:.8}}
 
-.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
+.field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px;opacity:.85}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
-.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease;image-rendering:auto}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,.5);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
@@ -577,8 +575,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== BUILDINGS ON FARM — Card Style ===== */
 #buildings-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6px}
 .building-tile{position:relative;cursor:pointer;transition:transform .15s, box-shadow .15s;display:flex;flex-direction:column;align-items:center;
-  background:linear-gradient(180deg,rgba(160,114,74,.35) 0%,rgba(139,94,60,.25) 40%,rgba(90,56,24,.3) 100%);border-radius:16px;padding:10px 12px 8px;border:1.5px solid rgba(255,220,160,.15);min-width:105px;
-  box-shadow:0 3px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -1px 0 rgba(0,0,0,.15)}
+  background:linear-gradient(180deg,rgba(160,114,74,.35) 0%,rgba(139,94,60,.25) 40%,rgba(90,56,24,.3) 100%);border-radius:18px;padding:12px 14px 10px;border:1.5px solid rgba(255,220,160,.18);min-width:110px;
+  box-shadow:0 4px 12px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.12)}
 .building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1)}
 .building-tile:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .building-tile::after{content:'';position:absolute;bottom:6px;left:18%;right:18%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,.25),transparent);border-radius:50%;z-index:0}
@@ -645,11 +643,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #toolbar{display:flex;justify-content:space-around;align-items:center;padding:4px 8px 6px;height:58px;flex-shrink:0;z-index:100;
   background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
-.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border-radius:12px;transition:all .2s;min-width:52px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
-.tool-btn.active{color:#f4a42a;transform:translateY(-1px);background:rgba(244,164,42,.08)}
-.tool-btn.active::after{content:'';position:absolute;bottom:0px;left:50%;transform:translateX(-50%);width:24px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
-.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border-radius:14px;transition:all .2s;min-width:52px;position:relative}
+.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px);background:rgba(255,255,255,.04)}
+.tool-btn.active{color:#ffd54f;transform:translateY(-2px);background:linear-gradient(180deg,rgba(244,164,42,.12),rgba(244,164,42,.04))}
+.tool-btn.active::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 8px rgba(244,164,42,.7),0 0 16px rgba(244,164,42,.25)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 5px rgba(244,164,42,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.3));transform:scale(1.05)}
 .tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:26px}
 .tool-icon img{max-width:26px;max-height:26px;object-fit:contain}
 .tool-label{font-size:9px;font-weight:700;letter-spacing:.3px}
@@ -658,12 +656,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes tabPulseGlow{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(255,215,0,.6),inset 0 0 8px rgba(255,215,0,.2)}}
 
 /* ===== PANELS — Premium Sliding Sheet ===== */
-.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.5)}
+.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#fcf7ec,#f5edd8,#ece3cc);border-radius:24px 24px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.5);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.45)}
 .panel.hidden{display:none}
 @keyframes panelIn{0%{opacity:0;transform:translateY(100%)}55%{transform:translateY(-6px)}75%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px}
-.panel-header h2{font-size:16px;color:var(--text-d);font-weight:900;letter-spacing:.3px}
+.panel-header h2{font-size:17px;color:var(--text-d);font-weight:900;letter-spacing:.3px;text-shadow:0 1px 0 rgba(255,255,255,.5)}
 .panel-subheader{display:flex;gap:14px;padding:0 16px 6px;font-size:11px;color:#888;font-weight:700}
 .close-btn{background:rgba(0,0,0,.06);border:none;cursor:pointer;padding:0;width:28px;height:28px;border-radius:50%;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .close-btn:hover{background:rgba(0,0,0,.12);transform:scale(1.1)}
@@ -681,19 +679,20 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .settings-info p{font-size:11px;color:#999;text-align:center}
 
 /* ===== ITEM GRID — Polished Cards ===== */
-.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
-.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.6));border-radius:14px;padding:8px 4px;border:1px solid rgba(212,160,86,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:76px;box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
-.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.2)}
-.item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.item-cell img{image-rendering:pixelated;image-rendering:crisp-edges;max-width:40px;max-height:40px;object-fit:contain}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
+.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(250,240,220,.65));border-radius:14px;padding:10px 4px 8px;border:1.5px solid rgba(212,160,86,.15);cursor:pointer;transition:all .15s;min-height:80px;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.7)}
+.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.12),0 0 0 1.5px rgba(212,160,86,.25);border-color:rgba(212,160,86,.3)}
+.item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.item-cell img{image-rendering:auto;max-width:40px;max-height:40px;object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2));transition:transform .15s}
+.item-cell:hover img{transform:scale(1.08)}
 .item-name{font-size:9px;font-weight:700;color:#666;margin-top:1px;text-align:center}
 .item-qty{font-size:11px;font-weight:900;color:var(--text-d);background:rgba(0,0,0,.05);padding:0 6px;border-radius:8px}
 .item-price{font-size:9px;color:var(--gold-d);font-weight:700}
 
 /* ===== BUILDINGS LIST ===== */
 #buildings-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.building-card{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .12s;cursor:pointer}
-.building-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.building-card{display:flex;align-items:center;gap:12px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:14px;padding:12px;border:1.5px solid rgba(0,0,0,.05);box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.4);transition:all .15s;cursor:pointer;margin-bottom:6px}
+.building-card:hover{transform:translateX(3px);box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:rgba(212,160,86,.2)}
 .building-card-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center}
 .building-card-icon img{max-width:56px;max-height:56px;object-fit:contain}
 .building-card-info{flex:1}
@@ -705,21 +704,23 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ORDERS ===== */
 #orders-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
-.order-card:hover{transform:translateY(-1px)}
+.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:14px;padding:12px;border:1.5px solid rgba(0,0,0,.06);box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.4);transition:all .15s;margin-bottom:8px}
+.order-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
 .order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
 .order-reward{font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px}
 .order-coin-reward{color:var(--gold-d);display:flex;align-items:center;gap:2px;background:rgba(255,215,0,.1);padding:2px 6px;border-radius:6px}
 .order-xp-reward{color:#2e7d32;background:rgba(76,175,80,.1);padding:2px 6px;border-radius:6px}
 .order-gem-reward{color:#0288d1;background:rgba(79,195,247,.12);padding:2px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;font-weight:800}
-.order-items{display:flex;flex-wrap:wrap;gap:4px}
-.order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
-.order-item img{max-width:18px;max-height:18px}
-.order-item.fulfilled{opacity:.65;background:rgba(76,175,80,.08)}
-.order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-.order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(74,158,47,.4)}
-.order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.order-items{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+.order-item{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.03);padding:6px 10px;border-radius:10px;font-size:12px;transition:all .15s;border:1px solid transparent}
+.order-item img{max-width:22px;max-height:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+.order-item.fulfilled{background:rgba(76,175,80,.08);border-color:rgba(76,175,80,.12);opacity:.7}
+.order-fulfill-btn{margin-top:8px;width:100%;padding:10px;background:linear-gradient(180deg,#bbb,#999);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:12px;cursor:not-allowed;box-shadow:0 2px 6px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.15);transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.order-fulfill-btn:disabled{opacity:.5}
+.order-btn-ready{background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26) !important;cursor:pointer !important;box-shadow:0 3px 10px rgba(74,158,47,.4),inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 #2d6e1a !important;animation:deliverPulse 2s ease-in-out infinite;font-size:13px !important;padding:12px !important}
+.order-btn-ready:hover{transform:translateY(-2px) !important;box-shadow:0 6px 16px rgba(74,158,47,.5),inset 0 1px 0 rgba(255,255,255,.35),0 2px 0 #2d6e1a !important}
+@keyframes deliverPulse{0%,100%{box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25)}50%{box-shadow:0 3px 18px rgba(74,158,47,.6),inset 0 1px 0 rgba(255,255,255,.3),0 0 20px rgba(74,158,47,.15)}}
 .order-btn-ready{animation:orderReadyPulse 1.5s ease-in-out infinite}
 @keyframes orderReadyPulse{0%,100%{box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a}50%{box-shadow:0 3px 12px rgba(74,158,47,.6),inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 #2d6e1a,0 0 16px rgba(74,158,47,.3)}}
 .order-progress-wrap{display:flex;align-items:center;gap:6px;margin-bottom:6px}
@@ -742,19 +743,21 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ACHIEVEMENTS ===== */
 #achievements-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px}
-.achievement-card{display:flex;align-items:center;gap:8px;background:linear-gradient(145deg,rgba(255,255,255,.5),rgba(255,255,255,.15));border-radius:10px;padding:8px;border:1px solid rgba(0,0,0,.04);transition:all .2s}
-.achievement-card.locked{opacity:.45}
-.achievement-card.unlocked{border-color:rgba(255,215,0,.3);background:linear-gradient(135deg,rgba(255,253,231,.7),rgba(255,248,225,.5));box-shadow:0 0 8px rgba(255,215,0,.15)}
-.achievement-icon{font-size:24px}
-.achievement-info{flex:1}
-.achievement-info h4{font-size:12px}
-.achievement-info p{font-size:9px;color:#888}
-.achievement-tier{font-size:8px;font-weight:800;padding:1px 5px;border-radius:3px;text-transform:uppercase}
+.achievement-card{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.2));border-radius:12px;padding:10px;border:1.5px solid rgba(0,0,0,.05);transition:all .2s;margin-bottom:4px}
+.achievement-card:hover{transform:translateX(2px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.achievement-card.locked{opacity:.4;filter:saturate(.6)}
+.achievement-card.unlocked{border-color:rgba(255,215,0,.35);background:linear-gradient(135deg,rgba(255,253,231,.75),rgba(255,248,225,.55));box-shadow:0 0 10px rgba(255,215,0,.15)}
+.achievement-icon{font-size:24px;flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.achievement-info{flex:1;min-width:0}
+.achievement-info h4{font-size:12px;line-height:1.3}
+.achievement-info p{font-size:9px;color:#888;line-height:1.3}
+.achievement-tier{font-size:8px;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;margin-left:4px}
 .tier-bronze{background:#cd7f32;color:#fff}
 .tier-silver{background:#c0c0c0;color:#333}
 .tier-gold{background:var(--gold);color:#333}
-.achievement-progress{width:100%;height:4px;background:rgba(0,0,0,.08);border-radius:2px;margin-top:4px;overflow:hidden}
-.achievement-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047);border-radius:2px;transition:width .5s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 3px rgba(76,175,80,.3)}
+.achievement-progress{width:100%;height:5px;background:rgba(0,0,0,.08);border-radius:3px;margin-top:4px;overflow:hidden}
+.achievement-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047);border-radius:3px;transition:width .5s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 4px rgba(76,175,80,.4);position:relative}
+.achievement-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:3px}
 .achievement-gem-reward{font-size:10px;color:var(--gem);font-weight:800;display:flex;align-items:center;gap:2px}
 
 /* ===== OVERLAYS — Premium Modals ===== */
@@ -762,7 +765,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .overlay.hidden{display:none}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 .overlay-close{position:absolute;top:10px;right:10px}
-.overlay-card{background:linear-gradient(180deg,#faf4e8 0%,#f5edd8 30%,#f0e5cc 60%,#e8dcc6 100%);border-radius:24px;padding:24px;text-align:center;min-width:280px;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.2),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 6px rgba(0,0,0,.04);border:3px solid rgba(212,160,86,.5);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative}
+.overlay-card{background:linear-gradient(180deg,#fcf8ef 0%,#f7f0e0 30%,#f2e8d2 60%,#ece0c8 100%);border-radius:26px;padding:24px;text-align:center;min-width:290px;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.25),inset 0 1px 0 rgba(255,255,255,.6),inset 0 -2px 6px rgba(0,0,0,.03);border:3px solid rgba(212,160,86,.45);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);position:relative;max-height:85vh;overflow-y:auto}
 .overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
@@ -799,21 +802,22 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 
 /* Plant dialog — Hay Day style seed selector */
-#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;padding:6px 2px;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
-.crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-3px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
-.crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
-.crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
-.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
-.crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
-.crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
+#crop-choices{display:flex;flex-direction:column;gap:6px;padding:6px 2px;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(250,240,220,.6));border-radius:16px;padding:10px 12px;border:1.5px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.6);position:relative;overflow:hidden}
+.crop-choice:hover{background:rgba(255,252,245,.95);border-color:rgba(106,191,71,.5);transform:translateX(3px);box-shadow:0 4px 16px rgba(106,191,71,.2),inset 0 1px 0 rgba(255,255,255,.7)}
+.crop-choice:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.crop-choice::after{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(180deg,#6abf47,#4a9e2f);border-radius:16px 0 0 16px;opacity:0;transition:opacity .18s}
+.crop-choice:hover::after{opacity:1}
+.crop-choice-icon{width:52px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s;background:radial-gradient(circle,rgba(255,255,255,.4),transparent 70%);border-radius:50%}
+.crop-choice:hover .crop-choice-icon{transform:scale(1.12)}
+.crop-choice-icon img{max-width:48px;max-height:48px;object-fit:contain;image-rendering:auto}
+.crop-choice-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.crop-choice-info strong{font-size:13px;color:var(--text-d);line-height:1.2;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.crop-choice-info span{font-size:9px;color:#888;display:inline-flex;align-items:center}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
-.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-yield-info{font-size:7px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
+.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.crop-yield-info{font-size:9px;color:#999;font-weight:600;margin-top:1px;letter-spacing:.2px;display:flex;flex-wrap:wrap;gap:4px}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -825,8 +829,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .event-icon{display:inline-block;width:14px;height:14px;vertical-align:middle;margin-right:2px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23ffd700'/%3E%3Cpath d='M8 3l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10.5 4.5 12.5l.5-3.5L2.5 6.5 6 6z' fill='%23fff' opacity='.8'/%3E%3C/svg%3E") center/contain no-repeat}
 
 /* Production dialog */
-.production-card{max-height:70vh;overflow-y:auto;text-align:left;padding-top:30px !important}
-.production-card h3{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(0,0,0,.06)}
+.production-card{max-height:70vh;overflow-y:auto;text-align:left;padding-top:30px !important;min-width:300px}
+.production-card h3{font-size:11px;color:#8b6914;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;padding-bottom:5px;border-bottom:1.5px solid rgba(212,160,86,.15);font-weight:800}
 .production-queue-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:linear-gradient(145deg,rgba(255,255,255,.5),rgba(255,255,255,.25));border-radius:10px;margin-bottom:5px;transition:all .15s;border:1px solid rgba(0,0,0,.04)}
 .production-queue-item.ready{border:1.5px solid var(--gold);box-shadow:0 0 12px rgba(255,215,0,.3);background:linear-gradient(145deg,rgba(255,253,231,.7),rgba(255,248,225,.4));animation:readyPulse 2s ease-in-out infinite}
 @keyframes readyPulse{0%,100%{box-shadow:0 0 8px rgba(255,215,0,.2)}50%{box-shadow:0 0 16px rgba(255,215,0,.45)}}
@@ -838,15 +842,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .pq-bar{flex:0 0 60px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden}
 .pq-bar-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:3px;transition:width .4s}
 .pq-ready-badge{font-size:16px;font-weight:900;color:#4caf50;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
-.recipe-card{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;border:1px solid rgba(0,0,0,.05);cursor:pointer;transition:all .18s;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateY(-2px);box-shadow:0 4px 12px rgba(106,191,71,.2)}
-.recipe-card.disabled{opacity:.4;cursor:not-allowed}
-.recipe-header{display:flex;align-items:center;gap:10px}
-.recipe-emoji{display:flex;align-items:center;justify-content:center;width:36px;height:36px}
-.recipe-emoji img{filter:drop-shadow(1px 1px 2px rgba(0,0,0,.2));max-width:32px;max-height:32px}
-.recipe-info{flex:1}
+.recipe-card{display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border-radius:14px;border:1.5px solid rgba(0,0,0,.05);cursor:pointer;transition:all .18s;margin-bottom:6px;box-shadow:0 2px 6px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.4);position:relative;overflow:hidden}
+.recipe-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#6abf47,#4a9e2f);opacity:0;transition:opacity .18s;border-radius:14px 0 0 14px}
+.recipe-card:hover:not(.disabled)::after{opacity:1}
+.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.9);border-color:rgba(106,191,71,.35);transform:translateX(3px);box-shadow:0 4px 12px rgba(106,191,71,.15)}
+.recipe-card.disabled{opacity:.35;cursor:not-allowed}
+.recipe-header{display:flex;align-items:center;gap:12px}
+.recipe-emoji{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex-shrink:0;background:radial-gradient(circle,rgba(255,255,255,.5),transparent 70%);border-radius:50%}
+.recipe-emoji img{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2));max-width:36px;max-height:36px}
+.recipe-info{flex:1;min-width:0}
 .recipe-info strong{font-size:13px;color:var(--text-d)}
-.recipe-time{font-size:9px;color:#888;display:block;margin-top:1px}
+.recipe-time{font-size:10px;color:#888;display:block;margin-top:2px}
 .recipe-ingredients{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
 .recipe-ingredient{font-size:10px;padding:3px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;font-weight:600;border:1px solid transparent;transition:all .15s}
 .recipe-ingredient img{max-width:16px;max-height:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
@@ -899,8 +905,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .sell-stock{font-size:11px;color:#888;font-weight:700;background:rgba(0,0,0,.04);padding:3px 10px;border-radius:8px;display:inline-block}
 .sell-unit-price{font-size:11px;color:var(--gold-d);font-weight:700;margin:4px 0 12px}
 .sell-buttons{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.sell-amount-btn{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border:1px solid rgba(0,0,0,.06);border-radius:14px;cursor:pointer;transition:all .18s;font-size:14px;font-weight:700;color:var(--text-d);box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.sell-amount-btn:hover{background:rgba(255,255,255,.95);border-color:rgba(255,215,0,.4);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,215,0,.15)}
+.sell-amount-btn{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.4));border:1.5px solid rgba(0,0,0,.06);border-radius:14px;cursor:pointer;transition:all .18s;font-size:14px;font-weight:700;color:var(--text-d);box-shadow:0 2px 6px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
+.sell-amount-btn::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--gold-d));opacity:0;transition:opacity .18s}
+.sell-amount-btn:hover{background:rgba(255,255,255,.95);border-color:rgba(255,215,0,.4);transform:translateX(3px);box-shadow:0 4px 12px rgba(255,215,0,.15)}
+.sell-amount-btn:hover::after{opacity:1}
 .sell-amount-btn:active{transform:scale(.97)}
 .sell-total{font-weight:900;color:var(--gold-d);font-size:15px}
 
@@ -1025,8 +1033,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
 .crop-cost-badge.free{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.08));color:#2e7d32;border-color:rgba(76,175,80,.2)}
+.crop-choice-stats{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
 .crop-profit{color:#2e7d32;font-weight:800}
-.crop-choice-locked{opacity:.45;cursor:not-allowed !important}
+.crop-stock-badge{background:rgba(79,195,247,.12);color:#0277bd;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px}
+.crop-growing-badge{background:rgba(255,152,0,.12);color:#e65100;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px}
+.crop-choice-locked{opacity:.4;cursor:not-allowed !important}
 .crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
 
 /* ===== PANEL CLOSE ANIMATION ===== */
