@@ -1748,6 +1748,8 @@ class FarmManager:
         self.state.gems += gem_reward
         self.state.xp += xp_reward
         self.state.total_coins_earned += coin_reward
+        self.state.session_coins_earned += coin_reward
+        self.state.session_xp_earned += xp_reward
         return {
             "coins": coin_reward,
             "gems": gem_reward,

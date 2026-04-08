@@ -237,11 +237,11 @@ const SoundMgr = {
       g2.gain.setValueAtTime(vol * 0.3, t + 0.1); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
       o2.connect(g2); g2.connect(ctx.destination); o2.start(t + 0.1); o2.stop(t + 0.35);
     } else if (id === 'coin') {
-      // Classic coin ding
+      // Classic coin ding - pleasant, not annoying even when repeated
       const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(1318, t); o.frequency.setValueAtTime(1568, t + 0.07);
-      g.gain.setValueAtTime(vol * 0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
+      o.type = 'sine'; o.frequency.setValueAtTime(1318, t); o.frequency.setValueAtTime(1568, t + 0.06);
+      g.gain.setValueAtTime(vol * 0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.22);
     } else if (id === 'collect') {
       // Rewarding ascending arpeggio (collecting production)
       [440, 554, 659, 880].forEach((f, i) => {
@@ -876,7 +876,7 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 48 : 62;
+      const cropSize = [32, 40, 50, 58, 64][Math.min(stage, 4)] || 50;
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       // Stage dots: 4 dots showing which growth stage we're in
@@ -1834,7 +1834,7 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;const stockBadge=stock>0?`<span class="crop-stock-badge">${stock}</span>`:'';const growBadge=growing>0?`<span class="crop-growing-badge">${growing}</span>`:'';el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}${stockBadge}${growBadge}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge">${totalReviews} rev.</span><span class="crop-price-badge">${sellPrice}/u · ${harvestMin}-${harvestMax}x</span></div><div class="crop-yield-info">+${profit} net</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
@@ -1929,7 +1929,7 @@ function showSellDialog(id, qty) {
 }
 function fulfillOrder(i){SoundMgr.play('collect');pycmd(`farm:fulfill_order:${i}`)}
 
-function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification(LANG.come_back)}
+function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');document.getElementById('wheel-spin-btn').disabled=false;document.getElementById('wheel-result').classList.add('hidden');drawWheel()}else showNotification(LANG.come_back)}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
 function showWheelResult(r){
   wheelSpinning=false;
@@ -2012,7 +2012,15 @@ function showSessionSummary(d){
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
 function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
-function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
+function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';
+  // Add coin icon for coin rewards
+  const coinSrc=S('ui_coin');
+  if(text.startsWith('+')&&!text.includes('XP')&&coinSrc){
+    el.innerHTML=`<img src="${coinSrc}" width="14" height="14" style="vertical-align:middle;margin-right:2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))"> ${text}`;
+  } else {
+    el.textContent=text;
+  }
+  el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1600)}
 function showCoinBurst(x,y,n){
   const layer=document.getElementById('reward-layer');
   const coinSrc=S('ui_coin');
@@ -2051,10 +2059,8 @@ function showReward(d){
   const xp = d.xp || 0;
   const hasItems = d.items && Object.keys(d.items).length > 0;
   const hasBox = !!d.mystery_box;
-  // Determine reward tier: normal review = subtle HUD-only feedback,
-  // good reward = small floating text, big reward = full burst
-  const isSpecial = hasItems || hasBox || coins >= 15;
   const isBig = coins >= 25 || hasBox;
+  const isMedium = hasItems || coins >= 15;
 
   if (coins > 0 || xp > 0) {
     if (isBig) {
@@ -2066,20 +2072,27 @@ function showReward(d){
       showCoinBurst(cx, cy + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
       SoundMgr.play('coin');
       if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, cx + 30, cy + 15), 180);
-    } else if (isSpecial) {
-      // Special: small floating text near HUD, subtle sound
+    } else if (isMedium) {
+      // Medium: floating text near HUD + sound
       const hudEl = document.getElementById('hud-coins');
       let cx = window.innerWidth / 2, cy = 60;
       if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 8; }
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
+    } else {
+      // Every review: always show a small floating reward near HUD
+      // This is the CORE addictive feedback — every review counts
+      const hudEl = document.getElementById('hud-coins');
+      let cx = window.innerWidth / 2, cy = 60;
+      if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 6; }
+      const label = coins > 0 && xp > 0 ? `+${coins} +${xp} XP` : coins > 0 ? `+${coins}` : `+${xp} XP`;
+      showFloatingReward(label, cx, cy);
+      SoundMgr.play('coin');
     }
-    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
-    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
   }
   // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
   if (hasItems) {
-    let delay = isSpecial ? 350 : 200;
+    let delay = isMedium ? 350 : 200;
     let first = true;
     Object.entries(d.items).forEach(([id, qty]) => {
       const playSound = first; first = false;
