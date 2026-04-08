@@ -1,9 +1,10 @@
 """
 Production System — Buildings, recipes, and production chains.
 
-Production is gated by sessions, NOT real-time clocks.
-A recipe that takes "1 session" completes after the player's next review session.
-This prevents incentivizing waiting instead of studying.
+Production advances every 10 reviews (1 tick = 10 reviews).
+A recipe with sessions_required=1 completes after 10 reviews.
+A recipe with sessions_required=2 completes after 20 reviews.
+This keeps production tightly coupled to the review-by-review loop.
 """
 
 from typing import Dict, List, Optional, Tuple

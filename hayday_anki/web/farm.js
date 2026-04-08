@@ -812,8 +812,14 @@ function renderFields() {
       const reviewsLeft = totalNeeded - totalDone;
       const cropSize = stage <= 1 ? 44 : 58;
       const cName = cropName(field.crop);
-      el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-crop-name"><span>${cName}</span></span>`;
+      const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
+      // Stage dots: 4 dots showing which growth stage we're in
+      let stageDots = '';
+      for (let s = 0; s < 4; s++) {
+        stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
+      }
+      el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-growth-info"><span class="plot-stage-label">${stageLabel}</span><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-reviews-left">${reviewsLeft}</span>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1060,21 +1066,21 @@ const ITEM_INFO = {
   bacon: {desc: 'Produit par les cochons (1 par cochon tous les 15 reviews). Ingrédient du burger.', usage: 'Vendre ou Burger'},
   wool: {desc: 'Tondue des moutons (1 par mouton tous les 20 reviews). Se vend cher.', usage: 'Vendre'},
   // Processed
-  bread: {desc: 'Fabriqué à la Boulangerie (3 blé → 1 session). Base de nombreuses recettes.', usage: 'Vendre ou Burger/Pizza'},
-  butter: {desc: 'Fabriqué à la Laiterie (2 lait → 1 session). Ingrédient du gâteau.', usage: 'Vendre ou Gâteau'},
-  cheese: {desc: 'Fabriqué à la Laiterie (3 lait → 2 sessions). Ingrédient de la pizza.', usage: 'Vendre ou Pizza'},
-  sugar: {desc: 'Fabriqué à la Sucrerie (3 riz → 1 session). Ingrédient confiture/limonade.', usage: 'Vendre ou Confiture/Limonade'},
-  cookie: {desc: 'Fabriqué à la Boulangerie (2 blé + 1 œuf → 1 session).', usage: 'Vendre'},
-  cake: {desc: 'Fabriqué à la Pâtisserie (1 pain + 1 beurre + 1 œuf → 2 sessions). Se vend très cher !', usage: 'Vendre (25 pièces)'},
-  pizza: {desc: 'Fabriquée à la Pizzeria (1 pain + 2 tomates + 1 fromage → 2 sessions). Top prix !', usage: 'Vendre (30 pièces)'},
-  burger: {desc: 'Fabriqué au BBQ (1 pain + 1 bacon → 2 sessions). Le plus cher !', usage: 'Vendre (35 pièces)'},
-  jam: {desc: 'Fabriquée à la Confiturerie (3 fraises + 1 sucre → 1 session).', usage: 'Vendre (20 pièces)'},
-  grape_jam: {desc: 'Fabriquée à la Confiturerie (3 raisins + 1 sucre → 1 session).', usage: 'Vendre (22 pièces)'},
-  juice: {desc: "Fabriqué au Pressoir (3 oranges → 1 session).", usage: 'Vendre (16 pièces)'},
-  lemonade: {desc: 'Fabriquée au Pressoir (3 citrons + 1 sucre → 1 session). Rafraîchissante !', usage: 'Vendre (18 pièces)'},
-  pie: {desc: "Fabriquée à la Pâtisserie (2 blé + 2 oranges + 1 sucre → 2 sessions).", usage: 'Vendre (28 pièces)'},
-  melon_pie: {desc: 'Fabriquée au Four à tartes (2 melons + 2 blé + 1 crème → 2 sessions). La plus chère !', usage: 'Vendre (35 pièces)'},
-  cream: {desc: 'Fabriquée à la Laiterie (2 lait → 1 session). Ingrédient de la tarte au melon.', usage: 'Vendre ou Tarte au melon'},
+  bread: {desc: 'Fabriqué à la Boulangerie (3 blé → 10 rev.). Base de nombreuses recettes.', usage: 'Vendre ou Burger/Pizza'},
+  butter: {desc: 'Fabriqué à la Laiterie (2 lait → 10 rev.). Ingrédient du gâteau.', usage: 'Vendre ou Gâteau'},
+  cheese: {desc: 'Fabriqué à la Laiterie (3 lait → 20 rev.). Ingrédient de la pizza.', usage: 'Vendre ou Pizza'},
+  sugar: {desc: 'Fabriqué à la Sucrerie (3 riz → 10 rev.). Ingrédient confiture/limonade.', usage: 'Vendre ou Confiture/Limonade'},
+  cookie: {desc: 'Fabriqué à la Boulangerie (2 blé + 1 œuf → 10 rev.).', usage: 'Vendre'},
+  cake: {desc: 'Fabriqué à la Pâtisserie (1 pain + 1 beurre + 1 œuf → 20 rev.). Se vend très cher !', usage: 'Vendre (25 pièces)'},
+  pizza: {desc: 'Fabriquée à la Pizzeria (1 pain + 2 tomates + 1 fromage → 20 rev.). Top prix !', usage: 'Vendre (30 pièces)'},
+  burger: {desc: 'Fabriqué au BBQ (1 pain + 1 bacon → 20 rev.). Le plus cher !', usage: 'Vendre (35 pièces)'},
+  jam: {desc: 'Fabriquée à la Confiturerie (3 fraises + 1 sucre → 10 rev.).', usage: 'Vendre (20 pièces)'},
+  grape_jam: {desc: 'Fabriquée à la Confiturerie (3 raisins + 1 sucre → 10 rev.).', usage: 'Vendre (22 pièces)'},
+  juice: {desc: "Fabriqué au Pressoir (3 oranges → 10 rev.).", usage: 'Vendre (16 pièces)'},
+  lemonade: {desc: 'Fabriquée au Pressoir (3 citrons + 1 sucre → 10 rev.). Rafraîchissante !', usage: 'Vendre (18 pièces)'},
+  pie: {desc: "Fabriquée à la Pâtisserie (2 blé + 2 oranges + 1 sucre → 20 rev.).", usage: 'Vendre (28 pièces)'},
+  melon_pie: {desc: 'Fabriquée au Four à tartes (2 melons + 2 blé + 1 crème → 20 rev.). La plus chère !', usage: 'Vendre (35 pièces)'},
+  cream: {desc: 'Fabriquée à la Laiterie (2 lait → 10 rev.). Ingrédient de la tarte au melon.', usage: 'Vendre ou Tarte au melon'},
 };
 
 function showItemInfo(itemId) {
@@ -2005,9 +2011,9 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:q.sessions_waited+'/'+q.sessions_required+' '+((q.sessions_required||1)>1?LANG.sessions:LANG.session)}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const reviewsDone=(q.sessions_waited||0)*10;const reviewsTotal=(q.sessions_required||1)*10;const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:reviewsDone+'/'+reviewsTotal+' rev.'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${r.sessions_required} ${r.sessions_required>1?LANG.sessions:LANG.session} | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
+  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});const reviewsNeeded=(r.sessions_required||1)*10;c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 

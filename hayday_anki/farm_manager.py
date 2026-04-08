@@ -736,6 +736,10 @@ class FarmManager:
         crop_notifs = self._advance_plots()
         rewards["notifications"].extend(crop_notifs)
 
+        # Advance production queues (every 10 reviews = 1 production tick)
+        prod_notifs = self._advance_production_by_review()
+        rewards["notifications"].extend(prod_notifs)
+
         # Check level up
         level_up = self._check_level_up()
         if level_up:
@@ -1637,8 +1641,10 @@ class FarmManager:
         self.state.total_sessions += 1
         self.generate_orders()
 
-        # Process production queues
-        self._process_production()
+        # Production now advances per-review (every 10 reviews) during the session.
+        # At session end, only advance if reviews < 10 (didn't get a single tick).
+        if self.state.session_reviews < 10:
+            self._process_production()
 
         summary = {
             "reviews": self.state.session_reviews,
@@ -1667,6 +1673,29 @@ class FarmManager:
                     item["sessions_waited"] = sessions_waited
                     if sessions_waited >= item.get("sessions_required", 1):
                         item["ready"] = True
+
+    def _advance_production_by_review(self) -> List[Dict]:
+        """Advance production queues per-review (every PRODUCTION_REVIEWS_PER_TICK reviews).
+        Returns list of newly ready production notifications."""
+        REVIEWS_PER_TICK = 10  # Every 10 reviews = 1 production tick
+        notifications = []
+        if self.state.session_reviews % REVIEWS_PER_TICK != 0:
+            return notifications
+
+        for building_id, queue in self.state.production_queues.items():
+            for item in queue:
+                if not item.get("ready", False):
+                    sessions_waited = item.get("sessions_waited", 0) + 1
+                    item["sessions_waited"] = sessions_waited
+                    if sessions_waited >= item.get("sessions_required", 1):
+                        item["ready"] = True
+                        notifications.append({
+                            "type": "production_ready",
+                            "message": f"{item['name']} est prêt(e) !",
+                            "building_id": building_id,
+                            "recipe_id": item.get("recipe_id", ""),
+                        })
+        return notifications
 
     # --- Data for UI ---
 

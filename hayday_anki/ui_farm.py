@@ -254,7 +254,16 @@ class FarmWebView:
                 result = self.manager.harvest_plot(plot_id)
                 if result:
                     self._js(f"showReward({json.dumps(result)})")
+                    # Show harvest quantity notification with crop icon
+                    from .farm_manager import ITEM_CATALOG as _IC
+                    for item_id, qty in result.get("items", {}).items():
+                        item_name = _IC.get(item_id, {}).get("name", item_id)
+                        xp = result.get("xp", 0)
+                        msg = f"+{qty} {item_name} · +{xp} XP"
+                        self._js(f"showNotification(itemIcon({json.dumps(item_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
                     self._check_and_show_level_up()
+                else:
+                    self._js("showNotification('Silo plein ! Vendez ou améliorez.', 'error')")
                 self._send_state()
                 self.manager.save()
 
@@ -616,6 +625,10 @@ class FarmWebView:
                     self._js(f"showNotification({json.dumps(msg)})")
                 elif ntype == "crop_ready":
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                elif ntype == "production_ready":
+                    recipe_id = notif.get("recipe_id", "")
+                    self._js(f"showNotification(itemIcon({json.dumps(recipe_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
+                    self._js("SoundMgr.play('collect')")
             self._send_state()
 
     def on_level_up(self, data: dict):
