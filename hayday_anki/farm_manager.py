@@ -736,7 +736,7 @@ class FarmManager:
         crop_notifs = self._advance_plots()
         rewards["notifications"].extend(crop_notifs)
 
-        # Advance production queues (every 10 reviews = 1 production tick)
+        # Advance production queues (every review for smooth progress)
         prod_notifs = self._advance_production_by_review()
         rewards["notifications"].extend(prod_notifs)
 
@@ -1641,10 +1641,8 @@ class FarmManager:
         self.state.total_sessions += 1
         self.generate_orders()
 
-        # Production now advances per-review (every 10 reviews) during the session.
-        # At session end, only advance if reviews < 10 (didn't get a single tick).
-        if self.state.session_reviews < 10:
-            self._process_production()
+        # Production now advances per-review (every review) during the session.
+        # No additional advancement needed at session end.
 
         summary = {
             "reviews": self.state.session_reviews,
@@ -1664,30 +1662,22 @@ class FarmManager:
         self.save()
         return summary
 
-    def _process_production(self):
-        """Process production queues - advance items that waited a session."""
-        for building_id, queue in self.state.production_queues.items():
-            for item in queue:
-                if not item.get("ready", False):
-                    sessions_waited = item.get("sessions_waited", 0) + 1
-                    item["sessions_waited"] = sessions_waited
-                    if sessions_waited >= item.get("sessions_required", 1):
-                        item["ready"] = True
-
     def _advance_production_by_review(self) -> List[Dict]:
-        """Advance production queues per-review (every PRODUCTION_REVIEWS_PER_TICK reviews).
+        """Advance production queues with EVERY review for smooth progress.
         Returns list of newly ready production notifications."""
-        REVIEWS_PER_TICK = 10  # Every 10 reviews = 1 production tick
         notifications = []
-        if self.state.session_reviews % REVIEWS_PER_TICK != 0:
-            return notifications
 
         for building_id, queue in self.state.production_queues.items():
             for item in queue:
                 if not item.get("ready", False):
-                    sessions_waited = item.get("sessions_waited", 0) + 1
-                    item["sessions_waited"] = sessions_waited
-                    if sessions_waited >= item.get("sessions_required", 1):
+                    # Migrate legacy items: convert sessions to reviews
+                    if "reviews_done" not in item:
+                        item["reviews_done"] = item.get("sessions_waited", 0) * 10
+                    if "reviews_required" not in item:
+                        item["reviews_required"] = item.get("sessions_required", 1) * 10
+
+                    item["reviews_done"] = item.get("reviews_done", 0) + 1
+                    if item["reviews_done"] >= item["reviews_required"]:
                         item["ready"] = True
                         notifications.append({
                             "type": "production_ready",

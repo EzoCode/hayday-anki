@@ -519,27 +519,32 @@ class FarmWebView:
         recipe_data = []
         for recipe in recipes:
             can, reason = prod_mgr.can_craft(building_id, recipe["id"])
+            reviews_req = recipe.get("reviews_required", recipe.get("sessions_required", 1) * 10)
             recipe_data.append({
                 "id": recipe["id"],
                 "name": recipe["name"],
                 "ingredients": recipe["ingredients"],
                 "xp": recipe["xp"],
-                "sessions_required": recipe["sessions_required"],
+                "reviews_required": reviews_req,
+                "sessions_required": max(1, reviews_req // 10),
                 "can_craft": can,
                 "reason": reason,
             })
 
         queue = self.manager.state.production_queues.get(building_id, [])
-        queue_data = [
-            {
+        queue_data = []
+        for item in queue:
+            reviews_done = item.get("reviews_done", item.get("sessions_waited", 0) * 10)
+            reviews_req = item.get("reviews_required", item.get("sessions_required", 1) * 10)
+            queue_data.append({
                 "name": item.get("name", ""),
                 "recipe_id": item.get("recipe_id", ""),
                 "ready": item.get("ready", False),
-                "sessions_waited": item.get("sessions_waited", 0),
-                "sessions_required": item.get("sessions_required", 1),
-            }
-            for item in queue
-        ]
+                "reviews_done": reviews_done,
+                "reviews_required": reviews_req,
+                "sessions_waited": reviews_done // 10,
+                "sessions_required": max(1, reviews_req // 10),
+            })
 
         data = {
             "building_id": building_id,

@@ -126,7 +126,7 @@ def on_reviewer_will_end():
     try:
         mgr = _get_manager()
 
-        # Production queues are advanced inside end_session() via _process_production()
+        # Production advances per-review via _advance_production_by_review()
         summary = mgr.end_session()
 
         if summary.get("reviews", 0) > 0:

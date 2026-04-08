@@ -865,8 +865,12 @@ function renderWorkshop() {
       statusHtml = `<span class="building-badge">${ready}</span>`;
     } else if (producing > 0) {
       const q = queue.find(item=>!item.ready);
-      const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
-      statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
+      const revDone = q ? (q.reviews_done||0) : 0;
+      const revReq = q ? (q.reviews_required || (q.sessions_required||1)*10) : 10;
+      const pct = Math.min(100, Math.round(revDone / Math.max(1, revReq) * 100));
+      const revLeft = Math.max(0, revReq - revDone);
+      const prodIcon = q ? itemIcon(q.recipe_id||'', 14) : '';
+      statusHtml = `<div class="building-prod-info">${prodIcon}<span class="building-rev-count">${revLeft} rev.</span></div><div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }
     el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${statusHtml}`;
     grid.appendChild(el);
@@ -1266,9 +1270,6 @@ function updateWeather() {
   if (dayOfYear % 7 === 3 || dayOfYear % 7 === 5) weather = 'rain';
   if (weather === currentWeather) return;
   currentWeather = weather;
-  const sky = document.querySelector('.farm-sky');
-  const world = document.getElementById('farm-world');
-  const atm = document.querySelector('.farm-atmosphere');
   // Remove existing weather classes
   document.body.classList.remove('weather-day','weather-night','weather-sunset','weather-dawn','weather-rain');
   document.body.classList.add('weather-' + weather);
@@ -1277,10 +1278,10 @@ function updateWeather() {
   if (oldRain) oldRain.remove();
   if (weather === 'rain') {
     const rainLayer = document.createElement('div'); rainLayer.id = 'rain-layer';
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 50; i++) {
       const drop = document.createElement('div'); drop.className = 'rain-drop';
       drop.style.left = Math.random()*100+'%'; drop.style.animationDelay = Math.random()*2+'s';
-      drop.style.animationDuration = (0.5+Math.random()*0.5)+'s';
+      drop.style.animationDuration = (0.4+Math.random()*0.4)+'s';
       rainLayer.appendChild(drop);
     }
     document.getElementById('farm-container').appendChild(rainLayer);
@@ -2011,9 +2012,9 @@ function showProductionDialog(data){
   document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
   const list=document.getElementById('production-recipes');list.innerHTML='';
   const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const reviewsDone=(q.sessions_waited||0)*10;const reviewsTotal=(q.sessions_required||1)*10;const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:reviewsDone+'/'+reviewsTotal+' rev.'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
+  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const revDone=q.reviews_done||(q.sessions_waited||0)*10;const revReq=q.reviews_required||(q.sessions_required||1)*10;const pct=Math.min(100,revDone/Math.max(1,revReq)*100);const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:revDone+'/'+revReq+' rev.'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
   const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});const reviewsNeeded=(r.sessions_required||1)*10;c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
+  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});const reviewsNeeded=r.reviews_required||(r.sessions_required||1)*10;c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
   list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
 }
 
