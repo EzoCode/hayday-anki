@@ -440,11 +440,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
-.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease;image-rendering:pixelated;image-rendering:crisp-edges}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:5px;background:rgba(0,0,0,.45);z-index:4;border-radius:0 0 14px 14px}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047,#81c784);transition:width .5s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 6px rgba(76,175,80,.5)}
-.plot-crop-name{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;white-space:nowrap;background:rgba(0,0,0,.25);padding:0 5px;border-radius:4px;line-height:1.4}
+/* .plot-crop-name is defined below in the CROP NAME section */
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
 .plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
@@ -554,8 +554,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px}
 .panel-header h2{font-size:16px;color:var(--text-d);font-weight:900;letter-spacing:.3px}
 .panel-subheader{display:flex;gap:14px;padding:0 16px 6px;font-size:11px;color:#888;font-weight:700}
-.close-btn{background:rgba(0,0,0,.06);border:none;cursor:pointer;padding:0;width:28px;height:28px;border-radius:50%;transition:all .15s;display:flex;align-items:center;justify-content:center}
-.close-btn:hover{background:rgba(0,0,0,.12);transform:scale(1.1)}
+.close-btn{background:rgba(139,94,60,.15);border:1.5px solid rgba(139,94,60,.2);cursor:pointer;padding:0;width:30px;height:30px;border-radius:50%;transition:all .15s;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.close-btn:hover{background:rgba(139,94,60,.25);transform:scale(1.1);border-color:rgba(139,94,60,.35)}
 .close-x{display:block;width:14px;height:14px;position:relative}
 .close-x::before,.close-x::after{content:'';position:absolute;top:50%;left:50%;width:12px;height:2px;background:#999;border-radius:1px;transform-origin:center}
 .close-x::before{transform:translate(-50%,-50%) rotate(45deg)}
@@ -655,6 +655,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .overlay-card::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:22px 22px 0 0;pointer-events:none}
 @keyframes popIn{0%{opacity:0;transform:scale(.8)}60%{transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
 .overlay-card h2{margin-bottom:12px;color:var(--text-d);font-size:17px}
+#plant-overlay .overlay-card{max-width:420px;max-height:85vh;overflow-y:auto}
 
 /* Wheel */
 #wheel-canvas-wrapper{position:relative;display:inline-block;margin-bottom:12px}
@@ -689,20 +690,24 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* Plant dialog — Hay Day style seed selector */
 #crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;padding:4px 0;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
+#crop-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:14px;padding:8px 4px 6px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden;min-height:110px}
 .crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-3px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
 .crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
-.crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
-.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
-.crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
-.crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
+.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:14px 14px 0 0}
+.crop-choice-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
+.crop-choice:hover .crop-choice-icon{transform:scale(1.12)}
+.crop-choice-icon img{max-width:44px;max-height:44px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
+.crop-choice-name{font-size:10px;color:var(--text-d);text-align:center;line-height:1.2}
+.crop-choice-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;font-size:8px;color:#888;line-height:1.2}
+.crop-choice-stats span{display:flex;align-items:center;gap:1px}
+.crop-choice-stats img{vertical-align:middle}
+.crop-stock-tag{position:absolute;top:3px;left:3px;font-size:7px;font-weight:900;color:#fff;background:rgba(76,175,80,.8);padding:1px 4px;border-radius:5px}
+.crop-grow-tag{position:absolute;top:3px;right:3px;font-size:7px;font-weight:900;color:#fff;background:rgba(255,152,0,.8);padding:1px 4px;border-radius:5px}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
 .crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 .crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-yield-info{font-size:7px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
+/* crop-yield-info removed — stats now inline in crop-choice-stats */
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -902,8 +907,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .inv-section-header{grid-column:1/-1;font-size:10px;font-weight:800;color:#8b6914;text-transform:uppercase;letter-spacing:.8px;padding:8px 4px 3px;border-bottom:1.5px solid rgba(212,160,86,.2);margin-top:2px}
 
 /* ===== CROP NAME ON GROWING PLOTS ===== */
-.plot-crop-name{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;text-transform:uppercase;pointer-events:none;line-height:1}
-.plot-crop-name span{background:rgba(0,0,0,.35);padding:1px 5px;border-radius:4px}
+.plot-crop-name{position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 2px rgba(0,0,0,.9);z-index:5;letter-spacing:.2px;pointer-events:none;line-height:1}
+.plot-crop-name span{background:rgba(0,0,0,.45);padding:1px 5px;border-radius:4px;white-space:nowrap}
 
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d);font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.25);display:inline-flex;align-items:center;gap:2px}
