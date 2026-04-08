@@ -813,7 +813,7 @@ function renderFields() {
       const cropSize = stage <= 1 ? 44 : 58;
       const cName = cropName(field.crop);
       el.title = `${cName} — ${GROWTH_LABEL[Math.min(stage,4)]}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-crop-name"><span>${cName}</span></span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1460,8 +1460,8 @@ function renderOrders() {
         ${canDo?'\u2714 Livrer maintenant !':'Items manquants'}
       </button>
     `;
-    if (canDo) card.style.borderColor = 'rgba(106,191,71,.4)';
-    if (almostDone) card.style.borderColor = 'rgba(255,152,0,.35)';
+    if (canDo) { card.style.borderColor = 'rgba(106,191,71,.5)'; card.style.boxShadow = '0 4px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.2),0 0 14px rgba(106,191,71,.2)'; }
+    if (almostDone) { card.style.borderColor = 'rgba(255,152,0,.45)'; card.style.boxShadow = '0 4px 12px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.2),0 0 10px rgba(255,152,0,.15)'; }
     list.appendChild(card);
   });
 }
@@ -1806,9 +1806,11 @@ function showSellDialog(id, qty) {
   const price = cat.sell_price || 0;
   const overlay = document.getElementById('sell-overlay');
   if (!overlay) return pycmd(`farm:sell:${id}:1`);
-  document.getElementById('sell-item-name').innerHTML = `${itemIcon(id,28)} ${itemName(id)}`;
+  document.getElementById('sell-item-name').innerHTML = `${itemIcon(id,36)} ${itemName(id)}`;
   document.getElementById('sell-item-stock').textContent = `Stock : ${qty}`;
-  document.getElementById('sell-unit-price').textContent = `${price} p. / unit\u00e9`;
+  const coinSrc = S('ui_coin');
+  const coinHtml = coinSrc ? `<img src="${coinSrc}" width="16" height="16" style="vertical-align:middle">` : '<span class="css-coin" style="width:14px;height:14px;display:inline-block"></span>';
+  document.getElementById('sell-unit-price').innerHTML = `${coinHtml} ${price} p. / unit\u00e9`;
   const btns = document.getElementById('sell-buttons');
   btns.innerHTML = '';
   const amounts = [1];
@@ -1822,7 +1824,7 @@ function showSellDialog(id, qty) {
     const total = n * price;
     const btn = document.createElement('button');
     btn.className = 'sell-amount-btn';
-    btn.innerHTML = `<span>${label}</span><span class="sell-total">${total} p.</span>`;
+    btn.innerHTML = `<span>${label}</span><span class="sell-total">${coinHtml} ${total}</span>`;
     btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('coin'); };
     btns.appendChild(btn);
   });
