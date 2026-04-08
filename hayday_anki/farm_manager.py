@@ -226,6 +226,11 @@ class FarmState:
         # Events
         self.active_events: List[Dict] = []
 
+        # Daily quests
+        self.daily_quests: List[Dict] = []
+        self.daily_quests_date: Optional[str] = None
+        self.daily_quests_claimed: bool = False
+
         # Orders (truck/boat)
         self.active_orders: List[Dict] = []
         self.orders_completed: int = 0
@@ -354,6 +359,9 @@ class FarmState:
             "production_queues": self.production_queues,
             "achievements": self.achievements,
             "active_events": self.active_events,
+            "daily_quests": self.daily_quests,
+            "daily_quests_date": self.daily_quests_date,
+            "daily_quests_claimed": self.daily_quests_claimed,
             "active_orders": self.active_orders,
             "orders_completed": self.orders_completed,
             "land_total": self.land_total,
@@ -419,6 +427,9 @@ class FarmState:
         state.last_login_date = None
         state.login_streak = 0
         state.active_events = []
+        state.daily_quests = []
+        state.daily_quests_date = None
+        state.daily_quests_claimed = False
         state.active_orders = []
         state.orders_completed = 0
         state.land_total = 20
@@ -732,6 +743,10 @@ class FarmManager:
                 "message": f"Une {box_size_fr} boîte mystère est apparue !",
             })
 
+        # Advance daily quest progress
+        self.advance_quest("reviews", 1)
+        self.advance_quest("coins_earned", coins)
+
         # Advance crop growth on plots
         crop_notifs = self._advance_plots()
         rewards["notifications"].extend(crop_notifs)
@@ -914,6 +929,7 @@ class FarmManager:
         field["growth_stage"] = 0
         field["reviews_needed"] = reviews_per_stage
         field["reviews_done"] = 0
+        self.advance_quest("plant", 1)
         return True
 
     def get_field_cost(self) -> int:
@@ -1109,6 +1125,7 @@ class FarmManager:
         self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
         self.state.session_harvests += 1
+        self.advance_quest("harvests", 1)
 
         # Reset field — remember last crop for quick replant
         last_crop = field["crop"]
@@ -1167,6 +1184,7 @@ class FarmManager:
         self.state.coins += coins
         self.state.total_coins_earned += coins
         self.state.total_items_sold += actual
+        self.advance_quest("sell", actual)
         return coins
 
     def buy_decoration(self, deco_type: str, x: int, y: int) -> bool:
@@ -1387,6 +1405,7 @@ class FarmManager:
         self.state.session_coins_earned += order["coin_reward"]
         self.state.session_xp_earned += order["xp_reward"]
         self.state.orders_completed += 1
+        self.advance_quest("orders", 1)
 
         # Boat orders have a chance to give gems (like Hay Day)
         gem_reward = 0
@@ -1621,6 +1640,92 @@ class FarmManager:
             "message": f"Bonus jour {self.state.login_streak} : {reward['desc']} !",
         }
 
+    # --- Daily Quests ---
+
+    def generate_daily_quests(self):
+        """Generate 3 daily quests. Called at profile load if date changed."""
+        today = date.today().isoformat()
+        if self.state.daily_quests_date == today and self.state.daily_quests:
+            return  # Already generated for today
+
+        level = self.state.level
+        self.state.daily_quests_date = today
+        self.state.daily_quests_claimed = False
+
+        # Quest pool scaled by level
+        quest_pool = [
+            {"type": "reviews", "target": max(10, min(30, 10 + level)), "progress": 0,
+             "desc": f"Révise {max(10, min(30, 10 + level))} cartes",
+             "icon": "reviews"},
+            {"type": "harvests", "target": max(2, min(8, 2 + level // 5)), "progress": 0,
+             "desc": f"Récolte {max(2, min(8, 2 + level // 5))} cultures",
+             "icon": "farming"},
+            {"type": "coins_earned", "target": max(30, min(200, 30 + level * 3)), "progress": 0,
+             "desc": f"Gagne {max(30, min(200, 30 + level * 3))} pièces",
+             "icon": "collection"},
+        ]
+
+        # Extra quests unlocked by progression
+        if level >= 5 and self.state.unlocked_buildings:
+            quest_pool.append(
+                {"type": "produce", "target": 1, "progress": 0,
+                 "desc": "Fabrique 1 produit", "icon": "production"})
+        if level >= 7 and self.state.active_orders:
+            quest_pool.append(
+                {"type": "orders", "target": 1, "progress": 0,
+                 "desc": "Livre 1 commande", "icon": "orders"})
+        if level >= 10:
+            quest_pool.append(
+                {"type": "sell", "target": max(3, min(10, level // 3)), "progress": 0,
+                 "desc": f"Vends {max(3, min(10, level // 3))} items",
+                 "icon": "collection"})
+        if level >= 3:
+            quest_pool.append(
+                {"type": "plant", "target": max(3, min(6, 3 + level // 10)), "progress": 0,
+                 "desc": f"Plante {max(3, min(6, 3 + level // 10))} cultures",
+                 "icon": "farming"})
+
+        # Pick 3 unique quest types
+        random.shuffle(quest_pool)
+        # Always include a review quest (the core mechanic)
+        review_quest = next(q for q in quest_pool if q["type"] == "reviews")
+        others = [q for q in quest_pool if q["type"] != "reviews"]
+        self.state.daily_quests = [review_quest] + others[:2]
+
+    def advance_quest(self, quest_type: str, amount: int = 1):
+        """Advance progress on a daily quest type."""
+        if not self.state.daily_quests:
+            return
+        for quest in self.state.daily_quests:
+            if quest["type"] == quest_type and quest["progress"] < quest["target"]:
+                quest["progress"] = min(quest["target"], quest["progress"] + amount)
+
+    def are_all_quests_complete(self) -> bool:
+        """Check if all 3 daily quests are complete."""
+        if not self.state.daily_quests:
+            return False
+        return all(q["progress"] >= q["target"] for q in self.state.daily_quests)
+
+    def claim_quest_reward(self) -> Optional[Dict]:
+        """Claim the daily quest completion reward."""
+        if not self.are_all_quests_complete() or self.state.daily_quests_claimed:
+            return None
+        self.state.daily_quests_claimed = True
+        # Reward scales with level
+        level = self.state.level
+        coin_reward = 20 + level * 5
+        gem_reward = 1 if level < 20 else 2 if level < 50 else 3
+        xp_reward = 10 + level * 2
+        self.state.coins += coin_reward
+        self.state.gems += gem_reward
+        self.state.xp += xp_reward
+        self.state.total_coins_earned += coin_reward
+        return {
+            "coins": coin_reward,
+            "gems": gem_reward,
+            "xp": xp_reward,
+        }
+
     # --- Session Management ---
 
     def start_session(self):
@@ -1831,6 +1936,9 @@ class FarmManager:
             "total_correct": self.state.total_correct,
             "field_cost": self.get_field_cost(),
             "next_unlock": self._get_next_unlock_preview(),
+            "daily_quests": self.state.daily_quests,
+            "daily_quests_claimed": self.state.daily_quests_claimed,
+            "all_quests_complete": self.are_all_quests_complete(),
         }
 
     def _get_next_unlock_preview(self) -> Optional[Dict]:

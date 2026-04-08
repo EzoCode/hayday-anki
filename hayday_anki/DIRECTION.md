@@ -179,8 +179,23 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 - **Hay Day assets integres** : `coin-box.png` utilise comme fond du compteur de pieces dans le HUD. `details-bg.png` (gradient vert Hay Day) utilise comme fond des overlay cards. `xp_pbar_bg.png` et `star.png` deja utilises pour le HUD XP.
 - **CSS cleanup** : code mort du farmer character supprime, toolbar plus spacieux avec padding ameliore, crop images avec meilleur centrage flex.
 
+## Ameliorations (session 13 — gameplay solide et quetes quotidiennes)
+- **Parcelles en croissance simplifiees** : suppression du label de stade ("Pousse", "Croissance") et du compteur de reviews restantes qui encombraient les parcelles de ~100px. Desormais : sprite de culture (plus grand: 48-62px) + 4 points de stade (dots) au-dessus + barre de progression en bas. L'info detaillee reste dans le tooltip natif. Resultat : affichage propre comme dans Hay Day.
+- **Parcelles pretes nettoyees** : suppression du label texte "Recolter !". Seul le sprite de culture (72px) avec animation bounce + glow dore + sparkle communique l'etat. Plus besoin de texte — le visuel parle de lui-meme comme dans le vrai jeu.
+- **Animation bounce amelioree** : rebond plus naturel avec 3 rebonds degressifs (18% -> 10% -> 5%) au lieu d'un seul rebond.
+- **Systeme de quetes quotidiennes** : 3 quetes generees chaque jour, adaptees au niveau du joueur :
+  - Toujours une quete "Reviser X cartes" (le coeur du jeu)
+  - 2 quetes parmi : recolter, gagner des pieces, planter, produire, livrer, vendre
+  - Les cibles scalent avec le niveau (ex: niveau 1 = 10 cartes, niveau 30 = 30 cartes)
+  - Barre de progression par quete avec animation fluide
+  - Recompense a la completion des 3 : pieces + gemmes + XP (scaling avec le niveau)
+  - Les quetes se renouvellent automatiquement chaque jour
+  - Persistance complete dans la sauvegarde avec migration backward-compatible
+- **Tracking de progression des quetes** : chaque action du jeu (revision, recolte, plantation, vente, production, livraison) avance automatiquement les quetes correspondantes.
+- **UI des quetes** : barre de quetes integree sous le HUD avec design bois Hay Day, icones SVG par type, barres de progression orange->vert, bouton de reclamation avec animation pulse.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
-- [ ] Systeme de quetes quotidiennes/hebdomadaires
 - [ ] Tutoriel ameliore avec guidage contextuel
+- [ ] Systeme d'etoiles par quete (bronze/argent/or selon la performance)

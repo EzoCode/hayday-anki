@@ -690,6 +690,9 @@ function updateHUD() {
       streakBonusEl.style.display = 'none';
     }
   }
+  // Daily quests
+  renderDailyQuests();
+
   // Next unlock preview
   const nextEl = document.getElementById('next-unlock-hint');
   if (nextEl && d.next_unlock) {
@@ -708,6 +711,60 @@ function updateHUD() {
     banner.style.display = '';
   } else {
     banner.style.display = 'none';
+  }
+}
+
+function renderDailyQuests() {
+  const bar = document.getElementById('daily-quests-bar');
+  const quests = farmData.daily_quests || [];
+  const claimed = farmData.daily_quests_claimed || false;
+  const allDone = farmData.all_quests_complete || false;
+
+  if (!quests.length) { if (bar) bar.style.display = 'none'; return; }
+  bar.style.display = '';
+
+  const items = document.getElementById('quest-items');
+  items.innerHTML = '';
+
+  const QUEST_ICONS = {
+    reviews: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='2' width='18' height='20' rx='2' fill='%234fc3f7'/%3E%3Crect x='6' y='5' width='12' height='14' rx='1' fill='%23fff'/%3E%3Cline x1='8' y1='8' x2='16' y2='8' stroke='%23bbb' stroke-width='1'/%3E%3Cline x1='8' y1='11' x2='16' y2='11' stroke='%23bbb' stroke-width='1'/%3E%3Cline x1='8' y1='14' x2='13' y2='14' stroke='%23bbb' stroke-width='1'/%3E%3C/svg%3E",
+    farming: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='6' r='3' fill='%234caf50'/%3E%3Cellipse cx='9' cy='8' rx='3' ry='2' fill='%2366bb6a' transform='rotate(-25 9 8)'/%3E%3Cellipse cx='15' cy='8' rx='3' ry='2' fill='%2366bb6a' transform='rotate(25 15 8)'/%3E%3Crect x='11' y='9' width='2' height='10' rx='1' fill='%238b5e3c'/%3E%3C/svg%3E",
+    collection: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%23ffd700'/%3E%3Ccircle cx='12' cy='12' r='6' fill='%23ffeb3b'/%3E%3Ctext x='12' y='16' text-anchor='middle' font-size='10' font-weight='bold' fill='%23c5a200'%3E$%3C/text%3E%3C/svg%3E",
+    production: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='10' width='16' height='10' rx='2' fill='%23c9884a'/%3E%3Crect x='7' y='4' width='10' height='7' rx='1.5' fill='%23e0e0e0'/%3E%3Ccircle cx='10' cy='7' r='1.5' fill='%23bbb'/%3E%3C/svg%3E",
+    orders: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='8' width='14' height='8' rx='1.5' fill='%23d4a056'/%3E%3Cpath d='M16 10h3l2 2v4h-5z' fill='%238b5e3c'/%3E%3Ccircle cx='6' cy='18' r='2' fill='%233a2510'/%3E%3Ccircle cx='18' cy='18' r='2' fill='%233a2510'/%3E%3C/svg%3E",
+  };
+
+  quests.forEach(q => {
+    const done = q.progress >= q.target;
+    const pct = Math.min(100, Math.round(q.progress / Math.max(1, q.target) * 100));
+    const iconSrc = QUEST_ICONS[q.icon] || QUEST_ICONS.reviews;
+    const el = document.createElement('div');
+    el.className = `quest-item${done ? ' quest-done' : ''}`;
+    el.innerHTML = `
+      <img src="${iconSrc}" class="quest-icon" width="20" height="20">
+      <div class="quest-info">
+        <span class="quest-desc">${q.desc}</span>
+        <div class="quest-progress-bar"><div class="quest-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <span class="quest-count">${q.progress}/${q.target}</span>
+      ${done ? '<span class="quest-check">&#10003;</span>' : ''}
+    `;
+    items.appendChild(el);
+  });
+
+  // Claim button
+  const claimBtn = document.getElementById('quest-claim-btn');
+  if (allDone && !claimed) {
+    claimBtn.style.display = '';
+  } else {
+    claimBtn.style.display = 'none';
+  }
+
+  // Show "claimed" state
+  if (claimed) {
+    bar.classList.add('quests-claimed');
+  } else {
+    bar.classList.remove('quests-claimed');
   }
 }
 
@@ -794,7 +851,8 @@ function renderFields() {
     } else if (field.state === 'ready') {
       const readyCropName = cropName(field.crop);
       el.title = `${readyCropName} — Prêt à récolter !`;
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 64)}</div><span class="plot-label plot-ready-label">Récolter !</span>`;
+      // Hay Day style: big bouncing crop with golden sparkle, no text clutter
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -810,7 +868,7 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 44 : 58;
+      const cropSize = stage <= 1 ? 48 : 62;
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       // Stage dots: 4 dots showing which growth stage we're in
@@ -819,7 +877,8 @@ function renderFields() {
         stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
       }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-growth-info"><span class="plot-stage-label">${stageLabel}</span><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div><span class="plot-reviews-left">${reviewsLeft}</span>`;
+      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);

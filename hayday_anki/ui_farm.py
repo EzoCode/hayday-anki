@@ -478,6 +478,20 @@ class FarmWebView:
             elif action == "get_achievements":
                 self._send_achievements()
 
+            elif action == "claim_quests":
+                reward = self.manager.claim_quest_reward()
+                if reward:
+                    self._js("SoundMgr.play('levelup')")
+                    self._js("createConfetti()")
+                    coins = reward["coins"]
+                    gems = reward["gems"]
+                    xp = reward["xp"]
+                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 8)")
+                    self._js(f"showNotification('Quêtes terminées ! +{coins} pièces, +{gems} gemmes, +{xp} XP', 'reward')")
+                    self._check_and_show_level_up()
+                self._send_state()
+                self.manager.save()
+
         except Exception as e:
             print(f"[ADFarm] Bridge error: {e}")
             import traceback
@@ -582,6 +596,7 @@ class FarmWebView:
             self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(8, len(collected_names) * 3)})")
             self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
             self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")
+            self.manager.advance_quest("produce", len(collected_names))
 
     def _check_and_show_level_up(self):
         """Check if XP earned outside reviews triggered a level-up."""

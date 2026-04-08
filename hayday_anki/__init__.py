@@ -43,6 +43,7 @@ def on_profile_loaded():
     try:
         mgr = _get_manager()
         mgr.generate_orders()
+        mgr.generate_daily_quests()
         login_bonus = mgr.check_daily_login()
         mgr.save()
     except Exception as e:
