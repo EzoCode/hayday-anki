@@ -555,6 +555,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,.5);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
+/* Reviews remaining badge — shows how many reviews until harvest */
+.plot-reviews-left{position:absolute;bottom:8px;right:4px;font-size:9px;font-weight:900;color:rgba(255,255,255,.95);background:rgba(0,0,0,.45);padding:1px 5px;border-radius:6px;z-index:5;text-shadow:0 1px 2px rgba(0,0,0,.6);letter-spacing:.3px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
 .plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
@@ -566,6 +568,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
 .plot-empty:hover .plot-replant img{transform:scale(1.15)}
 
+/* Harvest flash — golden burst when you collect a crop */
+.plot-harvest-flash{animation:harvestFlash .4s ease-out !important;z-index:10 !important}
+@keyframes harvestFlash{0%{filter:brightness(2) saturate(0);transform:scale(1.15)}30%{filter:brightness(1.5) saturate(.5)}100%{filter:brightness(1) saturate(1);transform:scale(1)}}
 @keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes sparkle{0%{opacity:.2;transform:scale(.5) rotate(0deg)}25%{opacity:1;transform:scale(1.2) rotate(90deg)}50%{opacity:.9;transform:scale(.8) rotate(180deg)}75%{opacity:1;transform:scale(1.1) rotate(270deg)}100%{opacity:.2;transform:scale(.5) rotate(360deg)}}
@@ -616,6 +621,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== REWARD LAYER ===== */
 #reward-layer{position:fixed;inset:0;pointer-events:none;z-index:150}
+/* Mini per-review reward — small, compact, non-distracting but satisfying */
+.mini-reward{position:absolute;font-size:13px;font-weight:900;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.8),0 0 8px rgba(255,215,0,.5);animation:miniFloat .9s ease-out forwards;pointer-events:none;display:flex;align-items:center;gap:3px;background:linear-gradient(135deg,rgba(50,30,10,.85),rgba(70,40,15,.9));padding:3px 10px;border-radius:12px;border:1px solid rgba(255,215,0,.3);white-space:nowrap;transform:translateX(-50%)}
+.mini-reward img{vertical-align:middle;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.mini-xp{color:#81c784;font-size:11px}
+@keyframes miniFloat{0%{opacity:0;transform:translateX(-50%) translateY(4px) scale(.7)}12%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.05)}40%{opacity:1;transform:translateX(-50%) translateY(-12px) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-30px) scale(.8)}}
 .floating-reward{position:absolute;font-size:20px;font-weight:900;color:var(--gold);text-shadow:0 0 10px rgba(255,215,0,.8),0 2px 4px rgba(0,0,0,.7),0 0 20px rgba(255,215,0,.3);animation:floatUp 1.4s ease-out forwards;pointer-events:none;letter-spacing:.5px}
 @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(.5)}10%{opacity:1;transform:translateY(0) scale(1.3)}40%{opacity:1;transform:translateY(-25px) scale(1.1)}100%{opacity:0;transform:translateY(-60px) scale(.7)}}
 .coin-particle{position:absolute;animation:coinBurst .8s ease-out forwards;pointer-events:none}

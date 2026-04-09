@@ -885,8 +885,9 @@ function renderFields() {
         stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
       }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Hay Day style: big crop sprite + stage dots at top + reviews remaining badge + progress bar
+      const reviewsBadge = `<span class="plot-reviews-left">${reviewsLeft}</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div>${reviewsBadge}<div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1018,7 +1019,10 @@ function updateTabBadges() {
   let readyCount = 0;
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
-  setBadge('tab-farm', (d.mystery_boxes||[]).length);
+  // Farm badge: ready crops + mystery boxes — the most important actions
+  const readyCrops = (d.fields||[]).filter(f => f.state === 'ready').length;
+  const mysteryBoxes = (d.mystery_boxes||[]).length;
+  setBadge('tab-farm', readyCrops + mysteryBoxes);
   // Show wheel badge on achievements if free spin available
   const achBadgeCount = (document.getElementById('tab-achievements')?.querySelector('.tab-badge')?.textContent||0);
   if (d.can_spin_wheel) setBadge('tab-achievements', Math.max(parseInt(achBadgeCount)||0, 1));
@@ -1914,7 +1918,6 @@ function showPlantDialog(plotId) {
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
-  // Find the plot element and create harvest burst from it
   const field = farmData.fields?.find(f => f.id === id);
   const allPlots = document.querySelectorAll('.plot');
   const idx = (farmData.fields||[]).findIndex(f => f.id === id);
@@ -1923,12 +1926,31 @@ function harvestPlot(id){
     const rect = plotEl.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
-    // Create harvest burst particles from actual plot position
+    // Big harvest burst from actual plot
     showHarvestBurst(cx, cy, field.crop);
-    // Coin fly from plot to HUD (satisfying collection feel)
-    showCoinBurst(cx, cy, 4);
+    // Coin fly from plot to HUD
+    showCoinBurst(cx, cy, 5);
+    // Satisfying screen shake
+    screenShake(3, 200);
+    // Flash the plot gold briefly
+    plotEl.classList.add('plot-harvest-flash');
+    setTimeout(() => plotEl.classList.remove('plot-harvest-flash'), 400);
   }
   pycmd(`farm:harvest:${id}`);
+}
+function screenShake(intensity, duration) {
+  const container = document.getElementById('farm-container');
+  if (!container) return;
+  const end = Date.now() + (duration || 200);
+  const orig = container.style.transform;
+  function shake() {
+    if (Date.now() > end) { container.style.transform = orig; return; }
+    const x = (Math.random() - 0.5) * intensity * 2;
+    const y = (Math.random() - 0.5) * intensity * 2;
+    container.style.transform = `translate(${x}px, ${y}px)`;
+    requestAnimationFrame(shake);
+  }
+  shake();
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
@@ -1967,6 +1989,7 @@ function showHarvestAllBurst(n, xp) {
   if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
   showCoinBurst(cx, cy, n);
   showFloatingReward('+' + xp + ' XP', cx, cy);
+  screenShake(4, 300);
 }
 function showPlantBurst(plotEl, cropId) {
   if (!plotEl) return;
@@ -2243,36 +2266,53 @@ function showCoinBurst(x,y,n){
     setTimeout(()=>{if(coinFly.parentNode)coinFly.parentNode.removeChild(coinFly)},700);
   }
 }
+// Mini floating "+5 +3XP" that appears on every review — like Hay Day tap feedback
+function showMiniReward(x, y, coins, xp) {
+  const layer = document.getElementById('reward-layer');
+  const el = document.createElement('div');
+  el.className = 'mini-reward';
+  const coinSrc = S('ui_coin');
+  const coinIcon = coinSrc ? `<img src="${coinSrc}" width="11" height="11">` : '';
+  let parts = [];
+  if (coins > 0) parts.push(`${coinIcon}+${coins}`);
+  if (xp > 0) parts.push(`<span class="mini-xp">+${xp}XP</span>`);
+  el.innerHTML = parts.join(' ');
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  layer.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 1000);
+}
+
 function showReward(d){
   const coins = d.coins || 0;
   const xp = d.xp || 0;
   const hasItems = d.items && Object.keys(d.items).length > 0;
   const hasBox = !!d.mystery_box;
-  // Determine reward tier: normal review = subtle HUD-only feedback,
-  // good reward = small floating text, big reward = full burst
-  const isSpecial = hasItems || hasBox || coins >= 15;
   const isBig = coins >= 25 || hasBox;
+  const isSpecial = hasItems || hasBox || coins >= 15;
 
   if (coins > 0 || xp > 0) {
+    // Every review shows a small "+coins +XP" near the HUD — like Hay Day tap feedback
+    const hudEl = document.getElementById('hud-coins');
+    let cx = window.innerWidth / 2, cy = 60;
+    if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 10; }
+
     if (isBig) {
-      // Big reward: full coin burst + floating text + sound (rare, exciting)
+      // Big reward: full coin burst + floating text + sound
       const zone = document.querySelector('.zone-fields');
-      let cx = window.innerWidth/2, cy = window.innerHeight/3;
-      if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = Math.max(60, r.top + r.height/2); }
-      showFloatingReward(`+${coins}`, cx, cy);
-      showCoinBurst(cx, cy + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
+      let bx = window.innerWidth/2, by = window.innerHeight/3;
+      if (zone) { const r = zone.getBoundingClientRect(); bx = r.left + r.width/2; by = Math.max(60, r.top + r.height/2); }
+      showFloatingReward(`+${coins}`, bx, by);
+      showCoinBurst(bx, by + 15, Math.min(8, Math.max(3, Math.floor(coins / 3))));
       SoundMgr.play('coin');
-      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, cx + 30, cy + 15), 180);
-    } else if (isSpecial) {
-      // Special: small floating text near HUD, subtle sound
-      const hudEl = document.getElementById('hud-coins');
-      let cx = window.innerWidth / 2, cy = 60;
-      if (hudEl) { const r = hudEl.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.bottom + 8; }
-      showFloatingReward(`+${coins}`, cx, cy);
-      SoundMgr.play('coin');
+      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, bx + 30, by + 15), 180);
+    } else {
+      // Normal/special review: always show small floating reward near HUD
+      showMiniReward(cx, cy, coins, xp);
+      if (isSpecial) SoundMgr.play('coin');
+      // Small coin fly to HUD for every review (subtle but satisfying)
+      showCoinBurst(cx, cy, 2);
     }
-    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
-    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
   }
   // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
   if (hasItems) {
