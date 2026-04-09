@@ -202,8 +202,16 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 5. **Vente amelioree** : la notification de vente utilise maintenant le style "reward" (dore) au lieu du style neutre.
 6. **Nettoyage des champs** : `harvest_plot` et `clear_wilted` nettoient maintenant tous les champs temporaires (`_wilt_warning`, `_wilt_warned`, `_wilt_remaining`).
 
+## Ameliorations (session 15 — polish gameplay et fondations)
+1. **BUG: Events sans multipliers** : `get_farm_data()` n'envoyait que le `name` des events actifs, pas `coin_multiplier`/`xp_multiplier`. La banniere events ne pouvait jamais afficher les bonus. Corrige : envoie aussi `icon`, `coin_multiplier`, `xp_multiplier`.
+2. **Crop portrait dans notification** : quand une culture devient prete pendant les revisions, la notification inclut maintenant le portrait de la culture (PNG Hay Day) au lieu de texte seul. Plus satisfaisant visuellement.
+3. **Golden burst quand culture prete** : ajout d'une animation `plot-just-ready` spectaculaire (scale 0.7→1.2→1 avec glow dore) + coin burst quand une culture termine sa croissance pendant les revisions. Le joueur VOIT et RESSENT le moment ou sa culture est prete.
+4. **XP bar shimmer** : quand la barre XP depasse 85%, elle pulse avec un gradient dore (animation `xpAlmostLevel`). Cree l'urgence de continuer a reviser pour level-up — mecanique dopamine cle de Hay Day.
+5. **Fix: Collect All button selector** : le selecteur `querySelector('.zone-add-btn')` dans `renderWorkshop` pouvait matcher le bouton lui-meme. Corrige avec `:not(#collect-all-buildings-btn)`.
+6. **Son collect_all_buildings** : ajout de `SoundMgr.play('collect')` cote Python quand la collecte batch reussit.
+7. **Audit complet de coherence** : verification de bout en bout du game loop (review→earn→grow→harvest→produce→sell→orders→quests). Tous les `advance_quest()` sont en place pour les 7 types de quetes. Tous les bridge commands (`pycmd`) sont geres avec error handling. Les 20 crops ont leurs 5 stades PNG + portrait. Les 9 batiments ont des SVGs uniques. Les 4 animaux ont labels/sprites.
+
 ## Prochaines etapes
-- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
-- [ ] Tutoriel ameliore avec guidage contextuel
 - [ ] Systeme d'etoiles par quete (bronze/argent/or selon la performance)
+- [ ] Ameliorer le tutoriel avec guidage contextuel etape par etape

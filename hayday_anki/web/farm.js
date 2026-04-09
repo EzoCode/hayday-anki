@@ -574,6 +574,23 @@ function updateFarm(data) {
     });
     if (anyReady) {
       setTimeout(() => SoundMgr.play('harvest'), 400);
+      // Golden sparkle burst on plots that just became ready
+      const allPlotsReady = document.querySelectorAll('#fields-grid .plot');
+      newFields.forEach((f, idx) => {
+        if (f.state === 'ready' && oldGrowth[f.id]) {
+          const oldState = oldGrowth[f.id].split(':')[2];
+          if (oldState !== 'ready' && allPlotsReady[idx]) {
+            const plotEl = allPlotsReady[idx];
+            plotEl.classList.add('plot-just-ready');
+            setTimeout(() => plotEl.classList.remove('plot-just-ready'), 1500);
+            // Sparkle burst from the plot center
+            const rect = plotEl.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            showCoinBurst(cx, cy, 3);
+          }
+        }
+      });
       // Pulse the farm tab to draw attention to ready crops
       const farmTab = document.getElementById('tab-farm');
       if (farmTab) { farmTab.classList.add('tab-pulse'); setTimeout(() => farmTab.classList.remove('tab-pulse'), 2000); }
@@ -665,8 +682,11 @@ function updateHUD() {
   }
 
   const xpPct = d.xp_percent || 0;
-  document.getElementById('hud-xp-bar').style.width = xpPct + '%';
+  const xpBar = document.getElementById('hud-xp-bar');
+  xpBar.style.width = xpPct + '%';
   document.getElementById('hud-xp-text').textContent = `${d.xp_progress||0}/${d.xp_needed||20}`;
+  // Shimmer when close to leveling up (creates urgency to keep reviewing)
+  xpBar.classList.toggle('xp-almost-level', xpPct >= 85);
   if (xpPct > (_prevHud.xp_percent || 0)) {
     const xpTrack = document.querySelector('.xp-bar-track');
     if (xpTrack) { xpTrack.classList.add('xp-bar-flash'); setTimeout(() => xpTrack.classList.remove('xp-bar-flash'), 700); }
@@ -990,7 +1010,7 @@ function renderWorkshop() {
     collectAllBtn.id = 'collect-all-buildings-btn';
     collectAllBtn.className = 'zone-add-btn harvest-all-btn';
     const header = zone.querySelector('.zone-header');
-    if (header) header.insertBefore(collectAllBtn, header.querySelector('.zone-add-btn'));
+    if (header) header.insertBefore(collectAllBtn, header.querySelector('.zone-add-btn:not(#collect-all-buildings-btn)'));
   }
   if (totalReady >= 2) {
     collectAllBtn.textContent = `Tout récupérer (${totalReady})`;

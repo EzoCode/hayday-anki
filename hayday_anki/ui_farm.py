@@ -406,6 +406,7 @@ class FarmWebView:
                                 total_xp += item.get("xp", 0)
                 if total_collected:
                     names_str = ", ".join(total_collected)
+                    self._js("SoundMgr.play('collect')")
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(10, len(total_collected) * 3)})")
                     self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
                     self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")
@@ -715,7 +716,11 @@ class FarmWebView:
                 if ntype == "storage_full":
                     self._js(f"showNotification({json.dumps(msg)})")
                 elif ntype == "crop_ready":
-                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                    crop_id = notif.get("crop_id", "")
+                    if crop_id:
+                        self._js(f"showNotification(cropPortrait({json.dumps(crop_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
+                    else:
+                        self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                 elif ntype == "wilt_warning":
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                     self._js("SoundMgr.play('error')")

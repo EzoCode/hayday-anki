@@ -837,12 +837,16 @@ class FarmManager:
             crop_counts = {}
             for crop_id in newly_ready:
                 crop_name = ITEM_CATALOG.get(crop_id, {}).get("name", crop_id)
-                crop_counts[crop_name] = crop_counts.get(crop_name, 0) + 1
-            for name, count in crop_counts.items():
+                crop_counts[crop_id] = crop_counts.get(crop_id, {"name": crop_name, "count": 0})
+                crop_counts[crop_id]["count"] += 1
+            for cid, info in crop_counts.items():
+                name = info["name"]
+                count = info["count"]
                 msg = f"{name} prêt à récolter !" if count == 1 else f"{count}x {name} prêts à récolter !"
                 notifs.append({
                     "type": "crop_ready",
                     "message": msg,
+                    "crop_id": cid,
                 })
         return notifs
 
@@ -2017,7 +2021,12 @@ class FarmManager:
             "session_xp": self.state.session_xp_earned,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
             "active_events": [
-                {"name": e.get("name", "")}
+                {
+                    "name": e.get("name", ""),
+                    "icon": e.get("icon", "event_star"),
+                    "coin_multiplier": e.get("coin_multiplier", 1.0),
+                    "xp_multiplier": e.get("xp_multiplier", 1.0),
+                }
                 for e in self.state.active_events
                 if self._is_event_active(e)
             ],
