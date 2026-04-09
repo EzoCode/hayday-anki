@@ -249,6 +249,15 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "clear_all_wilted":
+                count = self.manager.clear_all_wilted()
+                if count > 0:
+                    self._js(f"showNotification({json.dumps(f'{count} parcelle(s) nettoyée(s) !')})")
+                else:
+                    self._js("showNotification('Aucune parcelle fanée !')")
+                self._send_state()
+                self.manager.save()
+
             elif action == "harvest":
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)

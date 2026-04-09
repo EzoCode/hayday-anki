@@ -707,6 +707,18 @@ function renderFields() {
     }
   }
 
+  // Show/hide clear-all-wilted button
+  const wiltedCount = fields.filter(f => f.state === 'wilted').length;
+  const clearWiltedBtn = document.getElementById('clear-wilted-btn');
+  if (clearWiltedBtn) {
+    if (wiltedCount >= 1) {
+      clearWiltedBtn.style.display = '';
+      clearWiltedBtn.textContent = `Nettoyer fanés (${wiltedCount})`;
+    } else {
+      clearWiltedBtn.style.display = 'none';
+    }
+  }
+
   // Show/hide plant-all-empty button (only if there are empty fields with last_crop)
   const emptyWithLastCrop = fields.filter(f => f.state === 'empty' && f.last_crop && (farmData.unlocked_crops||[]).includes(f.last_crop));
   const plantAllBtn = document.getElementById('plant-all-btn');
@@ -763,7 +775,8 @@ function renderFields() {
       el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 56)}</div><span class="plot-crop-name plot-ready-crop-name">${readyCropName}</span><span class="plot-label plot-ready-label">Récolter !</span>`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
-      el.innerHTML += `<div class="plot-crop" style="opacity:.4;filter:grayscale(.8)">${cropImg(field.crop, 0, 36)}</div><span class="plot-label">Fané</span>`;
+      el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
+      el.innerHTML += `<div class="plot-crop" style="opacity:.35;filter:grayscale(.85) brightness(.7)">${cropImg(field.crop, 0, 40)}</div><span class="plot-wilted-overlay"><span class="wilt-cross"></span></span><span class="plot-label">Fané</span>`;
       el.onclick = () => pycmd('farm:clear_wilted:' + field.id);
     } else {
       const stage = field.growth_stage||0, needed = field.reviews_needed||1, done = field.reviews_done||0;
@@ -861,8 +874,11 @@ function renderPastures() {
     const produceEvery = adef.produce_every_n_reviews || 10;
     const reviewsSince = p.reviews_since_last || 0;
     const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
-    const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
-    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsSince}/${produceEvery}</span>`;
+    const almostReady = progPct >= 75;
+    if (almostReady) el.classList.add('pasture-almost-ready');
+    const productIcon = almostReady ? `<span class="pasture-product-icon">${itemIcon(adef.product||'', 18)}</span>` : '';
+    const imgHtml = lbl ? `<img src="${lbl}" width="58" height="58" class="animal-lbl">` : animalImg(p.animal_type, 55);
+    el.innerHTML = `${productIcon}${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 12)} ${reviewsSince}/${produceEvery}</span>`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
   });

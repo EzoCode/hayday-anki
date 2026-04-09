@@ -913,6 +913,23 @@ class FarmManager:
         field.pop("_ready_since", None)
         return True
 
+    def clear_all_wilted(self) -> int:
+        """Clear all wilted fields. Returns count cleared."""
+        count = 0
+        for field in self.state.fields:
+            if field["state"] == "wilted":
+                last_crop = field.get("crop")
+                field["state"] = "empty"
+                field["crop"] = None
+                field["planted_at"] = None
+                field["growth_stage"] = 0
+                field["reviews_needed"] = 0
+                field["reviews_done"] = 0
+                field["last_crop"] = last_crop
+                field.pop("_ready_since", None)
+                count += 1
+        return count
+
     def plant_crop(self, plot_id: int, crop_id: str) -> bool:
         """Plant a crop on a field (identified by ID). Costs coins based on crop."""
         # Look up field by ID in the new fields list
