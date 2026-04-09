@@ -47,13 +47,11 @@ function applyHayDayAssets() {
   const coinBoxSrc = S('hayday_coin-box');
   const hudCoins = document.getElementById('hud-coins');
   if (coinBoxSrc && hudCoins) {
-    hudCoins.style.backgroundImage = `url(${coinBoxSrc})`;
-    hudCoins.style.backgroundSize = 'cover';
-    hudCoins.style.backgroundPosition = 'center';
     hudCoins.style.background = `url(${coinBoxSrc}) center/cover no-repeat`;
     hudCoins.style.border = 'none';
-    hudCoins.style.minWidth = '80px';
-    hudCoins.style.paddingLeft = '24px';
+    hudCoins.style.minWidth = '84px';
+    hudCoins.style.paddingLeft = '26px';
+    hudCoins.style.color = '#fff';
   }
   // Coin icon from sprite
   const coinSrc = S('ui_coin');
@@ -698,23 +696,28 @@ function updateHUD() {
     if (sessionReviews > 0) {
       sessionCountEl.textContent = sessionReviews;
       sessionEl.style.display = '';
+      // Visual intensity based on session length
+      sessionEl.removeAttribute('data-count');
+      if (sessionReviews >= 50) sessionEl.setAttribute('data-count', 'epic');
+      else if (sessionReviews >= 20) sessionEl.setAttribute('data-count', 'high');
       if (sessionReviews > prevSessionReviews) {
         hudBump('hud-session-reviews');
         // Session milestones — celebrate to keep momentum (Hay Day dopamine loop)
         const milestones = [
-          {n:5, msg:'5 cartes ! Bien parti !', sound:'grow', confetti:false},
-          {n:10, msg:'10 cartes ! Belle session !', sound:'collect', confetti:false},
-          {n:20, msg:'20 cartes ! En feu !', sound:'collect', confetti:false},
-          {n:30, msg:'30 cartes ! Impressionnant !', sound:'levelup', confetti:false},
-          {n:50, msg:'50 cartes ! Session légendaire !', sound:'levelup', confetti:true},
-          {n:75, msg:'75 cartes ! Tu es inarrêtable !', sound:'levelup', confetti:true},
-          {n:100, msg:'100 cartes !! Champion absolu !!', sound:'levelup', confetti:true},
+          {n:5, msg:'5 cartes ! Bien parti !', sound:'grow', confetti:false, sparkle:false},
+          {n:10, msg:'10 cartes ! Belle session !', sound:'collect', confetti:false, sparkle:false},
+          {n:20, msg:'20 cartes ! En feu !', sound:'collect', confetti:false, sparkle:true},
+          {n:30, msg:'30 cartes ! Impressionnant !', sound:'levelup', confetti:false, sparkle:true},
+          {n:50, msg:'50 cartes ! Session légendaire !', sound:'levelup', confetti:true, sparkle:true},
+          {n:75, msg:'75 cartes ! Tu es inarrêtable !', sound:'levelup', confetti:true, sparkle:true},
+          {n:100, msg:'100 cartes !! Champion absolu !!', sound:'levelup', confetti:true, sparkle:true},
         ];
         const hit = milestones.find(m => sessionReviews >= m.n && prevSessionReviews < m.n);
         if (hit) {
           showNotification(hit.msg, 'reward');
           SoundMgr.play(hit.sound);
           if (hit.confetti) createConfetti();
+          if (hit.sparkle) createSparkleRain();
         }
       }
     } else {
@@ -2708,22 +2711,7 @@ function updateTutorialStep() {
   document.getElementById('tutorial-btn').textContent = tutorialStep === TUTORIAL_STEPS - 1 ? 'Commencer !' : 'Suivant';
 }
 
-// --- Ambient Particles (floating seeds, pollen — makes farm feel alive) ---
-function startAmbientParticles() {
-  const world = document.getElementById('farm-world');
-  if (!world) return;
-  const types = ['ambient-seed', 'ambient-pollen', 'ambient-leaf'];
-  for (let i = 0; i < 8; i++) {
-    const p = document.createElement('div');
-    const type = types[Math.floor(Math.random() * types.length)];
-    p.className = `ambient-particle ${type}`;
-    p.style.left = Math.random() * 90 + 5 + '%';
-    p.style.top = Math.random() * 60 + 10 + '%';
-    p.style.animationDelay = (Math.random() * 8) + 's';
-    p.style.animationDuration = (8 + Math.random() * 10) + 's';
-    world.appendChild(p);
-  }
-}
+// (startAmbientParticles defined above — spawns particles dynamically)
 
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('tab-farm').classList.add('active');

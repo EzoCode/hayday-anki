@@ -64,62 +64,80 @@ function makeStage0(v) {
 }
 
 function makeStage1(v) {
-  // Sprout: small stem + 2 tiny leaves
+  // Sprout: small stem + 2 tiny leaves — crop-tinted tip hints at what's growing
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     ${_soil(64)}
     <ellipse cx="32" cy="52" rx="12" ry="5" fill="#a07a3a"/>
-    ${_stem(32, 52, 38, v.stem, 2)}
-    <path d="M32,42 Q26,38 22,40" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="24" cy="39" rx="5" ry="2.5" fill="${v.leaf}" transform="rotate(-15,24,39)"/>
-    <path d="M32,44 Q38,40 42,42" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="40" cy="41" rx="5" ry="2.5" fill="${v.leaf}" transform="rotate(15,40,41)"/>
-    <circle cx="32" cy="38" r="1.5" fill="#8fce6a"/>
+    ${_stem(32, 52, 36, v.stem, 2.2)}
+    <path d="M32,42 Q25,37 21,39" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
+    <ellipse cx="23" cy="38" rx="6" ry="2.8" fill="${v.leaf}" transform="rotate(-15,23,38)"/>
+    <ellipse cx="24" cy="37.5" rx="3" ry="1.5" fill="${v.leaf}" opacity=".3" transform="rotate(-15,24,37.5)"/>
+    <path d="M32,43 Q39,38 43,40" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
+    <ellipse cx="41" cy="39" rx="6" ry="2.8" fill="${v.leaf}" transform="rotate(15,41,39)"/>
+    <ellipse cx="40" cy="38.5" rx="3" ry="1.5" fill="${v.leaf}" opacity=".3" transform="rotate(15,40,38.5)"/>
+    <circle cx="32" cy="36" r="2" fill="${v.fruit}" opacity=".35"/>
+    <circle cx="32" cy="36" r="1" fill="${v.fruit}" opacity=".2"/>
   </svg>`;
 }
 
 function makeStage2(v) {
-  // Growing: medium plant with multiple leaves
+  // Growing: medium plant with multiple leaves + small forming fruit visible
+  const fy = 26 + (v.fruitY || 0) * 0.3;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     ${_soil(64)}
     <ellipse cx="32" cy="52" rx="10" ry="4" fill="#a07a3a"/>
-    ${_stem(32, 52, 26, v.stem, 2.5)}
-    <path d="M32,46 Q22,42 18,45" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="21" cy="43" rx="7" ry="3" fill="${v.leaf}" transform="rotate(-20,21,43)"/>
-    <path d="M32,46 Q42,42 46,45" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="43" cy="43" rx="7" ry="3" fill="${v.leaf}" transform="rotate(20,43,43)"/>
-    <path d="M32,38 Q24,34 20,36" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="23" cy="35" rx="6" ry="2.5" fill="${v.leaf}" opacity=".9" transform="rotate(-25,23,35)"/>
-    <path d="M32,38 Q40,34 44,36" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="41" cy="35" rx="6" ry="2.5" fill="${v.leaf}" opacity=".9" transform="rotate(25,41,35)"/>
-    <path d="M32,30 Q28,26 25,28" stroke="${v.leaf}" stroke-width="1.5" fill="none"/>
-    <ellipse cx="27" cy="27" rx="5" ry="2" fill="${v.leaf}" opacity=".8" transform="rotate(-20,27,27)"/>
-    <path d="M32,30 Q36,26 39,28" stroke="${v.leaf}" stroke-width="1.5" fill="none"/>
-    <ellipse cx="37" cy="27" rx="5" ry="2" fill="${v.leaf}" opacity=".8" transform="rotate(20,37,27)"/>
+    ${_stem(32, 52, 24, v.stem, 2.8)}
+    <path d="M32,46 Q21,41 17,44" stroke="${v.leaf}" stroke-width="2.2" fill="none"/>
+    <ellipse cx="20" cy="42" rx="8" ry="3.2" fill="${v.leaf}" transform="rotate(-20,20,42)"/>
+    <ellipse cx="21" cy="41.5" rx="4" ry="1.8" fill="${v.leaf}" opacity=".25" transform="rotate(-20,21,41.5)"/>
+    <path d="M32,46 Q43,41 47,44" stroke="${v.leaf}" stroke-width="2.2" fill="none"/>
+    <ellipse cx="44" cy="42" rx="8" ry="3.2" fill="${v.leaf}" transform="rotate(20,44,42)"/>
+    <ellipse cx="43" cy="41.5" rx="4" ry="1.8" fill="${v.leaf}" opacity=".25" transform="rotate(20,43,41.5)"/>
+    <path d="M32,38 Q23,33 19,35" stroke="${v.leaf}" stroke-width="2" fill="none"/>
+    <ellipse cx="22" cy="34" rx="7" ry="2.8" fill="${v.leaf}" opacity=".9" transform="rotate(-22,22,34)"/>
+    <path d="M32,38 Q41,33 45,35" stroke="${v.leaf}" stroke-width="2" fill="none"/>
+    <ellipse cx="42" cy="34" rx="7" ry="2.8" fill="${v.leaf}" opacity=".9" transform="rotate(22,42,34)"/>
+    <path d="M32,30 Q27,26 24,28" stroke="${v.leaf}" stroke-width="1.6" fill="none"/>
+    <ellipse cx="26" cy="27" rx="5.5" ry="2.2" fill="${v.leaf}" opacity=".8" transform="rotate(-18,26,27)"/>
+    <path d="M32,30 Q37,26 40,28" stroke="${v.leaf}" stroke-width="1.6" fill="none"/>
+    <ellipse cx="38" cy="27" rx="5.5" ry="2.2" fill="${v.leaf}" opacity=".8" transform="rotate(18,38,27)"/>
+    <!-- small forming fruit hints -->
+    <circle cx="32" cy="${fy}" r="3" fill="${v.fruit}" opacity=".4"/>
+    <circle cx="32" cy="${fy}" r="1.5" fill="${v.fruit}" opacity=".25"/>
+    <circle cx="24" cy="34" r="2" fill="${v.fruit}" opacity=".2"/>
+    <circle cx="40" cy="34" r="2" fill="${v.fruit}" opacity=".2"/>
   </svg>`;
 }
 
 function makeStage3(v) {
-  // Flowering: full plant with fruit-color buds
+  // Flowering: full plant with prominent forming fruit — player can see the crop type
+  const fy = 24 + (v.fruitY || 0) * 0.5;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     ${_soil(64)}
     <ellipse cx="32" cy="52" rx="10" ry="4" fill="#a07a3a"/>
-    ${_stem(32, 52, 20, v.stem, 3)}
-    <path d="M32,48 Q20,44 16,47" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="19" cy="45" rx="8" ry="3.2" fill="${v.leaf}" transform="rotate(-18,19,45)"/>
-    <path d="M32,48 Q44,44 48,47" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="45" cy="45" rx="8" ry="3.2" fill="${v.leaf}" transform="rotate(18,45,45)"/>
-    <path d="M32,40 Q22,36 18,38" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="21" cy="37" rx="7" ry="3" fill="${v.leaf}" transform="rotate(-22,21,37)"/>
-    <path d="M32,40 Q42,36 46,38" stroke="${v.leaf}" stroke-width="2" fill="none"/>
-    <ellipse cx="43" cy="37" rx="7" ry="3" fill="${v.leaf}" transform="rotate(22,43,37)"/>
-    <path d="M32,32 Q26,28 22,30" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="25" cy="29" rx="6" ry="2.5" fill="${v.leaf}" opacity=".9" transform="rotate(-18,25,29)"/>
-    <path d="M32,32 Q38,28 42,30" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
-    <ellipse cx="39" cy="29" rx="6" ry="2.5" fill="${v.leaf}" opacity=".9" transform="rotate(18,39,29)"/>
-    <!-- buds -->
-    <circle cx="20" cy="36" r="3" fill="${v.fruit}" opacity=".5"/>
-    <circle cx="44" cy="36" r="3" fill="${v.fruit}" opacity=".5"/>
-    <circle cx="32" cy="22" r="3.5" fill="${v.fruit}" opacity=".6"/>
+    ${_stem(32, 52, 18, v.stem, 3)}
+    <path d="M32,48 Q19,43 15,46" stroke="${v.leaf}" stroke-width="2.2" fill="none"/>
+    <ellipse cx="18" cy="44" rx="9" ry="3.5" fill="${v.leaf}" transform="rotate(-18,18,44)"/>
+    <ellipse cx="19" cy="43.5" rx="4.5" ry="2" fill="${v.leaf}" opacity=".2" transform="rotate(-18,19,43.5)"/>
+    <path d="M32,48 Q45,43 49,46" stroke="${v.leaf}" stroke-width="2.2" fill="none"/>
+    <ellipse cx="46" cy="44" rx="9" ry="3.5" fill="${v.leaf}" transform="rotate(18,46,44)"/>
+    <ellipse cx="45" cy="43.5" rx="4.5" ry="2" fill="${v.leaf}" opacity=".2" transform="rotate(18,45,43.5)"/>
+    <path d="M32,40 Q21,35 17,37" stroke="${v.leaf}" stroke-width="2" fill="none"/>
+    <ellipse cx="20" cy="36" rx="7.5" ry="3" fill="${v.leaf}" transform="rotate(-22,20,36)"/>
+    <path d="M32,40 Q43,35 47,37" stroke="${v.leaf}" stroke-width="2" fill="none"/>
+    <ellipse cx="44" cy="36" rx="7.5" ry="3" fill="${v.leaf}" transform="rotate(22,44,36)"/>
+    <path d="M32,32 Q25,27 21,29" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
+    <ellipse cx="24" cy="28" rx="6.5" ry="2.8" fill="${v.leaf}" opacity=".9" transform="rotate(-18,24,28)"/>
+    <path d="M32,32 Q39,27 43,29" stroke="${v.leaf}" stroke-width="1.8" fill="none"/>
+    <ellipse cx="40" cy="28" rx="6.5" ry="2.8" fill="${v.leaf}" opacity=".9" transform="rotate(18,40,28)"/>
+    <!-- forming fruit — larger, more visible to build anticipation -->
+    <circle cx="21" cy="35" r="4" fill="${v.fruit}" opacity=".55"/>
+    <circle cx="21" cy="34.5" r="1.5" fill="${v.fruitDk}" opacity=".2"/>
+    <circle cx="43" cy="35" r="4" fill="${v.fruit}" opacity=".55"/>
+    <circle cx="43" cy="34.5" r="1.5" fill="${v.fruitDk}" opacity=".2"/>
+    <circle cx="32" cy="${fy}" r="5" fill="${v.fruit}" opacity=".65"/>
+    <circle cx="31" cy="${fy-1}" r="2" fill="#fff" opacity=".15"/>
+    <circle cx="32" cy="${fy}" r="2.5" fill="${v.fruitDk}" opacity=".15"/>
   </svg>`;
 }
 
@@ -254,8 +272,10 @@ function makeStage4(v) {
 }
 
 function makePortrait(v) {
+  // Portrait: fruit centered with subtle shadow and highlight for shop/inventory
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-    ${_fruitSvg(v, 16, 16, 6)}
+    <ellipse cx="16" cy="28" rx="8" ry="2" fill="#000" opacity=".08"/>
+    ${_fruitSvg(v, 16, 15, 6)}
   </svg>`;
 }
 

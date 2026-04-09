@@ -1232,4 +1232,20 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   justify-content: center;
 }
 
+/* ===== SESSION REVIEW COUNTER INTENSITY ===== */
+/* Counter gets more vibrant as session grows — builds momentum feeling */
+.hud-session-reviews[data-count="high"] {
+  border-color: rgba(255,152,0,.4) !important;
+  background: linear-gradient(135deg,rgba(255,152,0,.25),rgba(0,0,0,.35)) !important;
+}
+.hud-session-reviews[data-count="epic"] {
+  border-color: rgba(255,215,0,.5) !important;
+  background: linear-gradient(135deg,rgba(255,215,0,.3),rgba(0,0,0,.35)) !important;
+  animation: epicSession 2s ease-in-out infinite;
+}
+@keyframes epicSession {
+  0%,100% { box-shadow: 0 0 4px rgba(255,215,0,.2); }
+  50% { box-shadow: 0 0 12px rgba(255,215,0,.5); }
+}
+
 .hidden{display:none!important}
