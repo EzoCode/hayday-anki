@@ -1153,6 +1153,10 @@ const ITEM_INFO = {
   melon: {desc: 'Gros fruit juteux. Pousse lentement (12 reviews/stade) mais vaut cher.', usage: 'Vendre ou Tarte au melon'},
   grapes: {desc: 'Raisin sucré. Fait de la confiture ! Pousse en 11 reviews/stade.', usage: 'Vendre ou Confiture de raisin'},
   coffee: {desc: 'Grain précieux. Le plus cher des cultures ! Pousse lentement (14 reviews/stade).', usage: 'Vendre'},
+  tulip: {desc: 'Fleur élégante. Pousse en 7 reviews/stade. Belle et rentable !', usage: 'Vendre'},
+  rose: {desc: 'La reine des fleurs. Pousse en 12 reviews/stade. Se vend cher !', usage: 'Vendre'},
+  avocado: {desc: 'Fruit tendance et nutritif. Pousse lentement (13 reviews/stade) mais très rentable.', usage: 'Vendre'},
+  cassava: {desc: 'Tubercule tropical robuste. Pousse en 15 reviews/stade. Bonne récolte !', usage: 'Vendre'},
   // Animal products
   milk: {desc: 'Produit par les vaches (1 par vache tous les 10 reviews). Transformable en beurre, fromage, crème.', usage: 'Vendre ou Beurre/Fromage/Crème'},
   egg: {desc: 'Pondu par les poules (1 par poule tous les 8 reviews). Ingrédient des cookies et gâteaux.', usage: 'Vendre ou Cookie/Gâteau'},
@@ -1826,15 +1830,87 @@ function getAchCategoryIcon(cat) {
 }
 function updateAchievements(achs){const list=document.getElementById('achievements-list');list.innerHTML='';const gemSrc=S('ui_gem');(achs||[]).forEach(a=>{const card=document.createElement('div');card.className=`achievement-card ${a.unlocked?'unlocked':'locked'}`;const pct=Math.min(100,a.progress_pct||0);const achCatIcon=getAchCategoryIcon(a.category);card.innerHTML=`<span class="achievement-icon"><img src="${achCatIcon}" width="24" height="24" style="object-fit:contain"></span><div class="achievement-info"><h4>${a.name} <span class="achievement-tier tier-${a.tier}">${a.tier}</span></h4><p>${a.description}</p>${!a.unlocked?`<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div><p style="font-size:8px;color:#aaa;margin-top:2px">${a.current}/${a.target}</p>`:`<p style="font-size:8px;color:#4caf50">${LANG.done}</p>`}</div>${a.gems>0?`<span class="achievement-gem-reward">${gemSrc?`<img src="${gemSrc}" width="12" height="12" style="vertical-align:middle">`:''} ${a.gems}</span>`:''}`;list.appendChild(card)})}
 
-function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;const choices=document.getElementById('crop-choices');choices.innerHTML='';
+function showPlantDialog(plotId) {
+  SoundMgr.play('click');
+  plantingPlotId = plotId;
+  const choices = document.getElementById('crop-choices');
+  choices.innerHTML = '';
+
   // Count how many fields are currently growing each crop
   const growingCounts = {};
-  (farmData.fields||[]).forEach(f => {
+  (farmData.fields || []).forEach(f => {
     if (f.crop && f.state !== 'empty' && f.state !== 'wilted') {
-      growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
+      growingCounts[f.crop] = (growingCounts[f.crop] || 0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}const plotIdx=(farmData.fields||[]).findIndex(f=>f.id===plotId);const plotEl=document.querySelectorAll('#fields-grid .plot')[plotIdx];showPlantBurst(plotEl,id);pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+
+  const coins = farmData.coins || 0;
+
+  (farmData.unlocked_crops || []).forEach(id => {
+    const name = cropName(id);
+    const def = (farmData.crop_defs || {})[id] || {};
+    const gr = def.growth_reviews || 3;
+    const totalReviews = gr * 4;
+    const sellPrice = def.sell_price || 2;
+    const harvestMin = def.harvest_min || 2;
+    const harvestMax = def.harvest_max || 4;
+    const xpPerHarvest = def.xp_per_harvest || 3;
+    const plantCost = def.plant_cost || 0;
+    const stock = (farmData.inventory || {})[id] || 0;
+    const growing = growingCounts[id] || 0;
+    const canAfford = coins >= plantCost;
+    const avgYield = Math.round((harvestMin + harvestMax) / 2);
+    const profit = avgYield * sellPrice - plantCost;
+
+    const el = document.createElement('div');
+    el.className = 'crop-choice';
+    if (!canAfford) el.classList.add('crop-choice-locked');
+
+    el.onclick = () => {
+      if (!canAfford) {
+        showNotification(`Pas assez de pièces (${plantCost} requis)`);
+        return;
+      }
+      const plotIdx = (farmData.fields || []).findIndex(f => f.id === plotId);
+      const plotEl = document.querySelectorAll('#fields-grid .plot')[plotIdx];
+      showPlantBurst(plotEl, id);
+      pycmd(`farm:plant:${plotId}:${id}`);
+      hideOverlay();
+      SoundMgr.play('plant');
+    };
+
+    // Cost badge
+    const costHtml = plantCost > 0
+      ? `<span class="crop-cost-badge">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="10" height="10">` : ''} ${plantCost}</span>`
+      : `<span class="crop-cost-badge free">Gratuit</span>`;
+
+    // Stats badges
+    const reviewsBadge = `<span class="crop-reviews-badge">${totalReviews} rev.</span>`;
+    const priceBadge = `<span class="crop-price-badge">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="9" height="9">` : ''} ${sellPrice}/u</span>`;
+
+    // Info row (stock, growing, yield)
+    let infoParts = [];
+    if (stock > 0) infoParts.push(`${stock} en stock`);
+    if (growing > 0) infoParts.push(`${growing} en culture`);
+    const infoLine = infoParts.length > 0 ? `<span class="crop-extra-info">${infoParts.join(' · ')}</span>` : '';
+
+    el.innerHTML = `
+      <div class="crop-choice-icon">${cropPortrait(id, 52) || itemIcon(id, 52)}</div>
+      <strong class="crop-choice-name">${name}</strong>
+      ${costHtml}
+      <div class="crop-choice-stats">
+        ${reviewsBadge}
+        ${priceBadge}
+      </div>
+      <div class="crop-yield-info">
+        ${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>
+      </div>
+      ${infoLine}
+    `;
+    choices.appendChild(el);
+  });
+  document.getElementById('plant-overlay').classList.remove('hidden');
+}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
@@ -1985,8 +2061,16 @@ function showSellDialog(id, qty) {
   // Confirm button
   const confirmBtn = document.createElement('button');
   confirmBtn.className = 'sell-confirm-btn';
-  confirmBtn.textContent = 'Vendre !';
-  confirmBtn.onclick = () => { pycmd(`farm:sell:${_sellState.id}:${_sellState.qty}`); hideOverlay(); SoundMgr.play('coin'); };
+  confirmBtn.id = 'sell-confirm-btn';
+  confirmBtn.innerHTML = `Vendre ${_sellState.qty > 1 ? 'x' + _sellState.qty : ''} !`;
+  confirmBtn.onclick = () => {
+    pycmd(`farm:sell:${_sellState.id}:${_sellState.qty}`);
+    hideOverlay();
+    SoundMgr.play('coin');
+    // Show coin burst from center
+    const rect = confirmBtn.getBoundingClientRect();
+    showCoinBurst(rect.left + rect.width / 2, rect.top, 6);
+  };
   btns.appendChild(confirmBtn);
 
   overlay.classList.remove('hidden');
@@ -2003,11 +2087,18 @@ function _sellAdjust(delta) {
 function _updateSellPreview() {
   const numEl = document.getElementById('sell-qty-num');
   const totalEl = document.getElementById('sell-total-coins');
+  const btnEl = document.getElementById('sell-confirm-btn');
   if (numEl) numEl.textContent = _sellState.qty;
   if (totalEl) {
     const coinIconHtml = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20">` : '<span class="css-coin" style="width:18px;height:18px"></span>';
     totalEl.innerHTML = `${coinIconHtml} ${_sellState.qty * _sellState.price}`;
   }
+  if (btnEl) btnEl.innerHTML = `Vendre ${_sellState.qty > 1 ? 'x' + _sellState.qty : ''} !`;
+  // Update quick buttons active state
+  document.querySelectorAll('.sell-quick-btn').forEach(btn => {
+    const n = parseInt(btn.textContent.replace(/[^0-9]/g, ''), 10);
+    btn.classList.toggle('active', n === _sellState.qty);
+  });
   document.querySelectorAll('.sell-quick-btn').forEach(btn => {
     const match = btn.textContent.match(/\d+/);
     const n = match ? parseInt(match[0]) : 0;
@@ -2205,15 +2296,109 @@ function showReward(d){
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}
 function updateBuildingDetail(data){if(data&&data.recipes)showProductionDialog(data);else if(currentPanel==='buildings')renderBuildingsPanel()}
-function showProductionDialog(data){
+function showProductionDialog(data) {
   const bldIcon = buildingIcon(data.building_id, 22);
-  document.getElementById('production-title').innerHTML = `${bldIcon ? bldIcon + ' ' : ''}${data.building_name||'Production'}`;
-  const list=document.getElementById('production-recipes');list.innerHTML='';
-  const queue=data.queue||[];
-  if(queue.length>0){const qd=document.createElement('div');qd.innerHTML=`<h3>${LANG.in_progress}</h3>`;queue.forEach(q=>{const pct=Math.min(100,((q.sessions_waited||0)/Math.max(1,q.sessions_required||1))*100);const reviewsDone=(q.sessions_waited||0)*10;const reviewsTotal=(q.sessions_required||1)*10;const s=document.createElement('div');s.className=`production-queue-item ${q.ready?'ready':''}`;s.innerHTML=`<span class="pq-emoji">${itemIcon(q.recipe_id||'',24)}</span><div class="pq-info"><strong>${q.name}</strong><span>${q.ready?LANG.ready:reviewsDone+'/'+reviewsTotal+' rev.'}</span></div>${!q.ready?`<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`:'<span class="pq-ready-badge"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Ccircle cx=\'8\' cy=\'8\' r=\'7\' fill=\'%234caf50\'/%3E%3Cpath d=\'M4.5 8l2.5 2.5 4.5-5\' stroke=\'%23fff\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E" width="18" height="18"></span>'}`;qd.appendChild(s)});if(queue.some(q=>q.ready)){const btn=document.createElement('button');btn.className='action-btn';btn.textContent=LANG.collect_all;btn.style.marginTop='6px';btn.onclick=()=>{pycmd(`farm:collect:${data.building_id}`);hideOverlay();SoundMgr.play('collect')};qd.appendChild(btn)}list.appendChild(qd)}
-  const rd=document.createElement('div');rd.innerHTML=`<h3>${LANG.recipes}</h3>`;
-  (data.recipes||[]).forEach(r=>{const c=document.createElement('div');c.className=`recipe-card ${r.can_craft?'':'disabled'}`;let ing='';Object.entries(r.ingredients||{}).forEach(([id,qty])=>{const have=(farmData.inventory||{})[id]||0;ing+=`<span class="recipe-ingredient ${have>=qty?'has':'need'}">${itemIcon(id,14)} ${itemName(id)} ${have}/${qty}</span>`});const reviewsNeeded=(r.sessions_required||1)*10;c.innerHTML=`<div class="recipe-header"><span class="recipe-emoji">${itemIcon(r.id,28)}</span><div class="recipe-info"><strong>${r.name}</strong><span class="recipe-time">${reviewsNeeded} rev. | +${r.xp} XP</span></div></div><div class="recipe-ingredients">${ing}</div>${r.reason&&!r.can_craft?`<span style="font-size:8px;color:#c62828">${r.reason}</span>`:''}`;if(r.can_craft)c.onclick=()=>{pycmd(`farm:start_production:${data.building_id}:${r.id}`);hideOverlay();SoundMgr.play('click')};rd.appendChild(c)});
-  list.appendChild(rd);document.getElementById('production-overlay').classList.remove('hidden');
+  document.getElementById('production-title').innerHTML =
+    `${bldIcon ? bldIcon + ' ' : ''}${data.building_name || 'Production'}`;
+
+  const list = document.getElementById('production-recipes');
+  list.innerHTML = '';
+
+  // --- Production Queue ---
+  const queue = data.queue || [];
+  if (queue.length > 0) {
+    const qd = document.createElement('div');
+    qd.className = 'production-section';
+    qd.innerHTML = `<h3>${LANG.in_progress}</h3>`;
+
+    queue.forEach(q => {
+      const pct = Math.min(100, ((q.sessions_waited || 0) / Math.max(1, q.sessions_required || 1)) * 100);
+      const reviewsDone = (q.sessions_waited || 0) * 10;
+      const reviewsTotal = (q.sessions_required || 1) * 10;
+
+      const s = document.createElement('div');
+      s.className = `production-queue-item ${q.ready ? 'ready' : ''}`;
+
+      const checkSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%234caf50'/%3E%3Cpath d='M4.5 8l2.5 2.5 4.5-5' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+
+      const progressHtml = !q.ready
+        ? `<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`
+        : `<span class="pq-ready-badge"><img src="${checkSvg}" width="18" height="18"></span>`;
+
+      s.innerHTML = `
+        <span class="pq-emoji">${itemIcon(q.recipe_id || '', 28)}</span>
+        <div class="pq-info">
+          <strong>${q.name}</strong>
+          <span>${q.ready ? LANG.ready : reviewsDone + '/' + reviewsTotal + ' rev.'}</span>
+        </div>
+        ${progressHtml}
+      `;
+      qd.appendChild(s);
+    });
+
+    // Collect all button
+    if (queue.some(q => q.ready)) {
+      const btn = document.createElement('button');
+      btn.className = 'action-btn';
+      btn.textContent = LANG.collect_all;
+      btn.style.marginTop = '8px';
+      btn.onclick = () => {
+        pycmd(`farm:collect:${data.building_id}`);
+        hideOverlay();
+        SoundMgr.play('collect');
+      };
+      qd.appendChild(btn);
+    }
+    list.appendChild(qd);
+  }
+
+  // --- Recipes ---
+  const rd = document.createElement('div');
+  rd.className = 'production-section';
+  rd.innerHTML = `<h3>${LANG.recipes}</h3>`;
+
+  (data.recipes || []).forEach(r => {
+    const c = document.createElement('div');
+    c.className = `recipe-card ${r.can_craft ? '' : 'disabled'}`;
+
+    // Ingredients list
+    let ingHtml = '';
+    Object.entries(r.ingredients || {}).forEach(([id, qty]) => {
+      const have = (farmData.inventory || {})[id] || 0;
+      const enough = have >= qty;
+      ingHtml += `<span class="recipe-ingredient ${enough ? 'has' : 'need'}">
+        ${itemIcon(id, 16)} ${itemName(id)} <b>${have}/${qty}</b>
+      </span>`;
+    });
+
+    const reviewsNeeded = (r.sessions_required || 1) * 10;
+    const sellPrice = ((farmData.item_catalog || {})[r.id] || {}).sell_price || 0;
+    const priceHtml = sellPrice > 0 ? `<span class="recipe-sell-price">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="10" height="10">` : ''} ${sellPrice}</span>` : '';
+
+    c.innerHTML = `
+      <div class="recipe-header">
+        <span class="recipe-emoji">${itemIcon(r.id, 32)}</span>
+        <div class="recipe-info">
+          <strong>${r.name}</strong>
+          <span class="recipe-time">${reviewsNeeded} rev. · +${r.xp} XP ${priceHtml}</span>
+        </div>
+      </div>
+      <div class="recipe-ingredients">${ingHtml}</div>
+      ${r.reason && !r.can_craft ? `<span class="recipe-reason">${r.reason}</span>` : ''}
+    `;
+
+    if (r.can_craft) {
+      c.onclick = () => {
+        pycmd(`farm:start_production:${data.building_id}:${r.id}`);
+        hideOverlay();
+        SoundMgr.play('click');
+      };
+    }
+    rd.appendChild(c);
+  });
+
+  list.appendChild(rd);
+  document.getElementById('production-overlay').classList.remove('hidden');
 }
 
 function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000)return Math.round(n/1000)+'k';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}

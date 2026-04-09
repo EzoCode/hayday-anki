@@ -240,6 +240,9 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "building", "id": "dairy", "name": "Laiterie"},
         {"type": "plots", "count": 2, "id": "plots_25", "name": "+2 Parcelles"},
     ],
+    28: [
+        {"type": "crop", "id": "tulip", "name": "Tulipe"},
+    ],
     30: [
         {"type": "crop", "id": "orange", "name": "Orange"},
         {"type": "animal", "id": "pig", "name": "Cochon"},
@@ -262,6 +265,9 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "crop", "id": "grapes", "name": "Raisin"},
         {"type": "building", "id": "jam_maker", "name": "Confiturerie"},
     ],
+    48: [
+        {"type": "crop", "id": "rose", "name": "Rose"},
+    ],
     50: [
         {"type": "building", "id": "pizzeria", "name": "Pizzeria"},
         {"type": "plots", "count": 2, "id": "plots_50", "name": "+2 Parcelles"},
@@ -274,9 +280,15 @@ UNLOCK_TABLE: Dict[int, List[Dict]] = {
         {"type": "animal", "id": "sheep", "name": "Mouton"},
         {"type": "plots", "count": 1, "id": "plots_60", "name": "+1 Parcelle"},
     ],
+    65: [
+        {"type": "crop", "id": "avocado", "name": "Avocat"},
+    ],
     70: [
         {"type": "building", "id": "pie_oven", "name": "Four à tartes"},
         {"type": "plots", "count": 1, "id": "plots_70", "name": "+1 Parcelle"},
+    ],
+    75: [
+        {"type": "crop", "id": "cassava", "name": "Manioc"},
     ],
     80: [
         {"type": "plots", "count": 1, "id": "plots_80", "name": "+1 Parcelle"},
@@ -481,6 +493,46 @@ CROP_DEFINITIONS = {
         "sell_price": 12,
         "xp_per_harvest": 14,
         "plant_cost": 8,
+    },
+    "tulip": {
+        "name": "Tulipe",
+        "unlock_level": 28,
+        "growth_reviews": 7,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 7,
+        "xp_per_harvest": 7,
+        "plant_cost": 4,
+    },
+    "rose": {
+        "name": "Rose",
+        "unlock_level": 48,
+        "growth_reviews": 12,
+        "harvest_min": 1,
+        "harvest_max": 3,
+        "sell_price": 11,
+        "xp_per_harvest": 12,
+        "plant_cost": 7,
+    },
+    "avocado": {
+        "name": "Avocat",
+        "unlock_level": 65,
+        "growth_reviews": 13,
+        "harvest_min": 1,
+        "harvest_max": 2,
+        "sell_price": 14,
+        "xp_per_harvest": 15,
+        "plant_cost": 9,
+    },
+    "cassava": {
+        "name": "Manioc",
+        "unlock_level": 75,
+        "growth_reviews": 15,
+        "harvest_min": 2,
+        "harvest_max": 4,
+        "sell_price": 13,
+        "xp_per_harvest": 16,
+        "plant_cost": 10,
     },
 }
 

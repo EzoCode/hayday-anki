@@ -23,6 +23,10 @@ const CROP_VISUALS = {
   melon:      { fruit: '#6aaf4c', fruitDk: '#3d8c2a', leaf: '#5da33a', stem: '#4a8c32', fruitShape: 'melon',   fruitY: 4,  portrait: 'melon' },
   grapes:     { fruit: '#8e44ad', fruitDk: '#6c3483', leaf: '#5da33a', stem: '#6b4226', fruitShape: 'cluster', fruitY: 0,  portrait: 'cluster' },
   coffee:     { fruit: '#c0392b', fruitDk: '#922b21', leaf: '#3d7a28', stem: '#6b4226', fruitShape: 'cherry',  fruitY: -2, portrait: 'cherry' },
+  tulip:      { fruit: '#e91e63', fruitDk: '#c2185b', leaf: '#5da33a', stem: '#4a8c32', fruitShape: 'flower',  fruitY: -8, portrait: 'flower' },
+  rose:       { fruit: '#e53935', fruitDk: '#b71c1c', leaf: '#388e3c', stem: '#2e7d32', fruitShape: 'flower',  fruitY: -8, portrait: 'flower' },
+  avocado:    { fruit: '#558b2f', fruitDk: '#33691e', leaf: '#4a8c32', stem: '#5a9d3a', fruitShape: 'oval',    fruitY: 0,  portrait: 'oval' },
+  cassava:    { fruit: '#a1887f', fruitDk: '#795548', leaf: '#5da33a', stem: '#4a8c32', fruitShape: 'tuber',   fruitY: 8,  portrait: 'tuber' },
 };
 
 function _svgUri(svg) {

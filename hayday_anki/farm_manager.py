@@ -42,6 +42,10 @@ ITEM_CATALOG = {
     "melon": {"name": "Melon", "category": "crop", "sell_price": 8, "xp": 5},
     "grapes": {"name": "Raisin", "category": "crop", "sell_price": 9, "xp": 5},
     "coffee": {"name": "Café", "category": "crop", "sell_price": 12, "xp": 7},
+    "tulip": {"name": "Tulipe", "category": "crop", "sell_price": 7, "xp": 7},
+    "rose": {"name": "Rose", "category": "crop", "sell_price": 11, "xp": 12},
+    "avocado": {"name": "Avocat", "category": "crop", "sell_price": 14, "xp": 15},
+    "cassava": {"name": "Manioc", "category": "crop", "sell_price": 13, "xp": 16},
 
     # Animal products
     "milk": {"name": "Lait", "category": "animal_product", "sell_price": 8, "xp": 4},
