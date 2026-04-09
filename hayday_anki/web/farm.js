@@ -11,6 +11,7 @@ let plantingPlotId = null;
 let currentBoxIndex = null;
 let wheelSpinning = false;
 let notificationsEnabled = true;
+const _almostReadyNotified = new Set(); // Track which plots already showed "almost ready" notification
 
 // Called once on page load — caches static definitions that never change
 function initDefs(defs) {
@@ -580,7 +581,7 @@ function updateFarm(data) {
       if (farmTab) { farmTab.classList.add('tab-pulse'); setTimeout(() => farmTab.classList.remove('tab-pulse'), 2000); }
     }
     else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
-    // Check if any crop is close to harvest (90%+ progress) — tease the player
+    // Check if any crop is close to harvest (90%+ progress) — tease the player (once per crop)
     newFields.forEach((f, idx) => {
       if (f.state === 'growing' || f.state === 'planted') {
         const cropDef = (farmData.crop_defs||{})[f.crop]||{};
@@ -594,11 +595,14 @@ function updateFarm(data) {
           const oldDone = parseInt(parts[1]) || 0;
           return (oldStage * rps + oldDone) / totalN;
         })() : 0;
-        if (pct >= 0.9 && wasClose < 0.9) {
+        if (pct >= 0.9 && wasClose < 0.9 && !_almostReadyNotified.has(f.id)) {
+          _almostReadyNotified.add(f.id);
           const cName = cropName(f.crop);
           setTimeout(() => showNotification(`${cropPortrait(f.crop,14)||''} ${cName} presque prêt !`, 'reward'), 600);
         }
       }
+      // Clear tracking when plot becomes ready or empty (so re-planted crops can re-notify)
+      if (f.state === 'ready' || f.state === 'empty') _almostReadyNotified.delete(f.id);
     });
   }
   if (currentPanel) {
@@ -683,7 +687,8 @@ function updateHUD() {
   else gemEl.textContent = formatNum(newGems);
   if (newStreak !== _prevHud.streak && _prevHud.streak > 0) { streakCountEl.textContent = newStreak; hudBump('hud-streak'); }
   else streakCountEl.textContent = newStreak;
-  _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct };
+  const prevSessionReviews = _prevHud.sessionReviews || 0;
+  _prevHud = { coins: newCoins, gems: newGems, streak: newStreak, level: newLevel, xp_percent: xpPct, sessionReviews: prevSessionReviews };
 
   // Session review counter — shows during active review sessions
   const sessionReviews = d.session_reviews || 0;
@@ -693,26 +698,23 @@ function updateHUD() {
     if (sessionReviews > 0) {
       sessionCountEl.textContent = sessionReviews;
       sessionEl.style.display = '';
-      const prev = _prevHud.sessionReviews || 0;
-      if (sessionReviews > prev) {
+      if (sessionReviews > prevSessionReviews) {
         hudBump('hud-session-reviews');
         // Session milestones — celebrate to keep momentum (Hay Day dopamine loop)
-        if (sessionReviews > prev) {
-          const milestones = [
-            {n:5, msg:'5 cartes ! Bien parti !', sound:'grow', confetti:false},
-            {n:10, msg:'10 cartes ! Belle session !', sound:'collect', confetti:false},
-            {n:20, msg:'20 cartes ! En feu !', sound:'collect', confetti:false},
-            {n:30, msg:'30 cartes ! Impressionnant !', sound:'levelup', confetti:false},
-            {n:50, msg:'50 cartes ! Session légendaire !', sound:'levelup', confetti:true},
-            {n:75, msg:'75 cartes ! Tu es inarrêtable !', sound:'levelup', confetti:true},
-            {n:100, msg:'100 cartes !! Champion absolu !!', sound:'levelup', confetti:true},
-          ];
-          const hit = milestones.find(m => sessionReviews >= m.n && prev < m.n);
-          if (hit) {
-            showNotification(hit.msg, 'reward');
-            SoundMgr.play(hit.sound);
-            if (hit.confetti) createConfetti();
-          }
+        const milestones = [
+          {n:5, msg:'5 cartes ! Bien parti !', sound:'grow', confetti:false},
+          {n:10, msg:'10 cartes ! Belle session !', sound:'collect', confetti:false},
+          {n:20, msg:'20 cartes ! En feu !', sound:'collect', confetti:false},
+          {n:30, msg:'30 cartes ! Impressionnant !', sound:'levelup', confetti:false},
+          {n:50, msg:'50 cartes ! Session légendaire !', sound:'levelup', confetti:true},
+          {n:75, msg:'75 cartes ! Tu es inarrêtable !', sound:'levelup', confetti:true},
+          {n:100, msg:'100 cartes !! Champion absolu !!', sound:'levelup', confetti:true},
+        ];
+        const hit = milestones.find(m => sessionReviews >= m.n && prevSessionReviews < m.n);
+        if (hit) {
+          showNotification(hit.msg, 'reward');
+          SoundMgr.play(hit.sound);
+          if (hit.confetti) createConfetti();
         }
       }
     } else {
@@ -936,15 +938,18 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      // Hay Day style: crop grows visually bigger through stages, clean & uncluttered
+      // Hay Day style: crop grows visually bigger through stages
       const cropSize = 30 + stage * 12; // 30px at seed → 66px at stage 3
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
       // Almost-ready visual hint (like Hay Day subtle glow when crop is close)
       if (pct >= 75) el.classList.add('plot-almost-ready');
-      // Clean: just the crop sprite + thin progress bar at bottom. Info on tap.
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Crop sprite + name label + reviews-left pill + progress bar
+      const revsPill = reviewsLeft <= 3
+        ? `<span class="plot-revs-pill plot-revs-soon">${reviewsLeft}</span>`
+        : `<span class="plot-revs-pill">${reviewsLeft}</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}<div class="plot-crop-name"><span>${cName}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showCropDetail(field);
     }
     grid.appendChild(el);
@@ -959,11 +964,7 @@ function renderWorkshop() {
   const placed = farmData.placed_buildings || [];
   const zone = document.getElementById('zone-workshop');
 
-  if (placed.length === 0 && (farmData.unlocked_buildings||[]).length === 0) {
-    zone.style.display = 'none';
-    return;
-  }
-
+  // Always show workshop zone — show what's coming even if nothing unlocked yet
   // Count total ready products across all buildings for Collect All button
   let totalReady = 0;
   const readyBuildings = [];
@@ -995,8 +996,9 @@ function renderWorkshop() {
     const barnSpr = S('hayday_barn');
     const barnIcon = barnSpr ? `<img src="${barnSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
     const nextBld = ALL_BUILDINGS.find(b => (farmData.unlocked_buildings||[]).includes(b.id));
-    const hint = nextBld ? ` Clique "+ Construire" !` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${barnIcon}Construis ton premier bâtiment pour transformer tes récoltes !${hint}</div>`;
+    const nextBldLocked = ALL_BUILDINGS.find(b => !(farmData.unlocked_buildings||[]).includes(b.id));
+    const hint = nextBld ? ` Clique "+ Construire" !` : nextBldLocked ? ` Débloqué au niveau ${nextBldLocked.lvl} !` : '';
+    grid.innerHTML = `<div class="zone-empty-msg">${barnIcon}Construis des bâtiments pour transformer tes récoltes en produits de valeur !${hint}</div>`;
     return;
   }
 
@@ -1047,16 +1049,16 @@ function renderPastures() {
   const pastures = farmData.pastures || [];
   const zone = document.getElementById('zone-pasture');
 
-  if (pastures.length === 0 && (farmData.unlocked_animals||[]).length === 0) {
-    zone.style.display = 'none';
-    return;
-  }
+  // Always show pasture zone — show what's coming
   zone.style.display = '';
 
   if (pastures.length === 0) {
     const cowSpr = S('hayday_cow') || S('animals_cow');
     const cowIcon = cowSpr ? `<img src="${cowSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${cowIcon}Adopte ton premier animal pour produire lait, oeufs et plus !</div>`;
+    const nextAnimal = ALL_ANIMALS.find(a => (farmData.unlocked_animals||[]).includes(a.id));
+    const nextLocked = ALL_ANIMALS.find(a => !(farmData.unlocked_animals||[]).includes(a.id));
+    const hint = nextAnimal ? ` Clique "+ Enclos" !` : nextLocked ? ` Premier animal au niveau ${nextLocked.lvl} !` : '';
+    grid.innerHTML = `<div class="zone-empty-msg">${cowIcon}Adopte des animaux pour produire lait, œufs et laine !${hint}</div>`;
     return;
   }
 
@@ -1166,11 +1168,15 @@ function renderVillage() {
   const decos = farmData.decorations || [];
   const zone = document.getElementById('zone-village');
 
+  // Always show village zone — invite player to decorate
+  zone.style.display = '';
+
   if (decos.length === 0) {
-    zone.style.display = 'none';
+    const scarecrowSpr = S('hayday_scarecrow');
+    const scarecrowIcon = scarecrowSpr ? `<img src="${scarecrowSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
+    grid.innerHTML = `<div class="zone-empty-msg">${scarecrowIcon}Décore ton village ! Visite la boutique pour acheter des décorations.</div>`;
     return;
   }
-  zone.style.display = '';
 
   decos.forEach(deco => {
     const decoDef = (farmData.deco_defs||{})[deco.type] || {};
@@ -1501,13 +1507,14 @@ let currentWeather = null;
 function updateWeather() {
   const now = new Date();
   const hour = now.getHours();
+  const min = now.getMinutes();
   let weather = 'day';
   if (hour >= 21 || hour < 6) weather = 'night';
-  else if (hour >= 18) weather = 'sunset';
-  else if (hour >= 6 && hour < 8) weather = 'dawn';
-  // Random rain chance (seeded by day)
+  else if (hour >= 19) weather = 'sunset';
+  else if (hour >= 6 && hour < 9) weather = 'dawn';
+  // Rare rain (~1 day in 14, like real Hay Day — rain is a special event, not depressing)
   const dayOfYear = Math.floor((now - new Date(now.getFullYear(),0,0))/(1000*60*60*24));
-  if (dayOfYear % 7 === 3 || dayOfYear % 7 === 5) weather = 'rain';
+  if (dayOfYear % 14 === 7 && hour >= 10 && hour < 16) weather = 'rain';
   if (weather === currentWeather) return;
   currentWeather = weather;
   const sky = document.querySelector('.farm-sky');
@@ -2270,10 +2277,6 @@ function _updateSellPreview() {
   if (btnEl) btnEl.innerHTML = `Vendre ${_sellState.qty > 1 ? 'x' + _sellState.qty : ''} !`;
   // Update quick buttons active state
   document.querySelectorAll('.sell-quick-btn').forEach(btn => {
-    const n = parseInt(btn.textContent.replace(/[^0-9]/g, ''), 10);
-    btn.classList.toggle('active', n === _sellState.qty);
-  });
-  document.querySelectorAll('.sell-quick-btn').forEach(btn => {
     const match = btn.textContent.match(/\d+/);
     const n = match ? parseInt(match[0]) : 0;
     btn.classList.toggle('active', n === _sellState.qty);
@@ -2453,19 +2456,33 @@ function showReward(d){
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
     }
-    // Normal reviews: subtle XP pulse + small coin icon near HUD — satisfying but not distracting
+    // Normal reviews: coin sparkle near HUD + subtle XP indicator — satisfying but not distracting
     else if (coins > 0) {
-      // Tiny coin sparkle near HUD to acknowledge the reward
       const hudEl = document.getElementById('hud-coins');
       if (hudEl) {
         const r = hudEl.getBoundingClientRect();
+        const layer = document.getElementById('reward-layer');
+        // Coin sparkle with coin icon
         const sparkle = document.createElement('div');
         sparkle.className = 'review-sparkle';
         sparkle.style.left = (r.left + r.width / 2) + 'px';
         sparkle.style.top = (r.bottom + 4) + 'px';
-        sparkle.textContent = '+' + coins;
-        document.getElementById('reward-layer').appendChild(sparkle);
-        setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 800);
+        const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="12" height="12" style="vertical-align:middle;margin-right:1px">` : '';
+        sparkle.innerHTML = `${coinIcon}+${coins}`;
+        layer.appendChild(sparkle);
+        setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 1000);
+        // XP sparkle slightly delayed
+        if (xp > 0) {
+          setTimeout(() => {
+            const xpSparkle = document.createElement('div');
+            xpSparkle.className = 'review-sparkle review-sparkle-xp';
+            xpSparkle.style.left = (r.left + r.width / 2 + 30) + 'px';
+            xpSparkle.style.top = (r.bottom + 4) + 'px';
+            xpSparkle.textContent = '+' + xp + ' XP';
+            layer.appendChild(xpSparkle);
+            setTimeout(() => { if (xpSparkle.parentNode) xpSparkle.remove(); }, 1000);
+          }, 120);
+        }
       }
     }
   }

@@ -202,6 +202,16 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 5. **Vente amelioree** : la notification de vente utilise maintenant le style "reward" (dore) au lieu du style neutre.
 6. **Nettoyage des champs** : `harvest_plot` et `clear_wilted` nettoient maintenant tous les champs temporaires (`_wilt_warning`, `_wilt_warned`, `_wilt_remaining`).
 
+## Bugs corriges et ameliorations (session 15 â€” polish gameplay et fondations solides)
+1. **BUG: Session milestones fires on every UI update** : `_prevHud` etait ecrase a chaque `updateHUD()` SANS conserver `sessionReviews`, donc `prev` valait toujours 0. Le `hudBump` sur le compteur de session se declenchait a CHAQUE mise a jour au lieu de seulement sur les nouvelles revisions. Corrige : `prevSessionReviews` capture AVANT l'ecrasement de `_prevHud`, et conserve dans le nouvel objet.
+2. **BUG: Notification "presque pret" spam** : quand une culture atteignait 90%, la notification se repetait a chaque `updateFarm()`. Corrige : tracking via `_almostReadyNotified` Set. Chaque culture ne notifie qu'une seule fois, reset quand recoltee ou replantee.
+3. **BUG: Double code sell-preview** : `_updateSellPreview()` contenait 2 boucles identiques pour mettre a jour l'etat actif des boutons de vente rapide. La deuxieme supprimee.
+4. **Meteo equilibree** : la pluie se produisait 2 jours sur 7 (29%), rendant le jeu sombre et triste presque 1/3 du temps. Reduit a 1 jour sur 14 (~7%), uniquement entre 10h-16h. Plages dawn (6h-9h) et sunset (19h-21h) elargies pour plus de variete visuelle.
+5. **Nom des cultures sur les parcelles** : les parcelles en croissance n'affichaient aucun nom visible (seulement un tooltip au survol). Ajout d'un label `.plot-crop-name` discret en bas de chaque parcelle en croissance. Le joueur identifie instantanement ce qui pousse.
+6. **Compteur de revisions restantes** : ajout d'une pilule `.plot-revs-pill` en haut a droite des parcelles en croissance montrant combien de revisions restent avant la recolte. Quand il reste 3 ou moins, la pilule devient doree et pulse pour creer l'anticipation.
+7. **Zones toujours visibles** : les zones Atelier, Paturage et Village se cachaient quand vides, empechant la decouverte. Maintenant toujours visibles avec des messages invitants indiquant le prochain unlock ou encourageant l'action.
+8. **Feedback de revision ameliore** : le sparkle "+coins" des revisions normales affiche maintenant l'icone de piece, est plus grand (12px au lieu de 11px), dure plus longtemps (1s au lieu de 0.8s), et un sparkle XP suit avec un leger delai pour un double feedback satisfaisant.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

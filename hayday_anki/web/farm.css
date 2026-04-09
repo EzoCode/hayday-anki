@@ -324,10 +324,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .zone-empty-msg {
   width: 100%;
   text-align: center;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.55);
   font-size: 11px;
   font-style: italic;
-  padding: 10px;
+  padding: 14px 10px;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
 
 /* Land bar */
@@ -1067,10 +1069,13 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .inv-section-header{grid-column:1/-1;font-size:10px;font-weight:800;color:#8b6914;text-transform:uppercase;letter-spacing:.8px;padding:8px 4px 3px;border-bottom:1.5px solid rgba(212,160,86,.2);margin-top:2px}
 
 /* ===== CROP NAME ON GROWING PLOTS ===== */
-.plot-crop-name{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;text-transform:uppercase;pointer-events:none;line-height:1}
+.plot-crop-name{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;text-transform:uppercase;pointer-events:none;line-height:1}
 .plot-crop-name span{background:rgba(0,0,0,.4);padding:1px 6px;border-radius:4px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 
-/* (Stage dots and reviews-left counter removed — clean Hay Day style uses crop sprite + progress bar only, detail on tap) */
+/* Reviews-left pill — tiny counter showing how many reviews until harvest */
+.plot-revs-pill{position:absolute;top:4px;right:5px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);padding:1px 5px;border-radius:6px;z-index:5;letter-spacing:.2px;line-height:1.3;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.plot-revs-pill.plot-revs-soon{background:linear-gradient(135deg,rgba(255,215,0,.5),rgba(255,180,0,.45));color:#fff;border:1px solid rgba(255,215,0,.4);box-shadow:0 0 6px rgba(255,215,0,.3);animation:revsSoonPulse 1.5s ease-in-out infinite}
+@keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.2)}50%{box-shadow:0 0 10px rgba(255,215,0,.5)}}
 
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(255,215,0,.1));color:var(--gold-d);font-size:10px;font-weight:900;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,215,0,.3);display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -1095,8 +1100,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes actionPulseRing{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.05)}}
 
 /* ===== REVIEW MICRO-FEEDBACK — subtle +coins near HUD ===== */
-.review-sparkle{position:absolute;font-size:11px;font-weight:900;color:var(--gold);text-shadow:0 0 6px rgba(255,215,0,.6),0 1px 2px rgba(0,0,0,.5);animation:reviewSparkle .8s ease-out forwards;pointer-events:none;z-index:160;letter-spacing:.3px}
-@keyframes reviewSparkle{0%{opacity:0;transform:translateY(4px) scale(.7)}15%{opacity:1;transform:translateY(0) scale(1.1)}40%{opacity:1;transform:translateY(-8px) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(.8)}}
+.review-sparkle{position:absolute;font-size:12px;font-weight:900;color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,.7),0 1px 3px rgba(0,0,0,.6);animation:reviewSparkle 1s ease-out forwards;pointer-events:none;z-index:160;letter-spacing:.3px;display:flex;align-items:center;gap:1px}
+.review-sparkle img{filter:drop-shadow(0 0 3px rgba(255,215,0,.5))}
+.review-sparkle-xp{color:#81c784;text-shadow:0 0 6px rgba(76,175,80,.6),0 1px 2px rgba(0,0,0,.5);font-size:10px}
+@keyframes reviewSparkle{0%{opacity:0;transform:translateY(4px) scale(.7)}15%{opacity:1;transform:translateY(0) scale(1.15)}50%{opacity:1;transform:translateY(-10px) scale(1)}100%{opacity:0;transform:translateY(-22px) scale(.8)}}
 
 /* ===== CUSTOM SCROLLBAR — Hay Day Wood Style ===== */
 #farm-container::-webkit-scrollbar,
