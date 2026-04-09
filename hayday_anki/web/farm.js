@@ -1993,34 +1993,26 @@ function showPlantDialog(plotId) {
 
   const coins = farmData.coins || 0;
 
-  // Sort crops by efficiency (profit per review) — best deals first
+  // Sort crops: free first, then by unlock level (natural progression order)
   const sortedCrops = [...(farmData.unlocked_crops || [])].sort((a, b) => {
     const defA = (farmData.crop_defs || {})[a] || {};
     const defB = (farmData.crop_defs || {})[b] || {};
-    const totalA = (defA.growth_reviews || 3) * 4;
-    const totalB = (defB.growth_reviews || 3) * 4;
-    const avgA = ((defA.harvest_min || 2) + (defA.harvest_max || 4)) / 2;
-    const avgB = ((defB.harvest_min || 2) + (defB.harvest_max || 4)) / 2;
-    const profitPerRevA = (avgA * (defA.sell_price || 2) - (defA.plant_cost || 0)) / totalA;
-    const profitPerRevB = (avgB * (defB.sell_price || 2) - (defB.plant_cost || 0)) / totalB;
-    return profitPerRevB - profitPerRevA;
+    const costA = defA.plant_cost || 0;
+    const costB = defB.plant_cost || 0;
+    if (costA === 0 && costB > 0) return -1;
+    if (costB === 0 && costA > 0) return 1;
+    return (defA.unlock_level || 1) - (defB.unlock_level || 1);
   });
 
   sortedCrops.forEach(id => {
     const name = cropName(id);
     const def = (farmData.crop_defs || {})[id] || {};
-    const gr = def.growth_reviews || 3;
-    const totalReviews = gr * 4;
+    const totalReviews = (def.growth_reviews || 3) * 4;
     const sellPrice = def.sell_price || 2;
-    const harvestMin = def.harvest_min || 2;
-    const harvestMax = def.harvest_max || 4;
-    const xpPerHarvest = def.xp_per_harvest || 3;
     const plantCost = def.plant_cost || 0;
     const stock = (farmData.inventory || {})[id] || 0;
     const growing = growingCounts[id] || 0;
     const canAfford = coins >= plantCost;
-    const avgYield = Math.round((harvestMin + harvestMax) / 2);
-    const profit = avgYield * sellPrice - plantCost;
 
     const el = document.createElement('div');
     el.className = 'crop-choice';
@@ -2039,33 +2031,25 @@ function showPlantDialog(plotId) {
       SoundMgr.play('plant');
     };
 
-    // Cost badge
+    // Cost line — compact
     const costHtml = plantCost > 0
-      ? `<span class="crop-cost-badge">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="10" height="10">` : ''} ${plantCost}</span>`
-      : `<span class="crop-cost-badge free">Gratuit</span>`;
+      ? `<span class="crop-cost-badge">${plantCost}</span>`
+      : `<span class="crop-cost-badge free">0</span>`;
 
-    // Stats badges
-    const reviewsBadge = `<span class="crop-reviews-badge">${totalReviews} rev.</span>`;
-    const priceBadge = `<span class="crop-price-badge">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="9" height="9">` : ''} ${sellPrice}/u</span>`;
+    // Compact info: reviews + sell price only
+    const infoBadge = `<span class="crop-stats-line">${totalReviews} rev. · ${sellPrice} p.</span>`;
 
-    // Info row (stock, growing, yield)
-    let infoParts = [];
-    if (stock > 0) infoParts.push(`${stock} en stock`);
-    if (growing > 0) infoParts.push(`${growing} en culture`);
-    const infoLine = infoParts.length > 0 ? `<span class="crop-extra-info">${infoParts.join(' · ')}</span>` : '';
+    // Active count indicator
+    const activeHtml = growing > 0 ? `<span class="crop-active-dot" title="${growing} en culture">${growing}</span>` : '';
 
     el.innerHTML = `
-      <div class="crop-choice-icon">${cropPortrait(id, 52) || itemIcon(id, 52)}</div>
+      ${activeHtml}
+      <div class="crop-choice-icon">${cropPortrait(id, 48) || itemIcon(id, 48)}</div>
       <strong class="crop-choice-name">${name}</strong>
-      ${costHtml}
-      <div class="crop-choice-stats">
-        ${reviewsBadge}
-        ${priceBadge}
+      <div class="crop-choice-bottom">
+        ${costHtml}
+        ${infoBadge}
       </div>
-      <div class="crop-yield-info">
-        ${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>
-      </div>
-      ${infoLine}
     `;
     choices.appendChild(el);
   });
@@ -2270,10 +2254,6 @@ function _updateSellPreview() {
   if (btnEl) btnEl.innerHTML = `Vendre ${_sellState.qty > 1 ? 'x' + _sellState.qty : ''} !`;
   // Update quick buttons active state
   document.querySelectorAll('.sell-quick-btn').forEach(btn => {
-    const n = parseInt(btn.textContent.replace(/[^0-9]/g, ''), 10);
-    btn.classList.toggle('active', n === _sellState.qty);
-  });
-  document.querySelectorAll('.sell-quick-btn').forEach(btn => {
     const match = btn.textContent.match(/\d+/);
     const n = match ? parseInt(match[0]) : 0;
     btn.classList.toggle('active', n === _sellState.qty);
@@ -2453,19 +2433,32 @@ function showReward(d){
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
     }
-    // Normal reviews: subtle XP pulse + small coin icon near HUD — satisfying but not distracting
+    // Normal reviews: visible coin + XP feedback near HUD — every review feels rewarding
     else if (coins > 0) {
-      // Tiny coin sparkle near HUD to acknowledge the reward
       const hudEl = document.getElementById('hud-coins');
       if (hudEl) {
         const r = hudEl.getBoundingClientRect();
-        const sparkle = document.createElement('div');
-        sparkle.className = 'review-sparkle';
-        sparkle.style.left = (r.left + r.width / 2) + 'px';
-        sparkle.style.top = (r.bottom + 4) + 'px';
-        sparkle.textContent = '+' + coins;
-        document.getElementById('reward-layer').appendChild(sparkle);
-        setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 800);
+        const cx = r.left + r.width / 2;
+        const cy = r.bottom + 8;
+        // Floating coin amount
+        showFloatingReward(`+${coins}`, cx, cy);
+        // Single coin particle flying to HUD
+        const coinSrc = S('ui_coin');
+        const fly = document.createElement('div');
+        fly.className = 'coin-fly-to-hud';
+        if (coinSrc) fly.innerHTML = `<img src="${coinSrc}" width="14" height="14">`;
+        else fly.innerHTML = '<span class="css-coin" style="width:12px;height:12px"></span>';
+        fly.style.left = cx + 'px';
+        fly.style.top = (cy + 12) + 'px';
+        fly.style.setProperty('--target-x', '0px');
+        fly.style.setProperty('--target-y', '-20px');
+        document.getElementById('reward-layer').appendChild(fly);
+        setTimeout(() => { if (fly.parentNode) fly.remove(); }, 700);
+      }
+      // XP shimmer on the XP bar
+      if (xp > 0) {
+        const xpTrack = document.querySelector('.xp-bar-track');
+        if (xpTrack) { xpTrack.classList.add('xp-bar-flash'); setTimeout(() => xpTrack.classList.remove('xp-bar-flash'), 700); }
       }
     }
   }

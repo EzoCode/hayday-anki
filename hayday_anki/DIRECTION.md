@@ -202,6 +202,19 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 5. **Vente amelioree** : la notification de vente utilise maintenant le style "reward" (dore) au lieu du style neutre.
 6. **Nettoyage des champs** : `harvest_plot` et `clear_wilted` nettoient maintenant tous les champs temporaires (`_wilt_warning`, `_wilt_warned`, `_wilt_remaining`).
 
+## Ameliorations (session 15 â€” gameplay feel et coherence visuelle)
+- **Plant dialog redesign** : grille 3 colonnes compacte au lieu d'une liste verticale surchargee. Chaque culture montre : portrait, nom, cout (avec icone piece CSS), et stats compactes (reviews + prix). Tri par cout puis niveau de deblocage (progression naturelle). Badge vert avec compteur pour les cultures en cours de pousse.
+- **Review reward feedback ameliore** : chaque review montre maintenant un `+coins` flottant visible pres du HUD + une piece qui vole vers le compteur + un flash XP sur la barre de progression. Avant, les reviews normales ne montraient qu'un minuscule sparkle quasi invisible.
+- **Empty plots plus invitants** : les parcelles vides ont un hover vert subtil avec glow, les labels de replantation sont plus lisibles (9px, opacity .7 au lieu de .55). Les parcelles vides generales ont un "+" plus visible.
+- **Level up overlay refait** : fond vert fonce (comme Hay Day), nombre de niveau en or, texte blanc. Plus celebratoire et premium qu'avant (ancien fond vert pale fade).
+- **Session summary ameliore** : stats avec animation pop plus dynamique (translateY + scale), labels en uppercase, meilleur espacement.
+- **Sell dialog fix** : suppression de la boucle dupliquee de mise a jour des boutons rapides.
+- **Production dialog** : items prets cliquables avec hover, largeur minimum pour lisibilite.
+- **Order fulfill button** : le bouton desactive est maintenant grise (au lieu de vert estompe), le bouton "Livrer" actif est vert vif.
+- **CSS cleanup** : suppression des classes CSS orphelines (crop-reviews-badge, crop-price-badge, crop-yield-info, crop-extra-info, crop-detail) et de la definition dupliquee de crop-active-dot.
+- **Progress bar** : 5px au lieu de 4px, couleurs vertes plus vives, reflet plus prononce.
+- **Notifications** : taille max reduite a 300px pour un look plus compact et mobile.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
