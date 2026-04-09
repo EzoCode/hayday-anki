@@ -825,7 +825,7 @@ function renderFields() {
   const addBtn = document.getElementById('add-field-btn');
   if (addBtn) addBtn.textContent = fieldCost > 0 ? `+ Champ (${fieldCost})` : '+ Champ';
 
-  // Show/hide harvest all button
+  // Show/hide harvest all button + HUD ready indicator
   const readyCount = fields.filter(f => f.state === 'ready').length;
   const harvestAllBtn = document.getElementById('harvest-all-btn');
   if (harvestAllBtn) {
@@ -835,6 +835,11 @@ function renderFields() {
     } else {
       harvestAllBtn.style.display = 'none';
     }
+  }
+  // Glow on fields zone header when crops ready
+  const fieldsZone = document.querySelector('.zone-fields');
+  if (fieldsZone) {
+    fieldsZone.classList.toggle('has-ready-crops', readyCount > 0);
   }
 
   // Show/hide plant-all-empty button (only if there are empty fields with last_crop)
@@ -898,9 +903,10 @@ function renderFields() {
       } else {
         el.title = `${readyCropName} — Prêt à récolter !`;
       }
-      // Hay Day style: big bouncing crop with golden sparkle, no text clutter
+      // Hay Day style: big bouncing crop with golden sparkle + harvest badge
       const wiltBadge = wiltWarning ? `<span class="wilt-warning-badge">${wiltLeft}</span>` : '';
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}`;
+      const harvestLabel = `<span class="plot-harvest-badge">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}${harvestLabel}`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -916,7 +922,7 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 48 : 62;
+      const cropSize = stage === 0 ? 38 : stage === 1 ? 48 : stage === 2 ? 56 : 64;
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       // Stage dots: 4 dots showing which growth stage we're in
@@ -925,9 +931,12 @@ function renderFields() {
         stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
       }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom + reviews left
+      // Clean Hay Day style: crop name at top, big crop sprite, stage dots, progress bar, reviews left
       const reviewsLeftLabel = reviewsLeft <= 3 ? `<span class="plot-reviews-left almost-done">${reviewsLeft}</span>` : `<span class="plot-reviews-left">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>${reviewsLeftLabel}`;
+      const cropNameLabel = `<div class="plot-crop-name"><span>${cName}</span></div>`;
+      // Progress bar shifts from orange (0%) to green (100%) via background-position
+      const barPos = Math.round(100 - pct);
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%;background-position:${barPos}% 0"></div></div>${reviewsLeftLabel}${cropNameLabel}`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -1940,6 +1949,7 @@ function showPlantDialog(plotId) {
     return profitPerRevB - profitPerRevA;
   });
 
+  let isFirstCrop = true;
   sortedCrops.forEach(id => {
     const name = cropName(id);
     const def = (farmData.crop_defs || {})[id] || {};
@@ -1955,10 +1965,13 @@ function showPlantDialog(plotId) {
     const canAfford = coins >= plantCost;
     const avgYield = Math.round((harvestMin + harvestMax) / 2);
     const profit = avgYield * sellPrice - plantCost;
+    const isRecommended = isFirstCrop && canAfford;
+    isFirstCrop = false;
 
     const el = document.createElement('div');
     el.className = 'crop-choice';
     if (!canAfford) el.classList.add('crop-choice-locked');
+    if (isRecommended) el.classList.add('crop-choice-recommended');
 
     el.onclick = () => {
       if (!canAfford) {
@@ -1972,6 +1985,9 @@ function showPlantDialog(plotId) {
       hideOverlay();
       SoundMgr.play('plant');
     };
+
+    // Recommended tag
+    const recommendedTag = isRecommended ? `<span class="crop-recommended-tag">Meilleur choix</span>` : '';
 
     // Cost badge
     const costHtml = plantCost > 0
@@ -1989,6 +2005,7 @@ function showPlantDialog(plotId) {
     const infoLine = infoParts.length > 0 ? `<span class="crop-extra-info">${infoParts.join(' · ')}</span>` : '';
 
     el.innerHTML = `
+      ${recommendedTag}
       <div class="crop-choice-icon">${cropPortrait(id, 52) || itemIcon(id, 52)}</div>
       <strong class="crop-choice-name">${name}</strong>
       ${costHtml}
