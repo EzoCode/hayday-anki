@@ -21,7 +21,7 @@ function initDefs(defs) {
 }
 
 function applyHayDayAssets() {
-  // Inject SVG icons for missing sprites (truck, wheel, gear)
+  // Inject SVG icons for missing sprites (truck, wheel, gear, gold star)
   if (typeof SPRITES !== 'undefined') {
     if (!SPRITES['_icon_truck']) {
       SPRITES['_icon_truck'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='1' y='7' width='14' height='9' rx='1.5' fill='%23d4a056'/%3E%3Crect x='2' y='7.5' width='12' height='2' rx='.8' fill='%23e8c87a' opacity='.4'/%3E%3Cpath d='M15 10h4l3 3v3h-7z' fill='%238b5e3c'/%3E%3Cpath d='M15 10h4l3 3h-7z' fill='%23a0724a'/%3E%3Crect x='1' y='15.5' width='21' height='1' rx='.5' fill='%235a3520'/%3E%3Ccircle cx='5.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='5.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3Ccircle cx='18.5' cy='17.5' r='2.2' fill='%233a2510'/%3E%3Ccircle cx='18.5' cy='17.5' r='.8' fill='%238b6914'/%3E%3C/svg%3E";
@@ -32,19 +32,17 @@ function applyHayDayAssets() {
     if (!SPRITES['_icon_gear']) {
       SPRITES['_icon_gear'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='none' stroke='%23d4a056' stroke-width='2'/%3E%3Cpath d='M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12' stroke='%23d4a056' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E";
     }
+    // Gold star SVG — replaces the blue star.png for Hay Day gold aesthetic
+    SPRITES['_gold_star'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='sg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ffe566'/%3E%3Cstop offset='50%25' stop-color='%23ffd700'/%3E%3Cstop offset='100%25' stop-color='%23c5a200'/%3E%3C/linearGradient%3E%3ClinearGradient id='sh' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fff' stop-opacity='.5'/%3E%3Cstop offset='100%25' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M24 3l6.5 13.2L45 18.5l-10.2 9.9L37.2 43 24 36l-13.2 7 2.4-14.6L3 18.5l14.5-2.3z' fill='url(%23sg)' stroke='%23b8960e' stroke-width='1.5'/%3E%3Cpath d='M24 3l6.5 13.2L45 18.5l-10.2 9.9L37.2 43 24 36l-13.2 7 2.4-14.6L3 18.5l14.5-2.3z' fill='url(%23sh)'/%3E%3C/svg%3E";
   }
-  // Background
-  const bgSrc = S('hayday_background');
-  if (bgSrc) {
-    const world = document.getElementById('farm-world');
-    if (world) world.style.backgroundImage = `url(${bgSrc})`;
-  }
-  // HUD XP bar background
-  const xpBgSrc = S('hayday_xp_pbar_bg');
-  if (xpBgSrc) {
-    const xpEl = document.getElementById('xp-bar-bg-img');
-    if (xpEl) { xpEl.src = xpBgSrc; xpEl.style.display = 'block'; }
-  }
+  // Background — keep CSS grass gradients (they match the zone card layout better
+  // than the isometric Hay Day image which clashes with flat zone cards)
+  // HUD star — use gold star SVG for Hay Day aesthetic (the PNG is blue which clashes)
+  const goldStarSrc = S('_gold_star');
+  const hudStarImg = document.getElementById('hud-star-img');
+  if (goldStarSrc && hudStarImg) { hudStarImg.src = goldStarSrc; hudStarImg.style.display = ''; }
+  // HUD XP bar — use CSS track (the xp_pbar_bg sprite has a blue star that
+  // clashes with the gold star badge; the CSS track looks cleaner)
   // Coin display — use coin-box sprite as background if available
   const coinBoxSrc = S('hayday_coin-box');
   const hudCoins = document.getElementById('hud-coins');
@@ -95,11 +93,11 @@ function applyHayDayAssets() {
       lvlCard.style.backgroundPosition = 'center';
     }
   }
-  // Level up stars with real sprite
-  const starSrc2 = S('hayday_star');
+  // Level up stars — use gold star for Hay Day feel
+  const starSrc2 = S('_gold_star') || S('hayday_star');
   const starsEl = document.getElementById('levelup-stars');
   if (starsEl && starSrc2) {
-    const starImg = `<img src="${starSrc2}" width="28" height="28" style="vertical-align:middle;filter:drop-shadow(0 1px 3px rgba(0,0,0,.2))">`;
+    const starImg = `<img src="${starSrc2}" width="28" height="28" style="vertical-align:middle;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`;
     starsEl.innerHTML = `${starImg} ${starImg} ${starImg}`;
   }
   // Toolbar icons — use sprites (with SVG fallbacks for missing ones)
@@ -108,7 +106,7 @@ function applyHayDayAssets() {
     'icon-inventory': {sprite: 'hayday_silo'},
     'icon-orders': {sprite: '_icon_truck'},
     'icon-shop': {sprite: 'hayday_shop'},
-    'icon-achievements': {sprite: 'hayday_star'},
+    'icon-achievements': {sprite: '_gold_star'},
   };
   for (const [elId, cfg] of Object.entries(toolbarIcons)) {
     const el = document.getElementById(elId);
@@ -302,10 +300,12 @@ function toggleSettings() { showTab('settings'); }
 
 // --- Sprite Helpers ---
 function S(key) {
-  // For crop growth stages (tiny pixel art PNGs), prefer generated SVGs which scale cleanly
-  const isCropStage = key.startsWith('crops_') && !key.endsWith('_portrait');
-  if (isCropStage && typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
-  // For everything else (buildings, UI, backgrounds, portraits), prefer real PNG assets
+  // For ALL crop sprites (stages AND portraits), prefer generated SVGs —
+  // the PNG sprites are tiny 48x48 pixel art that looks blurry when scaled.
+  // SVGs are proper vector art that renders cleanly at any size.
+  const isCrop = key.startsWith('crops_');
+  if (isCrop && typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
+  // For everything else (buildings, UI, hayday assets), prefer real PNG sprites
   if (typeof SPRITES !== 'undefined' && SPRITES[key]) return SPRITES[key];
   // Fallback to generated SVG if no PNG
   if (typeof CROP_SVGS !== 'undefined' && CROP_SVGS[key]) return CROP_SVGS[key];
@@ -416,10 +416,10 @@ function itemIcon(id, w) {
   if (hdSrc) return `<img src="${hdSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try animal sprite
   const anSrc = S(`animals_${id}`);
-  if (anSrc) return `<img src="${anSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  if (anSrc) return `<img src="${anSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Try building sprite
   const blSrc = S(`buildings_${id}`);
-  if (blSrc) return `<img src="${blSrc}" width="${w}" height="${w}" style="object-fit:contain;image-rendering:pixelated">`;
+  if (blSrc) return `<img src="${blSrc}" width="${w}" height="${w}" style="object-fit:contain">`;
   // Fallback: generic placeholder icon
   return `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='4' fill='%23daa06d' opacity='.6'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='14' fill='%23fff'%3E%3F%3C/text%3E%3C/svg%3E" width="${w}" height="${w}" style="object-fit:contain">`;
 }
@@ -658,9 +658,9 @@ let _prevHud = { coins: 0, gems: 0, streak: 0, level: 0, xp_percent: 0 };
 
 function updateHUD() {
   const d = farmData;
-  const starSrc = S('hayday_star');
+  const starSrc = S('_gold_star') || S('hayday_star');
   const starEl = document.getElementById('hud-star-img');
-  if (starSrc && starEl) starEl.src = starSrc;
+  if (starSrc && starEl && !starEl.src) starEl.src = starSrc;
 
   const newLevel = d.level || 1;
   document.getElementById('hud-level').querySelector('.level-num').textContent = newLevel;
@@ -2312,7 +2312,7 @@ function showWheelResult(r){
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:pixelated">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:pixelated">`;else icon.innerHTML='<div class="css-chest"></div>'}}
+function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:auto">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
 function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
 
@@ -2355,9 +2355,9 @@ function showSessionSummary(d){
   let stars = 1;
   if (reviews >= 10 && accuracy >= 60) stars = 2;
   if (reviews >= 20 && accuracy >= 75) stars = 3;
-  const starSrc = S('hayday_star');
+  const starSrc = S('_gold_star') || S('hayday_star');
   const starFull = starSrc
-    ? `<img src="${starSrc}" width="28" height="28" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.2))">`
+    ? `<img src="${starSrc}" width="28" height="28" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`
     : '<span style="color:#ffd700;font-size:24px">&#9733;</span>';
   const starEmpty = starSrc
     ? `<img src="${starSrc}" width="28" height="28" style="filter:grayscale(1) opacity(.25)">`
@@ -2631,6 +2631,41 @@ function showProductionDialog(data) {
 }
 
 function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=10000)return Math.round(n/1000)+'k';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}
+
+// --- Ambient Particles (floating seeds, pollen, leaves for Hay Day atmosphere) ---
+let _ambientInterval = null;
+function startAmbientParticles() {
+  if (_ambientInterval) return;
+  const container = document.getElementById('farm-world');
+  if (!container) return;
+  function spawnParticle() {
+    // Don't spawn if farm tab isn't active or too many particles
+    if (currentPanel) return;
+    const existing = container.querySelectorAll('.ambient-particle');
+    if (existing.length >= 8) return;
+    const types = ['ambient-seed', 'ambient-pollen', 'ambient-leaf'];
+    const weights = [3, 4, 2]; // pollen most common
+    let r = Math.random() * 9;
+    let typeIdx = 0;
+    for (let i = 0; i < weights.length; i++) { r -= weights[i]; if (r <= 0) { typeIdx = i; break; } }
+    const p = document.createElement('div');
+    p.className = `ambient-particle ${types[typeIdx]}`;
+    p.style.left = (10 + Math.random() * 80) + '%';
+    p.style.top = (10 + Math.random() * 60) + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 3) + 's';
+    p.style.opacity = 0.15 + Math.random() * 0.25;
+    container.appendChild(p);
+    // Remove after animation completes
+    const dur = parseFloat(p.style.animationDuration) * 1000 + parseFloat(p.style.animationDelay) * 1000;
+    setTimeout(() => { if (p.parentNode) p.remove(); }, dur + 1000);
+  }
+  // Spawn a few immediately
+  for (let i = 0; i < 4; i++) setTimeout(spawnParticle, i * 800);
+  // Then every few seconds
+  _ambientInterval = setInterval(spawnParticle, 3000 + Math.random() * 2000);
+}
+
 // --- Farmer Character ---
 function renderFarmer() {
   const el = document.getElementById('farmer-character');
