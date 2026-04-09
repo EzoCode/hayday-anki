@@ -202,6 +202,14 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter â
 5. **Vente amelioree** : la notification de vente utilise maintenant le style "reward" (dore) au lieu du style neutre.
 6. **Nettoyage des champs** : `harvest_plot` et `clear_wilted` nettoient maintenant tous les champs temporaires (`_wilt_warning`, `_wilt_warned`, `_wilt_remaining`).
 
+## Ameliorations (session 15 â€” polish fondamental et bugs)
+1. **BUG: Code duplique dans _updateSellPreview** : le toggle des quick buttons etait execute 2 fois (2 boucles querySelectorAll identiques). Corrige : suppression de la premiere boucle redondante.
+2. **BUG: background.png ecrasait les textures CSS** : `applyHayDayAssets()` remplacait le fond multi-couches CSS (herbe texturee, reflets de soleil, motifs diagonaux) par un PNG plat generique. Corrige : le PNG n'est plus applique, le fond CSS reste.
+3. **Review feedback ameliore** : les reviews normales (les plus frequentes !) montraient un simple "+1" texte. Remplace par une animation `review-coin-fly` avec icone piece + texte qui s'envole vers le HUD. Chaque review est maintenant satisfaisante comme dans Hay Day.
+4. **Paturages ameliores** : tuiles plus grandes (110x120px vs 105x110), barre de progression epaissie (5px vs 3px) avec reflet, bordure "cloture" en haut pour l'effet enclos, labels plus lisibles (9px), couleur doree pulsee quand produit pret, icones produits plus grandes.
+5. **Messages de zones vides ameliores** : les zones sans contenu ont maintenant un fond subtil, bordure dashed, texte plus lisible (12px, 600 weight) au lieu d'italique gris a 11px. Plus invitant pour le joueur debutant.
+6. **Verification complete** : tous les fichiers Python compilent, le JS passe la verification syntaxique node, pas de classes CSS orphelines, pas de fonctions manquantes.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires

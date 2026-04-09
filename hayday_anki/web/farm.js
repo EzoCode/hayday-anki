@@ -32,12 +32,8 @@ function applyHayDayAssets() {
       SPRITES['_icon_gear'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='none' stroke='%23d4a056' stroke-width='2'/%3E%3Cpath d='M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12' stroke='%23d4a056' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E";
     }
   }
-  // Background
-  const bgSrc = S('hayday_background');
-  if (bgSrc) {
-    const world = document.getElementById('farm-world');
-    if (world) world.style.backgroundImage = `url(${bgSrc})`;
-  }
+  // Background — keep the rich CSS gradient (multi-layer grass texture with sun glow)
+  // The hayday_background.png is a flat image that looks worse than the CSS version
   // HUD XP bar background
   const xpBgSrc = S('hayday_xp_pbar_bg');
   if (xpBgSrc) {
@@ -1080,8 +1076,8 @@ function renderPastures() {
     const productName = itemName(adef.product || '');
     const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
     const prodLabelHtml = reviewsLeft <= 0
-      ? `<span class="pasture-prod-label ready-label">${itemIcon(adef.product||'', 12)} Prêt !</span>`
-      : `<span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsLeft} rev.</span>`;
+      ? `<span class="pasture-prod-label ready-label">${itemIcon(adef.product||'', 14)} Prêt !</span>`
+      : `<span class="pasture-prod-label">${itemIcon(adef.product||'', 12)} ${reviewsLeft} rev.</span>`;
     el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div>${prodLabelHtml}`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
@@ -2234,10 +2230,6 @@ function _updateSellPreview() {
   if (btnEl) btnEl.innerHTML = `Vendre ${_sellState.qty > 1 ? 'x' + _sellState.qty : ''} !`;
   // Update quick buttons active state
   document.querySelectorAll('.sell-quick-btn').forEach(btn => {
-    const n = parseInt(btn.textContent.replace(/[^0-9]/g, ''), 10);
-    btn.classList.toggle('active', n === _sellState.qty);
-  });
-  document.querySelectorAll('.sell-quick-btn').forEach(btn => {
     const match = btn.textContent.match(/\d+/);
     const n = match ? parseInt(match[0]) : 0;
     btn.classList.toggle('active', n === _sellState.qty);
@@ -2417,19 +2409,23 @@ function showReward(d){
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
     }
-    // Normal reviews: subtle XP pulse + small coin icon near HUD — satisfying but not distracting
+    // Normal reviews: coin flies up to HUD + sparkle — satisfying like Hay Day
     else if (coins > 0) {
-      // Tiny coin sparkle near HUD to acknowledge the reward
       const hudEl = document.getElementById('hud-coins');
       if (hudEl) {
         const r = hudEl.getBoundingClientRect();
-        const sparkle = document.createElement('div');
-        sparkle.className = 'review-sparkle';
-        sparkle.style.left = (r.left + r.width / 2) + 'px';
-        sparkle.style.top = (r.bottom + 4) + 'px';
-        sparkle.textContent = '+' + coins;
-        document.getElementById('reward-layer').appendChild(sparkle);
-        setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 800);
+        const layer = document.getElementById('reward-layer');
+        // Floating coin icon that flies upward
+        const coinSrc = S('ui_coin');
+        const coinEl = document.createElement('div');
+        coinEl.className = 'review-coin-fly';
+        coinEl.style.left = (r.left + r.width / 2) + 'px';
+        coinEl.style.top = (r.bottom + 20) + 'px';
+        coinEl.innerHTML = coinSrc
+          ? `<img src="${coinSrc}" width="16" height="16"><span>+${coins}</span>`
+          : `<span class="css-coin" style="width:14px;height:14px"></span><span>+${coins}</span>`;
+        layer.appendChild(coinEl);
+        setTimeout(() => { if (coinEl.parentNode) coinEl.remove(); }, 900);
       }
     }
   }
