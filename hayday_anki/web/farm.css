@@ -27,7 +27,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.15),transparent 60%)}
 .hud-star{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .level-num{position:relative;z-index:1;font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-.hud-xp{position:relative;width:140px;height:30px}
+.hud-xp{position:relative;width:150px;height:30px}
 .xp-bar-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;display:none;pointer-events:none}
 .xp-bar-track{position:absolute;top:8px;left:34px;right:8px;height:12px;background:#1a1a1a;border-radius:6px;overflow:hidden;border:1px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 4px rgba(0,0,0,.6);z-index:1}
 .xp-bar-fill{height:100%;background:linear-gradient(180deg,#81c784,var(--xp));border-radius:6px;transition:width .5s;box-shadow:0 0 6px rgba(76,175,80,.4);position:relative}
@@ -115,7 +115,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .quests-claimed .quest-title::after{content:' ✓ Terminé';color:#4caf50;font-size:9px;margin-left:6px;letter-spacing:0;text-transform:none}
 
 /* ===== NEXT UNLOCK HINT ===== */
-#next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:6px;padding:5px 12px;font-size:11px;font-weight:700;color:rgba(255,255,255,.95);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(139,94,60,.4),rgba(139,94,60,.55),rgba(139,94,60,.4));letter-spacing:.3px;overflow:hidden;border-top:1px solid rgba(255,220,160,.1);border-bottom:1px solid rgba(0,0,0,.15)}
+#next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 12px;font-size:11px;font-weight:700;color:rgba(255,255,255,.95);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(139,94,60,.3),rgba(139,94,60,.5),rgba(139,94,60,.3));letter-spacing:.3px;overflow:hidden;border-top:1px solid rgba(255,220,160,.1);border-bottom:1px solid rgba(0,0,0,.15);position:relative}
+#next-unlock-hint::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,215,0,.05),transparent);animation:unlockShimmer 4s ease-in-out infinite;pointer-events:none}
+@keyframes unlockShimmer{0%,100%{opacity:0}50%{opacity:1}}
 .next-unlock-label{background:linear-gradient(135deg,rgba(255,215,0,.35),rgba(255,180,0,.25));padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,0,.4);font-size:10px;font-weight:900;white-space:nowrap;color:var(--gold);text-shadow:0 1px 2px rgba(0,0,0,.6);animation:unlockHintPulse 3s ease-in-out infinite}
 @keyframes unlockHintPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.2)}50%{box-shadow:0 0 12px rgba(255,215,0,.5)}}
 
@@ -133,7 +135,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes notifOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
 
 /* ===== FARM WORLD — Real Hay Day Background ===== */
-#farm-container{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+#farm-container{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth}
 
 .farm-sky{position:sticky;top:0;left:0;right:0;height:80px;
   background:linear-gradient(180deg,#3a95cc 0%,#5db8e0 20%,#7cc8e8 40%,#9ed8ec 55%,#c5e8cc 75%,rgba(197,232,176,0) 100%);
@@ -514,9 +516,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .item-cell { position: relative; }
 
 /* ===== PLOTS — 3D Depth ===== */
-#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(82px,110px));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start}
-#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(72px,100px))}
-#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(64px,88px))}
+#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(90px,120px));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start}
+#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(78px,108px))}
+#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(68px,94px))}
 
 .plot{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:64px;max-width:115px;
   box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.15)}
@@ -531,8 +533,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(0,0,0,.06) 6px,rgba(0,0,0,.06) 7px);pointer-events:none;z-index:0;border-radius:16px}
 .plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-5px) scale(1.1) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff;z-index:5 !important}
-.plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
-.plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
+.plot-ready::after{content:'Récolter !';position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;font-weight:900;color:#fff;background:linear-gradient(180deg,rgba(255,215,0,.85),rgba(244,146,42,.9));padding:3px 0;z-index:6;text-shadow:0 1px 2px rgba(0,0,0,.5);letter-spacing:.3px;animation:harvestLabelPulse 2s ease-in-out infinite;border-radius:0 0 14px 14px}
+@keyframes harvestLabelPulse{0%,100%{background:linear-gradient(180deg,rgba(255,215,0,.85),rgba(244,146,42,.9))}50%{background:linear-gradient(180deg,rgba(255,230,100,.95),rgba(255,170,50,.95))}}
+.plot-ready::before{content:'';position:absolute;top:3px;right:5px;width:14px;height:14px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.3) 60%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:7}
 /* Wilt warning — urgent harvest needed */
 .plot-wilt-warning{animation:wiltWarningPulse 1.2s ease-in-out infinite !important;border-color:#ff6b35 !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.1),0 4px 8px rgba(0,0,0,.25),0 0 18px rgba(255,107,53,.5),0 0 35px rgba(255,60,0,.15) !important}
 .plot-wilt-warning:hover{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 6px 16px rgba(0,0,0,.3),0 0 25px rgba(255,107,53,.7) !important}
@@ -549,8 +552,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
-.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+.plot-crop img{max-width:80px;max-height:80px;width:auto;height:auto;transition:transform .3s ease}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
+.plot-pct{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;pointer-events:none}
 .plot-progress{position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,.5);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
@@ -558,12 +562,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
 .plot-empty-label{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3px}
-.plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.55;transition:all .25s}
-.plot-replant img{transition:transform .25s}
-.plot-replant-label{font-size:8px;color:rgba(255,255,255,.85);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);letter-spacing:.2px}
-.plot-replant-cost{font-size:7px;color:rgba(255,215,0,.9);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:5px}
-.plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
-.plot-empty:hover .plot-replant img{transform:scale(1.15)}
+.plot-replant{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;opacity:.7;transition:all .25s}
+.plot-replant img{transition:transform .25s;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))}
+.plot-replant-label{font-size:9px;color:rgba(255,255,255,.9);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);letter-spacing:.2px}
+.plot-replant-cost{font-size:8px;color:rgba(255,215,0,.95);font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.3);padding:2px 7px;border-radius:6px}
+.plot-empty:hover .plot-replant{opacity:1;transform:scale(1.1)}
+.plot-empty:hover .plot-replant img{transform:scale(1.2)}
 
 @keyframes readyGlow{0%,100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.3)}50%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 25px rgba(255,215,0,.65)}}
 @keyframes readyShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -586,7 +590,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .building-tile:hover .building-img{transform:scale(1.05)}
 /* Active building subtle breathing — feels alive when producing */
 .building-tile.producing .building-img{animation:buildingBreathe 3s ease-in-out infinite}
-@keyframes buildingBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02) translateY(-1px)}}
+@keyframes buildingBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03) translateY(-2px)}}
+/* Active building has a subtle animated border */
+.building-tile.producing{border-color:rgba(76,175,80,.3);box-shadow:0 3px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1),0 0 8px rgba(76,175,80,.2)}
 /* Building with ready items — golden glow to attract attention */
 .building-tile.has-ready{box-shadow:0 3px 10px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08),0 0 16px rgba(255,215,0,.4);border-color:rgba(255,215,0,.5);animation:buildingReady 2s ease-in-out infinite}
 @keyframes buildingReady{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 10px rgba(255,215,0,.3)}50%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 24px rgba(255,215,0,.6)}}
@@ -799,21 +805,21 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
 
 /* Plant dialog — Hay Day style seed selector */
-#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;padding:6px 2px;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.55));border-radius:16px;padding:10px 6px 8px;border:1px solid rgba(212,160,86,.15);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
+#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:6px 2px;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:row;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.85),rgba(250,240,220,.6));border-radius:16px;padding:10px 12px;border:1.5px solid rgba(212,160,86,.12);cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5);position:relative;overflow:hidden}
 .crop-choice:hover{background:rgba(255,252,245,.95);border-color:#d4a056;transform:translateY(-3px);box-shadow:0 6px 16px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.6)}
-.crop-choice:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.crop-choice:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:52px;height:52px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s}
+.crop-choice-icon{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));transition:transform .2s;background:rgba(0,0,0,.03);border-radius:12px;padding:2px}
 .crop-choice:hover .crop-choice-icon{transform:scale(1.1)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
-.crop-choice-info{display:flex;flex-direction:column;align-items:center;gap:1px;width:100%}
-.crop-choice-info strong{font-size:11px;color:var(--text-d);text-align:center;line-height:1.2}
-.crop-choice-info span{font-size:8px;color:#888;display:block;text-align:center}
+.crop-choice-icon img{max-width:44px;max-height:44px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges}
+.crop-choice-info{display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1;min-width:0}
+.crop-choice-info strong{font-size:12px;color:var(--text-d);line-height:1.2}
+.crop-choice-info span{font-size:9px;color:#888;display:block}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
 .crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 .crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-yield-info{font-size:8px;color:#999;font-weight:700;margin-top:2px;letter-spacing:.2px;line-height:1.4;padding:2px 4px;background:rgba(0,0,0,.03);border-radius:6px}
+.crop-yield-info{font-size:8px;color:#999;font-weight:700;margin-top:1px;letter-spacing:.2px;line-height:1.4;padding:2px 6px;background:rgba(0,0,0,.04);border-radius:6px;width:100%}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -858,7 +864,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .session-stat{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;padding:10px 8px;border:1px solid rgba(106,191,71,.1);animation:statPop .4s cubic-bezier(.34,1.56,.64,1) both}
 .session-stat:nth-child(1){animation-delay:0s}.session-stat:nth-child(2){animation-delay:.08s}.session-stat:nth-child(3){animation-delay:.16s}.session-stat:nth-child(4){animation-delay:.24s}.session-stat:nth-child(5){animation-delay:.32s}.session-stat:nth-child(6){animation-delay:.4s}
 @keyframes statPop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
-.session-stat-value{font-size:22px;font-weight:900;color:#2e7d32;display:flex;align-items:center;justify-content:center;gap:3px}
+.session-stat-value{font-size:24px;font-weight:900;color:#2e7d32;display:flex;align-items:center;justify-content:center;gap:3px;text-shadow:0 1px 2px rgba(0,0,0,.06)}
 .session-stat-label{font-size:9px;color:#888;font-weight:700;margin-top:2px}
 #session-items{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:8px}
 .session-item-tag{background:rgba(255,255,255,.5);padding:4px 10px;border-radius:12px;font-size:10px;border:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:3px;font-weight:600}
@@ -1044,7 +1050,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
 .panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
 
-/* ===== READY PLOT CROP NAME ===== */
-/* (removed — ready plots show crop via sprite + "Récolter !" badge only) */
+/* ===== HARVEST SHAKE — satisfying feedback when tapping ready crop ===== */
+.plot-harvesting{animation:harvestShake .35s cubic-bezier(.36,.07,.19,.97) both;pointer-events:none}
+@keyframes harvestShake{0%{transform:scale(1) rotate(0)}15%{transform:scale(1.15) rotate(-5deg)}30%{transform:scale(1.2) rotate(5deg)}45%{transform:scale(1.15) rotate(-3deg)}60%{transform:scale(1.25) rotate(2deg)}80%{transform:scale(.3) rotate(-2deg);opacity:.6}100%{transform:scale(0) rotate(0);opacity:0}}
+
+/* ===== SMOKE PUFF for producing buildings ===== */
+.building-tile.producing::before{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:12px;height:12px;background:radial-gradient(circle,rgba(200,200,200,.5),transparent 70%);border-radius:50%;animation:smokeRise 2.5s ease-out infinite;z-index:8;pointer-events:none}
+@keyframes smokeRise{0%{opacity:0;transform:translateX(-50%) translateY(0) scale(.4)}20%{opacity:.6;transform:translateX(-50%) translateY(-8px) scale(.8)}60%{opacity:.3;transform:translateX(calc(-50% + 6px)) translateY(-18px) scale(1)}100%{opacity:0;transform:translateX(calc(-50% + 10px)) translateY(-28px) scale(1.2)}}
 
 .hidden{display:none!important}
