@@ -961,7 +961,7 @@ function renderWorkshop() {
       const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }
-    el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${statusHtml}`;
+    el.innerHTML = `${buildingImg(bid,120)}<span class="building-name">${name}</span>${statusHtml}`;
     grid.appendChild(el);
   });
 }
@@ -988,14 +988,20 @@ function renderPastures() {
   pastures.forEach(p => {
     const el = document.createElement('div');
     el.className = 'pasture-tile';
-    el.style.animationDelay = `${Math.random()*2}s`;
+    // Use the real Hay Day isometric sprite as background
+    const isChicken = p.animal_type === 'chicken';
+    const bgSpr = isChicken ? S('hayday_chicken_coop') : S('hayday_pasture');
+    if (bgSpr) {
+      el.style.backgroundImage = `url(${bgSpr})`;
+    }
     const lbl = S(`hayday_${p.animal_type}-lbl`);
     const name = animalName(p.animal_type) || (p.animal_type||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     const adef = (farmData.animal_defs||{})[p.animal_type]||{};
     const produceEvery = adef.produce_every_n_reviews || 10;
     const reviewsSince = p.reviews_since_last || 0;
     const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
-    const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
+    // Use the animal label sprite or animal image as a floating sprite on top of the pasture
+    const imgHtml = lbl ? `<img src="${lbl}" width="44" height="44" class="animal-sprite">` : `<span class="animal-sprite">${animalImg(p.animal_type,40)}</span>`;
     el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsSince}/${produceEvery}</span>`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
