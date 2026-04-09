@@ -524,9 +524,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .item-cell { position: relative; }
 
 /* ===== PLOTS — 3D Depth ===== */
-#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(82px,110px));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start}
-#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(72px,100px))}
-#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(64px,88px))}
+#fields-grid{display:grid;grid-template-columns:repeat(3,minmax(85px,110px));gap:10px;padding:12px;min-height:60px;justify-content:center;align-items:start}
+#fields-grid.cols-4{grid-template-columns:repeat(4,minmax(78px,100px));gap:8px}
+#fields-grid.cols-5{grid-template-columns:repeat(5,minmax(68px,90px));gap:7px}
 
 .plot{position:relative;border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:64px;max-width:115px;
   box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.15)}
@@ -539,6 +539,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty .field-img{filter:brightness(.85) saturate(.8)}
 .plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
 .plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(0,0,0,.06) 6px,rgba(0,0,0,.06) 7px);pointer-events:none;z-index:0;border-radius:16px}
+/* Almost ready — subtle golden hint like Hay Day pre-harvest glow */
+.plot-almost-ready{border-color:rgba(255,215,0,.25) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.15) !important}
+.plot-almost-ready .plot-progress-fill{background:linear-gradient(90deg,#4caf50,#8bc34a,#ffd700) !important}
 .plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-5px) scale(1.1) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff;z-index:5 !important}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
@@ -561,7 +564,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
 .plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:6px;background:rgba(0,0,0,.5);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.4);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
@@ -575,9 +578,6 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
 .plot-empty:hover .plot-replant img{transform:scale(1.15)}
 
-/* Gem speed-up button on growing plots */
-.plot-gem-btn{position:absolute;top:3px;left:3px;z-index:8;background:linear-gradient(135deg,rgba(79,195,247,.25),rgba(2,136,209,.35));border:1px solid rgba(79,195,247,.4);border-radius:8px;padding:2px 5px;font-size:8px;font-weight:900;color:#fff;cursor:pointer;display:flex;align-items:center;gap:2px;text-shadow:0 1px 2px rgba(0,0,0,.5);transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-.plot-gem-btn:hover{background:linear-gradient(135deg,rgba(79,195,247,.45),rgba(2,136,209,.55));transform:scale(1.1);box-shadow:0 0 10px rgba(79,195,247,.5)}
 /* Gem speed-up button in production queue */
 .gem-speed-btn{background:linear-gradient(135deg,rgba(79,195,247,.2),rgba(2,136,209,.35));border:1px solid rgba(79,195,247,.35);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;gap:3px;text-shadow:0 1px 2px rgba(0,0,0,.4);transition:all .15s;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .gem-speed-btn:hover{background:linear-gradient(135deg,rgba(79,195,247,.4),rgba(2,136,209,.55));transform:scale(1.05);box-shadow:0 0 12px rgba(79,195,247,.4)}
@@ -1066,18 +1066,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-crop-name{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;text-transform:uppercase;pointer-events:none;line-height:1}
 .plot-crop-name span{background:rgba(0,0,0,.4);padding:1px 6px;border-radius:4px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 
-/* ===== GROWING PLOT — Clean Hay Day style ===== */
-.plot-stage-dots-wrap{position:absolute;top:4px;left:0;right:0;display:flex;justify-content:center;z-index:5;pointer-events:none}
-.plot-stage-dots{display:flex;gap:4px;align-items:center;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:8px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-.stage-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.35);transition:all .3s}
-.stage-dot.filled{background:rgba(76,175,80,.95);border-color:rgba(76,175,80,.8);box-shadow:0 0 4px rgba(76,175,80,.6)}
-.stage-dot.current{background:rgba(255,215,0,.95);border-color:rgba(255,215,0,.8);box-shadow:0 0 5px rgba(255,215,0,.7);animation:dotPulse 1.5s ease-in-out infinite}
-@keyframes dotPulse{0%,100%{transform:scale(1);box-shadow:0 0 3px rgba(255,215,0,.4)}50%{transform:scale(1.4);box-shadow:0 0 8px rgba(255,215,0,.9)}}
-
-/* Reviews-left counter on growing plots */
-.plot-reviews-left{position:absolute;bottom:8px;right:4px;font-size:8px;font-weight:900;color:rgba(255,255,255,.7);text-shadow:0 1px 2px rgba(0,0,0,.8);z-index:5;background:rgba(0,0,0,.35);padding:1px 4px;border-radius:4px;line-height:1.2}
-.plot-reviews-left.almost-done{color:var(--gold);background:rgba(255,215,0,.25);border:1px solid rgba(255,215,0,.4);animation:almostDonePulse 1.5s ease-in-out infinite}
-@keyframes almostDonePulse{0%,100%{box-shadow:0 0 3px rgba(255,215,0,.3)}50%{box-shadow:0 0 8px rgba(255,215,0,.7)}}
+/* (Stage dots and reviews-left counter removed — clean Hay Day style uses crop sprite + progress bar only, detail on tap) */
 
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(255,215,0,.1));color:var(--gold-d);font-size:10px;font-weight:900;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,215,0,.3);display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)}

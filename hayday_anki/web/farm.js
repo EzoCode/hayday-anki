@@ -447,10 +447,11 @@ function buildingIcon(id, w) {
   return '';
 }
 
-// Only map buildings that have UNIQUE real sprites (not shared/generic)
+// Map buildings to their real Hay Day PNG sprites
 const HD_BUILDINGS = {
   barn:'hayday_barn', silo:'hayday_silo', shop:'hayday_shop',
   chicken_coop:'hayday_chicken_coop', coop:'hayday_chicken_coop',
+  sugar_mill:'hayday_mill-dark',
 };
 function buildingImg(id, w) {
   // Use unique SVGs for production buildings (each has its own design)
@@ -935,27 +936,16 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      const cropSize = stage <= 1 ? 48 : 62;
+      // Hay Day style: crop grows visually bigger through stages, clean & uncluttered
+      const cropSize = 30 + stage * 12; // 30px at seed → 66px at stage 3
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
-      // Stage dots: 4 dots showing which growth stage we're in
-      let stageDots = '';
-      for (let s = 0; s < 4; s++) {
-        stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
-      }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom + reviews left
-      const gemGrowCost = Math.max(1, Math.floor(reviewsLeft / 5));
-      const canGemGrow = (farmData.gems||0) >= gemGrowCost && reviewsLeft > 0;
-      const gemGrowBtn = canGemGrow ? `<span class="plot-gem-btn" data-field="${field.id}" data-cost="${gemGrowCost}" title="Croissance instantanée (${gemGrowCost} gemmes)"><span class="css-gem" style="width:8px;height:10px"></span>${gemGrowCost}</span>` : '';
-      const reviewsLeftLabel = reviewsLeft <= 3 ? `<span class="plot-reviews-left almost-done">${reviewsLeft}</span>` : `<span class="plot-reviews-left">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>${reviewsLeftLabel}${gemGrowBtn}`;
-      el.onclick = () => showItemInfo(field.crop);
-      // Attach gem grow handler after appended
-      setTimeout(() => {
-        const gemEl = el.querySelector('.plot-gem-btn');
-        if (gemEl) gemEl.onclick = (e) => { e.stopPropagation(); pycmd('farm:gem_instant_grow:' + gemEl.dataset.field); SoundMgr.play('coin'); };
-      }, 0);
+      // Almost-ready visual hint (like Hay Day subtle glow when crop is close)
+      if (pct >= 75) el.classList.add('plot-almost-ready');
+      // Clean: just the crop sprite + thin progress bar at bottom. Info on tap.
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      el.onclick = () => showCropDetail(field);
     }
     grid.appendChild(el);
   });
@@ -1319,6 +1309,41 @@ function showItemInfo(itemId) {
     requirements: reqs,
     action_label: (cat.sell_price > 0 && qty > 0) ? `Vendre tout (${qty} × ${cat.sell_price} = ${qty * cat.sell_price} pièces)` : null,
     action_cmd: (cat.sell_price > 0 && qty > 0) ? `pycmd('farm:sell:${itemId}:${qty}');hideOverlay()` : null,
+  });
+}
+
+function showCropDetail(field) {
+  const cropDef = (farmData.crop_defs||{})[field.crop]||{};
+  const reviewsPerStage = cropDef.growth_reviews || 3;
+  const totalNeeded = reviewsPerStage * 4;
+  const totalDone = (field.growth_stage||0) * reviewsPerStage + (field.reviews_done||0);
+  const reviewsLeft = totalNeeded - totalDone;
+  const pct = Math.min(100, Math.round(totalDone / totalNeeded * 100));
+  const cName = cropName(field.crop);
+  const stageLabel = GROWTH_LABEL[Math.min(field.growth_stage||0, 4)];
+  const sellPrice = cropDef.sell_price || 2;
+  const harvestMin = cropDef.harvest_min || 2;
+  const harvestMax = cropDef.harvest_max || 4;
+
+  const reqs = [
+    {label: 'Progression', value: `${pct}% — ${stageLabel}`, met: pct >= 50},
+    {label: 'Révisions restantes', value: `${reviewsLeft}`, met: reviewsLeft <= 5},
+    {label: 'Récolte', value: `${harvestMin}-${harvestMax}x à ${sellPrice} p./u`, met: true},
+  ];
+
+  // Gem instant grow option
+  const gemGrowCost = Math.max(1, Math.floor(reviewsLeft / 5));
+  const canGemGrow = (farmData.gems||0) >= gemGrowCost && reviewsLeft > 0;
+  const actionLabel = canGemGrow ? `Croissance instantanée (${gemGrowCost} gemmes)` : null;
+  const actionCmd = canGemGrow ? `pycmd('farm:gem_instant_grow:${field.id}');hideOverlay()` : null;
+
+  showInfo({
+    icon: cropPortrait(field.crop, 48) || cropImg(field.crop, field.growth_stage||0, 48),
+    title: cName,
+    desc: `${stageLabel} — encore ${reviewsLeft} révisions avant la récolte.`,
+    requirements: reqs,
+    action_label: actionLabel,
+    action_cmd: actionCmd,
   });
 }
 
