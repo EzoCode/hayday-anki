@@ -381,6 +381,17 @@ const ITEM_ICONS = {
   picnic_table: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='pt' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e8c87a'/%3E%3Cstop offset='1' stop-color='%23c9884a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cellipse cx='16' cy='28' rx='14' ry='2' fill='%23000' opacity='.06'/%3E%3Crect x='3' y='13' width='26' height='3.5' rx='1' fill='url(%23pt)' stroke='%23a06a30' stroke-width='.3'/%3E%3Crect x='4' y='13.3' width='24' height='1' fill='%23f0d090' opacity='.3'/%3E%3Crect x='8' y='8' width='16' height='2.5' rx='.8' fill='%23e74c3c' opacity='.6'/%3E%3Crect x='16' y='8' width='8' height='2.5' rx='.8' fill='%23fff' opacity='.2'/%3E%3Cpath d='M8 16.5L4 28' stroke='%23a06a30' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M24 16.5L28 28' stroke='%23a06a30' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M8.5 16.5L4.5 28' stroke='%23c9884a' stroke-width='.8' opacity='.3'/%3E%3Cpath d='M24.5 16.5L28.5 28' stroke='%23c9884a' stroke-width='.8' opacity='.3'/%3E%3Crect x='5' y='11' width='22' height='2.5' rx='.8' fill='url(%23pt)' stroke='%23a06a30' stroke-width='.3'/%3E%3Crect x='6' y='11.3' width='20' height='.7' fill='%23f0d090' opacity='.25'/%3E%3Crect x='5' y='17' width='22' height='2.5' rx='.8' fill='url(%23pt)' stroke='%23a06a30' stroke-width='.3'/%3E%3Crect x='6' y='17.3' width='20' height='.7' fill='%23f0d090' opacity='.25'/%3E%3C/svg%3E",
 };
 
+// --- Event Icons (SVG inline, replacing emoji) ---
+const EVENT_ICONS = {
+  event_weekend: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='%23ff9800'/%3E%3Cpath d='M10 4l1.5 3 3.5.5-2.5 2.5.6 3.5L10 12l-3.1 1.5.6-3.5L5 7.5l3.5-.5z' fill='%23fff'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_sunrise: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect x='0' y='12' width='20' height='8' fill='%234caf50' rx='1'/%3E%3Ccircle cx='10' cy='12' r='5' fill='%23ffd54f'/%3E%3Cpath d='M10 3v3M4.5 7l2 2M15.5 7l-2 2M2 12h3M15 12h3' stroke='%23ffb300' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_moon: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%231a237e'/%3E%3Cpath d='M12 3a7 7 0 100 14 7 7 0 01-6-7 7 7 0 016-7z' fill='%23ffd54f'/%3E%3Ccircle cx='14' cy='5' r='.8' fill='%23fff' opacity='.6'/%3E%3Ccircle cx='6' cy='7' r='.5' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='16' cy='12' r='.6' fill='%23fff' opacity='.5'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_lunch: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='12' r='7' fill='%23fff' stroke='%23bbb' stroke-width='.5'/%3E%3Cellipse cx='10' cy='12' rx='5' ry='3' fill='%23ff7043' opacity='.7'/%3E%3Ccircle cx='8' cy='11' r='1.5' fill='%234caf50'/%3E%3Ccircle cx='12' cy='11' r='1' fill='%23ffd54f'/%3E%3Cpath d='M5 5v6M3 5h4' stroke='%23999' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_fire: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 2c0 4-5 6-5 10a5.5 5.5 0 0011 0c0-4-3-4-3-7s-3-3-3-3z' fill='%23ff5722'/%3E%3Cpath d='M10 8c0 2-2.5 3-2.5 5a2.8 2.8 0 005.5 0c0-2-1.5-2-1.5-3.5S10 8 10 8z' fill='%23ffab00'/%3E%3Cpath d='M10 12c0 1-1 1.5-1 2.5a1.2 1.2 0 002.5 0c0-1-.5-.8-.5-1.5s-1-1-1-1z' fill='%23fff9c4'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_star: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%239c27b0'/%3E%3Cpath d='M10 3l2 4.5 5 .7-3.6 3.5.8 5L10 14.5 5.8 16.7l.8-5L3 8.2l5-.7z' fill='%23ffd700'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+  event_sprout: "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect x='2' y='14' width='16' height='5' rx='2' fill='%238d6e63'/%3E%3Cpath d='M10 14V8' stroke='%234caf50' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10 10c-3-1-4-4-4-4s3 1 4 4z' fill='%2366bb6a'/%3E%3Cpath d='M10 8c3-1 4-4 4-4s-3 1-4 4z' fill='%234caf50'/%3E%3C/svg%3E\" width=\"14\" height=\"14\" style=\"vertical-align:middle\">",
+};
+
 // Get item icon as <img> tag (SVG inline or sprite, no emoji fallback for key items)
 function itemIcon(id, w) {
   w = w || 24;
@@ -747,7 +758,15 @@ function updateHUD() {
   const banner = document.getElementById('event-banner');
   const events = d.active_events || [];
   if (events.length > 0) {
-    banner.innerHTML = events.map(e => `<span class="event-tag"><span class="event-icon"></span> ${e.name}</span>`).join('');
+    banner.innerHTML = events.map(e => {
+      const iconId = e.icon || '';
+      const iconHtml = EVENT_ICONS[iconId] || EVENT_ICONS['event_star'] || '';
+      const mult = [];
+      if (e.coin_multiplier && e.coin_multiplier > 1) mult.push(`x${e.coin_multiplier} ${S('ui_coin') ? `<img src="${S('ui_coin')}" width="10" height="10">` : 'p.'}`);
+      if (e.xp_multiplier && e.xp_multiplier > 1) mult.push(`x${e.xp_multiplier} XP`);
+      const multStr = mult.length ? ` <span class="event-mult">${mult.join(' ')}</span>` : '';
+      return `<span class="event-tag">${iconHtml} ${e.name}${multStr}</span>`;
+    }).join('');
     banner.style.display = '';
   } else {
     banner.style.display = 'none';
@@ -926,9 +945,17 @@ function renderFields() {
       }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
       // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom + reviews left
+      const gemGrowCost = Math.max(1, Math.floor(reviewsLeft / 5));
+      const canGemGrow = (farmData.gems||0) >= gemGrowCost && reviewsLeft > 0;
+      const gemGrowBtn = canGemGrow ? `<span class="plot-gem-btn" data-field="${field.id}" data-cost="${gemGrowCost}" title="Croissance instantanée (${gemGrowCost} gemmes)"><span class="css-gem" style="width:8px;height:10px"></span>${gemGrowCost}</span>` : '';
       const reviewsLeftLabel = reviewsLeft <= 3 ? `<span class="plot-reviews-left almost-done">${reviewsLeft}</span>` : `<span class="plot-reviews-left">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>${reviewsLeftLabel}`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>${reviewsLeftLabel}${gemGrowBtn}`;
       el.onclick = () => showItemInfo(field.crop);
+      // Attach gem grow handler after appended
+      setTimeout(() => {
+        const gemEl = el.querySelector('.plot-gem-btn');
+        if (gemEl) gemEl.onclick = (e) => { e.stopPropagation(); pycmd('farm:gem_instant_grow:' + gemEl.dataset.field); SoundMgr.play('coin'); };
+      }, 0);
     }
     grid.appendChild(el);
   });
@@ -999,14 +1026,19 @@ function renderWorkshop() {
       statusHtml = `<span class="building-badge">${ready}</span>`;
     } else if (producing > 0) {
       const q = queue.find(item=>!item.ready);
-      const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
+      const revDone = q ? (q.reviews_done||0) : 0;
+      const revReq = q ? (q.reviews_required || (q.sessions_required||1)*10) : 10;
+      const pct = Math.min(100, Math.round(revDone / Math.max(1, revReq) * 100));
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }
     // Show what the building is doing for better game comprehension
     let prodLabel = '';
     if (producing > 0 && !ready) {
       const q = queue.find(item=>!item.ready);
-      if (q) prodLabel = `<span class="building-prod-label-sm">${q.name||''}</span>`;
+      if (q) {
+        const revLeft = Math.max(0, (q.reviews_required || (q.sessions_required||1)*10) - (q.reviews_done||0));
+        prodLabel = `<span class="building-prod-label-sm">${q.name||''} · ${revLeft} rev.</span>`;
+      }
     } else if (ready > 0) {
       prodLabel = `<span class="building-prod-label-sm ready-label">Prêt !</span>`;
     }
@@ -1044,8 +1076,13 @@ function renderPastures() {
     const produceEvery = adef.produce_every_n_reviews || 10;
     const reviewsSince = p.reviews_since_last || 0;
     const progPct = Math.min(100, Math.round(reviewsSince / produceEvery * 100));
+    const reviewsLeft = Math.max(0, produceEvery - reviewsSince);
+    const productName = itemName(adef.product || '');
     const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
-    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div><span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsSince}/${produceEvery}</span>`;
+    const prodLabelHtml = reviewsLeft <= 0
+      ? `<span class="pasture-prod-label ready-label">${itemIcon(adef.product||'', 12)} Prêt !</span>`
+      : `<span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsLeft} rev.</span>`;
+    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div>${prodLabelHtml}`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
   });
@@ -2006,6 +2043,7 @@ function showPlantDialog(plotId) {
   document.getElementById('plant-overlay').classList.remove('hidden');
 }
 
+let _lastHarvestPos = null;
 function harvestPlot(id){
   SoundMgr.play('harvest');
   // Find the plot element and create harvest burst from it
@@ -2017,10 +2055,16 @@ function harvestPlot(id){
     const rect = plotEl.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
+    _lastHarvestPos = {x: cx, y: cy};
     // Create harvest burst particles from actual plot position
     showHarvestBurst(cx, cy, field.crop);
     // Coin fly from plot to HUD (satisfying collection feel)
     showCoinBurst(cx, cy, 4);
+    // Satisfying scale-down animation on the plot
+    plotEl.style.transition = 'transform .2s ease-out';
+    plotEl.style.transform = 'scale(0.3)';
+    plotEl.style.opacity = '0.3';
+    setTimeout(() => { plotEl.style.transition = ''; plotEl.style.transform = ''; plotEl.style.opacity = ''; }, 300);
   }
   pycmd(`farm:harvest:${id}`);
 }
@@ -2347,8 +2391,16 @@ function showReward(d){
   const isSpecial = hasItems || hasBox || coins >= 15;
   const isBig = coins >= 25 || hasBox;
 
+  // Use last harvest position for harvest rewards (Hay Day style: rewards fly from crop)
+  const harvestPos = _lastHarvestPos;
+  _lastHarvestPos = null;
+
   if (coins > 0 || xp > 0) {
-    if (isBig) {
+    if (harvestPos) {
+      // Harvest reward: show from the plot position for satisfying feedback
+      showFloatingReward(`+${coins}`, harvestPos.x - 15, harvestPos.y - 10);
+      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, harvestPos.x + 15, harvestPos.y + 5), 150);
+    } else if (isBig) {
       // Big reward: full coin burst + floating text + sound (rare, exciting)
       const zone = document.querySelector('.zone-fields');
       let cx = window.innerWidth/2, cy = window.innerHeight/3;
@@ -2419,27 +2471,44 @@ function showProductionDialog(data) {
     qd.innerHTML = `<h3>${LANG.in_progress}</h3>`;
 
     queue.forEach(q => {
-      const pct = Math.min(100, ((q.sessions_waited || 0) / Math.max(1, q.sessions_required || 1)) * 100);
-      const reviewsDone = (q.sessions_waited || 0) * 10;
-      const reviewsTotal = (q.sessions_required || 1) * 10;
+      const reviewsDone = q.reviews_done || (q.sessions_waited || 0) * 10;
+      const reviewsTotal = q.reviews_required || (q.sessions_required || 1) * 10;
+      const pct = Math.min(100, reviewsDone / Math.max(1, reviewsTotal) * 100);
 
       const s = document.createElement('div');
       s.className = `production-queue-item ${q.ready ? 'ready' : ''}`;
 
       const checkSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%234caf50'/%3E%3Cpath d='M4.5 8l2.5 2.5 4.5-5' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
 
+      const reviewsLeft = Math.max(0, reviewsTotal - reviewsDone);
+      const gemCost = Math.max(1, Math.floor(reviewsLeft / 5));
       const progressHtml = !q.ready
         ? `<div class="pq-bar"><div class="pq-bar-fill" style="width:${pct}%"></div></div>`
         : `<span class="pq-ready-badge"><img src="${checkSvg}" width="18" height="18"></span>`;
+
+      const gemIconHtml = S('ui_gem') ? `<img src="${S('ui_gem')}" width="12" height="12" style="vertical-align:middle">` : '<span class="css-gem" style="width:10px;height:12px"></span>';
+      const gemBtnHtml = !q.ready && (farmData.gems||0) >= gemCost
+        ? `<button class="gem-speed-btn" title="Terminer maintenant (${gemCost} gemmes)">${gemIconHtml} ${gemCost}</button>`
+        : '';
 
       s.innerHTML = `
         <span class="pq-emoji">${itemIcon(q.recipe_id || '', 28)}</span>
         <div class="pq-info">
           <strong>${q.name}</strong>
-          <span>${q.ready ? LANG.ready : reviewsDone + '/' + reviewsTotal + ' rev.'}</span>
+          <span>${q.ready ? LANG.ready : reviewsLeft + ' révisions restantes'}</span>
         </div>
         ${progressHtml}
+        ${gemBtnHtml}
       `;
+      // Attach gem speed click handler
+      const gemBtn = s.querySelector('.gem-speed-btn');
+      if (gemBtn) {
+        gemBtn.onclick = (e) => {
+          e.stopPropagation();
+          pycmd(`farm:gem_speed_production:${data.building_id}`);
+          hideOverlay();
+        };
+      }
       qd.appendChild(s);
     });
 

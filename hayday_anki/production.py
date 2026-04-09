@@ -1,10 +1,10 @@
 """
 Production System — Buildings, recipes, and production chains.
 
-Production advances every 10 reviews (1 tick = 10 reviews).
-A recipe with sessions_required=1 completes after 10 reviews.
-A recipe with sessions_required=2 completes after 20 reviews.
-This keeps production tightly coupled to the review-by-review loop.
+Production advances every single review for smooth, visible progress.
+A recipe with sessions_required=1 needs 10 reviews to complete.
+A recipe with sessions_required=2 needs 20 reviews to complete.
+Progress is tracked as reviews_done/reviews_required for clear UI feedback.
 """
 
 from typing import Dict, List, Optional, Tuple
@@ -229,12 +229,15 @@ class ProductionManager:
         if building_id not in self.state.production_queues:
             self.state.production_queues[building_id] = []
 
+        reviews_required = recipe["sessions_required"] * 10
         production_item = {
             "recipe_id": recipe_id,
             "name": recipe["name"],
             "output": recipe["output"],
             "xp": recipe["xp"],
             "sessions_required": recipe["sessions_required"],
+            "reviews_required": reviews_required,
+            "reviews_done": 0,
             "sessions_waited": 0,
             "ready": False,
         }
@@ -246,6 +249,7 @@ class ProductionManager:
             "recipe": recipe_id,
             "name": recipe["name"],
             "sessions_required": recipe["sessions_required"],
+            "reviews_required": reviews_required,
         }
 
     def collect_ready(self, building_id: str) -> List[Dict]:
@@ -296,15 +300,20 @@ class ProductionManager:
         for building_id, queue in self.state.production_queues.items():
             result[building_id] = []
             for item in queue:
+                reviews_required = item.get("reviews_required",
+                                            item.get("sessions_required", 1) * 10)
+                reviews_done = item.get("reviews_done",
+                                        item.get("sessions_waited", 0) * 10)
                 result[building_id].append({
                     "recipe_id": item["recipe_id"],
                     "name": item["name"],
                     "ready": item.get("ready", False),
+                    "reviews_done": reviews_done,
+                    "reviews_required": reviews_required,
                     "sessions_waited": item.get("sessions_waited", 0),
                     "sessions_required": item.get("sessions_required", 1),
                     "progress_pct": min(100, int(
-                        item.get("sessions_waited", 0) /
-                        max(1, item.get("sessions_required", 1)) * 100
+                        reviews_done / max(1, reviews_required) * 100
                     )),
                 })
         return result

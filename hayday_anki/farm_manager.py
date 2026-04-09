@@ -1328,6 +1328,57 @@ class FarmManager:
         self.state.mystery_boxes_opened += 1
         return result
 
+    # --- Gem Speed-Up Actions ---
+
+    def gem_speed_production(self, building_id: str) -> Optional[Dict]:
+        """Spend gems to instantly complete the first in-progress item in a building.
+        Cost: 1 gem per 5 remaining reviews (minimum 1 gem)."""
+        queue = self.state.production_queues.get(building_id, [])
+        item = next((q for q in queue if not q.get("ready", False)), None)
+        if not item:
+            return None
+
+        reviews_required = item.get("reviews_required",
+                                    item.get("sessions_required", 1) * 10)
+        reviews_done = item.get("reviews_done", 0)
+        reviews_left = max(0, reviews_required - reviews_done)
+        gem_cost = max(1, reviews_left // 5)
+
+        if self.state.gems < gem_cost:
+            return None
+
+        self.state.gems -= gem_cost
+        item["ready"] = True
+        item["reviews_done"] = reviews_required
+        return {"gem_cost": gem_cost, "name": item.get("name", "")}
+
+    def gem_instant_grow(self, plot_id: int) -> Optional[Dict]:
+        """Spend gems to instantly grow a crop to ready state.
+        Cost: 1 gem per 5 remaining reviews (minimum 1 gem)."""
+        from . import progression
+        field = next((f for f in self.state.fields if f.get("id") == plot_id), None)
+        if not field or field.get("state") not in ("planted", "growing"):
+            return None
+
+        crop_def = progression.CROP_DEFINITIONS.get(field.get("crop", ""), {})
+        reviews_per_stage = crop_def.get("growth_reviews", 3)
+        total_needed = reviews_per_stage * 4
+        total_done = (field.get("growth_stage", 0) * reviews_per_stage
+                      + field.get("reviews_done", 0))
+        reviews_left = max(0, total_needed - total_done)
+        gem_cost = max(1, reviews_left // 5)
+
+        if self.state.gems < gem_cost:
+            return None
+
+        self.state.gems -= gem_cost
+        field["growth_stage"] = 4
+        field["state"] = "ready"
+        field["reviews_done"] = 0
+        field["_ready_since"] = self.state.total_reviews
+        crop_name = ITEM_CATALOG.get(field.get("crop", ""), {}).get("name", field.get("crop", ""))
+        return {"gem_cost": gem_cost, "crop_name": crop_name}
+
     # --- Streak Management ---
 
     def update_streak(self):
@@ -1537,7 +1588,7 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": "weekend_bonus",
                     "name": "Bonus Weekend !",
-                    "emoji": "\U0001F389",
+                    "icon": "event_weekend",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 2.0,
                     "ends_at": end.isoformat(),
@@ -1549,7 +1600,7 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "early_bird",
                 "name": "Lève-tôt !",
-                "emoji": "\U0001F305",
+                "icon": "event_sunrise",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
                 "ends_at": end,
@@ -1561,7 +1612,7 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "night_owl",
                 "name": "Couche-tard !",
-                "emoji": "\U0001F989",
+                "icon": "event_moon",
                 "coin_multiplier": 1.3,
                 "xp_multiplier": 1.5,
                 "ends_at": end,
@@ -1573,7 +1624,7 @@ class FarmManager:
             self.state.active_events.append({
                 "id": "lunch_rush",
                 "name": "Pause déjeuner !",
-                "emoji": "\U0001F35C",
+                "icon": "event_lunch",
                 "coin_multiplier": 1.2,
                 "xp_multiplier": 1.3,
                 "ends_at": end,
@@ -1587,7 +1638,7 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": evt_id,
                     "name": f"Série de {self.state.current_streak} jours !",
-                    "emoji": "\U0001F525",
+                    "icon": "event_fire",
                     "coin_multiplier": 2.0,
                     "xp_multiplier": 2.0,
                     "ends_at": end,
@@ -1601,7 +1652,7 @@ class FarmManager:
                 self.state.active_events.append({
                     "id": evt_id,
                     "name": f"Niveau {self.state.level} !",
-                    "emoji": "\U0001F38A",
+                    "icon": "event_star",
                     "coin_multiplier": 1.5,
                     "xp_multiplier": 1.5,
                     "ends_at": end,
@@ -1617,7 +1668,7 @@ class FarmManager:
                     self.state.active_events.append({
                         "id": "first_session",
                         "name": "Nouveau départ !",
-                        "emoji": "\U0001F331",
+                        "icon": "event_sprout",
                         "coin_multiplier": 1.25,
                         "xp_multiplier": 1.25,
                         "ends_at": end,
@@ -1802,29 +1853,39 @@ class FarmManager:
         return summary
 
     def _process_production(self):
-        """Process production queues - advance items that waited a session."""
+        """Legacy end-of-session production advance.
+        Production now advances per-review in _advance_production_by_review().
+        This is kept as a safety net for saves that might have stale items."""
         for building_id, queue in self.state.production_queues.items():
             for item in queue:
                 if not item.get("ready", False):
-                    sessions_waited = item.get("sessions_waited", 0) + 1
-                    item["sessions_waited"] = sessions_waited
-                    if sessions_waited >= item.get("sessions_required", 1):
+                    reviews_required = item.get("reviews_required",
+                                                item.get("sessions_required", 1) * 10)
+                    reviews_done = item.get("reviews_done",
+                                            item.get("sessions_waited", 0) * 10)
+                    if reviews_done >= reviews_required:
                         item["ready"] = True
 
     def _advance_production_by_review(self) -> List[Dict]:
-        """Advance production queues per-review (every PRODUCTION_REVIEWS_PER_TICK reviews).
+        """Advance production queues every single review for smooth progress.
+        Each recipe has reviews_required (= sessions_required * 10).
         Returns list of newly ready production notifications."""
-        REVIEWS_PER_TICK = 10  # Every 10 reviews = 1 production tick
         notifications = []
-        if self.state.session_reviews % REVIEWS_PER_TICK != 0:
-            return notifications
 
         for building_id, queue in self.state.production_queues.items():
             for item in queue:
                 if not item.get("ready", False):
-                    sessions_waited = item.get("sessions_waited", 0) + 1
-                    item["sessions_waited"] = sessions_waited
-                    if sessions_waited >= item.get("sessions_required", 1):
+                    # Migrate old session-based items to review-based
+                    if "reviews_done" not in item:
+                        sessions_waited = item.get("sessions_waited", 0)
+                        sessions_required = item.get("sessions_required", 1)
+                        item["reviews_required"] = sessions_required * 10
+                        item["reviews_done"] = sessions_waited * 10
+                    item["reviews_done"] = item.get("reviews_done", 0) + 1
+                    reviews_required = item.get("reviews_required",
+                                                item.get("sessions_required", 1) * 10)
+                    item["reviews_required"] = reviews_required
+                    if item["reviews_done"] >= reviews_required:
                         item["ready"] = True
                         notifications.append({
                             "type": "production_ready",

@@ -536,6 +536,34 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "gem_speed_production":
+                building_id = parts[2] if len(parts) > 2 else ""
+                result = self.manager.gem_speed_production(building_id)
+                if result:
+                    cost = result["gem_cost"]
+                    name = result["name"]
+                    self._js(f"showNotification({json.dumps(f'{name} terminé ! (-{cost} gemmes)')}, 'reward')")
+                    self._js("SoundMgr.play('collect')")
+                else:
+                    self._js("showNotification('Pas assez de gemmes !', 'error')")
+                    self._js("SoundMgr.play('error')")
+                self._send_state()
+                self.manager.save()
+
+            elif action == "gem_instant_grow":
+                plot_id = int(parts[2]) if len(parts) > 2 else -1
+                result = self.manager.gem_instant_grow(plot_id)
+                if result:
+                    cost = result["gem_cost"]
+                    crop_name = result["crop_name"]
+                    self._js(f"showNotification({json.dumps(f'{crop_name} prêt ! (-{cost} gemmes)')}, 'reward')")
+                    self._js("SoundMgr.play('harvest')")
+                else:
+                    self._js("showNotification('Pas assez de gemmes !', 'error')")
+                    self._js("SoundMgr.play('error')")
+                self._send_state()
+                self.manager.save()
+
         except Exception as e:
             print(f"[ADFarm] Bridge error: {e}")
             import traceback
@@ -593,6 +621,10 @@ class FarmWebView:
                 "name": item.get("name", ""),
                 "recipe_id": item.get("recipe_id", ""),
                 "ready": item.get("ready", False),
+                "reviews_done": item.get("reviews_done",
+                                         item.get("sessions_waited", 0) * 10),
+                "reviews_required": item.get("reviews_required",
+                                             item.get("sessions_required", 1) * 10),
                 "sessions_waited": item.get("sessions_waited", 0),
                 "sessions_required": item.get("sessions_required", 1),
             }
