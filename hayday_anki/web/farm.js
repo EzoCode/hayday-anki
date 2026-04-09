@@ -1031,6 +1031,10 @@ function renderWorkshop() {
       }
     } else if (ready > 0) {
       prodLabel = `<span class="building-prod-label-sm ready-label">Prêt !</span>`;
+    } else if (queue.length === 0) {
+      // Idle building — subtle hint to encourage production
+      prodLabel = `<span class="building-prod-label-sm" style="opacity:.4">Tap pour produire</span>`;
+      el.classList.add('building-idle');
     }
     el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${prodLabel}${statusHtml}`;
     grid.appendChild(el);
@@ -2086,10 +2090,17 @@ function harvestPlot(id){
     // Coin fly from plot to HUD (satisfying collection feel)
     showCoinBurst(cx, cy, 4);
     // Satisfying scale-down animation on the plot
-    plotEl.style.transition = 'transform .2s ease-out';
+    plotEl.style.transition = 'transform .2s ease-out, opacity .2s ease-out';
     plotEl.style.transform = 'scale(0.3)';
     plotEl.style.opacity = '0.3';
-    setTimeout(() => { plotEl.style.transition = ''; plotEl.style.transform = ''; plotEl.style.opacity = ''; }, 300);
+    // After harvest animation, add glow hint for quick replant
+    setTimeout(() => {
+      plotEl.style.transition = '';
+      plotEl.style.transform = '';
+      plotEl.style.opacity = '';
+      plotEl.classList.add('plot-just-harvested');
+      setTimeout(() => plotEl.classList.remove('plot-just-harvested'), 1500);
+    }, 300);
   }
   pycmd(`farm:harvest:${id}`);
 }

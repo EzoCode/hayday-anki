@@ -1869,30 +1869,34 @@ class FarmManager:
     def _advance_production_by_review(self) -> List[Dict]:
         """Advance production queues every single review for smooth progress.
         Each recipe has reviews_required (= sessions_required * 10).
+        Like real Hay Day: only the first non-ready item per building advances.
         Returns list of newly ready production notifications."""
         notifications = []
 
         for building_id, queue in self.state.production_queues.items():
             for item in queue:
-                if not item.get("ready", False):
-                    # Migrate old session-based items to review-based
-                    if "reviews_done" not in item:
-                        sessions_waited = item.get("sessions_waited", 0)
-                        sessions_required = item.get("sessions_required", 1)
-                        item["reviews_required"] = sessions_required * 10
-                        item["reviews_done"] = sessions_waited * 10
-                    item["reviews_done"] = item.get("reviews_done", 0) + 1
-                    reviews_required = item.get("reviews_required",
-                                                item.get("sessions_required", 1) * 10)
-                    item["reviews_required"] = reviews_required
-                    if item["reviews_done"] >= reviews_required:
-                        item["ready"] = True
-                        notifications.append({
-                            "type": "production_ready",
-                            "message": f"{item['name']} est prêt(e) !",
-                            "building_id": building_id,
-                            "recipe_id": item.get("recipe_id", ""),
-                        })
+                if item.get("ready", False):
+                    continue
+                # Only advance the first non-ready item (sequential production)
+                # Migrate old session-based items to review-based
+                if "reviews_done" not in item:
+                    sessions_waited = item.get("sessions_waited", 0)
+                    sessions_required = item.get("sessions_required", 1)
+                    item["reviews_required"] = sessions_required * 10
+                    item["reviews_done"] = sessions_waited * 10
+                item["reviews_done"] = item.get("reviews_done", 0) + 1
+                reviews_required = item.get("reviews_required",
+                                            item.get("sessions_required", 1) * 10)
+                item["reviews_required"] = reviews_required
+                if item["reviews_done"] >= reviews_required:
+                    item["ready"] = True
+                    notifications.append({
+                        "type": "production_ready",
+                        "message": f"{item['name']} est prêt(e) !",
+                        "building_id": building_id,
+                        "recipe_id": item.get("recipe_id", ""),
+                    })
+                break  # Only advance first non-ready item per building
         return notifications
 
     # --- Data for UI ---
@@ -2017,7 +2021,12 @@ class FarmManager:
             "session_xp": self.state.session_xp_earned,
             "streak_bonus_pct": min(self.state.current_streak * 5, 50),
             "active_events": [
-                {"name": e.get("name", "")}
+                {
+                    "name": e.get("name", ""),
+                    "icon": e.get("icon", "event_star"),
+                    "coin_multiplier": e.get("coin_multiplier", 1.0),
+                    "xp_multiplier": e.get("xp_multiplier", 1.0),
+                }
                 for e in self.state.active_events
                 if self._is_event_active(e)
             ],

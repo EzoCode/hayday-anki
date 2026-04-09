@@ -616,6 +616,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .building-prod-bar{position:absolute;bottom:4px;left:12%;right:12%;height:4px;background:rgba(0,0,0,.2);border-radius:2px;overflow:hidden;z-index:5}
 .building-prod-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:2px;transition:width .4s;box-shadow:0 0 4px rgba(76,175,80,.3)}
 
+/* Idle building — subtle pulsing border to draw attention */
+.building-tile.building-idle{border-style:dashed;border-color:rgba(255,255,255,.2);animation:idlePulse 4s ease-in-out infinite}
+@keyframes idlePulse{0%,100%{border-color:rgba(255,255,255,.15)}50%{border-color:rgba(255,220,160,.35)}}
+
 /* ===== ANIMALS ===== */
 #animals-area{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 6px}
 .animal-tile{display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s;animation:animalBob 3s ease-in-out infinite}
@@ -1093,5 +1097,132 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== REVIEW MICRO-FEEDBACK — subtle +coins near HUD ===== */
 .review-sparkle{position:absolute;font-size:11px;font-weight:900;color:var(--gold);text-shadow:0 0 6px rgba(255,215,0,.6),0 1px 2px rgba(0,0,0,.5);animation:reviewSparkle .8s ease-out forwards;pointer-events:none;z-index:160;letter-spacing:.3px}
 @keyframes reviewSparkle{0%{opacity:0;transform:translateY(4px) scale(.7)}15%{opacity:1;transform:translateY(0) scale(1.1)}40%{opacity:1;transform:translateY(-8px) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(.8)}}
+
+/* ===== CUSTOM SCROLLBAR — Hay Day Wood Style ===== */
+#farm-container::-webkit-scrollbar,
+.panel::-webkit-scrollbar,
+#orders-list::-webkit-scrollbar,
+#buildings-list::-webkit-scrollbar,
+#achievements-list::-webkit-scrollbar,
+.item-grid::-webkit-scrollbar,
+#crop-choices::-webkit-scrollbar,
+.info-card::-webkit-scrollbar,
+.production-card::-webkit-scrollbar {
+  width: 6px;
+}
+#farm-container::-webkit-scrollbar-track,
+.panel::-webkit-scrollbar-track,
+#orders-list::-webkit-scrollbar-track,
+#buildings-list::-webkit-scrollbar-track,
+#achievements-list::-webkit-scrollbar-track,
+.item-grid::-webkit-scrollbar-track,
+#crop-choices::-webkit-scrollbar-track,
+.info-card::-webkit-scrollbar-track,
+.production-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+#farm-container::-webkit-scrollbar-thumb,
+.panel::-webkit-scrollbar-thumb {
+  background: rgba(139,94,60,.35);
+  border-radius: 3px;
+}
+#farm-container::-webkit-scrollbar-thumb:hover,
+.panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(139,94,60,.55);
+}
+#orders-list::-webkit-scrollbar-thumb,
+#buildings-list::-webkit-scrollbar-thumb,
+#achievements-list::-webkit-scrollbar-thumb,
+.item-grid::-webkit-scrollbar-thumb,
+#crop-choices::-webkit-scrollbar-thumb,
+.info-card::-webkit-scrollbar-thumb,
+.production-card::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.12);
+  border-radius: 3px;
+}
+
+/* ===== NOTIFICATION AREA — safe position below HUD ===== */
+#notification-area{top:64px}
+
+/* ===== HARVEST REPLANT GLOW — highlight freshly emptied plot for quick replant ===== */
+.plot-empty.plot-just-harvested {
+  animation: harvestGlow 1.5s ease-out;
+  border-color: rgba(106,191,71,.5) !important;
+}
+@keyframes harvestGlow {
+  0% { box-shadow: inset 1px 1px 0 rgba(255,255,255,.2), 0 0 20px rgba(106,191,71,.5), 0 4px 10px rgba(0,0,0,.25); }
+  100% { box-shadow: inset 1px 1px 0 rgba(255,255,255,.2), 0 0 0 transparent, 0 4px 10px rgba(0,0,0,.25); }
+}
+
+/* ===== SMOOTH PLOT TRANSITION — harvest to empty ===== */
+.plot {
+  transition: transform .15s, box-shadow .15s, background .4s, border-color .4s, opacity .3s;
+}
+
+/* ===== ZONE DEPTH — subtle bottom fade for 3D feel ===== */
+.farm-zone::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.08));
+  pointer-events: none;
+  border-radius: 0 0 16px 16px;
+}
+
+/* ===== IMPROVED HUD COIN/GEM ICON ALIGNMENT ===== */
+.hud-currency img { vertical-align: middle; }
+
+/* ===== READY CROP HARVEST HINT — pulsing glow on tap target ===== */
+.plot-ready .plot-crop img {
+  cursor: pointer;
+  filter: drop-shadow(2px 3px 3px rgba(0,0,0,.45)) drop-shadow(0 0 8px rgba(255,215,0,.3));
+}
+
+/* ===== GROWING PLOT — subtle green progress indicator ===== */
+.plot-planted .plot-progress-fill,
+.plot-growing .plot-progress-fill {
+  box-shadow: 0 0 6px rgba(76,175,80,.4);
+}
+
+/* ===== LEVEL UP OVERLAY — prevent text overflow ===== */
+.levelup-card {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* ===== OVERLAY BACKDROP — smoother blur ===== */
+.overlay {
+  transition: opacity .2s;
+}
+
+/* ===== PANEL SMOOTH OPEN/CLOSE ===== */
+.panel {
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+}
+.panel.panel-closing {
+  transition: transform .3s ease-in, opacity .25s ease-in;
+}
+
+/* ===== BUILDING TILE — consistent sizing ===== */
+.building-tile {
+  min-height: 130px;
+}
+
+/* ===== QUEST ITEM — better tap target ===== */
+.quest-item {
+  min-height: 32px;
+}
+
+/* ===== PASTURE ZONE — slightly taller tiles for better animal display ===== */
+#pasture-grid {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 10px;
+  justify-content: center;
+}
 
 .hidden{display:none!important}
