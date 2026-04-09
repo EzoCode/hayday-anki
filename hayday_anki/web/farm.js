@@ -568,6 +568,26 @@ function updateFarm(data) {
       if (farmTab) { farmTab.classList.add('tab-pulse'); setTimeout(() => farmTab.classList.remove('tab-pulse'), 2000); }
     }
     else if (anyGrew) setTimeout(() => SoundMgr.play('grow'), 300);
+    // Check if any crop is close to harvest (90%+ progress) — tease the player
+    newFields.forEach((f, idx) => {
+      if (f.state === 'growing' || f.state === 'planted') {
+        const cropDef = (farmData.crop_defs||{})[f.crop]||{};
+        const rps = cropDef.growth_reviews || 3;
+        const totalN = rps * 4;
+        const totalD = (f.growth_stage||0) * rps + (f.reviews_done||0);
+        const pct = totalD / totalN;
+        const wasClose = oldGrowth[f.id] ? (() => {
+          const parts = oldGrowth[f.id].split(':');
+          const oldStage = parseInt(parts[0]) || 0;
+          const oldDone = parseInt(parts[1]) || 0;
+          return (oldStage * rps + oldDone) / totalN;
+        })() : 0;
+        if (pct >= 0.9 && wasClose < 0.9) {
+          const cName = cropName(f.crop);
+          setTimeout(() => showNotification(`${cropPortrait(f.crop,14)||''} ${cName} presque prêt !`, 'reward'), 600);
+        }
+      }
+    });
   }
   if (currentPanel) {
     if (currentPanel === 'inventory') renderInventory();
@@ -664,11 +684,23 @@ function updateHUD() {
       const prev = _prevHud.sessionReviews || 0;
       if (sessionReviews > prev) {
         hudBump('hud-session-reviews');
-        // Session milestones — celebrate every 10 cards to keep momentum
-        if (sessionReviews >= 10 && sessionReviews % 10 === 0 && prev < sessionReviews) {
-          showNotification(`${sessionReviews} cartes cette session ! Continue !`, 'reward');
-          SoundMgr.play('collect');
-          if (sessionReviews >= 50) createConfetti();
+        // Session milestones — celebrate to keep momentum (Hay Day dopamine loop)
+        if (sessionReviews > prev) {
+          const milestones = [
+            {n:5, msg:'5 cartes ! Bien parti !', sound:'grow', confetti:false},
+            {n:10, msg:'10 cartes ! Belle session !', sound:'collect', confetti:false},
+            {n:20, msg:'20 cartes ! En feu !', sound:'collect', confetti:false},
+            {n:30, msg:'30 cartes ! Impressionnant !', sound:'levelup', confetti:false},
+            {n:50, msg:'50 cartes ! Session légendaire !', sound:'levelup', confetti:true},
+            {n:75, msg:'75 cartes ! Tu es inarrêtable !', sound:'levelup', confetti:true},
+            {n:100, msg:'100 cartes !! Champion absolu !!', sound:'levelup', confetti:true},
+          ];
+          const hit = milestones.find(m => sessionReviews >= m.n && prev < m.n);
+          if (hit) {
+            showNotification(hit.msg, 'reward');
+            SoundMgr.play(hit.sound);
+            if (hit.confetti) createConfetti();
+          }
         }
       }
     } else {
@@ -677,10 +709,11 @@ function updateHUD() {
   }
   _prevHud.sessionReviews = sessionReviews;
 
-  // Streak bonus indicator — show percentage when active
+  // Streak bonus indicator — more dramatic as streak grows (Hay Day fire effect)
   const streakWrap = document.getElementById('hud-streak');
   const bonus = d.streak_bonus_pct || 0;
-  streakWrap.title = bonus > 0 ? `Streak bonus: +${bonus}% pièces et XP` : 'Révisez chaque jour pour construire votre série !';
+  const streak = d.streak || 0;
+  streakWrap.title = bonus > 0 ? `Série de ${streak} jours ! +${bonus}% pièces et XP` : 'Révisez chaque jour pour construire votre série !';
   const streakBonusEl = document.getElementById('streak-bonus');
   if (streakBonusEl) {
     if (bonus > 0) {
@@ -689,6 +722,13 @@ function updateHUD() {
     } else {
       streakBonusEl.style.display = 'none';
     }
+  }
+  // Intensify fire animation based on streak length
+  const fireEl = document.getElementById('streak-fire-icon');
+  if (fireEl) {
+    fireEl.classList.remove('streak-hot', 'streak-blazing');
+    if (streak >= 7) fireEl.classList.add('streak-blazing');
+    else if (streak >= 3) fireEl.classList.add('streak-hot');
   }
   // Daily quests
   renderDailyQuests();
@@ -885,8 +925,9 @@ function renderFields() {
         stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
       }
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
-      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Clean Hay Day style: big crop sprite + stage dots at top + progress bar at bottom + reviews left
+      const reviewsLeftLabel = reviewsLeft <= 3 ? `<span class="plot-reviews-left almost-done">${reviewsLeft}</span>` : `<span class="plot-reviews-left">${reviewsLeft}</span>`;
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div><div class="plot-stage-dots-wrap"><div class="plot-stage-dots">${stageDots}</div></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>${reviewsLeftLabel}`;
       el.onclick = () => showItemInfo(field.crop);
     }
     grid.appendChild(el);
@@ -961,7 +1002,15 @@ function renderWorkshop() {
       const pct = q ? Math.min(100, Math.round((q.sessions_waited||0)/Math.max(1,q.sessions_required||1)*100)) : 0;
       statusHtml = `<div class="building-prod-bar"><div class="building-prod-fill" style="width:${pct}%"></div></div>`;
     }
-    el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${statusHtml}`;
+    // Show what the building is doing for better game comprehension
+    let prodLabel = '';
+    if (producing > 0 && !ready) {
+      const q = queue.find(item=>!item.ready);
+      if (q) prodLabel = `<span class="building-prod-label-sm">${q.name||''}</span>`;
+    } else if (ready > 0) {
+      prodLabel = `<span class="building-prod-label-sm ready-label">Prêt !</span>`;
+    }
+    el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${prodLabel}${statusHtml}`;
     grid.appendChild(el);
   });
 }
@@ -1004,6 +1053,38 @@ function renderPastures() {
 
 function updateSections() {
   updateTabBadges();
+  updateActionHints();
+}
+
+// Show contextual "what to do next" hints — key for engagement
+function updateActionHints() {
+  const d = farmData;
+  const fields = d.fields || [];
+  const emptyFields = fields.filter(f => f.state === 'empty').length;
+  const readyFields = fields.filter(f => f.state === 'ready').length;
+  const placed = d.placed_buildings || [];
+  const unlBuildings = d.unlocked_buildings || [];
+  const builtIds = Object.keys(d.buildings || {});
+  const unbuildable = unlBuildings.filter(id => !builtIds.includes(id));
+
+  // Pulse the "Tout récolter" button if there are ready fields
+  const harvestBtn = document.getElementById('harvest-all-btn');
+  if (harvestBtn && readyFields >= 2) {
+    harvestBtn.classList.add('action-pulse');
+  }
+
+  // If all fields are empty and player has coins, pulse the plant-all button
+  const plantBtn = document.getElementById('plant-all-btn');
+  if (plantBtn && emptyFields >= 2 && !plantBtn.style.display?.includes('none')) {
+    plantBtn.classList.add('action-pulse');
+  }
+
+  // If player has unlocked but un-built buildings, show subtle hint on workshop zone
+  const workshopZone = document.getElementById('zone-workshop');
+  if (workshopZone && unbuildable.length > 0 && placed.length === 0) {
+    const buildBtn = workshopZone.querySelector('.zone-add-btn:not(.harvest-all-btn):not(.plant-all-btn)');
+    if (buildBtn) buildBtn.classList.add('action-pulse');
+  }
 }
 
 function updateTabBadges() {
@@ -1136,27 +1217,27 @@ const ITEM_INFO = {
   paint: {desc: 'Sert à améliorer le Silo. Matériau rare.', usage: 'Améliorer Silo (+25 stockage)'},
   land_deed: {desc: 'Acte de propriété. Nécessaire pour agrandir ton terrain. Très rare (~3% des drops matériaux).', usage: 'Acheter du terrain (+5 unités)'},
   expansion_permit: {desc: "Permis d'expansion. Ultra rare (~2% des drops). Nécessaire pour agrandir le terrain.", usage: 'Acheter du terrain (+5 unités)'},
-  // Crops
-  wheat: {desc: 'Céréale de base. Pousse vite (3 reviews/stade). Ingrédient du pain et des cookies.', usage: 'Vendre ou transformer en Pain/Cookie'},
-  corn: {desc: 'Céréale dorée. Pousse en 4 reviews/stade.', usage: 'Vendre'},
-  turnip: {desc: 'Légume-racine. Pousse en 5 reviews/stade.', usage: 'Vendre'},
-  tomato: {desc: 'Fruit juteux. Essentiel pour les pizzas ! Pousse en 6 reviews/stade.', usage: 'Vendre ou Pizza'},
-  cucumber: {desc: 'Légume frais et croquant. Pousse en 4 reviews/stade.', usage: 'Vendre'},
-  potato: {desc: 'Tubercule nourrissant. Pousse en 5 reviews/stade.', usage: 'Vendre'},
-  rice: {desc: 'Céréale précieuse. Transformé en sucre à la Sucrerie. Pousse en 7 reviews/stade.', usage: 'Vendre ou Sucre → Confiture/Limonade'},
-  strawberry: {desc: 'Fruit délicat. Ingrédient de la confiture ! Pousse en 8 reviews/stade.', usage: 'Vendre ou Confiture'},
-  eggplant: {desc: 'Légume méditerranéen. Se vend bien. Pousse en 6 reviews/stade.', usage: 'Vendre'},
-  lemon: {desc: 'Agrume acidulé. Ingrédient de la limonade ! Pousse en 8 reviews/stade.', usage: 'Vendre ou Limonade'},
-  orange: {desc: "Fruit juteux. Fait du jus et des tartes. Pousse en 10 reviews/stade.", usage: "Vendre ou Jus d'orange/Tarte"},
-  sunflower: {desc: 'Fleur majestueuse. Se vend cher ! Pousse en 9 reviews/stade.', usage: 'Vendre'},
-  pineapple: {desc: 'Fruit tropical. Pousse lentement mais vaut cher. 10 reviews/stade.', usage: 'Vendre'},
-  melon: {desc: 'Gros fruit juteux. Pousse lentement (12 reviews/stade) mais vaut cher.', usage: 'Vendre ou Tarte au melon'},
-  grapes: {desc: 'Raisin sucré. Fait de la confiture ! Pousse en 11 reviews/stade.', usage: 'Vendre ou Confiture de raisin'},
-  coffee: {desc: 'Grain précieux. Le plus cher des cultures ! Pousse lentement (14 reviews/stade).', usage: 'Vendre'},
-  tulip: {desc: 'Fleur élégante. Pousse en 7 reviews/stade. Belle et rentable !', usage: 'Vendre'},
-  rose: {desc: 'La reine des fleurs. Pousse en 12 reviews/stade. Se vend cher !', usage: 'Vendre'},
-  avocado: {desc: 'Fruit tendance et nutritif. Pousse lentement (13 reviews/stade) mais très rentable.', usage: 'Vendre'},
-  cassava: {desc: 'Tubercule tropical robuste. Pousse en 15 reviews/stade. Bonne récolte !', usage: 'Vendre'},
+  // Crops (descriptions auto-generated from crop_defs if available)
+  wheat: {desc: 'Céréale de base. Pousse vite (3 rev./stade, 12 total). Ingrédient du pain et des cookies.', usage: 'Pain, Cookie'},
+  corn: {desc: 'Céréale dorée. 4 rev./stade (16 total). Bonne culture de départ.', usage: 'Vendre'},
+  turnip: {desc: 'Légume-racine. 5 rev./stade (20 total). Bon rendement.', usage: 'Vendre'},
+  tomato: {desc: 'Fruit juteux, essentiel pour les pizzas ! 6 rev./stade (24 total).', usage: 'Pizza'},
+  cucumber: {desc: 'Légume frais et croquant. 4 rev./stade (16 total). Bon rendement.', usage: 'Vendre'},
+  potato: {desc: 'Tubercule nourrissant. 5 rev./stade (20 total).', usage: 'Vendre'},
+  rice: {desc: 'Céréale précieuse. Transformé en sucre à la Sucrerie. 7 rev./stade (28 total).', usage: 'Sucre → Confiture/Limonade'},
+  strawberry: {desc: 'Fruit délicat, ingrédient de la confiture ! 8 rev./stade (32 total).', usage: 'Confiture'},
+  eggplant: {desc: 'Légume méditerranéen. Se vend bien. 6 rev./stade (24 total).', usage: 'Vendre'},
+  lemon: {desc: 'Agrume acidulé, ingrédient de la limonade ! 8 rev./stade (32 total).', usage: 'Limonade'},
+  orange: {desc: "Fruit juteux. Fait du jus et des tartes. 10 rev./stade (40 total).", usage: "Jus d'orange, Tarte"},
+  sunflower: {desc: 'Fleur majestueuse. Se vend cher ! 9 rev./stade (36 total).', usage: 'Vendre'},
+  pineapple: {desc: 'Fruit tropical. Pousse lentement mais vaut cher. 10 rev./stade (40 total).', usage: 'Vendre'},
+  melon: {desc: 'Gros fruit juteux. 12 rev./stade (48 total). Ingrédient de la tarte au melon.', usage: 'Tarte au melon'},
+  grapes: {desc: 'Raisin sucré. Fait de la confiture ! 11 rev./stade (44 total).', usage: 'Confiture de raisin'},
+  coffee: {desc: 'Grain précieux, le plus cher des cultures ! 14 rev./stade (56 total).', usage: 'Vendre'},
+  tulip: {desc: 'Fleur élégante. 7 rev./stade (28 total). Belle et rentable !', usage: 'Vendre'},
+  rose: {desc: 'La reine des fleurs. 12 rev./stade (48 total). Se vend cher !', usage: 'Vendre'},
+  avocado: {desc: 'Fruit tendance et nutritif. 13 rev./stade (52 total). Très rentable.', usage: 'Vendre'},
+  cassava: {desc: 'Tubercule tropical robuste. 15 rev./stade (60 total). Bonne récolte !', usage: 'Vendre'},
   // Animal products
   milk: {desc: 'Produit par les vaches (1 par vache tous les 10 reviews). Transformable en beurre, fromage, crème.', usage: 'Vendre ou Beurre/Fromage/Crème'},
   egg: {desc: 'Pondu par les poules (1 par poule tous les 8 reviews). Ingrédient des cookies et gâteaux.', usage: 'Vendre ou Cookie/Gâteau'},
@@ -1846,7 +1927,20 @@ function showPlantDialog(plotId) {
 
   const coins = farmData.coins || 0;
 
-  (farmData.unlocked_crops || []).forEach(id => {
+  // Sort crops by efficiency (profit per review) — best deals first
+  const sortedCrops = [...(farmData.unlocked_crops || [])].sort((a, b) => {
+    const defA = (farmData.crop_defs || {})[a] || {};
+    const defB = (farmData.crop_defs || {})[b] || {};
+    const totalA = (defA.growth_reviews || 3) * 4;
+    const totalB = (defB.growth_reviews || 3) * 4;
+    const avgA = ((defA.harvest_min || 2) + (defA.harvest_max || 4)) / 2;
+    const avgB = ((defB.harvest_min || 2) + (defB.harvest_max || 4)) / 2;
+    const profitPerRevA = (avgA * (defA.sell_price || 2) - (defA.plant_cost || 0)) / totalA;
+    const profitPerRevB = (avgB * (defB.sell_price || 2) - (defB.plant_cost || 0)) / totalB;
+    return profitPerRevB - profitPerRevA;
+  });
+
+  sortedCrops.forEach(id => {
     const name = cropName(id);
     const def = (farmData.crop_defs || {})[id] || {};
     const gr = def.growth_reviews || 3;
@@ -2271,8 +2365,21 @@ function showReward(d){
       showFloatingReward(`+${coins}`, cx, cy);
       SoundMgr.play('coin');
     }
-    // Normal reviews: HUD counter animation handles it (animateCount + hudBump)
-    // — no burst, no floating text, no sound. Clean, focused, non-distracting.
+    // Normal reviews: subtle XP pulse + small coin icon near HUD — satisfying but not distracting
+    else if (coins > 0) {
+      // Tiny coin sparkle near HUD to acknowledge the reward
+      const hudEl = document.getElementById('hud-coins');
+      if (hudEl) {
+        const r = hudEl.getBoundingClientRect();
+        const sparkle = document.createElement('div');
+        sparkle.className = 'review-sparkle';
+        sparkle.style.left = (r.left + r.width / 2) + 'px';
+        sparkle.style.top = (r.bottom + 4) + 'px';
+        sparkle.textContent = '+' + coins;
+        document.getElementById('reward-layer').appendChild(sparkle);
+        setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 800);
+      }
+    }
   }
   // Material/item drops: staggered notifications with item icons (these are rare ~15%, always exciting)
   if (hasItems) {
