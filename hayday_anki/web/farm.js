@@ -1899,33 +1899,84 @@ function sellItem(id){
   if (qty <= 1) { pycmd(`farm:sell:${id}:1`); return; }
   showSellDialog(id, qty);
 }
+let _sellState = { id: '', qty: 0, maxQty: 0, price: 0 };
+
 function showSellDialog(id, qty) {
   const cat = (farmData.item_catalog||{})[id]||{};
-  const name = cat.name || id;
   const price = cat.sell_price || 0;
+  if (price <= 0 || qty <= 0) return;
   const overlay = document.getElementById('sell-overlay');
   if (!overlay) return pycmd(`farm:sell:${id}:1`);
-  document.getElementById('sell-item-name').innerHTML = `${itemIcon(id,28)} ${itemName(id)}`;
+
+  _sellState = { id, qty: qty <= 5 ? qty : 1, maxQty: qty, price };
+
+  document.getElementById('sell-item-name').innerHTML = `${itemIcon(id,32)} ${itemName(id)}`;
   document.getElementById('sell-item-stock').textContent = `Stock : ${qty}`;
   document.getElementById('sell-unit-price').textContent = `${price} p. / unit\u00e9`;
+
   const btns = document.getElementById('sell-buttons');
   btns.innerHTML = '';
-  const amounts = [1];
-  if (qty >= 5) amounts.push(5);
-  if (qty >= 10) amounts.push(10);
-  amounts.push(qty);
-  const seen = new Set();
-  amounts.forEach(n => {
-    if (seen.has(n)) return; seen.add(n);
-    const label = n === qty ? `Tout (${n})` : `x${n}`;
-    const total = n * price;
+
+  // Quick quantity buttons
+  const quickDiv = document.createElement('div');
+  quickDiv.className = 'sell-quick-btns';
+  const quickAmts = [1];
+  if (qty >= 5) quickAmts.push(5);
+  if (qty >= 10) quickAmts.push(10);
+  if (!quickAmts.includes(qty)) quickAmts.push(qty);
+  quickAmts.forEach(n => {
     const btn = document.createElement('button');
-    btn.className = 'sell-amount-btn';
-    btn.innerHTML = `<span>${label}</span><span class="sell-total">${total} p.</span>`;
-    btn.onclick = () => { pycmd(`farm:sell:${id}:${n}`); hideOverlay(); SoundMgr.play('coin'); };
-    btns.appendChild(btn);
+    btn.className = 'sell-quick-btn' + (n === _sellState.qty ? ' active' : '');
+    btn.textContent = n === qty ? `Tout (${n})` : `x${n}`;
+    btn.onclick = () => { _sellState.qty = n; _updateSellPreview(); SoundMgr.play('click'); };
+    quickDiv.appendChild(btn);
   });
+  btns.appendChild(quickDiv);
+
+  // +/- quantity selector
+  const selectorDiv = document.createElement('div');
+  selectorDiv.className = 'sell-qty-selector';
+  selectorDiv.innerHTML = `
+    <button class="sell-qty-btn" onclick="_sellAdjust(-1)">-</button>
+    <span class="sell-qty-display" id="sell-qty-num">${_sellState.qty}</span>
+    <button class="sell-qty-btn" onclick="_sellAdjust(1)">+</button>
+  `;
+  btns.appendChild(selectorDiv);
+
+  // Total preview
+  const previewDiv = document.createElement('div');
+  previewDiv.className = 'sell-total-preview';
+  previewDiv.innerHTML = `<div class="sell-total-coins" id="sell-total-coins"><span class="css-coin" style="width:18px;height:18px"></span> ${_sellState.qty * price}</div>`;
+  btns.appendChild(previewDiv);
+
+  // Confirm button
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'sell-confirm-btn';
+  confirmBtn.textContent = 'Vendre !';
+  confirmBtn.onclick = () => { pycmd(`farm:sell:${_sellState.id}:${_sellState.qty}`); hideOverlay(); SoundMgr.play('coin'); };
+  btns.appendChild(confirmBtn);
+
   overlay.classList.remove('hidden');
+}
+
+function _sellAdjust(delta) {
+  const newQty = Math.max(1, Math.min(_sellState.maxQty, _sellState.qty + delta));
+  if (newQty === _sellState.qty) return;
+  _sellState.qty = newQty;
+  _updateSellPreview();
+  SoundMgr.play('click');
+}
+
+function _updateSellPreview() {
+  const numEl = document.getElementById('sell-qty-num');
+  const totalEl = document.getElementById('sell-total-coins');
+  if (numEl) numEl.textContent = _sellState.qty;
+  if (totalEl) totalEl.innerHTML = `<span class="css-coin" style="width:18px;height:18px"></span> ${_sellState.qty * _sellState.price}`;
+  document.querySelectorAll('.sell-quick-btn').forEach(btn => {
+    const match = btn.textContent.match(/\d+/);
+    const n = match ? parseInt(match[0]) : 0;
+    btn.classList.toggle('active', n === _sellState.qty);
+  });
 }
 function fulfillOrder(i){SoundMgr.play('collect');pycmd(`farm:fulfill_order:${i}`)}
 
@@ -1993,10 +2044,29 @@ function hideLoginBonus(){document.getElementById('login-bonus-overlay').classLi
 function showSessionSummary(d){
   SoundMgr.play('levelup');
   const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20" style="vertical-align:middle">` : '<span class="css-coin" style="width:16px;height:16px;display:inline-block;vertical-align:middle"></span>';
-  const gemIcon = S('ui_gem') ? `<img src="${S('ui_gem')}" width="18" height="18" style="vertical-align:middle">` : '';
   const accuracy = d.reviews > 0 ? Math.round((d.correct||0)/d.reviews*100) : 0;
+  const reviews = d.reviews || 0;
+
+  // Star rating based on session quality (Hay Day style)
+  let stars = 1;
+  if (reviews >= 10 && accuracy >= 60) stars = 2;
+  if (reviews >= 20 && accuracy >= 75) stars = 3;
+  const starSrc = S('hayday_star');
+  const starFull = starSrc
+    ? `<img src="${starSrc}" width="28" height="28" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.2))">`
+    : '<span style="color:#ffd700;font-size:24px">&#9733;</span>';
+  const starEmpty = starSrc
+    ? `<img src="${starSrc}" width="28" height="28" style="filter:grayscale(1) opacity(.25)">`
+    : '<span style="color:#ccc;font-size:24px">&#9733;</span>';
+  const starsHtml = [1,2,3].map(i => i <= stars ? starFull : starEmpty).join(' ');
+  const ratingLabels = ['', 'Bon d\u00e9but !', 'Belle session !', 'Session parfaite !'];
+
   document.getElementById('session-stats').innerHTML = `
-    <div class="session-stat"><div class="session-stat-value">${d.reviews||0}</div><div class="session-stat-label">${LANG.cards}</div></div>
+    <div style="grid-column:1/-1;text-align:center;margin-bottom:4px">
+      <div style="margin-bottom:4px">${starsHtml}</div>
+      <div style="font-size:12px;font-weight:800;color:#8b6914;letter-spacing:.3px">${ratingLabels[stars]}</div>
+    </div>
+    <div class="session-stat"><div class="session-stat-value">${reviews}</div><div class="session-stat-label">${LANG.cards}</div></div>
     <div class="session-stat"><div class="session-stat-value">${coinIcon} ${formatNum(d.coins_earned||0)}</div><div class="session-stat-label">${LANG.coins_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">+${formatNum(d.xp_earned||0)}</div><div class="session-stat-label">${LANG.xp_earned}</div></div>
     <div class="session-stat"><div class="session-stat-value">${accuracy}%</div><div class="session-stat-label">${LANG.accuracy}</div></div>
@@ -2007,7 +2077,7 @@ function showSessionSummary(d){
   Object.entries(d.items_earned||{}).forEach(([id,qty])=>{items+=`<span class="session-item-tag">${itemIcon(id,14)} ${itemName(id)} x${qty}</span>`});
   document.getElementById('session-items').innerHTML=items;
   document.getElementById('session-overlay').classList.remove('hidden');
-  createConfetti();
+  if (stars >= 2) createConfetti();
 }
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}

@@ -575,9 +575,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .lock-label{font-size:8px;color:rgba(255,255,255,.5);font-weight:700;margin-top:2px}
 
 /* ===== BUILDINGS ON FARM — Card Style ===== */
-#buildings-area{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:0 6px}
+#workshop-grid{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;padding:12px 10px;justify-items:center}
 .building-tile{position:relative;cursor:pointer;transition:transform .15s, box-shadow .15s;display:flex;flex-direction:column;align-items:center;
-  background:linear-gradient(180deg,rgba(160,114,74,.35) 0%,rgba(139,94,60,.25) 40%,rgba(90,56,24,.3) 100%);border-radius:16px;padding:10px 12px 8px;border:1.5px solid rgba(255,220,160,.15);min-width:105px;
+  background:linear-gradient(180deg,rgba(160,114,74,.35) 0%,rgba(139,94,60,.25) 40%,rgba(90,56,24,.3) 100%);border-radius:16px;padding:10px 12px 8px;border:1.5px solid rgba(255,220,160,.15);width:100%;max-width:130px;
   box-shadow:0 3px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -1px 0 rgba(0,0,0,.15)}
 .building-tile:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1)}
 .building-tile:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.2)}
@@ -813,7 +813,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
 .crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
 .crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:8px;font-weight:800;padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px}
-.crop-yield-info{font-size:7px;color:#aaa;font-weight:600;margin-top:1px;letter-spacing:.2px}
+.crop-yield-info{font-size:8px;color:#999;font-weight:700;margin-top:2px;letter-spacing:.2px;line-height:1.4;padding:2px 4px;background:rgba(0,0,0,.03);border-radius:6px}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -893,20 +893,31 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .stat-row strong{font-weight:900;color:#2e7d32;font-size:14px}
 
 /* ===== SELL DIALOG ===== */
-.sell-card{min-width:260px}
+.sell-card{min-width:280px;max-width:340px}
 .sell-item-name{font-size:18px;font-weight:900;color:var(--text-d);margin:8px 0 4px;display:flex;align-items:center;justify-content:center;gap:6px}
 .sell-item-name img{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2))}
 .sell-stock{font-size:11px;color:#888;font-weight:700;background:rgba(0,0,0,.04);padding:3px 10px;border-radius:8px;display:inline-block}
-.sell-unit-price{font-size:11px;color:var(--gold-d);font-weight:700;margin:4px 0 12px}
-.sell-buttons{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.sell-amount-btn{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35));border:1px solid rgba(0,0,0,.06);border-radius:14px;cursor:pointer;transition:all .18s;font-size:14px;font-weight:700;color:var(--text-d);box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.sell-amount-btn:hover{background:rgba(255,255,255,.95);border-color:rgba(255,215,0,.4);transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,215,0,.15)}
-.sell-amount-btn:active{transform:scale(.97)}
-.sell-total{font-weight:900;color:var(--gold-d);font-size:15px}
+.sell-unit-price{font-size:11px;color:var(--gold-d);font-weight:700;margin:4px 0 8px}
+.sell-qty-selector{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0}
+.sell-qty-btn{width:36px;height:36px;border-radius:50%;border:2px solid rgba(212,160,86,.35);background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(245,235,215,.6));cursor:pointer;font-size:18px;font-weight:900;color:var(--text-d);display:flex;align-items:center;justify-content:center;transition:all .15s;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.sell-qty-btn:hover{background:rgba(255,255,255,.95);border-color:var(--gold);transform:scale(1.1);box-shadow:0 3px 10px rgba(255,215,0,.2)}
+.sell-qty-btn:active{transform:scale(.9)}
+.sell-qty-display{font-size:28px;font-weight:900;color:var(--text-d);min-width:50px;text-align:center}
+.sell-total-preview{margin:6px 0 14px;padding:10px 16px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.06));border-radius:12px;border:1px solid rgba(255,215,0,.2)}
+.sell-total-coins{font-size:22px;font-weight:900;color:var(--gold-d);display:flex;align-items:center;justify-content:center;gap:4px}
+.sell-quick-btns{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
+.sell-quick-btn{padding:6px 14px;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35));cursor:pointer;font-size:11px;font-weight:800;color:var(--text-d);transition:all .15s}
+.sell-quick-btn:hover{border-color:rgba(255,215,0,.4);background:rgba(255,255,255,.9);transform:translateY(-1px)}
+.sell-quick-btn.active{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,215,0,.1));color:var(--gold-d)}
+.sell-confirm-btn{width:100%;padding:14px;background:linear-gradient(180deg,#f7c948 0%,#f4a22a 30%,#f4922a 60%,#e07c18 100%);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:16px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(244,146,42,.45),inset 0 2px 0 rgba(255,255,255,.3),0 3px 0 #b86a12;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3);letter-spacing:.3px;position:relative;overflow:hidden}
+.sell-confirm-btn::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .4s}
+.sell-confirm-btn:hover::before{left:100%}
+.sell-confirm-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,146,42,.55)}
+.sell-confirm-btn:active{transform:translateY(1px) scale(.98)}
 
 /* ===== WEATHER SYSTEM ===== */
 .weather-night .farm-sky{background:linear-gradient(180deg,#0f1e3d 0%,#1e3358 40%,#2a4a6b 70%,rgba(42,74,107,0) 100%)}
-.weather-night #farm-world{filter:brightness(.7) saturate(.75) hue-rotate(5deg)}
+.weather-night #farm-world{filter:brightness(.82) saturate(.8) hue-rotate(3deg)}
 .weather-night .farm-atmosphere{background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,20,.3) 100%)}
 .weather-night .section-label{color:rgba(180,200,255,.6)}
 .weather-night .building-name{color:rgba(220,225,255,.9)}
@@ -1032,7 +1043,6 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== PANEL CLOSE ANIMATION ===== */
 .panel{transition:transform .3s cubic-bezier(.4,0,1,1),opacity .25s ease}
 .panel.panel-closing{transform:translateY(100%);opacity:0;pointer-events:none}
-@keyframes panelIn{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
 
 /* ===== READY PLOT CROP NAME ===== */
 /* (removed — ready plots show crop via sprite + "Récolter !" badge only) */

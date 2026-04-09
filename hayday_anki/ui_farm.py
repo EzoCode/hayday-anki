@@ -665,7 +665,7 @@ class FarmWebView:
                 elif ntype == "crop_ready":
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                 elif ntype == "wilt_warning":
-                    self._js(f"showNotification({json.dumps('⚠ ' + msg)}, 'reward')")
+                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                     self._js("SoundMgr.play('error')")
                 elif ntype == "production_ready":
                     recipe_id = notif.get("recipe_id", "")
