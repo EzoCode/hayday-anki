@@ -470,8 +470,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   padding-top: 36px !important;
 }
 .info-card .overlay-close {
-  position: fixed;
-  top: auto; right: auto;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   z-index: 310;
 }
 .info-card .info-icon { font-size: 40px; text-align: center; margin-bottom: 6px; display:flex;align-items:center;justify-content:center; }
@@ -622,6 +623,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .harvest-particle{position:absolute;pointer-events:none;z-index:155;animation:harvestBurst .8s ease-out forwards}
 @keyframes harvestBurst{0%{opacity:1;transform:translate(0,0) scale(1.3)}30%{opacity:1;transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5)) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3) rotate(15deg)}}
 .harvest-sparkle{position:absolute;pointer-events:none;z-index:156;width:6px;height:6px;background:radial-gradient(circle,#fff,#ffd700);border-radius:50%;box-shadow:0 0 6px #ffd700;animation:harvestBurst .7s ease-out forwards}
+.plant-particle{position:absolute;pointer-events:none;z-index:155;width:6px;height:6px;background:radial-gradient(circle,#c9a66b,#8b6914);border-radius:50%;opacity:.8;animation:plantPuffBurst .6s ease-out forwards}
+@keyframes plantPuffBurst{0%{opacity:.9;transform:translate(0,0) scale(1.2)}40%{opacity:.7;transform:translate(calc(var(--dx)*.6),calc(var(--dy)*.6)) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+.plant-seed-drop{position:absolute;pointer-events:none;z-index:156;animation:seedDrop .5s cubic-bezier(.4,0,.6,1) forwards}
+.plant-seed-drop img{max-width:18px;max-height:18px}
+@keyframes seedDrop{0%{opacity:1;transform:translateY(0) scale(1.2)}60%{opacity:1;transform:translateY(20px) scale(.9)}80%{opacity:.8;transform:translateY(16px) scale(1.1)}100%{opacity:0;transform:translateY(20px) scale(.6)}}
 .coin-fly-to-hud{position:absolute;pointer-events:none;z-index:160;animation:coinFlyHud .6s cubic-bezier(.2,.8,.3,1) forwards}
 @keyframes coinFlyHud{0%{opacity:1;transform:translate(0,0) scale(1.2)}60%{opacity:1}100%{opacity:0;transform:translate(var(--target-x),var(--target-y)) scale(.4)}}
 .hud-coins,.hud-gems,.hud-streak{transition:transform .15s cubic-bezier(.34,1.56,.64,1)}

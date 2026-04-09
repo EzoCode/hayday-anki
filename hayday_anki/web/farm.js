@@ -839,7 +839,7 @@ function renderFields() {
         const lcCost = lcDef.plant_cost||0;
         const costLabel = lcCost > 0 ? `<span class="plot-replant-cost">${lcCost} p.</span>` : '';
         el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span>${costLabel}</div>`;
-        el.onclick = () => { pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('plant'); };
+        el.onclick = () => { showPlantBurst(el, field.last_crop); pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('plant'); };
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
       } else {
@@ -1551,7 +1551,7 @@ function renderOrders() {
     card.innerHTML = `
       <div class="order-header">
         <span class="order-type"><img src="${order.type==='boat'?ITEM_ICONS._icon_boat:ITEM_ICONS._icon_truck_color}" width="28" height="28" style="vertical-align:middle"> ${order.type==='boat'?'Bateau':'Camion'}</span>
-        <span class="order-reward"><span class="order-coin-reward"><span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span> ${order.coin_reward}</span> <span class="order-xp-reward">+${order.xp_reward} XP</span>${order.type==='boat'?'<span class="order-gem-reward"><span class="css-gem" style="width:10px;height:12px;display:inline-block;vertical-align:middle"></span> Bonus</span>':''}</span>
+        <span class="order-reward"><span class="order-coin-reward">${S('ui_coin')?`<img src="${S('ui_coin')}" width="14" height="14" style="vertical-align:middle">`:'<span class="css-coin" style="width:12px;height:12px;display:inline-block;vertical-align:middle"></span>'} ${order.coin_reward}</span> <span class="order-xp-reward">+${order.xp_reward} XP</span>${order.type==='boat'?`<span class="order-gem-reward">${S('ui_gem')?`<img src="${S('ui_gem')}" width="12" height="14" style="vertical-align:middle">`:'<span class="css-gem" style="width:10px;height:12px;display:inline-block;vertical-align:middle"></span>'} Bonus</span>`:''}</span>
       </div>
       ${!canDo?`<div class="order-progress-wrap"><div class="order-prog-bar"><div class="order-prog-fill${almostDone?' almost':''}" style="width:${pct}%"></div></div><span class="order-prog-text">${pct}%</span></div>`:''}
       <div class="order-items">${items}</div>
@@ -1834,7 +1834,7 @@ function showPlantDialog(plotId){SoundMgr.play('click');plantingPlotId=plotId;co
       growingCounts[f.crop] = (growingCounts[f.crop]||0) + 1;
     }
   });
-  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
+  (farmData.unlocked_crops||[]).forEach(id=>{const name=cropName(id);const def=(farmData.crop_defs||{})[id]||{};const gr=def.growth_reviews||3;const totalReviews=gr*4;const sellPrice=def.sell_price||2;const harvestMin=def.harvest_min||2;const harvestMax=def.harvest_max||4;const xpPerHarvest=def.xp_per_harvest||3;const plantCost=def.plant_cost||0;const stock=(farmData.inventory||{})[id]||0;const growing=growingCounts[id]||0;const coins=farmData.coins||0;const canAfford=coins>=plantCost;const el=document.createElement('div');el.className='crop-choice';if(!canAfford)el.classList.add('crop-choice-locked');el.onclick=()=>{if(!canAfford){showNotification(`Pas assez de pièces (${plantCost} requis)`);return}const plotIdx=(farmData.fields||[]).findIndex(f=>f.id===plotId);const plotEl=document.querySelectorAll('#fields-grid .plot')[plotIdx];showPlantBurst(plotEl,id);pycmd(`farm:plant:${plotId}:${id}`);hideOverlay();SoundMgr.play('plant')};const costBadge=plantCost>0?`<span class="crop-cost-badge">${plantCost} p.</span>`:`<span class="crop-cost-badge free">Gratuit</span>`;const avgYield=Math.round((harvestMin+harvestMax)/2);const profit=avgYield*sellPrice-plantCost;el.innerHTML=`<div class="crop-choice-icon">${cropPortrait(id,48)||itemIcon(id,48)}</div><div class="crop-choice-info"><strong>${name}</strong>${costBadge}<span class="crop-reviews-badge"><span class="crop-stat-icon reviews-icon"></span>${totalReviews} rev.</span><span class="crop-price-badge"><span class="crop-stat-icon coin-icon-sm"></span>${sellPrice}/u</span></div><div class="crop-yield-info">${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>${stock>0?' · '+stock+' stock':''}${growing>0?' · '+growing+' cult.':''}</div>`;choices.appendChild(el)});document.getElementById('plant-overlay').classList.remove('hidden')}
 
 function harvestPlot(id){
   SoundMgr.play('harvest');
@@ -1892,6 +1892,38 @@ function showHarvestAllBurst(n, xp) {
   showCoinBurst(cx, cy, n);
   showFloatingReward('+' + xp + ' XP', cx, cy);
 }
+function showPlantBurst(plotEl, cropId) {
+  if (!plotEl) return;
+  const layer = document.getElementById('reward-layer');
+  const rect = plotEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  // Dirt puff particles (brown, rising outward)
+  for (let i = 0; i < 6; i++) {
+    const el = document.createElement('div');
+    el.className = 'plant-particle';
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    const angle = (i / 6) * Math.PI * 2;
+    const dist = 25 + Math.random() * 20;
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 15) + 'px');
+    el.style.animationDelay = (i * 30) + 'ms';
+    layer.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 700);
+  }
+  // Seed falling into soil
+  const portrait = cropPortrait(cropId, 18);
+  if (portrait) {
+    const seed = document.createElement('div');
+    seed.className = 'plant-seed-drop';
+    seed.innerHTML = portrait;
+    seed.style.left = cx + 'px';
+    seed.style.top = (cy - 20) + 'px';
+    layer.appendChild(seed);
+    setTimeout(() => { if (seed.parentNode) seed.remove(); }, 600);
+  }
+}
 function plantAllEmpty(){SoundMgr.play('plant');pycmd('farm:plant_all_empty')}
 function sellItem(id){
   SoundMgr.play('click');
@@ -1946,7 +1978,8 @@ function showSellDialog(id, qty) {
   // Total preview
   const previewDiv = document.createElement('div');
   previewDiv.className = 'sell-total-preview';
-  previewDiv.innerHTML = `<div class="sell-total-coins" id="sell-total-coins"><span class="css-coin" style="width:18px;height:18px"></span> ${_sellState.qty * price}</div>`;
+  const coinIconHtml = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20">` : '<span class="css-coin" style="width:18px;height:18px"></span>';
+  previewDiv.innerHTML = `<div class="sell-total-coins" id="sell-total-coins">${coinIconHtml} ${_sellState.qty * price}</div>`;
   btns.appendChild(previewDiv);
 
   // Confirm button
@@ -1971,7 +2004,10 @@ function _updateSellPreview() {
   const numEl = document.getElementById('sell-qty-num');
   const totalEl = document.getElementById('sell-total-coins');
   if (numEl) numEl.textContent = _sellState.qty;
-  if (totalEl) totalEl.innerHTML = `<span class="css-coin" style="width:18px;height:18px"></span> ${_sellState.qty * _sellState.price}`;
+  if (totalEl) {
+    const coinIconHtml = S('ui_coin') ? `<img src="${S('ui_coin')}" width="20" height="20">` : '<span class="css-coin" style="width:18px;height:18px"></span>';
+    totalEl.innerHTML = `${coinIconHtml} ${_sellState.qty * _sellState.price}`;
+  }
   document.querySelectorAll('.sell-quick-btn').forEach(btn => {
     const match = btn.textContent.match(/\d+/);
     const n = match ? parseInt(match[0]) : 0;

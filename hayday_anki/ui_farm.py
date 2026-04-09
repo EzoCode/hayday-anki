@@ -352,7 +352,8 @@ class FarmWebView:
                 if result:
                     self._js(f"showWheelResult({json.dumps(result)})")
                 else:
-                    self._js("showNotification('Déjà tourné aujourd\\'hui !')")
+                    msg = "Déjà tourné aujourd'hui !"
+                    self._js(f"showNotification({json.dumps(msg)})")
                 self._send_state()
                 self.manager.save()
 
@@ -362,7 +363,8 @@ class FarmWebView:
                 if result:
                     self._js(f"showBoxResult({json.dumps(result)})")
                 else:
-                    self._js("showNotification('Impossible d\\'ouvrir !')")
+                    msg = "Impossible d'ouvrir !"
+                    self._js(f"showNotification({json.dumps(msg)})")
                 self._send_state()
                 self.manager.save()
 
@@ -376,7 +378,7 @@ class FarmWebView:
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 8)")
                     self._js(f"showFloatingReward('+{r_coins} pièces', window.innerWidth/2, window.innerHeight/3)")
                     gem_text = f" +{r_gems} gemmes" if r_gems > 0 else ""
-                    self._js(f"showNotification('Commande livrée ! +{r_coins} pièces, +{r_xp} XP{gem_text}', 'reward')")
+                    self._js(f"showNotification({json.dumps(f'Commande livrée ! +{r_coins} pièces, +{r_xp} XP{gem_text}')}, 'reward')")
                     self._js("createConfetti()")
                     self._check_and_show_level_up()
                 else:
@@ -420,16 +422,24 @@ class FarmWebView:
                     result = self.manager.upgrade_barn()
                     if result:
                         lvl = result["new_level"]
-                        self._js(f"showNotification('Grange améliorée au niveau {lvl} !')")
+                        cap = result.get("new_capacity", 0)
+                        self._js(f"showNotification({json.dumps(f'Grange améliorée ! Niveau {lvl} ({cap} places)')}, 'reward')")
+                        self._js("SoundMgr.play('levelup')")
+                        self._js("createConfetti()")
                     else:
                         self._js("showNotification('Matériaux insuffisants !')")
+                        self._js("SoundMgr.play('error')")
                 elif target == "silo":
                     result = self.manager.upgrade_silo()
                     if result:
                         lvl = result["new_level"]
-                        self._js(f"showNotification('Silo amélioré au niveau {lvl} !')")
+                        cap = result.get("new_capacity", 0)
+                        self._js(f"showNotification({json.dumps(f'Silo amélioré ! Niveau {lvl} ({cap} places)')}, 'reward')")
+                        self._js("SoundMgr.play('levelup')")
+                        self._js("createConfetti()")
                     else:
                         self._js("showNotification('Matériaux insuffisants !')")
+                        self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
@@ -447,18 +457,19 @@ class FarmWebView:
             elif action == "add_field":
                 cost = self.manager.get_field_cost()
                 if self.manager.add_field():
-                    msg = "Nouveau champ ajouté !"
-                    if cost > 0:
-                        msg = f"Nouveau champ ajouté ! (-{cost} pièces)"
-                    self._js(f"showNotification('{msg}')")
+                    msg = f"Nouveau champ ajouté !" + (f" (-{cost} pièces)" if cost > 0 else "")
+                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                    self._js("SoundMgr.play('collect')")
+                    self._js("createConfetti()")
                 else:
                     used = self.manager.get_land_used()
                     total = self.manager.state.land_total
                     coins = self.manager.state.coins
                     if used >= total:
-                        self._js(f"showNotification('Terrain plein ({used}/{total}) ! Achète du terrain.')")
+                        self._js(f"showNotification({json.dumps(f'Terrain plein ({used}/{total}) ! Achète du terrain.')})")
                     else:
-                        self._js(f"showNotification('Pas assez de pièces ({coins}/{cost}) !')")
+                        self._js(f"showNotification({json.dumps(f'Pas assez de pièces ({coins}/{cost}) !')})")
+                    self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
@@ -468,10 +479,13 @@ class FarmWebView:
                     from . import progression
                     adef = progression.ANIMAL_DEFINITIONS.get(animal_type, {})
                     aname = adef.get("name", animal_type)
-                    self._js(f"showNotification({json.dumps(f'{aname} acheté(e) !')})")
+                    self._js(f"showNotification({json.dumps(f'{aname} acheté(e) !')}, 'reward')")
+                    self._js("SoundMgr.play('levelup')")
+                    self._js("createConfetti()")
                 else:
                     reason = self.manager.get_pasture_fail_reason(animal_type)
                     self._js(f"showNotification({json.dumps(reason)})")
+                    self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
@@ -481,21 +495,27 @@ class FarmWebView:
                     from . import progression
                     bdef = progression.BUILDING_DEFINITIONS.get(building_id, {})
                     bname = bdef.get("name", building_id)
-                    self._js(f"showNotification({json.dumps(f'{bname} construit !')})")
+                    self._js(f"showNotification({json.dumps(f'{bname} construit !')}, 'reward')")
+                    self._js("SoundMgr.play('levelup')")
+                    self._js("createConfetti()")
                 else:
                     reason = self.manager.get_build_fail_reason(building_id)
                     self._js(f"showNotification({json.dumps(reason)})")
+                    self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
             elif action == "buy_land":
                 if self.manager.buy_land():
                     total = self.manager.state.land_total
-                    self._js(f"showNotification('Terrain agrandi ! Total: {total}')")
+                    self._js(f"showNotification({json.dumps(f'Terrain agrandi ! Total: {total}')}, 'reward')")
+                    self._js("SoundMgr.play('collect')")
+                    self._js("createConfetti()")
                 else:
                     cost = 100 * (self.manager.state.land_total // 5)
                     deeds = self.manager.state.inventory.get("land_deed", 0)
-                    self._js(f"showNotification('Besoin de {cost} pièces + Land Deed ({deeds}/1)')")
+                    self._js(f"showNotification({json.dumps(f'Besoin de {cost} pièces + Titre foncier ({deeds}/1)')})")
+                    self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
@@ -511,7 +531,7 @@ class FarmWebView:
                     gems = reward["gems"]
                     xp = reward["xp"]
                     self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 8)")
-                    self._js(f"showNotification('Quêtes terminées ! +{coins} pièces, +{gems} gemmes, +{xp} XP', 'reward')")
+                    self._js(f"showNotification({json.dumps(f'Quêtes terminées ! +{coins} pièces, +{gems} gemmes, +{xp} XP')}, 'reward')")
                     self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
