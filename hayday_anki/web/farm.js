@@ -989,7 +989,7 @@ function renderWorkshop() {
   if (totalReady >= 2) {
     collectAllBtn.textContent = `Tout récupérer (${totalReady})`;
     collectAllBtn.style.display = '';
-    collectAllBtn.onclick = () => { pycmd('farm:collect_all_buildings'); SoundMgr.play('collect'); };
+    collectAllBtn.onclick = () => collectAllBuildingsDirect();
   } else {
     collectAllBtn.style.display = 'none';
   }
@@ -1010,12 +1010,18 @@ function renderWorkshop() {
     const name = buildingName(bid);
     const el = document.createElement('div');
     el.className = 'building-tile';
-    el.onclick = () => pycmd('farm:building_detail:' + bid);
     const queue = (farmData.production_queues||{})[bid]||[];
     const ready = queue.filter(q=>q.ready).length;
     const producing = queue.filter(q=>!q.ready).length;
     if (producing > 0) el.classList.add('producing');
     if (ready > 0) el.classList.add('has-ready');
+    // Hay Day mechanic: tap building with ready products → instant collect with burst
+    // Tap idle/producing building → open production dialog
+    if (ready > 0) {
+      el.onclick = () => collectBuildingDirect(bid, el);
+    } else {
+      el.onclick = () => pycmd('farm:building_detail:' + bid);
+    }
     let statusHtml = '';
     if (ready > 0) {
       statusHtml = `<span class="building-badge">${ready}</span>`;
@@ -2285,7 +2291,27 @@ function _updateSellPreview() {
     btn.classList.toggle('active', n === _sellState.qty);
   });
 }
-function fulfillOrder(i){SoundMgr.play('collect');pycmd(`farm:fulfill_order:${i}`)}
+function fulfillOrder(i){
+  SoundMgr.play('collect');
+  // Find the order card and animate it (truck/boat driving away)
+  const orderCards = document.querySelectorAll('.order-card');
+  const orders = farmData.active_orders || [];
+  const sortedIdxMap = orders.map((o, idx) => ({...o, _idx: idx}))
+    .sort((a, b) => {
+      const inv = farmData.inventory || {};
+      const pA = Object.entries(a.items_needed||{}).reduce((s,[id,q])=>s+Math.min(1,(inv[id]||0)/q),0)/Math.max(1,Object.keys(a.items_needed||{}).length);
+      const pB = Object.entries(b.items_needed||{}).reduce((s,[id,q])=>s+Math.min(1,(inv[id]||0)/q),0)/Math.max(1,Object.keys(b.items_needed||{}).length);
+      return pB - pA;
+    });
+  const sortedPos = sortedIdxMap.findIndex(o => o._idx === i);
+  // +1 to skip the explanation header div
+  const targetCard = orderCards[sortedPos] || null;
+  if (targetCard) {
+    targetCard.classList.add('order-delivering');
+    setTimeout(() => targetCard.classList.remove('order-delivering'), 1000);
+  }
+  pycmd(`farm:fulfill_order:${i}`);
+}
 
 function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification(LANG.come_back)}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
@@ -2507,6 +2533,84 @@ function showReward(d){
     const sz = {small:'petite', medium:'moyenne', large:'grande'}[d.mystery_box.size] || d.mystery_box.size;
     setTimeout(() => showNotification(`Une ${sz} boîte mystère est apparue !`, 'reward'), 550);
   }
+}
+
+// --- Hay Day-style building tap-to-collect ---
+// Tap a building with ready products → instant collect with satisfying burst animation
+function collectBuildingDirect(bid, el) {
+  if (!el) return pycmd('farm:collect:' + bid);
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  SoundMgr.play('collect');
+
+  // Products burst out of building (like items popping in Hay Day)
+  const queue = (farmData.production_queues || {})[bid] || [];
+  const readyItems = queue.filter(q => q.ready);
+  readyItems.forEach((q, i) => {
+    setTimeout(() => {
+      const productId = q.recipe_id || '';
+      showBuildingProductBurst(cx, cy, productId);
+    }, i * 120);
+  });
+
+  // Coins fly to HUD from building position
+  showCoinBurst(cx, cy, Math.min(8, readyItems.length * 3));
+
+  // Satisfying bounce animation on the building tile
+  el.classList.add('building-collect-bounce');
+  setTimeout(() => el.classList.remove('building-collect-bounce'), 600);
+
+  // Send collection to backend (quiet mode — JS handles visuals)
+  pycmd('farm:collect_direct:' + bid);
+}
+
+// Products burst out of a building (items flying outward like Hay Day)
+function showBuildingProductBurst(x, y, productId) {
+  const layer = document.getElementById('reward-layer');
+  const icon = itemIcon(productId, 22);
+  for (let i = 0; i < 3; i++) {
+    const el = document.createElement('div');
+    el.className = 'harvest-particle';
+    el.innerHTML = icon;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    const angle = ((i / 3) * Math.PI - Math.PI / 2) + (Math.random() - 0.5) * 0.8;
+    const dist = 50 + Math.random() * 40;
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 30) + 'px');
+    el.style.animationDelay = (i * 60) + 'ms';
+    layer.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 1000);
+  }
+}
+
+// Collect all buildings with staggered bursts from each building position
+function collectAllBuildingsDirect() {
+  const buildingTiles = document.querySelectorAll('.building-tile.has-ready');
+  if (buildingTiles.length === 0) return;
+
+  SoundMgr.play('collect');
+
+  buildingTiles.forEach((tile, idx) => {
+    const rect = tile.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    setTimeout(() => {
+      showCoinBurst(cx, cy, 3);
+      showBuildingProductBurst(cx, cy, '');
+      tile.classList.add('building-collect-bounce');
+      setTimeout(() => tile.classList.remove('building-collect-bounce'), 600);
+    }, idx * 200);
+  });
+
+  if (buildingTiles.length >= 3) {
+    setTimeout(() => createConfetti(), buildingTiles.length * 200);
+  }
+
+  // Send to backend (quiet mode)
+  pycmd('farm:collect_all_direct');
 }
 
 function showBuildingDetail(bid){pycmd(`farm:building_detail:${bid}`)}

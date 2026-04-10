@@ -327,10 +327,8 @@ class FarmWebView:
                 qty = int(parts[3]) if len(parts) > 3 else 1
                 coins = self.manager.sell_item(item_id, qty)
                 if coins > 0:
-                    burst_count = min(10, max(3, coins // 5))
-                    self._js("SoundMgr.play('coin')")
-                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/2, {burst_count})")
-                    self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/2)")
+                    # JS side already handles sound + coin burst from button position
+                    self._js(f"showFloatingReward('+{coins} pièces', window.innerWidth/2, window.innerHeight/3)")
                     self._js(f"showNotification({json.dumps(f'+{coins} pièces')}, 'reward')")
                 self._send_state()
                 self.manager.save()
@@ -392,6 +390,17 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
+            elif action == "collect_direct":
+                # Collect with JS-side visuals (burst from building position)
+                building_id = parts[2]
+                self._collect_building_quiet(building_id)
+                self._check_and_show_level_up()
+                self._send_state()
+                # Auto-open production dialog after collecting (Hay Day flow)
+                from aqt.qt import QTimer
+                QTimer.singleShot(500, lambda bid=building_id: self._send_building_detail(bid))
+                self.manager.save()
+
             elif action == "collect_all_buildings":
                 from . import production
                 total_collected = []
@@ -412,6 +421,30 @@ class FarmWebView:
                     self.manager.advance_quest("produce", len(total_collected))
                     if len(total_collected) >= 3:
                         self._js("createConfetti()")
+                self._check_and_show_level_up()
+                self._send_state()
+                self.manager.save()
+
+            elif action == "collect_all_direct":
+                # Collect all with JS-side visuals (bursts from building positions)
+                from . import production
+                total_collected = []
+                total_xp = 0
+                for building_id, queue in list(self.manager.state.production_queues.items()):
+                    if any(item.get("ready") for item in queue):
+                        prod_mgr = production.ProductionManager(self.manager.state)
+                        collected = prod_mgr.collect_ready(building_id)
+                        for item in collected:
+                            if not item.get("storage_full"):
+                                total_collected.append(item["name"])
+                                total_xp += item.get("xp", 0)
+                            else:
+                                i_name = item["name"]
+                                self._js(f"showNotification({json.dumps(f'Silo plein ! {i_name} en attente.')})")
+                if total_collected:
+                    names_str = ", ".join(total_collected)
+                    self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) ! +{total_xp} XP')}, 'reward')")
+                    self.manager.advance_quest("produce", len(total_collected))
                 self._check_and_show_level_up()
                 self._send_state()
                 self.manager.save()
@@ -648,9 +681,11 @@ class FarmWebView:
             r_name = result["name"]
             msg = f"Production de {r_name} lancée !"
             self._js(f"showNotification({json.dumps(msg)})")
+            self._js("SoundMgr.play('plant')")
         else:
             can, reason = prod_mgr.can_craft(building_id, recipe_id)
             self._js(f"showNotification({json.dumps(reason)})")
+            self._js("SoundMgr.play('error')")
 
     def _collect_building(self, building_id: str):
         from . import production
@@ -672,6 +707,26 @@ class FarmWebView:
             self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, {min(8, len(collected_names) * 3)})")
             self._js(f"showFloatingReward('+{total_xp} XP', window.innerWidth/2, window.innerHeight/3)")
             self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) !')}, 'reward')")
+            self.manager.advance_quest("produce", len(collected_names))
+
+    def _collect_building_quiet(self, building_id: str):
+        """Collect ready products — JS handles visual effects (burst from building pos)."""
+        from . import production
+        prod_mgr = production.ProductionManager(self.manager.state)
+        collected = prod_mgr.collect_ready(building_id)
+        total_xp = 0
+        collected_names = []
+        for item in collected:
+            i_name = item["name"]
+            if item.get("storage_full"):
+                self._js(f"showNotification({json.dumps(f'Silo plein ! {i_name} reste en attente.')})")
+            else:
+                i_xp = item.get("xp", 0)
+                total_xp += i_xp
+                collected_names.append(i_name)
+        if collected_names:
+            names_str = ", ".join(collected_names)
+            self._js(f"showNotification({json.dumps(f'{names_str} récupéré(s) ! +{total_xp} XP')}, 'reward')")
             self.manager.advance_quest("produce", len(collected_names))
 
     def _check_and_show_level_up(self):

@@ -606,9 +606,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Active building subtle breathing — feels alive when producing */
 .building-tile.producing .building-img{animation:buildingBreathe 3s ease-in-out infinite}
 @keyframes buildingBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02) translateY(-1px)}}
-/* Building with ready items — golden glow to attract attention */
+/* Building with ready items — golden glow + subtle bounce to attract tap */
 .building-tile.has-ready{box-shadow:0 3px 10px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08),0 0 16px rgba(255,215,0,.4);border-color:rgba(255,215,0,.5);animation:buildingReady 2s ease-in-out infinite}
+.building-tile.has-ready .building-img{animation:buildingReadyBounce 2.5s ease-in-out infinite !important}
 @keyframes buildingReady{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 10px rgba(255,215,0,.3)}50%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 24px rgba(255,215,0,.6)}}
+@keyframes buildingReadyBounce{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.04) translateY(-2px)}}
 .building-name{font-size:9px;color:var(--text-l);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-top:3px;text-align:center;letter-spacing:.3px;background:rgba(0,0,0,.2);padding:1px 6px;border-radius:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .building-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#6abf47,#4a9e2f);color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(106,191,71,.6);animation:badgePulse 1.5s ease-in-out infinite;z-index:10}
 @keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 2px 6px rgba(231,76,60,.4)}50%{transform:scale(1.15);box-shadow:0 2px 12px rgba(231,76,60,.7)}}
@@ -621,6 +623,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Idle building — subtle pulsing border to draw attention */
 .building-tile.building-idle{border-style:dashed;border-color:rgba(255,255,255,.2);animation:idlePulse 4s ease-in-out infinite}
 @keyframes idlePulse{0%,100%{border-color:rgba(255,255,255,.15)}50%{border-color:rgba(255,220,160,.35)}}
+/* Building collect bounce — satisfying pop when collecting products */
+.building-tile.building-collect-bounce{animation:buildingCollectBounce .6s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
+.building-tile.building-collect-bounce .building-img{animation:buildingImgPop .5s cubic-bezier(.34,1.56,.64,1) !important}
+.building-tile.building-collect-bounce::before{content:'';position:absolute;inset:-8px;border-radius:22px;background:radial-gradient(circle,rgba(255,215,0,.4),transparent 60%);animation:buildingCollectGlow .7s ease-out forwards;pointer-events:none;z-index:15}
+@keyframes buildingCollectBounce{0%{transform:scale(1)}20%{transform:scale(1.15)}50%{transform:scale(.95)}75%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes buildingImgPop{0%{transform:scale(1);filter:brightness(1)}20%{transform:scale(1.2) translateY(-4px);filter:brightness(1.4)}50%{transform:scale(.95)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes buildingCollectGlow{0%{opacity:1;transform:scale(.8)}50%{opacity:.6;transform:scale(1.1)}100%{opacity:0;transform:scale(1.3)}}
+/* Has-ready building: tap indicator — pulsing hand/tap hint */
+.building-tile.has-ready{cursor:pointer}
+.building-tile.has-ready .ready-label{animation:readyLabelBounce 1.5s ease-in-out infinite}
+@keyframes readyLabelBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
 /* ===== ANIMALS ===== */
 #animals-area{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 6px}
@@ -759,6 +772,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .order-prog-fill.almost{background:linear-gradient(90deg,#ffb74d,#ff9800);animation:almostPulse 2s ease-in-out infinite}
 @keyframes almostPulse{0%,100%{opacity:.8}50%{opacity:1}}
 .order-prog-text{font-size:9px;font-weight:800;color:#888;min-width:28px;text-align:right}
+/* Order delivery animation — card slides out like a truck leaving */
+.order-delivering{animation:orderDeliver .8s cubic-bezier(.4,0,1,1) forwards !important;pointer-events:none}
+@keyframes orderDeliver{0%{transform:translateX(0);opacity:1}30%{transform:translateX(-8px) scale(1.02);opacity:1}100%{transform:translateX(120%) scale(.9);opacity:0}}
 
 /* ===== SHOP ===== */
 .shop-tabs{display:flex;gap:3px;padding:6px 14px 0}

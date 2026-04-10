@@ -212,6 +212,15 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 7. **Zones toujours visibles** : les zones Atelier, Paturage et Village se cachaient quand vides, empechant la decouverte. Maintenant toujours visibles avec des messages invitants indiquant le prochain unlock ou encourageant l'action.
 8. **Feedback de revision ameliore** : le sparkle "+coins" des revisions normales affiche maintenant l'icone de piece, est plus grand (12px au lieu de 11px), dure plus longtemps (1s au lieu de 0.8s), et un sparkle XP suit avec un leger delai pour un double feedback satisfaisant.
 
+## Ameliorations (session 16 — game feel et interactions Hay Day)
+1. **Tap-to-collect batiments (MECANIQUE HAY DAY)** : dans Hay Day, on tape un batiment avec des produits prets pour les collecter instantanement. Avant, tous les clics sur les batiments ouvraient le dialogue de production. Maintenant : tap batiment pret → burst de produits depuis le batiment + coins volent vers le HUD + animation bounce → dialogue de production s'ouvre automatiquement pour lancer la prochaine recette. Le flow complet (collecter → produire) se fait en 2 taps au lieu de 4.
+2. **Tout recuperer ameliore** : le bouton "Tout recuperer" des batiments fait maintenant un burst echelonne depuis chaque batiment (stagger 200ms), avec confettis si 3+ batiments. Avant : un seul burst au centre de l'ecran.
+3. **Animation de livraison de commande** : quand on livre une commande, la carte de commande glisse hors de l'ecran comme un camion qui part (animation `orderDeliver` slide-out 800ms). Feedback visuel satisfaisant de completion.
+4. **Animation bounce de collecte batiment** : nouveau CSS `building-collect-bounce` avec 3 keyframes (bounce, image pop avec brightness, glow radial dore). Les batiments "rebondissent" quand on collecte comme dans le vrai jeu.
+5. **Son de production** : lancer une production joue maintenant le son "plant" (confirmation). Echec de production joue "error". Avant : aucun feedback sonore.
+6. **FIX: Double coin burst a la vente** : le JS ET le Python declenchaient chacun un `showCoinBurst` + `SoundMgr.play('coin')` lors de la vente. Resultat : double son + double animation. Corrige : le Python ne fait plus que la notification texte, le JS gere le feedback visuel.
+7. **Auto-ouverture dialogue production** : apres tap-to-collect sur un batiment, le dialogue de production s'ouvre automatiquement apres 500ms pour permettre de lancer la prochaine recette. Flow continu comme dans Hay Day.
+
 ## Prochaines etapes
 - [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
