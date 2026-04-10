@@ -2179,6 +2179,7 @@ function harvestPlot(id){
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
+  if (!layer) return;
   const portrait = cropPortrait(cropId, 22) || itemIcon(cropId, 20);
   // Main crop burst (8 particles fanning out)
   for (let i = 0; i < 8; i++) {
@@ -2219,6 +2220,7 @@ function showHarvestAllBurst(n, xp, coins) {
 function showPlantBurst(plotEl, cropId) {
   if (!plotEl) return;
   const layer = document.getElementById('reward-layer');
+  if (!layer) return;
   const rect = plotEl.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
@@ -2485,10 +2487,10 @@ function showSessionSummary(d){
 }
 
 function hideOverlay(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));wheelSpinning=false}
-function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
-function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
+function showNotification(msg,type){if(!notificationsEnabled&&type!=='reward')return;const area=document.getElementById('notification-area');if(!area)return;const el=document.createElement('div');el.className='notification';if(type==='reward')el.classList.add('reward-notif');el.innerHTML=msg;area.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},3000)}
+function showFloatingReward(text,x,y){const layer=document.getElementById('reward-layer');if(!layer)return;const el=document.createElement('div');el.className='floating-reward';el.textContent=text;el.style.left=(x||window.innerWidth/2)+'px';el.style.top=(y||window.innerHeight/2)+'px';layer.appendChild(el);setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el)},1200)}
 function showCoinBurst(x,y,n){
-  const layer=document.getElementById('reward-layer');
+  const layer=document.getElementById('reward-layer');if(!layer)return;
   const coinSrc=S('ui_coin');
   for(let i=0;i<(n||5);i++){
     const el=document.createElement('div');
@@ -2648,6 +2650,7 @@ function collectBuildingDirect(bid, el) {
 // Products burst out of a building (items flying outward like Hay Day)
 function showBuildingProductBurst(x, y, productId) {
   const layer = document.getElementById('reward-layer');
+  if (!layer) return;
   const icon = itemIcon(productId, 22);
   for (let i = 0; i < 3; i++) {
     const el = document.createElement('div');
