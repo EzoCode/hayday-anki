@@ -279,17 +279,19 @@ class FarmWebView:
                 if result["count"] > 0:
                     total_xp = result["xp"]
                     total_coins = result.get("coins", 0)
-                    items_text = ", ".join(
-                        f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
-                        for iid, qty in result["items"].items()
-                    )
                     count = result["count"]
                     burst = min(10, count * 2)
                     self._js("SoundMgr.play('harvest')")
                     self._js(f"showHarvestAllBurst({burst}, {total_xp}, {total_coins})")
-                    coins_text = f" +{total_coins} pièces," if total_coins > 0 else ""
-                    msg = f"{count} récoltes :{coins_text} {items_text}"
-                    self._js(f"showNotification({json.dumps(msg)}, 'reward')")
+                    # Build rich notification with item icons
+                    items_parts = []
+                    for iid, qty in result["items"].items():
+                        name = _IC.get(iid, {}).get("name", iid)
+                        items_parts.append(f"' + itemIcon({json.dumps(iid)}, 14) + ' {qty}x {name}")
+                    items_html = ", ".join(items_parts)
+                    coins_text = f" +{total_coins} p." if total_coins > 0 else ""
+                    msg_js = f"'{count} récoltes :{coins_text} {items_html}'"
+                    self._js(f"showNotification({msg_js}, 'reward')")
                     if count >= 3:
                         self._js("createConfetti()")
                     self._check_and_show_level_up()
@@ -391,11 +393,11 @@ class FarmWebView:
                     r_coins = result["coins"]
                     r_xp = result["xp"]
                     r_gems = result.get("gems", 0)
-                    self._js(f"showCoinBurst(window.innerWidth/2, window.innerHeight/3, 8)")
-                    self._js(f"showFloatingReward('+{r_coins} pièces', window.innerWidth/2, window.innerHeight/3)")
+                    # Coin burst already triggered from JS (from the card position)
                     gem_text = f" +{r_gems} gemmes" if r_gems > 0 else ""
                     self._js(f"showNotification({json.dumps(f'Commande livrée ! +{r_coins} pièces, +{r_xp} XP{gem_text}')}, 'reward')")
                     self._js("createConfetti()")
+                    self._js("SoundMgr.play('levelup')")
                     self._check_and_show_level_up()
                 else:
                     self._js("showNotification('Items manquants !')")

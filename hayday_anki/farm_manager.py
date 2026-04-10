@@ -245,13 +245,33 @@ class FarmState:
         self.placed_buildings: List[Dict] = []  # [{id, building_type}]
         self.pastures: List[Dict] = []  # [{id, animal_type, count, reviews_since_last}]
 
-        # Initialize 3 starter fields for new players
-        for i in range(3):
-            self.fields.append({
-                "id": i, "crop": None, "state": "empty",
+        # Initialize 4 starter fields for new players (like Hay Day's living farm)
+        # Pre-plant wheat at different stages so farm feels alive immediately
+        self.fields = [
+            {
+                "id": 0, "crop": "wheat", "state": "growing",
+                "growth_stage": 3, "reviews_needed": 3,
+                "reviews_done": 1, "planted_at": datetime.now().isoformat(),
+                "last_crop": "wheat",
+            },
+            {
+                "id": 1, "crop": "wheat", "state": "growing",
+                "growth_stage": 2, "reviews_needed": 3,
+                "reviews_done": 0, "planted_at": datetime.now().isoformat(),
+                "last_crop": "wheat",
+            },
+            {
+                "id": 2, "crop": "wheat", "state": "growing",
+                "growth_stage": 1, "reviews_needed": 3,
+                "reviews_done": 1, "planted_at": datetime.now().isoformat(),
+                "last_crop": "wheat",
+            },
+            {
+                "id": 3, "crop": None, "state": "empty",
                 "growth_stage": 0, "reviews_needed": 0,
                 "reviews_done": 0, "planted_at": None,
-            })
+            },
+        ]
         self.num_plots = len(self.fields)
 
         # Lifetime tracking counters (for achievements)
@@ -727,8 +747,8 @@ class FarmManager:
                         "message": f"Grange pleine ! {mat_name} perdu. Vendez ou améliorez la grange.",
                     })
 
-        # Mystery box chance (~1 in 20 reviews)
-        if random.random() < 0.05:
+        # Mystery box chance (~1 in 20 reviews), capped at 20 to prevent UI flooding
+        if random.random() < 0.05 and len(self.state.mystery_boxes) < 20:
             box_size = random.choices(
                 ["small", "medium", "large"],
                 weights=[0.6, 0.3, 0.1]

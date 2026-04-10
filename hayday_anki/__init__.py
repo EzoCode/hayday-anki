@@ -245,17 +245,21 @@ def _check_achievements(mgr):
         if gem_reward > 0:
             mgr.state.gems += gem_reward
 
-        # Show achievement notification in UI
+        # Show achievement notification in UI with star icon
         view = _get_view()
         if view.web:
             ach_name = ach.get("name", "")
             ach_tier = ach.get("tier", "")
             tier_label = {"bronze": "Bronze", "silver": "Argent", "gold": "Or"}.get(ach_tier, ach_tier)
             gem_text = f" +{gem_reward} gemmes" if gem_reward > 0 else ""
-            msg = f"{tier_label} — {ach_name}{gem_text}"
-            view._js(f"showNotification({json.dumps(msg)}, 'reward')")
+            # Use gold star icon for achievements
+            star_js = "S('_gold_star') ? '<img src=\"'+S('_gold_star')+'\" width=\"16\" height=\"16\" style=\"vertical-align:middle\">' : ''"
+            msg_parts = json.dumps(f" {tier_label} — {ach_name}{gem_text}")
+            view._js(f"showNotification(({star_js}) + {msg_parts}, 'reward')")
             if ach_tier == "gold":
                 view._js("createConfetti()")
+            elif ach_tier == "silver":
+                view._js("createSparkleRain()")
 
 
 # =============================================================================

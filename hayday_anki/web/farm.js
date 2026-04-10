@@ -423,7 +423,7 @@ function itemIcon(id, w) {
 // --- Inline SVG Building Icons (distinct identity per building) ---
 const BUILDING_SVGS = {
   bakery: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='32' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='10' y='53' width='60' height='22' rx='2' fill='%23c9884a' stroke='%23a06a30' stroke-width='.8'/%3E%3Crect x='11' y='54' width='28' height='20' fill='%23daa06d' opacity='.2'/%3E%3Cpath d='M5 53L40 23l35 30z' fill='%23d4534a' stroke='%23b03a32' stroke-width='.6'/%3E%3Cpath d='M12 53L40 28l28 25z' fill='%23e8665e'/%3E%3Cpath d='M14 53L40 30l26 23z' fill='%23ef8a84' opacity='.3'/%3E%3Crect x='28' y='56' width='24' height='19' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='30' y='58' width='20' height='13' rx='1' fill='%23ffd54f' opacity='.35'/%3E%3Cpath d='M30 64h20' stroke='%238b5e3c' stroke-width='.5' opacity='.3'/%3E%3Crect x='15' y='40' width='12' height='11' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='16' y='41' width='10' height='9' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='53' y='40' width='12' height='11' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='54' y='41' width='10' height='9' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='36' y='18' width='8' height='12' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.4'/%3E%3Cellipse cx='40' cy='15' rx='3' ry='4' fill='%23ccc' opacity='.5'/%3E%3Cellipse cx='40' cy='13' rx='2' ry='3' fill='%23ddd' opacity='.35'/%3E%3Ccircle cx='40' cy='64' r='5' fill='%23e8b87a' stroke='%23c9884a' stroke-width='.4'/%3E%3Ccircle cx='40' cy='63' r='3.5' fill='%23daa06d'/%3E%3Cellipse cx='38' cy='62' rx='1.5' ry='1' fill='%23fff' opacity='.2'/%3E%3C/svg%3E",
-  sugar_mill: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='15' y='35' width='50' height='40' rx='3' fill='%23e0d5c0'/%3E%3Cpath d='M10 35L40 15l30 20z' fill='%23c9884a'/%3E%3Cpath d='M15 35L40 19l25 16z' fill='%23daa06d'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Ccircle cx='55' cy='30' r='10' fill='%23c9884a'/%3E%3Cpath d='M55 20v20M45 30h20' stroke='%23a06a30' stroke-width='2.5'/%3E%3Cpath d='M48 23l14 14M48 37l14-14' stroke='%23a06a30' stroke-width='1.5'/%3E%3Ccircle cx='55' cy='30' r='3' fill='%23daa06d'/%3E%3C/svg%3E",
+  sugar_mill: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='30' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='15' y='35' width='50' height='40' rx='3' fill='%23e8dcc8' stroke='%23d4c8b0' stroke-width='.6'/%3E%3Crect x='16' y='36' width='24' height='38' fill='%23f0e8d8' opacity='.3'/%3E%3Cpath d='M10 35L40 12l30 23z' fill='%23c9884a' stroke='%23a06a30' stroke-width='.5'/%3E%3Cpath d='M16 35L40 16l24 19z' fill='%23daa06d'/%3E%3Cpath d='M20 35L40 19l20 16z' fill='%23e8c87a' opacity='.3'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Cpath d='M32 64h16' stroke='%238b5e3c' stroke-width='.5' opacity='.3'/%3E%3Crect x='17' y='44' width='11' height='10' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='18' y='45' width='9' height='8' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='52' y='44' width='11' height='10' rx='1' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.4'/%3E%3Crect x='53' y='45' width='9' height='8' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Ccircle cx='58' cy='24' r='14' fill='none' stroke='%23c9884a' stroke-width='.5' opacity='.15'/%3E%3Cpath d='M58 10v28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M44 24h28' stroke='%23a06a30' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M48.1 14.1l19.8 19.8' stroke='%23a06a30' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M48.1 33.9l19.8-19.8' stroke='%23a06a30' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='58' cy='24' r='4' fill='%23daa06d' stroke='%23a06a30' stroke-width='.6'/%3E%3Ccircle cx='58' cy='24' r='2' fill='%23e8c87a'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23fff8e1' stroke='%23e8c87a' stroke-width='.4'/%3E%3Ccircle cx='40' cy='63.5' r='2.5' fill='%23fffde7' opacity='.6'/%3E%3C/svg%3E",
   dairy: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='30' ry='4' fill='%23000' opacity='.08'/%3E%3Crect x='12' y='38' width='56' height='37' rx='3' fill='%23f0f0f0' stroke='%23ddd' stroke-width='.6'/%3E%3Crect x='13' y='39' width='26' height='35' fill='%23f5f5f5' opacity='.3'/%3E%3Cpath d='M8 38L40 16l32 22z' fill='%234fc3f7' stroke='%230288d1' stroke-width='.5'/%3E%3Cpath d='M14 38L40 20l26 18z' fill='%2381d4fa'/%3E%3Cpath d='M18 38L40 23l22 15z' fill='%23b3e5fc' opacity='.4'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='16' y='46' width='11' height='10' rx='1' fill='%23bbb' stroke='%23999' stroke-width='.3'/%3E%3Crect x='17' y='47' width='9' height='8' rx='1' fill='%23e3f2fd'/%3E%3Crect x='53' y='46' width='11' height='10' rx='1' fill='%23bbb' stroke='%23999' stroke-width='.3'/%3E%3Crect x='54' y='47' width='9' height='8' rx='1' fill='%23e3f2fd'/%3E%3Ccircle cx='40' cy='64' r='4' fill='%23fff' opacity='.4'/%3E%3Ccircle cx='40' cy='64' r='2.5' fill='%2381d4fa' opacity='.5'/%3E%3C/svg%3E",
   bbq: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='30' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='12' y='40' width='56' height='35' rx='3' fill='%23795548' stroke='%234e342e' stroke-width='.5'/%3E%3Crect x='13' y='41' width='26' height='33' fill='%238d6e63' opacity='.2'/%3E%3Cpath d='M8 40L40 18l32 22z' fill='%23e53935' stroke='%23c62828' stroke-width='.5'/%3E%3Cpath d='M14 40L40 22l26 18z' fill='%23ef5350'/%3E%3Cpath d='M18 40L40 25l22 15z' fill='%23ef9a9a' opacity='.3'/%3E%3Crect x='30' y='55' width='20' height='20' rx='2' fill='%235d4037' stroke='%234e342e' stroke-width='.4'/%3E%3Crect x='32' y='57' width='16' height='14' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='34' y='14' width='4' height='10' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Crect x='43' y='12' width='4' height='12' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Cellipse cx='36' cy='12' rx='3' ry='4' fill='%23bbb' opacity='.25'/%3E%3Cellipse cx='45' cy='10' rx='3.5' ry='4.5' fill='%23bbb' opacity='.2'/%3E%3Cellipse cx='36' cy='10' rx='2' ry='3' fill='%23ccc' opacity='.15'/%3E%3C/svg%3E",
   pastry_shop: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cellipse cx='40' cy='76' rx='32' ry='4' fill='%23000' opacity='.1'/%3E%3Crect x='10' y='42' width='60' height='33' rx='3' fill='%23fff8e1' stroke='%23e8c87a' stroke-width='.6'/%3E%3Crect x='11' y='43' width='28' height='31' fill='%23fffde7' opacity='.3'/%3E%3Cpath d='M5 42L40 18l35 24z' fill='%23ff9800' stroke='%23e68900' stroke-width='.5'/%3E%3Cpath d='M12 42L40 22l28 20z' fill='%23ffb74d'/%3E%3Cpath d='M16 42L40 26l24 16z' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='28' y='52' width='24' height='23' rx='2' fill='%238b5e3c' stroke='%236d4c41' stroke-width='.5'/%3E%3Crect x='30' y='54' width='20' height='16' rx='1' fill='%23ffd54f' opacity='.3'/%3E%3Crect x='14' y='48' width='11' height='9' rx='1.5' fill='%238b5e3c'/%3E%3Crect x='15' y='49' width='9' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Crect x='55' y='48' width='11' height='9' rx='1.5' fill='%238b5e3c'/%3E%3Crect x='56' y='49' width='9' height='7' rx='1' fill='%23ffd54f' opacity='.25'/%3E%3Ccircle cx='35' cy='63' r='4.5' fill='%23ffc107' stroke='%23e6a800' stroke-width='.4'/%3E%3Ccircle cx='35' cy='62' r='3' fill='%23ffe082'/%3E%3Ccircle cx='35' cy='60.5' r='1.5' fill='%23e74c3c'/%3E%3Ccircle cx='46' cy='65' r='3.5' fill='%23efebe9' stroke='%23d7ccc8' stroke-width='.4'/%3E%3Ccircle cx='46' cy='64' r='2.5' fill='%23fce4ec'/%3E%3Cpath d='M44 62h4' stroke='%23e91e63' stroke-width='.6'/%3E%3Crect x='36' y='14' width='8' height='10' rx='1.5' fill='%23999' stroke='%23777' stroke-width='.3'/%3E%3Cellipse cx='40' cy='12' rx='3' ry='4' fill='%23ccc' opacity='.4'/%3E%3C/svg%3E",
@@ -1123,12 +1123,25 @@ function updateActionHints() {
   const iconEl = document.getElementById('next-action-icon');
   const textEl = document.getElementById('next-action-text');
 
+  // Check if any crop is very close to harvest (strong motivator)
+  let closestReviewsLeft = 999;
+  let closestCropName = '';
+  fields.filter(f => f.state === 'growing' || f.state === 'planted').forEach(f => {
+    const cd = (d.crop_defs||{})[f.crop]||{};
+    const rps = cd.growth_reviews || 3;
+    const left = rps * 4 - ((f.growth_stage||0) * rps + (f.reviews_done||0));
+    if (left < closestReviewsLeft) { closestReviewsLeft = left; closestCropName = cropName(f.crop); }
+  });
+
   if (wiltingFields > 0) {
     // URGENT: crops about to wilt
     _nextAction = {type:'harvest', text:`${wiltingFields} culture${wiltingFields>1?'s':''} va${wiltingFields>1?'nt':''} faner ! Récolte vite !`};
   } else if (readyFields > 0) {
     // Ready to harvest — most satisfying action
     _nextAction = {type:'harvest', text:`${readyFields} culture${readyFields>1?'s':''} prête${readyFields>1?'s':''} à récolter !`};
+  } else if (closestReviewsLeft <= 3 && closestReviewsLeft > 0) {
+    // Almost ready — strong motivator to keep reviewing (like Hay Day's "almost done!" teasing)
+    _nextAction = {type:'review', text:`${closestCropName} prêt dans ${closestReviewsLeft} révision${closestReviewsLeft>1?'s':''} ! Continue !`};
   } else if (emptyFields > 0 && fields.length > 0) {
     // Empty fields to plant
     _nextAction = {type:'plant', text:`${emptyFields} parcelle${emptyFields>1?'s':''} vide${emptyFields>1?'s':''} — plante pour gagner plus !`};
@@ -2330,11 +2343,20 @@ function fulfillOrder(i){
       return pB - pA;
     });
   const sortedPos = sortedIdxMap.findIndex(o => o._idx === i);
-  // +1 to skip the explanation header div
   const targetCard = orderCards[sortedPos] || null;
   if (targetCard) {
+    const rect = targetCard.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    // Coin burst from the order card position (not screen center)
+    showCoinBurst(cx, cy, 8);
+    // Satisfying green flash on the card before it slides away
+    targetCard.style.boxShadow = '0 0 20px rgba(76,175,80,.6), inset 0 0 15px rgba(76,175,80,.2)';
     targetCard.classList.add('order-delivering');
-    setTimeout(() => targetCard.classList.remove('order-delivering'), 1000);
+    setTimeout(() => {
+      targetCard.classList.remove('order-delivering');
+      targetCard.style.boxShadow = '';
+    }, 1000);
   }
   pycmd(`farm:fulfill_order:${i}`);
 }
