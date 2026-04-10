@@ -18,13 +18,13 @@
 body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;user-select:none;background:var(--grass-2)}
 
 /* ===== HUD ===== */
-#hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:54px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 20%,transparent 40%,rgba(0,0,0,.12) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
-  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
+#hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:56px;flex-shrink:0;z-index:100;
+  background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 18%,transparent 38%,rgba(0,0,0,.14) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
+  border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 5px 18px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.15) inset}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
-.hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;border:2.5px solid var(--gold);box-shadow:0 0 10px rgba(255,215,0,.5),0 0 20px rgba(255,215,0,.15),inset 0 0 4px rgba(255,215,0,.3);
-  background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.25),rgba(255,215,0,.05) 60%,transparent)}
+.hud-level{position:relative;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 12px rgba(255,215,0,.6),0 0 25px rgba(255,215,0,.2),inset 0 0 6px rgba(255,215,0,.4),0 2px 4px rgba(0,0,0,.3);
+  background:radial-gradient(circle at 40% 35%,rgba(255,215,0,.3),rgba(255,215,0,.08) 55%,rgba(0,0,0,.1))}
 .hud-star{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .level-num{position:relative;z-index:1;font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .hud-xp{position:relative;width:140px;height:30px}
@@ -141,19 +141,35 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== FARM WORLD — Real Hay Day Background ===== */
 #farm-container{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 
-.farm-sky{position:sticky;top:0;left:0;right:0;height:80px;
-  background:linear-gradient(180deg,#3a95cc 0%,#5db8e0 20%,#7cc8e8 40%,#9ed8ec 55%,#c5e8cc 75%,rgba(197,232,176,0) 100%);
+.farm-sky{position:sticky;top:0;left:0;right:0;height:90px;
+  background:linear-gradient(180deg,#2b88c2 0%,#4aa8d8 15%,#6dc0e4 30%,#90d2ec 45%,#b5e2d0 65%,#c5e8cc 80%,rgba(197,232,176,0) 100%);
   z-index:0;pointer-events:none;overflow:hidden}
-.farm-sky::before{content:'';position:absolute;top:6px;left:8%;width:80px;height:20px;
-  background:radial-gradient(ellipse at 30% 50%,rgba(255,255,255,.55) 0%,rgba(255,255,255,.4) 40%,rgba(255,255,255,.15) 70%,transparent 100%);
-  border-radius:20px;animation:cloudDrift1 45s linear infinite;filter:blur(0.5px)}
-.farm-sky::after{content:'';position:absolute;top:18px;right:12%;width:60px;height:16px;
-  background:radial-gradient(ellipse at 60% 40%,rgba(255,255,255,.4) 0%,rgba(255,255,255,.25) 50%,transparent 100%);
-  border-radius:16px;animation:cloudDrift2 65s linear infinite;filter:blur(0.5px)}
-@keyframes cloudDrift1{0%{transform:translateX(-20px)}50%{transform:translateX(30px)}100%{transform:translateX(-20px)}}
-@keyframes cloudDrift2{0%{transform:translateX(15px)}50%{transform:translateX(-25px)}100%{transform:translateX(15px)}}
+.farm-sky::before{content:'';position:absolute;top:10px;left:5%;width:100px;height:24px;
+  background:
+    radial-gradient(ellipse at 25% 50%,rgba(255,255,255,.6) 0%,rgba(255,255,255,.4) 40%,transparent 70%),
+    radial-gradient(ellipse at 70% 45%,rgba(255,255,255,.45) 0%,rgba(255,255,255,.25) 40%,transparent 65%);
+  border-radius:24px;animation:cloudDrift1 50s linear infinite;filter:blur(0.5px)}
+.farm-sky::after{content:'';position:absolute;top:28px;left:45%;width:75px;height:18px;
+  background:
+    radial-gradient(ellipse at 40% 50%,rgba(255,255,255,.45) 0%,rgba(255,255,255,.25) 45%,transparent 70%),
+    radial-gradient(ellipse at 80% 40%,rgba(255,255,255,.3) 0%,transparent 60%);
+  border-radius:20px;animation:cloudDrift2 70s linear infinite;filter:blur(0.5px)}
+@keyframes cloudDrift1{0%{transform:translateX(-30px)}50%{transform:translateX(40px)}100%{transform:translateX(-30px)}}
+@keyframes cloudDrift2{0%{transform:translateX(20px)}50%{transform:translateX(-30px)}100%{transform:translateX(20px)}}
 
 .farm-atmosphere{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(255,240,180,.06) 0%,transparent 50%),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.12) 100%);pointer-events:none;z-index:5}
+
+/* Sun — warm golden circle */
+.sky-sun{position:absolute;top:6px;right:15%;width:32px;height:32px;background:radial-gradient(circle,#fff8c4 0%,#ffd700 30%,rgba(255,215,0,.3) 60%,transparent 70%);border-radius:50%;box-shadow:0 0 30px rgba(255,215,0,.4),0 0 60px rgba(255,200,50,.15);animation:sunPulse 6s ease-in-out infinite;z-index:1}
+@keyframes sunPulse{0%,100%{box-shadow:0 0 30px rgba(255,215,0,.3),0 0 60px rgba(255,200,50,.12);transform:scale(1)}50%{box-shadow:0 0 40px rgba(255,215,0,.5),0 0 80px rgba(255,200,50,.2);transform:scale(1.05)}}
+
+/* Farmer character on the farm */
+#farmer-character{position:absolute;bottom:8px;right:14px;z-index:6;pointer-events:none;filter:drop-shadow(1px 3px 4px rgba(0,0,0,.4));transition:transform .3s}
+#farmer-character img{max-width:48px;max-height:60px;object-fit:contain}
+.farmer-idle{animation:farmerIdle 4s ease-in-out infinite}
+.farmer-happy{animation:farmerHappy .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes farmerIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes farmerHappy{0%{transform:scale(1) rotate(0)}30%{transform:scale(1.15) rotate(-5deg) translateY(-8px)}60%{transform:scale(1.05) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
 
 #farm-world{position:relative;min-height:100%;padding:12px 10px 20px;
   background-color:#4a8c32;
@@ -338,6 +354,33 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   padding: 14px 10px;
   line-height: 1.4;
   text-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+/* Clean, visual empty zone CTA — like Hay Day's locked zones */
+.zone-empty-cta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 10px;
+  text-align: center;
+  opacity: .7;
+  transition: opacity .2s;
+  cursor: pointer;
+}
+.zone-empty-cta:hover { opacity: 1; }
+.zone-empty-cta img { transition: transform .2s; }
+.zone-empty-cta:hover img { transform: scale(1.1) translateY(-3px); }
+.zone-empty-cta span {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,.8);
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  background: rgba(0,0,0,.2);
+  padding: 3px 12px;
+  border-radius: 10px;
+  letter-spacing: .3px;
 }
 
 /* Land bar */
@@ -529,7 +572,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Almost ready — subtle golden hint like Hay Day pre-harvest glow */
 .plot-almost-ready{border-color:rgba(255,215,0,.25) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.15) !important}
 .plot-almost-ready .plot-progress-fill{background:linear-gradient(90deg,#4caf50,#8bc34a,#ffd700) !important}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
+.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 4px 8px rgba(0,0,0,.25),0 0 24px rgba(255,215,0,.6),0 0 48px rgba(255,215,0,.18);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-5px) scale(1.1) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff;z-index:5 !important}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
@@ -549,7 +592,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
-.plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+.plot-crop img{max-width:78px;max-height:78px;width:auto;height:auto;transition:transform .3s ease;image-rendering:auto}
 /* Growing crops sway gently in the wind — signature Hay Day feel */
 .plot-growing .plot-crop img,.plot-planted .plot-crop img{animation:cropSway 4s ease-in-out infinite}
 .plot:nth-child(even) .plot-crop img{animation-delay:-.8s}
@@ -928,18 +971,18 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .pq-bar{flex:0 0 60px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden}
 .pq-bar-fill{height:100%;background:linear-gradient(90deg,#81c784,#4caf50);border-radius:3px;transition:width .4s}
 .pq-ready-badge{font-size:16px;font-weight:900;color:#4caf50;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
-.recipe-card{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(255,255,255,.3));border-radius:12px;border:1px solid rgba(0,0,0,.05);cursor:pointer;transition:all .18s;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.9);border-color:#6abf47;transform:translateY(-2px);box-shadow:0 4px 12px rgba(106,191,71,.2)}
+.recipe-card{display:flex;flex-direction:column;gap:8px;padding:12px 14px;background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(250,245,230,.5));border-radius:14px;border:1.5px solid rgba(212,160,86,.12);cursor:pointer;transition:all .18s;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.5)}
+.recipe-card:hover:not(.disabled){background:rgba(255,255,255,.95);border-color:#6abf47;transform:translateY(-3px);box-shadow:0 6px 16px rgba(106,191,71,.25),0 0 0 1px rgba(106,191,71,.1)}
 .recipe-card.disabled{opacity:.4;cursor:not-allowed}
 .recipe-header{display:flex;align-items:center;gap:10px}
-.recipe-emoji{display:flex;align-items:center;justify-content:center;width:36px;height:36px}
-.recipe-emoji img{filter:drop-shadow(1px 1px 2px rgba(0,0,0,.2));max-width:32px;max-height:32px}
+.recipe-emoji{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:radial-gradient(circle,rgba(255,215,0,.08),transparent 70%);border-radius:50%;flex-shrink:0}
+.recipe-emoji img{filter:drop-shadow(1px 2px 3px rgba(0,0,0,.25));max-width:38px;max-height:38px}
 .recipe-info{flex:1}
 .recipe-info strong{font-size:13px;color:var(--text-d)}
 .recipe-time{font-size:9px;color:#888;display:block;margin-top:1px}
 .recipe-ingredients{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
-.recipe-ingredient{font-size:10px;padding:3px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;font-weight:600;border:1px solid transparent;transition:all .15s}
-.recipe-ingredient img{max-width:16px;max-height:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.recipe-ingredient{font-size:10px;padding:4px 10px;border-radius:10px;display:inline-flex;align-items:center;gap:4px;font-weight:700;border:1px solid transparent;transition:all .15s}
+.recipe-ingredient img{max-width:20px;max-height:20px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
 .recipe-ingredient.has{background:rgba(76,175,80,.12);color:#2e7d32;border-color:rgba(76,175,80,.15)}
 .recipe-ingredient.need{background:rgba(244,67,54,.08);color:#c62828;border-color:rgba(244,67,54,.12)}
 .recipe-ingredient b{font-weight:800}
@@ -1077,10 +1120,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== REWARD NOTIFICATION (gold) ===== */
 .notification.reward-notif{
-  background:linear-gradient(135deg,rgba(40,25,10,.92),rgba(80,50,10,.95));
-  border:1px solid rgba(255,215,0,.4);
+  background:linear-gradient(135deg,rgba(40,25,10,.94),rgba(80,50,10,.96));
+  border:1.5px solid rgba(255,215,0,.5);
   color:var(--gold);
-  box-shadow:0 4px 14px rgba(255,215,0,.2),0 4px 14px rgba(0,0,0,.4)}
+  box-shadow:0 4px 14px rgba(255,215,0,.25),0 6px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,215,0,.15);
+  animation:notifIn .4s cubic-bezier(.34,1.56,.64,1),rewardGlow 2s ease-in-out 1,notifOut .4s ease 2.8s forwards}
+@keyframes rewardGlow{0%,100%{box-shadow:0 4px 14px rgba(255,215,0,.2),0 6px 18px rgba(0,0,0,.4)}50%{box-shadow:0 4px 20px rgba(255,215,0,.45),0 6px 18px rgba(0,0,0,.4),0 0 25px rgba(255,215,0,.15)}}
 
 /* ===== RESPONSIVE TOUCH TARGETS ===== */
 @media(max-width:400px){
@@ -1098,16 +1143,19 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* Growth feedback — triggered when a plot advances after review */
 /* THIS IS THE KEY FEEDBACK: player sees crops grow with each review */
-.plot-grew{animation:plotGrew 1s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
-.plot-grew .plot-crop{animation:cropGrew .9s cubic-bezier(.34,1.56,.64,1) !important}
-.plot-grew::after{content:'';position:absolute;inset:-6px;border-radius:20px;background:radial-gradient(circle,rgba(106,191,71,.6),rgba(255,255,255,.1) 50%,transparent 70%);animation:growGlow 1.2s ease-out forwards;pointer-events:none;z-index:10}
-@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}15%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.5),inset -2px -2px 6px rgba(0,0,0,.1),0 0 28px rgba(106,191,71,.8),0 4px 8px rgba(0,0,0,.2);transform:scale(1.08)}40%{transform:scale(.98)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
-@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}15%{transform:scale(1.3);filter:brightness(1.4) saturate(1.3)}40%{transform:scale(.95);filter:brightness(1.1)}100%{transform:scale(1);filter:brightness(1)}}
-@keyframes growGlow{0%{opacity:1;transform:scale(.7)}40%{opacity:.8;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
+.plot-grew{animation:plotGrew 1.1s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
+.plot-grew .plot-crop{animation:cropGrew 1s cubic-bezier(.34,1.56,.64,1) !important}
+.plot-grew::after{content:'';position:absolute;inset:-8px;border-radius:22px;background:radial-gradient(circle,rgba(106,191,71,.7),rgba(200,255,150,.2) 40%,transparent 70%);animation:growGlow 1.3s ease-out forwards;pointer-events:none;z-index:10}
+/* Green sparkle overlay on growth — uses box-shadow instead of ::before to avoid pseudo-element conflict */
+@keyframes plotGrew{0%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 6px 12px rgba(0,0,0,.3)}12%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.6),inset -2px -2px 6px rgba(0,0,0,.05),0 0 35px rgba(106,191,71,.9),0 4px 8px rgba(0,0,0,.2);transform:scale(1.1)}35%{transform:scale(.97)}60%{transform:scale(1.03)}100%{box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),inset -2px -2px 6px rgba(0,0,0,.3),0 4px 10px rgba(0,0,0,.25);transform:scale(1)}}
+@keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}12%{transform:scale(1.35);filter:brightness(1.5) saturate(1.4)}35%{transform:scale(.92);filter:brightness(1.15)}60%{transform:scale(1.05)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes growGlow{0%{opacity:1;transform:scale(.6)}30%{opacity:.9;transform:scale(1.15)}100%{opacity:0;transform:scale(1.5)}}
 
-/* ===== READY CROP BOUNCE ===== */
-.plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
-@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}12%{transform:scale(1.18) translateY(-8px)}28%{transform:scale(1) translateY(0)}40%{transform:scale(1.1) translateY(-5px)}55%{transform:scale(1) translateY(0)}68%{transform:scale(1.05) translateY(-2px)}80%{transform:scale(1) translateY(0)}}
+/* ===== READY CROP BOUNCE — Irresistible tap target ===== */
+.plot-crop-bounce{animation:readyBounce 2s ease-in-out infinite !important}
+@keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}10%{transform:scale(1.22) translateY(-10px)}22%{transform:scale(.98) translateY(1px)}34%{transform:scale(1.14) translateY(-7px)}48%{transform:scale(1) translateY(0)}60%{transform:scale(1.08) translateY(-4px)}74%{transform:scale(1) translateY(0)}}
+/* Ready crop has subtle shadow bounce for depth */
+.plot-ready .plot-crop{filter:drop-shadow(2px 4px 5px rgba(0,0,0,.5)) drop-shadow(0 0 8px rgba(255,215,0,.3))}
 
 /* ===== INVENTORY ITEM HOVER ===== */
 .item-cell::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0;background:radial-gradient(circle at center,rgba(255,215,0,.15),transparent 70%);transition:opacity .2s;pointer-events:none}
@@ -1314,19 +1362,24 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== NEXT ACTION GUIDANCE — What to do next (key for engagement) ===== */
 .next-action-bar{
-  display:flex;align-items:center;gap:6px;
-  padding:6px 12px;
-  background:linear-gradient(90deg,rgba(106,191,71,.12),rgba(106,191,71,.06));
-  border-top:1px solid rgba(106,191,71,.15);
-  font-size:11px;font-weight:700;color:rgba(255,255,255,.85);
-  text-shadow:0 1px 2px rgba(0,0,0,.4);
-  cursor:pointer;transition:background .2s;
-  position:relative;z-index:1;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;margin:6px 10px;
+  background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(106,191,71,.1));
+  border:1.5px solid rgba(106,191,71,.2);
+  border-radius:14px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.9);
+  text-shadow:0 1px 2px rgba(0,0,0,.5);
+  cursor:pointer;transition:all .2s;
+  position:relative;z-index:2;
+  box-shadow:0 2px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1);
+  animation:nextActionPulse 3s ease-in-out infinite;
 }
-.next-action-bar:hover{background:linear-gradient(90deg,rgba(106,191,71,.2),rgba(106,191,71,.12))}
-.next-action-icon{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+@keyframes nextActionPulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1)}50%{box-shadow:0 2px 12px rgba(106,191,71,.2),inset 0 1px 0 rgba(255,255,255,.15),0 0 12px rgba(106,191,71,.1)}}
+.next-action-bar:hover{background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(106,191,71,.15));border-color:rgba(106,191,71,.35);transform:translateY(-1px)}
+.next-action-icon{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.next-action-icon img{filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .next-action-text{flex:1;line-height:1.3}
-.next-action-arrow{color:rgba(255,255,255,.4);font-size:14px;font-weight:900}
+.next-action-arrow{color:rgba(255,255,255,.5);font-size:16px;font-weight:900}
 
 /* ===== SMOOTHER OVERLAY TRANSITIONS ===== */
 .overlay-card{max-height:85vh;overflow-y:auto}

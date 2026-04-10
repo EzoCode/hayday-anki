@@ -90,6 +90,11 @@ function applyHayDayAssets() {
       lvlCard.style.backgroundPosition = 'center';
     }
   }
+  // Farmer character — use real Hay Day farmer sprite
+  const farmerSrc = S('hayday_farmer-man') || S('hayday_farmer-woman');
+  const farmerImg = document.getElementById('farmer-img');
+  if (farmerSrc && farmerImg) { farmerImg.src = farmerSrc; farmerImg.style.display = ''; }
+  else if (farmerImg) { farmerImg.style.display = 'none'; }
   // Level up stars — use gold star for Hay Day feel
   const starSrc2 = S('_gold_star') || S('hayday_star');
   const starsEl = document.getElementById('levelup-stars');
@@ -185,6 +190,18 @@ function itemName(id) { const c = (farmData.item_catalog||{})[id]; return c ? c.
 
 // Safe parseInt wrapper
 function safeInt(val, fallback) { const n = parseInt(val, 10); return isNaN(n) ? (fallback||0) : n; }
+
+// Farmer character reactions — adds life to the farm
+function triggerFarmerReaction(type) {
+  const farmer = document.getElementById('farmer-character');
+  if (!farmer) return;
+  farmer.className = '';
+  void farmer.offsetWidth; // force reflow
+  farmer.className = type === 'happy' ? 'farmer-happy' : 'farmer-idle';
+  if (type === 'happy') {
+    setTimeout(() => { farmer.className = 'farmer-idle'; }, 800);
+  }
+}
 
 // --- Sound Manager with Web Audio API synth sounds ---
 const SoundMgr = {
@@ -883,8 +900,8 @@ function renderFields() {
 
   if (fields.length === 0) {
     const wheatSrc = S('crops_wheat_portrait') || S('crops_wheat_4');
-    const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="28" height="28" style="vertical-align:middle;margin-right:4px">` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${wheatIcon}Ajoute ton premier champ pour commencer !</div>`;
+    const wheatIcon = wheatSrc ? `<img src="${wheatSrc}" width="40" height="40" style="filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))">` : '';
+    grid.innerHTML = `<div class="zone-empty-cta">${wheatIcon}<span>Plante ta première culture !</span></div>`;
     return;
   }
 
@@ -923,7 +940,7 @@ function renderFields() {
       }
       // Hay Day style: big bouncing crop with golden sparkle, no text clutter
       const wiltBadge = wiltWarning ? `<span class="wilt-warning-badge">${wiltLeft}</span>` : '';
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 82)}</div>${wiltBadge}`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -939,8 +956,8 @@ function renderFields() {
       const pct = Math.min(100, (totalDone/totalNeeded)*100);
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
-      // Hay Day style: crop grows visually bigger through stages
-      const cropSize = 32 + stage * 11; // 32px at seed → 65px at stage 3
+      // Hay Day style: crop grows visually bigger through stages — dramatic progression
+      const cropSize = 28 + stage * 14; // 28px at seed → 70px at stage 3
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
@@ -1002,11 +1019,11 @@ function renderWorkshop() {
 
   if (placed.length === 0) {
     const barnSpr = S('hayday_barn');
-    const barnIcon = barnSpr ? `<img src="${barnSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
+    const barnIcon = barnSpr ? `<img src="${barnSpr}" width="44" height="44" style="filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))">` : '';
     const nextBld = ALL_BUILDINGS.find(b => (farmData.unlocked_buildings||[]).includes(b.id));
     const nextBldLocked = ALL_BUILDINGS.find(b => !(farmData.unlocked_buildings||[]).includes(b.id));
-    const hint = nextBld ? ` Clique "+ Construire" !` : nextBldLocked ? ` Débloqué au niveau ${nextBldLocked.lvl} !` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${barnIcon}Construis des bâtiments pour transformer tes récoltes en produits de valeur !${hint}</div>`;
+    const hint = nextBld ? `Construire` : nextBldLocked ? `Niveau ${nextBldLocked.lvl}` : '';
+    grid.innerHTML = `<div class="zone-empty-cta">${barnIcon}<span>${hint}</span></div>`;
     return;
   }
 
@@ -1068,11 +1085,11 @@ function renderPastures() {
 
   if (pastures.length === 0) {
     const cowSpr = S('hayday_cow') || S('animals_cow');
-    const cowIcon = cowSpr ? `<img src="${cowSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
+    const cowIcon = cowSpr ? `<img src="${cowSpr}" width="44" height="44" style="filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))">` : '';
     const nextAnimal = ALL_ANIMALS.find(a => (farmData.unlocked_animals||[]).includes(a.id));
     const nextLocked = ALL_ANIMALS.find(a => !(farmData.unlocked_animals||[]).includes(a.id));
-    const hint = nextAnimal ? ` Clique "+ Enclos" !` : nextLocked ? ` Premier animal au niveau ${nextLocked.lvl} !` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${cowIcon}Adopte des animaux pour produire lait, œufs et laine !${hint}</div>`;
+    const hint = nextAnimal ? `Adopter` : nextLocked ? `Niveau ${nextLocked.lvl}` : '';
+    grid.innerHTML = `<div class="zone-empty-cta">${cowIcon}<span>${hint}</span></div>`;
     return;
   }
 
@@ -2116,6 +2133,8 @@ function showPlantDialog(plotId) {
 let _lastHarvestPos = null;
 function harvestPlot(id){
   SoundMgr.play('harvest');
+  // Farmer reacts with joy
+  triggerFarmerReaction('happy');
   // Find the plot element and create harvest burst from it
   const field = farmData.fields?.find(f => f.id === id);
   const allPlots = document.querySelectorAll('.plot');
@@ -2147,33 +2166,53 @@ function harvestPlot(id){
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
-  const portrait = cropPortrait(cropId, 22) || itemIcon(cropId, 20);
-  // Main crop burst (8 particles fanning out)
-  for (let i = 0; i < 8; i++) {
+  const portrait = cropPortrait(cropId, 24) || itemIcon(cropId, 22);
+  // Main crop burst (10 particles fanning out — more dramatic)
+  for (let i = 0; i < 10; i++) {
     const el = document.createElement('div');
     el.className = 'harvest-particle';
     el.innerHTML = portrait;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
-    const angle = (i / 8) * Math.PI * 2;
-    const dist = 60 + Math.random() * 50;
+    const angle = (i / 10) * Math.PI * 2 + (Math.random() - .5) * .3;
+    const dist = 70 + Math.random() * 60;
     el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-    el.style.setProperty('--dy', (Math.sin(angle) * dist - 40) + 'px');
-    el.style.animationDelay = (i * 40) + 'ms';
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 50) + 'px');
+    el.style.animationDelay = (i * 30) + 'ms';
     layer.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1000);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 1100);
   }
-  // Gold sparkles around the harvest
-  for (let i = 0; i < 5; i++) {
+  // Gold sparkles around the harvest (more sparkles)
+  for (let i = 0; i < 8; i++) {
     const sp = document.createElement('div');
     sp.className = 'harvest-sparkle';
     sp.style.left = x + 'px';
     sp.style.top = y + 'px';
-    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
-    sp.style.setProperty('--dy', (-(Math.random() * 60 + 20)) + 'px');
-    sp.style.animationDelay = (100 + i * 50) + 'ms';
+    sp.style.setProperty('--dx', ((Math.random() - 0.5) * 100) + 'px');
+    sp.style.setProperty('--dy', (-(Math.random() * 80 + 20)) + 'px');
+    sp.style.animationDelay = (80 + i * 40) + 'ms';
     layer.appendChild(sp);
-    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 1000);
+  }
+  // Coin fly from harvest position to HUD coin counter
+  const hudCoins = document.getElementById('hud-coins');
+  if (hudCoins) {
+    const hudRect = hudCoins.getBoundingClientRect();
+    const targetX = hudRect.left + hudRect.width/2 - x;
+    const targetY = hudRect.top + hudRect.height/2 - y;
+    for (let i = 0; i < 3; i++) {
+      const coin = document.createElement('div');
+      coin.className = 'coin-fly-to-hud';
+      const coinSrc = S('ui_coin');
+      coin.innerHTML = coinSrc ? `<img src="${coinSrc}" width="16" height="16">` : '<span class="css-coin" style="width:14px;height:14px"></span>';
+      coin.style.left = (x + (Math.random()-0.5)*20) + 'px';
+      coin.style.top = (y + (Math.random()-0.5)*20) + 'px';
+      coin.style.setProperty('--target-x', targetX + 'px');
+      coin.style.setProperty('--target-y', targetY + 'px');
+      coin.style.animationDelay = (200 + i * 100) + 'ms';
+      layer.appendChild(coin);
+      setTimeout(() => { if (coin.parentNode) coin.remove(); }, 1000);
+    }
   }
 }
 function showHarvestAllBurst(n, xp, coins) {
