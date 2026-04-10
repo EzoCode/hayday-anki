@@ -942,17 +942,24 @@ function renderFields() {
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
       // Hay Day style: crop grows visually bigger through stages
-      const cropSize = 30 + stage * 12; // 30px at seed → 66px at stage 3
+      const cropSize = 32 + stage * 11; // 32px at seed → 65px at stage 3
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
       // Almost-ready visual hint (like Hay Day subtle glow when crop is close)
       if (pct >= 75) el.classList.add('plot-almost-ready');
-      // Crop sprite + name label + reviews-left pill + progress bar
+      // Stage dots — Hay Day signature progress indicator (4 dots = 4 growth stages)
+      let stageDots = '<div class="plot-stage-dots">';
+      for (let s = 0; s < 4; s++) {
+        const cls = s < stage ? 'filled' : s === stage ? 'current' : '';
+        stageDots += `<span class="plot-stage-dot ${cls}"></span>`;
+      }
+      stageDots += '</div>';
+      // Reviews remaining pill
       const revsPill = reviewsLeft <= 3
         ? `<span class="plot-revs-pill plot-revs-soon">${reviewsLeft}</span>`
         : `<span class="plot-revs-pill">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}<div class="plot-crop-name"><span>${cName}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      el.innerHTML += `${stageDots}<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}<div class="plot-crop-name"><span>${cName}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showCropDetail(field);
     }
     grid.appendChild(el);
@@ -1098,16 +1105,90 @@ function updateSections() {
   updateActionHints();
 }
 
-// Show contextual "what to do next" hints — key for engagement
+// Show contextual "what to do next" hints — key for engagement (Hay Day always tells you what to do)
+let _nextAction = null; // {type, text, icon}
 function updateActionHints() {
   const d = farmData;
   const fields = d.fields || [];
   const emptyFields = fields.filter(f => f.state === 'empty').length;
   const readyFields = fields.filter(f => f.state === 'ready').length;
+  const wiltingFields = fields.filter(f => f._wilt_warning).length;
   const placed = d.placed_buildings || [];
   const unlBuildings = d.unlocked_buildings || [];
   const builtIds = Object.keys(d.buildings || {});
   const unbuildable = unlBuildings.filter(id => !builtIds.includes(id));
+  const inv = d.inventory || {};
+
+  // Determine the most urgent/relevant next action
+  _nextAction = null;
+  const bar = document.getElementById('next-action-bar');
+  const iconEl = document.getElementById('next-action-icon');
+  const textEl = document.getElementById('next-action-text');
+
+  if (wiltingFields > 0) {
+    // URGENT: crops about to wilt
+    _nextAction = {type:'harvest', text:`${wiltingFields} culture${wiltingFields>1?'s':''} va${wiltingFields>1?'nt':''} faner ! Récolte vite !`};
+  } else if (readyFields > 0) {
+    // Ready to harvest — most satisfying action
+    _nextAction = {type:'harvest', text:`${readyFields} culture${readyFields>1?'s':''} prête${readyFields>1?'s':''} à récolter !`};
+  } else if (emptyFields > 0 && fields.length > 0) {
+    // Empty fields to plant
+    _nextAction = {type:'plant', text:`${emptyFields} parcelle${emptyFields>1?'s':''} vide${emptyFields>1?'s':''} — plante pour gagner plus !`};
+  } else if (unbuildable.length > 0 && placed.length === 0) {
+    // Can build first building
+    const bdef = (d.building_defs||{})[unbuildable[0]]||{};
+    _nextAction = {type:'build', text:`Construis ${bdef.name||'un bâtiment'} pour transformer tes récoltes !`};
+  } else {
+    // Check for fulfillable orders
+    let fulfillable = 0;
+    (d.active_orders||[]).forEach(order => {
+      let canDo = true;
+      Object.entries(order.items_needed||{}).forEach(([id,qty]) => { if ((inv[id]||0) < qty) canDo = false; });
+      if (canDo) fulfillable++;
+    });
+    if (fulfillable > 0) {
+      _nextAction = {type:'orders', text:`${fulfillable} commande${fulfillable>1?'s':''} prête${fulfillable>1?'s':''} à livrer !`};
+    } else {
+      // Check for ready production
+      let readyProd = 0;
+      Object.values(d.production_queues||{}).forEach(q => q.forEach(item => { if (item.ready) readyProd++; }));
+      if (readyProd > 0) {
+        _nextAction = {type:'collect', text:`${readyProd} produit${readyProd>1?'s':''} prêt${readyProd>1?'s':''} à récupérer !`};
+      } else if (fields.length > 0 && emptyFields === 0 && readyFields === 0) {
+        // All fields growing — encourage reviews
+        const closestField = fields.filter(f => f.state === 'growing' || f.state === 'planted')
+          .sort((a,b) => {
+            const cda = (d.crop_defs||{})[a.crop]||{}, cdb = (d.crop_defs||{})[b.crop]||{};
+            const leftA = (cda.growth_reviews||3)*4 - ((a.growth_stage||0)*(cda.growth_reviews||3)+(a.reviews_done||0));
+            const leftB = (cdb.growth_reviews||3)*4 - ((b.growth_stage||0)*(cdb.growth_reviews||3)+(b.reviews_done||0));
+            return leftA - leftB;
+          })[0];
+        if (closestField) {
+          const cd = (d.crop_defs||{})[closestField.crop]||{};
+          const left = (cd.growth_reviews||3)*4 - ((closestField.growth_stage||0)*(cd.growth_reviews||3)+(closestField.reviews_done||0));
+          const cn = cropName(closestField.crop);
+          _nextAction = {type:'review', text:`Révise pour faire pousser ! ${cn} prêt dans ${left} rev.`};
+        }
+      }
+    }
+  }
+
+  if (_nextAction && bar && textEl) {
+    const ICONS = {
+      harvest: S('hayday_wheat-icon'),
+      plant: S('hayday_plus') || S('hayday_wheat-icon'),
+      build: S('hayday_barn'),
+      orders: S('_icon_truck'),
+      collect: S('hayday_shop'),
+      review: S('_gold_star'),
+    };
+    const iconSrc = ICONS[_nextAction.type];
+    iconEl.innerHTML = iconSrc ? `<img src="${iconSrc}" width="16" height="16">` : '';
+    textEl.textContent = _nextAction.text;
+    bar.style.display = '';
+  } else if (bar) {
+    bar.style.display = 'none';
+  }
 
   // Pulse the "Tout récolter" button if there are ready fields
   const harvestBtn = document.getElementById('harvest-all-btn');
@@ -1126,6 +1207,33 @@ function updateActionHints() {
   if (workshopZone && unbuildable.length > 0 && placed.length === 0) {
     const buildBtn = workshopZone.querySelector('.zone-add-btn:not(.harvest-all-btn):not(.plant-all-btn)');
     if (buildBtn) buildBtn.classList.add('action-pulse');
+  }
+}
+
+// Handle tap on the "next action" guidance bar
+function handleNextAction() {
+  if (!_nextAction) return;
+  SoundMgr.play('click');
+  switch(_nextAction.type) {
+    case 'harvest':
+      // Scroll to fields zone
+      document.querySelector('.zone-fields')?.scrollIntoView({behavior:'smooth', block:'center'});
+      break;
+    case 'plant':
+      document.querySelector('.zone-fields')?.scrollIntoView({behavior:'smooth', block:'center'});
+      break;
+    case 'build':
+      showBuildMenu();
+      break;
+    case 'orders':
+      showTab('orders');
+      break;
+    case 'collect':
+      document.querySelector('.zone-workshop')?.scrollIntoView({behavior:'smooth', block:'center'});
+      break;
+    case 'review':
+      // Nothing to navigate to — just dismiss
+      break;
   }
 }
 

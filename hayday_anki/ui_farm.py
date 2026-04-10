@@ -252,7 +252,10 @@ class FarmWebView:
             elif action == "harvest":
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)
-                if result:
+                if result and result.get("error") == "storage_full":
+                    self._js("showNotification('Silo plein ! Vendez ou améliorez.')")
+                    self._js("SoundMgr.play('error')")
+                elif result and result.get("items"):
                     self._js(f"showReward({json.dumps(result)})")
                     # Show harvest quantity notification with crop icon
                     from .farm_manager import ITEM_CATALOG as _IC
@@ -265,7 +268,8 @@ class FarmWebView:
                         self._js(f"showNotification(itemIcon({json.dumps(item_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
                     self._check_and_show_level_up()
                 else:
-                    self._js("showNotification('Silo plein ! Vendez ou améliorez.', 'error')")
+                    self._js("showNotification('Silo plein ! Vendez ou améliorez.')")
+                    self._js("SoundMgr.play('error')")
                 self._send_state()
                 self.manager.save()
 
@@ -296,7 +300,10 @@ class FarmWebView:
 
             elif action == "plant":
                 plot_id = int(parts[2])
-                crop_id = parts[3]
+                crop_id = parts[3] if len(parts) > 3 else ""
+                if not crop_id:
+                    self._send_state()
+                    return
                 from . import progression
                 crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
                 plant_cost = crop_def.get("plant_cost", 0)

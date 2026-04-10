@@ -810,8 +810,10 @@ class FarmManager:
         WILT_WARNING = 35  # Start warning at 70% of threshold
         for field in self.state.fields:
             if field["state"] == "ready":
-                ready_since = field.get("_ready_since", 0)
-                if ready_since <= 0:
+                ready_since = field.get("_ready_since")
+                if not ready_since:
+                    # Initialize if missing (e.g. from older save)
+                    field["_ready_since"] = self.state.total_reviews
                     continue
                 reviews_unharvested = self.state.total_reviews - ready_since
                 if reviews_unharvested > WILT_THRESHOLD:
@@ -1131,6 +1133,10 @@ class FarmManager:
             return None
 
         crop_id = field["crop"]
+        if not crop_id:
+            # Safety: field marked ready but has no crop (data corruption)
+            field["state"] = "empty"
+            return None
         from . import progression
         crop_def = progression.CROP_DEFINITIONS.get(crop_id, {})
 
@@ -1148,7 +1154,7 @@ class FarmManager:
                 harvested[crop_id] = space
                 qty = space
             else:
-                return None
+                return {"error": "storage_full", "items": {}, "xp": 0, "coins": 0}
 
         # Coin reward for harvesting (scales with crop value — makes harvest feel rewarding)
         sell_price = crop_def.get("sell_price", 2)

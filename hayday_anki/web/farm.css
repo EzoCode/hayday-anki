@@ -565,8 +565,30 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .field-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;image-rendering:auto;border-radius:16px}
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
 .plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
+/* Growing crops sway gently in the wind — signature Hay Day feel */
+.plot-growing .plot-crop img,.plot-planted .plot-crop img{animation:cropSway 4s ease-in-out infinite}
+.plot:nth-child(even) .plot-crop img{animation-delay:-.8s}
+.plot:nth-child(3n) .plot-crop img{animation-duration:4.5s}
+@keyframes cropSway{0%,100%{transform:rotate(0deg)}25%{transform:rotate(1.5deg)}75%{transform:rotate(-1.5deg)}}
+/* Ready crop bounces to attract tap */
+.plot-crop-bounce img{animation:readyCropBounce 1.8s ease-in-out infinite !important}
+@keyframes readyCropBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-4px) scale(1.06)}60%{transform:translateY(1px) scale(.98)}}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.4);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
+/* Crop name label under growing crops */
+.plot-crop-name{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;white-space:nowrap}
+.plot-crop-name span{font-size:8px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;letter-spacing:.2px}
+/* Reviews remaining pill — more visible and Hay Day-like */
+.plot-revs-pill{position:absolute;top:4px;right:4px;z-index:6;font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,.4);padding:2px 5px;border-radius:6px;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.1;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.plot-revs-pill::before{content:'';display:inline-block;width:6px;height:8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Crect x='1' y='0' width='6' height='8' rx='1' fill='%23fff'/%3E%3Cline x1='2.5' y1='2.5' x2='5.5' y2='2.5' stroke='%23bbb' stroke-width='.6'/%3E%3Cline x1='2.5' y1='4.5' x2='5.5' y2='4.5' stroke='%23bbb' stroke-width='.6'/%3E%3C/svg%3E") center/contain no-repeat;margin-right:2px;vertical-align:middle}
+.plot-revs-soon{background:linear-gradient(135deg,rgba(76,175,80,.7),rgba(56,142,60,.8)) !important;border:1px solid rgba(255,255,255,.2);animation:revsSoonPulse 1.5s ease-in-out infinite}
+@keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(76,175,80,.3)}50%{box-shadow:0 0 10px rgba(76,175,80,.6)}}
+/* Stage dots (like Hay Day crop progress indicator) */
+.plot-stage-dots{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:3px}
+.plot-stage-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.15);transition:all .3s}
+.plot-stage-dot.filled{background:rgba(76,175,80,.8);border-color:rgba(76,175,80,.5);box-shadow:0 0 3px rgba(76,175,80,.5)}
+.plot-stage-dot.current{background:rgba(255,215,0,.8);border-color:rgba(255,215,0,.5);box-shadow:0 0 4px rgba(255,215,0,.5);animation:stageDotPulse 1.5s ease-in-out infinite}
+@keyframes stageDotPulse{0%,100%{box-shadow:0 0 3px rgba(255,215,0,.3)}50%{box-shadow:0 0 6px rgba(255,215,0,.7)}}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:5px;background:rgba(0,0,0,.4);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
 .plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
@@ -579,6 +601,12 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-replant-cost{font-size:7px;color:rgba(255,215,0,.9);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:5px}
 .plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
 .plot-empty:hover .plot-replant img{transform:scale(1.15)}
+/* Plot growth animation — subtle scale bump when crop advances */
+.plot-grew{animation:plotGrew .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes plotGrew{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
+/* Just-harvested plot — invite quick replant with green glow */
+.plot-just-harvested{animation:plotJustHarvested 1.2s ease-out;border-color:rgba(106,191,71,.5) !important}
+@keyframes plotJustHarvested{0%{box-shadow:0 0 20px rgba(106,191,71,.5)}100%{box-shadow:none}}
 
 /* Gem speed-up button in production queue */
 .gem-speed-btn{background:linear-gradient(135deg,rgba(79,195,247,.2),rgba(2,136,209,.35));border:1px solid rgba(79,195,247,.35);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;gap:3px;text-shadow:0 1px 2px rgba(0,0,0,.4);transition:all .15s;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
@@ -1267,5 +1295,56 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   0%,100% { box-shadow: 0 0 4px rgba(255,215,0,.2); }
   50% { box-shadow: 0 0 12px rgba(255,215,0,.5); }
 }
+
+/* ===== IMPROVED TOOLBAR — More Hay Day feel ===== */
+#toolbar .tool-btn{
+  border-radius:14px;
+  padding:4px 8px;
+  min-width:48px;
+  position:relative;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+#toolbar .tool-btn:active{transform:scale(.88);transition:transform .08s}
+#toolbar .tool-btn.active{
+  background:linear-gradient(180deg,rgba(244,164,42,.15) 0%,rgba(244,164,42,.08) 100%);
+  border-radius:14px;
+}
+/* Active tab icon glow */
+#toolbar .tool-btn.active .tool-icon img{
+  filter:drop-shadow(0 0 6px rgba(244,164,42,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.3)) !important;
+}
+
+/* ===== NEXT ACTION GUIDANCE — What to do next (key for engagement) ===== */
+.next-action-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;
+  background:linear-gradient(90deg,rgba(106,191,71,.12),rgba(106,191,71,.06));
+  border-top:1px solid rgba(106,191,71,.15);
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.85);
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
+  cursor:pointer;transition:background .2s;
+  position:relative;z-index:1;
+}
+.next-action-bar:hover{background:linear-gradient(90deg,rgba(106,191,71,.2),rgba(106,191,71,.12))}
+.next-action-icon{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
+.next-action-text{flex:1;line-height:1.3}
+.next-action-arrow{color:rgba(255,255,255,.4);font-size:14px;font-weight:900}
+
+/* ===== SMOOTHER OVERLAY TRANSITIONS ===== */
+.overlay-card{max-height:85vh;overflow-y:auto}
+
+/* ===== IMPROVED ZONE EMPTY MESSAGES — More inviting ===== */
+.zone-empty-msg{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:18px 14px;
+  color:rgba(255,255,255,.6);
+  font-size:12px;
+  font-weight:600;
+  line-height:1.5;
+  text-shadow:0 1px 2px rgba(0,0,0,.3);
+  font-style:normal !important;
+}
+.zone-empty-msg img{opacity:.7;transition:opacity .2s}
+.zone-empty-msg:hover img{opacity:1}
 
 .hidden{display:none!important}
