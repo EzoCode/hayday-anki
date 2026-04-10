@@ -273,11 +273,17 @@ const SoundMgr = {
       g.gain.setValueAtTime(vol * 0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
       o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
     } else if (id === 'grow') {
-      // Subtle magical growth sound
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(440, t); o.frequency.exponentialRampToValueAtTime(660, t + 0.15);
-      g.gain.setValueAtTime(vol * 0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.25);
+      // Magical growth sparkle — ascending shimmer (like Hay Day plant growth)
+      [440, 554, 660].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f, t + i * 0.06);
+        o.frequency.exponentialRampToValueAtTime(f * 1.2, t + i * 0.06 + 0.12);
+        g.gain.setValueAtTime(vol * 0.2, t + i * 0.06);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.18);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t + i * 0.06); o.stop(t + i * 0.06 + 0.22);
+      });
     }
   },
   playMusic() {
@@ -565,8 +571,11 @@ function updateFarm(data) {
       const newKey = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state;
       if (oldGrowth[f.id] && oldGrowth[f.id] !== newKey && f.state !== 'empty' && allPlots[idx]) {
         allPlots[idx].classList.add('plot-grew');
-        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 800);
+        setTimeout(() => allPlots[idx]?.classList.remove('plot-grew'), 1200);
         anyGrew = true;
+        // Emit green growth particles from the plot
+        const rect = allPlots[idx].getBoundingClientRect();
+        showGrowthParticles(rect.left + rect.width/2, rect.top + rect.height/2);
         // Check if this plot just became ready
         const oldState = oldGrowth[f.id].split(':')[2];
         if (f.state === 'ready' && oldState !== 'ready') anyReady = true;
@@ -1155,11 +1164,26 @@ function setBadge(tabId, count) {
 
 function renderMysteryBoxes() {
   const layer = document.getElementById('mystery-boxes-layer'); layer.innerHTML = '';
-  (farmData.mystery_boxes||[]).forEach((box,i) => {
+  const boxes = farmData.mystery_boxes||[];
+  if (boxes.length === 0) return;
+  // Scatter boxes across the farm world using their stored x,y coordinates
+  // Positions are in a 1-8 grid, mapped to percentages with some randomness
+  boxes.forEach((box,i) => {
     const el = document.createElement('div'); el.className = 'mystery-box';
+    const sizeClass = box.size==='large'?'mystery-box-large':box.size==='medium'?'mystery-box-medium':'mystery-box-small';
+    el.classList.add(sizeClass);
+    // Position: use stored grid coords (1-8) mapped to percentage, with per-box offset
+    const bx = ((box.x||1) - 0.5) / 8 * 80 + 10; // 10-90% range
+    const by = ((box.y||1) - 0.5) / 6 * 60 + 20; // 20-80% range
+    el.style.left = bx + '%';
+    el.style.top = by + '%';
+    // Stagger the float animation for variety
+    el.style.animationDelay = (i * 0.7) + 's';
+    el.style.animationDuration = (2 + (i % 3) * 0.5) + 's';
     const idx = box.size==='large'?2:box.size==='medium'?1:0;
+    const imgSize = box.size==='large'?44:box.size==='medium'?38:32;
     const src = S(`ui_chest_${idx}_closed`);
-    if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else { const fb=S('ui_chest_0_closed'); if(fb) el.innerHTML=`<img src="${fb}" width="36" height="36">`; else el.innerHTML='<div class="css-chest" style="width:30px;height:26px"></div>'; }
+    if (src) el.innerHTML = `<img src="${src}" width="${imgSize}" height="${imgSize}">`; else { const fb=S('ui_chest_0_closed'); if(fb) el.innerHTML=`<img src="${fb}" width="${imgSize}" height="${imgSize}">`; else el.innerHTML='<div class="css-chest" style="width:30px;height:26px"></div>'; }
     el.onclick = () => showMysteryBox(i); layer.appendChild(el);
   });
 }
@@ -2113,6 +2137,23 @@ function harvestPlot(id){
     }, 300);
   }
   pycmd(`farm:harvest:${id}`);
+}
+function showGrowthParticles(x, y) {
+  const layer = document.getElementById('reward-layer');
+  // Small green leaves/sparkles rising from the plot
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('div');
+    el.className = 'growth-particle';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    const angle = (i / 5) * Math.PI * 2;
+    const dist = 20 + Math.random() * 25;
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist - 25) + 'px');
+    el.style.animationDelay = (i * 40) + 'ms';
+    layer.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 900);
+  }
 }
 function showHarvestBurst(x, y, cropId) {
   const layer = document.getElementById('reward-layer');
