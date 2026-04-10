@@ -902,8 +902,8 @@ function renderFields() {
         const lcName = cropName(field.last_crop);
         const lcDef = (farmData.crop_defs||{})[field.last_crop]||{};
         const lcCost = lcDef.plant_cost||0;
-        const costLabel = lcCost > 0 ? `<span class="plot-replant-cost">${lcCost} p.</span>` : '';
-        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 32) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span>${costLabel}</div>`;
+        const costLabel = lcCost > 0 ? `<span class="plot-replant-cost">${S('ui_coin') ? `<img src="${S('ui_coin')}" width="8" height="8">` : ''} ${lcCost}</span>` : '<span class="plot-replant-cost free">Gratuit</span>';
+        el.innerHTML += `<div class="plot-replant">${cropPortrait(field.last_crop, 36) || '<span class="plot-plus">+</span>'}<span class="plot-replant-label">${lcName}</span>${costLabel}</div>`;
         el.onclick = () => { showPlantBurst(el, field.last_crop); pycmd(`farm:plant:${field.id}:${field.last_crop}`); SoundMgr.play('plant'); };
         // Long press / right-click for other crop choices
         el.oncontextmenu = (e) => { e.preventDefault(); showPlantDialog(field.id); };
@@ -923,9 +923,10 @@ function renderFields() {
       } else {
         el.title = `${readyCropName} — Prêt à récolter !`;
       }
-      // Hay Day style: big bouncing crop with golden sparkle, no text clutter
+      // Hay Day style: big bouncing crop with golden sparkle + harvest label
       const wiltBadge = wiltWarning ? `<span class="wilt-warning-badge">${wiltLeft}</span>` : '';
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}`;
+      const harvestLabel = `<span class="plot-harvest-label">Récolter !</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}${harvestLabel}`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;
@@ -948,11 +949,18 @@ function renderFields() {
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
       // Almost-ready visual hint (like Hay Day subtle glow when crop is close)
       if (pct >= 75) el.classList.add('plot-almost-ready');
-      // Crop sprite + name label + reviews-left pill + progress bar
-      const revsPill = reviewsLeft <= 3
-        ? `<span class="plot-revs-pill plot-revs-soon">${reviewsLeft}</span>`
-        : `<span class="plot-revs-pill">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}<div class="plot-crop-name"><span>${cName}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Hay Day style: clean visual — crop sprite + stage dots + slim progress bar
+      // Reviews pill only shown when close (≤5) to avoid clutter
+      const revsPill = reviewsLeft <= 5
+        ? `<span class="plot-revs-pill${reviewsLeft <= 3 ? ' plot-revs-soon' : ''}">${reviewsLeft}</span>`
+        : '';
+      // Stage dots (4 dots showing growth progress — minimal, Hay Day-like)
+      let stageDots = '<div class="plot-stage-dots">';
+      for (let s = 0; s < 4; s++) {
+        stageDots += `<span class="stage-dot${s < stage ? ' filled' : s === stage ? ' current' : ''}"></span>`;
+      }
+      stageDots += '</div>';
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}${stageDots}<div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showCropDetail(field);
     }
     grid.appendChild(el);
@@ -1037,8 +1045,8 @@ function renderWorkshop() {
     } else if (ready > 0) {
       prodLabel = `<span class="building-prod-label-sm ready-label">Prêt !</span>`;
     } else if (queue.length === 0) {
-      // Idle building — subtle hint to encourage production
-      prodLabel = `<span class="building-prod-label-sm" style="opacity:.4">Tap pour produire</span>`;
+      // Idle building — visible hint to encourage production
+      prodLabel = `<span class="building-prod-label-sm building-idle-hint">Produire</span>`;
       el.classList.add('building-idle');
     }
     el.innerHTML = `${buildingImg(bid,100)}<span class="building-name">${name}</span>${prodLabel}${statusHtml}`;
@@ -2719,6 +2727,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   pycmd('farm:get_state');
   SoundMgr.playMusic();
   startAmbientParticles();
+  renderFarmer();
   // Show tutorial on first visit
   if (!localStorage.getItem('adfarm_tutorial_done')) {
     setTimeout(showTutorial, 800);
