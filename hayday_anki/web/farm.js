@@ -34,8 +34,19 @@ function applyHayDayAssets() {
     // Gold star SVG — replaces the blue star.png for Hay Day gold aesthetic
     SPRITES['_gold_star'] = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='sg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ffe566'/%3E%3Cstop offset='50%25' stop-color='%23ffd700'/%3E%3Cstop offset='100%25' stop-color='%23c5a200'/%3E%3C/linearGradient%3E%3ClinearGradient id='sh' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fff' stop-opacity='.5'/%3E%3Cstop offset='100%25' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M24 3l6.5 13.2L45 18.5l-10.2 9.9L37.2 43 24 36l-13.2 7 2.4-14.6L3 18.5l14.5-2.3z' fill='url(%23sg)' stroke='%23b8960e' stroke-width='1.5'/%3E%3Cpath d='M24 3l6.5 13.2L45 18.5l-10.2 9.9L37.2 43 24 36l-13.2 7 2.4-14.6L3 18.5l14.5-2.3z' fill='url(%23sh)'/%3E%3C/svg%3E";
   }
-  // Background — keep CSS grass gradients (they match the zone card layout better
-  // than the isometric Hay Day image which clashes with flat zone cards)
+  // Background — use real Hay Day background if available, blended with CSS grass
+  const bgSrc = S('hayday_background');
+  const farmWorld = document.getElementById('farm-world');
+  if (bgSrc && farmWorld) {
+    farmWorld.style.backgroundImage = `
+      radial-gradient(ellipse at 75% 5%, rgba(255,240,150,.1) 0%, transparent 35%),
+      radial-gradient(ellipse at 20% 15%, rgba(129,199,132,.12) 0%, transparent 40%),
+      repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0px,rgba(255,255,255,.02) 1px,transparent 1px,transparent 16px),
+      repeating-linear-gradient(0deg,rgba(0,0,0,.015) 0px,rgba(0,0,0,.015) 1px,transparent 1px,transparent 14px),
+      url(${bgSrc})`;
+    farmWorld.style.backgroundSize = 'auto, auto, auto, auto, cover';
+    farmWorld.style.backgroundPosition = 'center top';
+  }
   // HUD star — use gold star SVG for Hay Day aesthetic (the PNG is blue which clashes)
   const goldStarSrc = S('_gold_star');
   const hudStarImg = document.getElementById('hud-star-img');
@@ -125,6 +136,12 @@ function applyHayDayAssets() {
     if (src && el) {
       el.innerHTML = `<img src="${src}" width="18" height="18" style="vertical-align:middle;margin-right:4px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))"> ${el.textContent}`;
     }
+  }
+  // Decorative scarecrow between zones (Hay Day charm)
+  const scarecrowSrc = S('hayday_scarecrow');
+  const decoRow = document.getElementById('farm-deco-scarecrow');
+  if (scarecrowSrc && decoRow && !decoRow.hasChildNodes()) {
+    decoRow.innerHTML = `<img src="${scarecrowSrc}" width="32" height="40" class="farm-deco-img" title="Épouvantail">`;
   }
   // Wheel icon inside achievements panel
   const wheelPanelIcon = document.getElementById('icon-wheel-panel');
@@ -2436,14 +2453,28 @@ function showDailyLoginBonus(d){
   const day=d.day||1, reward=d.reward||{};
   const el=document.getElementById('login-bonus-overlay');
   document.getElementById('login-day').textContent=day;
+  const dayBoxSrc = S('hayday_day-box');
   let dots='';
-  for(let i=1;i<=7;i++){dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}">${i}</span>`}
+  for(let i=1;i<=7;i++){
+    const dayBg = dayBoxSrc ? `background:url(${dayBoxSrc}) center/contain no-repeat;` : '';
+    dots+=`<span class="login-day-dot ${i<=day?'claimed':''} ${i===day?'today':''}" style="${dayBg}">${i}</span>`;
+  }
   document.getElementById('login-days-row').innerHTML=dots;
   let rw='';
-  if(reward.coins){const cSrc=S('ui_coin');rw+=`<span class="login-reward-item">${cSrc?`<img src="${cSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.coins}</span>`;}
-  if(reward.gems){const gSrc=S('ui_gem');rw+=`<span class="login-reward-item">${gSrc?`<img src="${gSrc}" width="18" height="18" style="vertical-align:middle">`:''} +${reward.gems}</span>`;}
+  const coinSrc=S('ui_coin'), gemSrc=S('ui_gem');
+  if(reward.coins){rw+=`<span class="login-reward-item">${coinSrc?`<img src="${coinSrc}" width="22" height="22" style="vertical-align:middle;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`:''} <strong>+${reward.coins}</strong></span>`;}
+  if(reward.gems){rw+=`<span class="login-reward-item">${gemSrc?`<img src="${gemSrc}" width="22" height="22" style="vertical-align:middle;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`:''} <strong>+${reward.gems}</strong></span>`;}
   document.getElementById('login-reward-detail').innerHTML=rw;
   el.classList.remove('hidden');
+  // Farmer greeting
+  const farmerSrc = S('hayday_farmer-woman') || S('hayday_farmer-man');
+  const loginCard = el.querySelector('.login-bonus-card');
+  if (farmerSrc && loginCard && !loginCard.querySelector('.login-farmer')) {
+    const farmerEl = document.createElement('div');
+    farmerEl.className = 'login-farmer';
+    farmerEl.innerHTML = `<img src="${farmerSrc}" width="48" height="56" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));border-radius:50%;border:2px solid rgba(255,215,0,.4)">`;
+    loginCard.insertBefore(farmerEl, loginCard.firstChild);
+  }
 }
 function hideLoginBonus(){document.getElementById('login-bonus-overlay').classList.add('hidden')}
 
