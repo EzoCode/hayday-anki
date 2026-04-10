@@ -102,15 +102,6 @@
       <div class="zone-content" id="pasture-grid"></div>
     </div>
 
-    <!-- Zone: Village (decorations) -->
-    <div class="farm-zone zone-village" id="zone-village">
-      <div class="zone-header">
-        <span class="zone-title" id="zone-title-village">Village</span>
-        <button class="zone-add-btn" onclick="showTab('shop')">+ Décorer</button>
-      </div>
-      <div class="zone-content" id="deco-grid"></div>
-    </div>
-
     <!-- Land status bar -->
     <div class="land-bar" id="land-bar">
       <span id="land-status">Terrain: 0/20</span>
@@ -118,13 +109,16 @@
     </div>
 
     <!-- Floating layers -->
-    <div id="decorations-layer"></div>
-    <div id="mystery-boxes-layer"></div>
     <div id="reward-layer"></div>
   </div>
   <div class="farm-atmosphere"></div>
   <div id="sparkle-layer"></div>
   <div id="confetti-layer"></div>
+</div>
+
+<!-- ===== WHEEL OF FORTUNE FLOATING BUTTON ===== -->
+<div id="wheel-float-btn" class="wheel-float-btn" style="display:none" onclick="spinWheel()">
+  <span id="wheel-float-icon"></span>
 </div>
 
 <!-- ===== BOTTOM TOOLBAR ===== -->
@@ -176,7 +170,6 @@
     <button class="shop-tab" onclick="showShopCategory('upgrades')">Améliorer</button>
     <button class="shop-tab" onclick="showShopCategory('animals')">Animaux</button>
     <button class="shop-tab" onclick="showShopCategory('land')">Terrain</button>
-    <button class="shop-tab" onclick="showShopCategory('decorations')">Déco</button>
   </div>
   <div id="shop-grid" class="item-grid"></div>
 </div>
@@ -222,15 +215,6 @@
   </div>
 </div>
 
-<div id="mystery-box-overlay" class="overlay hidden">
-  <div class="overlay-card">
-    <h2>Boîte Mystère</h2>
-    <div id="mystery-box-animation"><div class="box-icon" id="box-icon"></div></div>
-    <div id="mystery-box-result" class="hidden"></div>
-    <button id="open-box-btn" class="action-btn" onclick="doOpenBox()">Ouvrir !</button>
-    <button class="close-btn overlay-close" onclick="hideOverlay()"><span class="close-x"></span></button>
-  </div>
-</div>
 
 <div id="levelup-overlay" class="overlay hidden">
   <div class="overlay-card levelup-card">

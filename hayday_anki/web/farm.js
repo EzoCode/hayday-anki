@@ -8,7 +8,6 @@ let _staticDefs = {};  // Cached static definitions (item_catalog, building_defs
 let currentPanel = null;
 let currentShopCategory = 'upgrades';
 let plantingPlotId = null;
-let currentBoxIndex = null;
 let wheelSpinning = false;
 let notificationsEnabled = true;
 const _almostReadyNotified = new Set(); // Track which plots already showed "almost ready" notification
@@ -119,7 +118,6 @@ function applyHayDayAssets() {
     'zone-title-fields': 'hayday_wheat-icon',
     'zone-title-workshop': 'hayday_barn',
     'zone-title-pasture': 'hayday_cow',
-    'zone-title-village': 'hayday_scarecrow',
   };
   for (const [elId, sprKey] of Object.entries(zoneIcons)) {
     const src = S(sprKey);
@@ -555,7 +553,7 @@ function updateFarm(data) {
   oldFields.forEach(f => { if (f.id != null) oldGrowth[f.id] = (f.growth_stage||0) + ':' + (f.reviews_done||0) + ':' + f.state; });
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
-  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  updateHUD(); renderFields(); renderWorkshop(); renderPastures(); updateLandBar(); updateSections(); checkStorageWarnings(); updateWeather(); updateWheelButton();
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   let anyGrew = false, anyReady = false;
@@ -1249,7 +1247,7 @@ function updateTabBadges() {
   let readyCount = 0;
   Object.values(d.production_queues||{}).forEach(queue => { queue.forEach(q => { if (q.ready) readyCount++; }); });
   setBadge('tab-buildings', readyCount);
-  setBadge('tab-farm', (d.mystery_boxes||[]).length);
+  setBadge('tab-farm', 0);
   // Show wheel badge on achievements if free spin available
   const achBadgeCount = (document.getElementById('tab-achievements')?.querySelector('.tab-badge')?.textContent||0);
   if (d.can_spin_wheel) setBadge('tab-achievements', Math.max(parseInt(achBadgeCount)||0, 1));
@@ -1267,53 +1265,9 @@ function setBadge(tabId, count) {
   }
 }
 
-function renderMysteryBoxes() {
-  const layer = document.getElementById('mystery-boxes-layer'); layer.innerHTML = '';
-  (farmData.mystery_boxes||[]).forEach((box,i) => {
-    const el = document.createElement('div'); el.className = 'mystery-box';
-    const idx = box.size==='large'?2:box.size==='medium'?1:0;
-    const src = S(`ui_chest_${idx}_closed`);
-    if (src) el.innerHTML = `<img src="${src}" width="36" height="36">`; else { const fb=S('ui_chest_0_closed'); if(fb) el.innerHTML=`<img src="${fb}" width="36" height="36">`; else el.innerHTML='<div class="css-chest" style="width:30px;height:26px"></div>'; }
-    el.onclick = () => showMysteryBox(i); layer.appendChild(el);
-  });
-}
+// Mystery boxes removed — Wheel of Fortune covers surprise rewards
 
-// --- Village / Deco Zone Rendering ---
-function renderVillage() {
-  const grid = document.getElementById('deco-grid');
-  grid.innerHTML = '';
-  const decos = farmData.decorations || [];
-  const zone = document.getElementById('zone-village');
-
-  // Always show village zone — invite player to decorate
-  zone.style.display = '';
-
-  if (decos.length === 0) {
-    const scarecrowSpr = S('hayday_scarecrow');
-    const scarecrowIcon = scarecrowSpr ? `<img src="${scarecrowSpr}" width="28" height="28" style="vertical-align:middle;margin-right:4px;opacity:.6">` : '';
-    grid.innerHTML = `<div class="zone-empty-msg">${scarecrowIcon}Décore ton village ! Visite la boutique pour acheter des décorations.</div>`;
-    return;
-  }
-
-  decos.forEach(deco => {
-    const decoDef = (farmData.deco_defs||{})[deco.type] || {};
-    const catFallback = (farmData.item_catalog||{})[deco.type] || {};
-    const name = decoDef.name || catFallback.name || decoName(deco.type);
-    const el = document.createElement('div');
-    el.className = 'deco-tile';
-    // Try to use Hay Day sprite, then SVG icon, then fallback
-    const sprSrc = S(`hayday_${deco.type}`);
-    const svgSrc = ITEM_ICONS[deco.type];
-    if (sprSrc) {
-      el.innerHTML = `<img src="${sprSrc}" width="44" height="44" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.3))"><span class="deco-name">${name}</span>`;
-    } else if (svgSrc) {
-      el.innerHTML = `<img src="${svgSrc}" width="40" height="40" style="object-fit:contain;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.2))"><span class="deco-name">${name}</span>`;
-    } else {
-      el.innerHTML = `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%234caf50' opacity='.5'/%3E%3Cpath d='M16 8v8M12 12l4-4 4 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E" width="32" height="32" style="object-fit:contain"><span class="deco-name">${name}</span>`;
-    }
-    grid.appendChild(el);
-  });
-}
+// Village/Decoration zone removed — focus on core gameplay (fields, workshop, pastures)
 
 // --- Land Bar ---
 function updateLandBar() {
@@ -1615,9 +1569,6 @@ function showAnimalInfo(animalType) {
   });
 }
 
-// --- Decoration Rendering ---
-// (DECO_EMOJI removed — all rendering uses ITEM_ICONS SVGs or hayday sprites)
-// Decorations are rendered in the Village zone grid via renderVillage()
 
 // --- Weather System ---
 let currentWeather = null;
@@ -1842,47 +1793,13 @@ function renderOrders() {
 
 function renderShop() {
   const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
-  const shopCats=['upgrades','animals','land','decorations'];
+  const shopCats=['upgrades','animals','land'];
   document.querySelectorAll('.shop-tab').forEach((b,i)=>b.classList.toggle('active',shopCats[i]===currentShopCategory));
-  if(currentShopCategory==='decorations')renderShopDeco(grid);else if(currentShopCategory==='animals')renderShopAnimals(grid);
+  if(currentShopCategory==='animals')renderShopAnimals(grid);
   else if(currentShopCategory==='upgrades')renderShopUpgrades(grid);else if(currentShopCategory==='land')renderShopLand(grid);
 }
 function showShopCategory(cat){currentShopCategory=cat;renderShop()}
-function renderShopDeco(grid){
-  const defs=farmData.deco_defs||{};
-  const coins=farmData.coins||0;
-  const DECOS=[
-    {id:'hay_bale',cat:'Basique'},{id:'fence',cat:'Basique'},{id:'mailbox',cat:'Basique'},
-    {id:'flower_pot',cat:'Basique'},{id:'lamp_post',cat:'Basique'},{id:'bench',cat:'Basique'},
-    {id:'scarecrow',cat:'Basique'},{id:'garden_gnome',cat:'Premium'},
-    {id:'bird_bath',cat:'Premium'},{id:'tree_oak',cat:'Nature'},{id:'tree_pine',cat:'Nature'},
-    {id:'pond',cat:'Nature'},{id:'swing',cat:'Premium'},{id:'fountain',cat:'Premium'},
-    {id:'statue_chicken',cat:'Spécial'},{id:'tree_cherry',cat:'Spécial'},
-    {id:'arch_flowers',cat:'Spécial'},{id:'statue_cow',cat:'Spécial'},{id:'windmill_deco',cat:'Spécial'},
-  ];
-  let lastCat='';
-  DECOS.forEach(item=>{
-    if(item.cat!==lastCat){
-      lastCat=item.cat;
-      const sep=document.createElement('div');
-      sep.style.cssText='grid-column:1/-1;font-size:10px;font-weight:800;color:#888;text-transform:uppercase;padding:6px 0 2px;letter-spacing:.5px';
-      sep.textContent=item.cat;
-      grid.appendChild(sep);
-    }
-    const d=defs[item.id]||{};
-    const cost=d.cost||0;
-    const ok=coins>=cost;
-    const el=document.createElement('div');
-    el.className='item-cell';
-    el.style.opacity=ok?'1':'.45';
-    el.onclick=()=>{if(ok){pycmd(`farm:buy_deco:${item.id}`);SoundMgr.play('click')}else showNotification(`Il faut ${cost} pièces (tu as ${coins}).`)};
-    const decoSpr = S(`hayday_${item.id}`);
-    const decoSvg = ITEM_ICONS[item.id];
-    const decoIcon = decoSpr ? `<img src="${decoSpr}" width="32" height="32" style="object-fit:contain">` : decoSvg ? `<img src="${decoSvg}" width="30" height="30" style="object-fit:contain">` : `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%234caf50' opacity='.5'/%3E%3Cpath d='M16 8v8M12 12l4-4 4 4' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E" width="30" height="30" style="object-fit:contain">`;
-    el.innerHTML=`${decoIcon}<span class="item-name">${d.name||decoName(item.id)}</span><span class="item-price">${cost} p.</span>`;
-    grid.appendChild(el);
-  });
-}
+// Decoration shop removed — focus on core gameplay
 const ANIMAL_INFO_DB = {
   cow: {lvl:10, desc:'Produit du lait tous les 10 reviews. Le lait fait du beurre, fromage, crème.', produces:'Lait \u2192 Beurre, Fromage, Cr\u00E8me'},
   chicken: {lvl:20, desc:'Pond des \u0153ufs tous les 8 reviews. Les \u0153ufs servent aux cookies et g\u00E2teaux.', produces:'\u0152uf \u2192 Cookie, G\u00E2teau'},
@@ -2423,6 +2340,20 @@ function fulfillOrder(i){
 }
 
 function spinWheel(){if(farmData.can_spin_wheel){SoundMgr.play('click');document.getElementById('wheel-overlay').classList.remove('hidden');drawWheel()}else showNotification(LANG.come_back)}
+
+// Floating wheel button — visible when a free spin is available (Hay Day style: prominent bonus mechanic)
+function updateWheelButton() {
+  const btn = document.getElementById('wheel-float-btn');
+  if (!btn) return;
+  if (farmData.can_spin_wheel) {
+    btn.style.display = 'flex';
+    const iconEl = document.getElementById('wheel-float-icon');
+    const wheelSrc = S('_icon_wheel');
+    if (iconEl && wheelSrc) iconEl.innerHTML = `<img src="${wheelSrc}" width="32" height="32" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
 function doSpinWheel(){if(wheelSpinning)return;wheelSpinning=true;SoundMgr.play('click');document.getElementById('wheel-spin-btn').disabled=true;document.getElementById('wheel-result').classList.add('hidden');pycmd('farm:spin_wheel')}
 function showWheelResult(r){
   wheelSpinning=false;
@@ -2450,9 +2381,8 @@ function showWheelResult(r){
 }
 function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Permis',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
-function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:auto">`;else icon.innerHTML='<div class="css-chest"></div>'}}
-function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
-function showBoxResult(r){const icon=document.getElementById('box-icon');icon.classList.remove('shaking');icon.classList.add('opened');setTimeout(()=>{let t=`${LANG.found} : `;const rw=r.reward||{};if(rw.coins)t+=`${rw.coins} ${LANG.pieces} !`;else if(rw.gems)t+=`${rw.gems} ${LANG.gemmes} !`;else if(rw.item)t+=`${rw.qty||1}x ${itemName(rw.item)} !`;document.getElementById('mystery-box-result').textContent=t;document.getElementById('mystery-box-result').classList.remove('hidden');currentBoxIndex=null;SoundMgr.play('levelup');if((rw.gems||0)>=5||(rw.coins||0)>=200)createConfetti()},600)}
+// Mystery box functions removed — Wheel of Fortune covers surprise rewards
+function showBoxResult(r){} // no-op stub for backward compat with Python bridge
 
 function showLevelUp(d){
   SoundMgr.play('levelup');
@@ -2562,11 +2492,10 @@ function showReward(d){
   const coins = d.coins || 0;
   const xp = d.xp || 0;
   const hasItems = d.items && Object.keys(d.items).length > 0;
-  const hasBox = !!d.mystery_box;
   // Determine reward tier: normal review = subtle HUD-only feedback,
   // good reward = small floating text, big reward = full burst
-  const isSpecial = hasItems || hasBox || coins >= 15;
-  const isBig = coins >= 25 || hasBox;
+  const isSpecial = hasItems || coins >= 15;
+  const isBig = coins >= 25;
 
   // Use last harvest position for harvest rewards (Hay Day style: rewards fly from crop)
   const harvestPos = _lastHarvestPos;
@@ -2636,11 +2565,6 @@ function showReward(d){
       }, delay);
       delay += 280;
     });
-  }
-  // Mystery box appearance (rare ~5%, always dramatic)
-  if (hasBox) {
-    const sz = {small:'petite', medium:'moyenne', large:'grande'}[d.mystery_box.size] || d.mystery_box.size;
-    setTimeout(() => showNotification(`Une ${sz} boîte mystère est apparue !`, 'reward'), 550);
   }
 }
 

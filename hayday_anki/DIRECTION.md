@@ -221,8 +221,19 @@ L'objectif est de creer une boucle d'engagement comparable a Hay Day : planter �
 6. **FIX: Double coin burst a la vente** : le JS ET le Python declenchaient chacun un `showCoinBurst` + `SoundMgr.play('coin')` lors de la vente. Resultat : double son + double animation. Corrige : le Python ne fait plus que la notification texte, le JS gere le feedback visuel.
 7. **Auto-ouverture dialogue production** : apres tap-to-collect sur un batiment, le dialogue de production s'ouvre automatiquement apres 500ms pour permettre de lancer la prochaine recette. Flow continu comme dans Hay Day.
 
+## Ameliorations (session 17 — nettoyage et fondations solides)
+1. **Village/Decoration zone supprimee** : la zone Village etait une fonctionnalite a moitie implementee — decorations avec icones SVG generiques, aucun impact gameplay, aucune vraie image. Supprimee du HTML, JS et CSS. Le backend garde les donnees pour compatibilite mais le joueur ne voit plus cette zone incomplete. Le jeu est plus propre et plus concentre sur le gameplay principal (champs, atelier, paturage).
+2. **Mystery boxes supprimees** : les boites mystere flottaient au-dessus de la ferme sans s'integrer au gameplay. La Roue de la Fortune couvre deja le mecanisme de "recompense surprise". Overlay, rendu et CSS supprimes. Le backend continue de generer les boites (compatibilite) mais elles ne sont plus affichees.
+3. **Boutique "Deco" tab supprime** : le tab Deco dans la boutique menait a des decorations sans vraies images. Supprime pour simplifier la boutique (3 tabs: Ameliorer, Animaux, Terrain).
+4. **Roue de la Fortune accessible** : bouton flottant dore en bas a droite quand un tour gratuit est disponible. Le joueur voit immediatement qu'il peut tourner sans devoir naviguer dans le panel Succes. Animation subtile de flottement.
+5. **Animations excessives attenuees** : les boutons "Tout recolter" et "Tout planter" ne pulsent plus en continu (distractif). Remplaces par un glow statique au hover. Le shimmer du compteur de session supprime. Les "action-pulse" remplaces par un highlight statique subtil.
+6. **Quetes completion polish** : le checkmark emoji dans "Termine" remplace par un badge CSS propre avec fond vert subtil.
+7. **Zone connectors ameliores** : le chemin de terre entre les zones est maintenant un ovale subtil au lieu d'un rectangle brut. Plus organique et Hay Day-like.
+8. **Zones visuelles ameliorees** : bordure-radius augmente (18px), marges ameliorees, gradients radiaux subtils pour donner de la profondeur aux zones. Headers de zones affines.
+9. **~200 lignes de CSS mort supprimees** : styles village, deco-tile, mystery-box, css-chest, animations boxFloat/boxShake/boxOpen, harvestPulse/plantPulse.
+
 ## Prochaines etapes
-- [ ] Generer des sprites de decorations avec Gemini (fontaine, arbre, banc, etc.)
 - [ ] Evenements saisonniers avec bonus temporaires
 - [ ] Tutoriel ameliore avec guidage contextuel
 - [ ] Systeme d'etoiles par quete (bronze/argent/or selon la performance)
+- [ ] Vraies images PNG pour les produits transformes (pain, fromage, pizza, etc.) au lieu de SVG

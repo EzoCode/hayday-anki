@@ -50,9 +50,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .streak-fire.streak-blazing .css-fire{box-shadow:0 0 12px rgba(255,60,0,.9),0 0 20px rgba(255,140,0,.4);width:13px;height:16px}
 @keyframes flameHot{0%,100%{transform:scale(1)}50%{transform:scale(1.35) translateY(-2px);filter:brightness(1.5)}}
 @keyframes flameBlazing{0%,100%{transform:scale(1) rotate(-3deg)}25%{transform:scale(1.4) translateY(-2px) rotate(3deg);filter:brightness(1.6)}50%{transform:scale(1.2) rotate(-2deg)}75%{transform:scale(1.45) translateY(-3px) rotate(2deg);filter:brightness(1.7)}}
-.hud-session-reviews{background:linear-gradient(135deg,rgba(76,175,80,.2),rgba(0,0,0,.35));border:1px solid rgba(76,175,80,.3);position:relative;overflow:hidden}
-.hud-session-reviews::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(76,175,80,.15),transparent);animation:sessionShimmer 3s ease-in-out infinite;pointer-events:none}
-@keyframes sessionShimmer{0%,100%{opacity:0;transform:translateX(-100%)}50%{opacity:1;transform:translateX(100%)}}
+.hud-session-reviews{background:linear-gradient(135deg,rgba(76,175,80,.2),rgba(0,0,0,.35));border:1px solid rgba(76,175,80,.3)}
 .session-review-icon{display:inline-block;width:11px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='2' y='1' width='12' height='14' rx='1.5' fill='%234fc3f7'/%3E%3Crect x='4' y='3' width='8' height='10' rx='.5' fill='%23fff'/%3E%3Cline x1='5' y1='5' x2='11' y2='5' stroke='%23bbb' stroke-width='.8'/%3E%3Cline x1='5' y1='7.5' x2='11' y2='7.5' stroke='%23bbb' stroke-width='.8'/%3E%3Cline x1='5' y1='10' x2='9' y2='10' stroke='%23bbb' stroke-width='.8'/%3E%3C/svg%3E") center/contain no-repeat}
 
 /* ===== CSS-only icons (replacing emojis) ===== */
@@ -119,7 +117,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .quest-claim-btn:active{transform:scale(.97)}
 @keyframes questClaimPulse{0%,100%{box-shadow:0 3px 8px rgba(74,158,47,.3)}50%{box-shadow:0 3px 16px rgba(74,158,47,.7),0 0 20px rgba(74,158,47,.2)}}
 .quests-claimed #quest-items{opacity:.45}
-.quests-claimed .quest-title::after{content:' ✓ Terminé';color:#4caf50;font-size:9px;margin-left:6px;letter-spacing:0;text-transform:none}
+.quests-claimed .quest-title::after{content:' Terminé';color:#4caf50;font-size:9px;margin-left:6px;letter-spacing:0;text-transform:none;background:rgba(76,175,80,.15);padding:1px 6px;border-radius:6px;border:1px solid rgba(76,175,80,.25)}
 
 /* ===== NEXT UNLOCK HINT ===== */
 #next-unlock-hint{display:flex;align-items:center;justify-content:center;gap:6px;padding:5px 12px;font-size:11px;font-weight:700;color:rgba(255,255,255,.95);text-shadow:0 1px 2px rgba(0,0,0,.5);background:linear-gradient(90deg,rgba(139,94,60,.4),rgba(139,94,60,.55),rgba(139,94,60,.4));letter-spacing:.3px;overflow:hidden;border-top:1px solid rgba(255,220,160,.1);border-bottom:1px solid rgba(0,0,0,.15)}
@@ -182,72 +180,76 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ZONES ===== */
 .farm-zone {
-  margin: 10px 8px;
-  border-radius: 16px;
+  margin: 10px 10px;
+  border-radius: 18px;
   overflow: hidden;
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.1);
   transition: transform 0.2s;
 }
-.farm-zone + .farm-zone { margin-top: 0; }
+.farm-zone + .farm-zone { margin-top: 6px; }
 
 /* Hay Day-style dirt path connector between zones */
 .farm-zone + .farm-zone::before {
   content: '';
   display: block;
-  width: 40px;
-  height: 18px;
-  margin: -4px auto -2px;
+  width: 32px;
+  height: 14px;
+  margin: -2px auto -1px;
   position: relative;
-  top: -8px;
+  top: -7px;
   background:
-    linear-gradient(180deg, rgba(160,130,80,.6) 0%, rgba(139,105,20,.5) 50%, rgba(160,130,80,.6) 100%);
-  border-radius: 0 0 8px 8px;
+    radial-gradient(ellipse at 50% 30%, rgba(200,168,100,.55), rgba(139,105,20,.4) 60%, rgba(90,67,16,.3));
+  border-radius: 50%;
   box-shadow:
-    inset 0 2px 3px rgba(0,0,0,.15),
-    0 2px 4px rgba(0,0,0,.1);
+    inset 0 1px 2px rgba(0,0,0,.12),
+    0 1px 3px rgba(0,0,0,.08);
   z-index: 2;
+  opacity: .7;
 }
 
 .zone-fields {
   background:
+    radial-gradient(ellipse at 20% 30%, rgba(100,180,60,.12), transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(80,160,40,.08), transparent 50%),
     linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
     linear-gradient(180deg, #4a8c32 0%, #3d7828 50%, #357020 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-bottom: 3px solid rgba(30,60,15,0.5);
 }
 .zone-workshop {
-  background: linear-gradient(180deg, #7d5535 0%, #6b4520 50%, #5a3818 100%);
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(180,130,80,.08), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 30%),
+    linear-gradient(180deg, #7d5535 0%, #6b4520 50%, #5a3818 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(70,40,15,0.5);
 }
 .zone-pasture {
-  background: linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
+  background:
+    radial-gradient(ellipse at 70% 50%, rgba(100,180,60,.1), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 30%),
+    linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(35,70,18,0.45);
-}
-.zone-village {
-  background: linear-gradient(180deg, #a08552 0%, #8a7040 50%, #7a6335 100%);
-  border: 1.5px solid rgba(255,255,255,0.1);
-  border-bottom: 3px solid rgba(80,55,25,0.45);
 }
 
 .zone-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   background:
     /* Wood grain texture */
-    repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
-    repeating-linear-gradient(85deg, transparent 0px, transparent 12px, rgba(0,0,0,.02) 12px, rgba(0,0,0,.02) 13px),
+    repeating-linear-gradient(95deg, transparent 0px, transparent 10px, rgba(255,255,255,.025) 10px, rgba(255,255,255,.025) 11px),
+    /* Highlight strip */
+    linear-gradient(180deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.04) 35%, transparent 55%, rgba(0,0,0,.12) 100%),
     /* Base wood */
-    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.15) 100%),
-    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
-  border-bottom: 2px solid rgba(90,53,32,.6);
-  border-top: 1px solid rgba(255,220,160,.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
+    linear-gradient(180deg, #a87a4e, #8b5e3c 55%, #6b4520);
+  border-bottom: 2px solid rgba(90,53,32,.55);
+  border-top: 1px solid rgba(255,220,160,.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), inset 0 -1px 0 rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.12);
 }
 
 .zone-title {
@@ -285,22 +287,28 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 }
 .harvest-all-btn {
   background: linear-gradient(180deg,#6abf47,#4a9e2f) !important;
-  border: 1px solid rgba(255,255,255,.2) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
   border-style: solid !important;
   color: #fff !important;
   text-shadow: 0 1px 1px rgba(0,0,0,.3);
-  animation: harvestPulse 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(106,191,71,0.35);
 }
-@keyframes harvestPulse { 0%,100%{box-shadow:0 0 4px rgba(106,191,71,0.3)} 50%{box-shadow:0 0 12px rgba(106,191,71,0.6)} }
+.harvest-all-btn:hover {
+  box-shadow: 0 2px 14px rgba(106,191,71,0.6);
+  transform: scale(1.03);
+}
 .plant-all-btn {
   background: linear-gradient(180deg,#a0845a,#8b6914) !important;
   border: 1px solid rgba(255,255,255,.15) !important;
   border-style: solid !important;
   color: #fff !important;
   text-shadow: 0 1px 1px rgba(0,0,0,.3);
-  animation: plantPulse 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(139,105,20,0.3);
 }
-@keyframes plantPulse { 0%,100%{box-shadow:0 0 4px rgba(139,105,20,0.3)} 50%{box-shadow:0 0 12px rgba(139,105,20,0.6)} }
+.plant-all-btn:hover {
+  box-shadow: 0 2px 14px rgba(139,105,20,0.5);
+  transform: scale(1.03);
+}
 
 .zone-content {
   display: flex;
@@ -379,29 +387,6 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   text-shadow: 0 1px 1px rgba(0,0,0,.2);
 }
 
-/* Deco tiles in village zone */
-.deco-tile {
-  width: 72px;
-  height: 72px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(0,0,0,0.04));
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
-  transition: transform 0.18s, box-shadow 0.18s;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.deco-tile::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.1),transparent 60%);pointer-events:none;border-radius:14px}
-.deco-tile:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 6px 16px rgba(0,0,0,0.3), 0 0 12px rgba(255,215,0,.15); }
-.deco-tile:active { transform: scale(0.95); }
-.deco-tile img { max-width: 46px; max-height: 46px; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3)); transition: transform .2s; }
-.deco-tile:hover img { transform: scale(1.1); }
-.deco-name { font-size: 8px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
 
 /* Pasture tile */
 .pasture-tile {
@@ -678,11 +663,6 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== DECORATIONS & MYSTERY BOXES ===== */
 #decorations-layer{position:absolute;inset:0;pointer-events:none;z-index:3}
-#mystery-boxes-layer{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:6px;min-height:0;z-index:4;position:relative}
-.mystery-box{cursor:pointer;animation:boxFloat 2.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,215,0,.6));transition:transform .15s;position:relative}
-.mystery-box:hover{transform:scale(1.2);filter:drop-shadow(0 0 14px rgba(255,215,0,.8))}
-.mystery-box img{max-width:40px;max-height:40px}
-@keyframes boxFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
 /* ===== REWARD LAYER ===== */
 #reward-layer{position:fixed;inset:0;pointer-events:none;z-index:150}
@@ -716,6 +696,35 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes sparkleFall{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(.5)}30%{opacity:1;transform:translateY(30vh) rotate(180deg) scale(1)}100%{opacity:0;transform:translateY(100vh) rotate(360deg) scale(.3)}}
 .confetti-piece{position:absolute;bottom:50%;width:8px;height:8px;border-radius:2px;animation:confettiBurst 1.8s ease-out forwards}
 @keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}}
+
+/* ===== WHEEL OF FORTUNE FLOATING BUTTON ===== */
+.wheel-float-btn {
+  position: fixed;
+  bottom: 72px;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f4922a, #e07c18);
+  border: 2.5px solid rgba(255,255,255,.3);
+  box-shadow: 0 4px 16px rgba(228,124,24,.5), 0 2px 4px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3);
+  z-index: 95;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: wheelBtnFloat 3s ease-in-out infinite;
+  transition: transform .15s, box-shadow .15s;
+}
+.wheel-float-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 24px rgba(228,124,24,.7), 0 2px 4px rgba(0,0,0,.3);
+}
+.wheel-float-btn:active { transform: scale(.92); }
+@keyframes wheelBtnFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
 
 /* ===== TOOLBAR — Mobile Tab Bar ===== */
 #toolbar{display:flex;justify-content:space-around;align-items:center;padding:4px 8px 6px;height:58px;flex-shrink:0;z-index:100;
@@ -854,14 +863,6 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #wheel-result{margin-top:10px;font-size:16px;font-weight:900;color:#2e7d32}
 
 /* Mystery box */
-.box-icon{display:inline-block;margin:16px 0;transition:transform .3s;min-width:64px;min-height:64px}
-.css-chest{display:inline-block;width:56px;height:48px;background:linear-gradient(180deg,#d4a056 0%,#8b5e3c 50%,#5a3520 100%);border-radius:6px;border:2px solid #5a3520;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 4px 8px rgba(0,0,0,.3);position:relative}
-.css-chest::before{content:'';position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:12px;height:10px;background:#ffd700;border-radius:2px;border:1.5px solid #c5a200;box-shadow:0 0 6px rgba(255,215,0,.5)}
-.box-icon.shaking{animation:boxShake .3s ease-in-out infinite}
-.box-icon.opened{animation:boxOpen .6s ease forwards}
-@keyframes boxShake{0%,100%{transform:rotate(0) scale(1)}15%{transform:rotate(-12deg) scale(1.05)}30%{transform:rotate(12deg) scale(1.05)}45%{transform:rotate(-8deg)}60%{transform:rotate(8deg)}75%{transform:rotate(-4deg)}}
-@keyframes boxOpen{0%{transform:scale(1)}30%{transform:scale(1.4) rotate(15deg)}50%{transform:scale(1.5);opacity:.6}100%{transform:scale(0) rotate(-30deg);opacity:0}}
-#mystery-box-result{font-size:16px;font-weight:900;color:#2e7d32;margin-top:8px}
 
 /* Level up — Hay Day style green card */
 .levelup-card{background:linear-gradient(180deg,#e8f5e9,#c8e6c9,#a5d6a7)!important;color:#2e7d32!important;box-shadow:0 0 60px rgba(76,175,80,.4),0 16px 50px rgba(0,0,0,.45)!important;overflow:hidden;background-size:cover!important;background-position:center!important;border:3px solid rgba(76,175,80,.5)!important}
@@ -1141,11 +1142,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== READY PLOT CROP NAME ===== */
 /* (removed — ready plots show crop via sprite + "Récolter !" badge only) */
 
-/* ===== ACTION PULSE — draw attention to actionable buttons ===== */
-.action-pulse{animation:actionPulse 2s ease-in-out infinite !important;position:relative}
-.action-pulse::after{content:'';position:absolute;inset:-3px;border-radius:10px;border:2px solid rgba(255,215,0,.5);animation:actionPulseRing 2s ease-in-out infinite;pointer-events:none}
-@keyframes actionPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.3)}50%{box-shadow:0 0 14px rgba(255,215,0,.6)}}
-@keyframes actionPulseRing{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.05)}}
+/* ===== ACTION HIGHLIGHT — subtle glow on actionable buttons ===== */
+.action-pulse{box-shadow:0 0 8px rgba(255,215,0,.3) !important;border-color:rgba(255,215,0,.35) !important}
 
 /* ===== REVIEW MICRO-FEEDBACK — subtle +coins near HUD ===== */
 .review-sparkle{position:absolute;font-size:12px;font-weight:900;color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,.7),0 1px 3px rgba(0,0,0,.6);animation:reviewSparkle 1s ease-out forwards;pointer-events:none;z-index:160;letter-spacing:.3px;display:flex;align-items:center;gap:1px}
