@@ -556,6 +556,8 @@ function updateFarm(data) {
   // Merge cached static definitions into dynamic state for backward-compat access
   farmData = Object.assign({}, _staticDefs, data);
   updateHUD(); renderFields(); renderWorkshop(); renderPastures(); renderVillage(); updateLandBar(); renderMysteryBoxes(); updateSections(); checkStorageWarnings(); updateWeather();
+  // Apply queued pasture collection animations AFTER DOM rebuild
+  requestAnimationFrame(() => _applyPastureCollectedAnimations());
   // Animate plots that grew
   const newFields = farmData.fields || farmData.plots || [];
   let anyGrew = false, anyReady = false;
@@ -1071,6 +1073,9 @@ function renderPastures() {
     return;
   }
 
+  // Check silo status for "silo full" display on pastures
+  const siloFull = (farmData.silo_used||0) >= (farmData.silo_capacity||50);
+
   pastures.forEach(p => {
     const el = document.createElement('div');
     el.className = 'pasture-tile';
@@ -1084,12 +1089,64 @@ function renderPastures() {
     const reviewsLeft = Math.max(0, produceEvery - reviewsSince);
     const productName = itemName(adef.product || '');
     const imgHtml = lbl ? `<img src="${lbl}" width="50" height="50">` : animalImg(p.animal_type,45);
-    const prodLabelHtml = reviewsLeft <= 0
-      ? `<span class="pasture-prod-label ready-label">${itemIcon(adef.product||'', 12)} Prêt !</span>`
-      : `<span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsLeft} rev.</span>`;
-    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span><span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div>${prodLabelHtml}`;
+
+    // Determine pasture state: producing, silo-full (blocked), or normal
+    let prodLabelHtml;
+    if (reviewsLeft <= 0 && siloFull) {
+      // Silo full — products blocked. Show warning state.
+      el.classList.add('pasture-silo-full');
+      prodLabelHtml = `<span class="pasture-prod-label silo-full-label">${itemIcon(adef.product||'', 12)} Silo plein !</span>`;
+    } else if (reviewsLeft <= 0) {
+      // Products ready (auto-collected on next review)
+      el.classList.add('pasture-has-product');
+      prodLabelHtml = `<span class="pasture-prod-label ready-label">${itemIcon(adef.product||'', 12)} Prêt !</span>`;
+    } else if (reviewsLeft <= 3) {
+      // Almost ready — show golden pill like crops
+      prodLabelHtml = `<span class="pasture-prod-label pasture-almost">${itemIcon(adef.product||'', 10)} ${reviewsLeft} rev.</span>`;
+    } else {
+      prodLabelHtml = `<span class="pasture-prod-label">${itemIcon(adef.product||'', 10)} ${reviewsLeft} rev.</span>`;
+    }
+
+    // Product floating icon (shows what the animal produces)
+    const productBadge = `<span class="pasture-product-badge">${itemIcon(adef.product||'', 16)}</span>`;
+
+    el.innerHTML = `${imgHtml}<span class="pasture-count">x${p.count||1}</span>${productBadge}<span class="pasture-name">${name}</span><div class="pasture-progress"><div class="pasture-progress-fill" style="width:${progPct}%"></div></div>${prodLabelHtml}`;
     el.onclick = () => showAnimalInfo(p.animal_type);
     grid.appendChild(el);
+  });
+}
+
+// Track pasture collections for animation (applied during renderPastures after state update)
+const _pastureCollected = new Map(); // animalType -> {productId, qty, ts}
+
+// Called from Python when animal products are collected — queues visual burst for next render
+function showPastureCollected(animalType, productId, qty) {
+  _pastureCollected.set(animalType, {productId, qty, ts: Date.now()});
+}
+
+// Apply pasture collection animations after renderPastures rebuilds the DOM
+function _applyPastureCollectedAnimations() {
+  if (_pastureCollected.size === 0) return;
+  const now = Date.now();
+  const tiles = document.querySelectorAll('.pasture-tile');
+  const pastures = farmData.pastures || [];
+
+  _pastureCollected.forEach((data, animalType) => {
+    // Only animate if recent (within 2 seconds)
+    if (now - data.ts > 2000) { _pastureCollected.delete(animalType); return; }
+    pastures.forEach((p, idx) => {
+      if (p.animal_type === animalType && tiles[idx]) {
+        const tile = tiles[idx];
+        tile.classList.add('pasture-collected');
+        setTimeout(() => tile.classList.remove('pasture-collected'), 800);
+        // Product burst from pasture position
+        const rect = tile.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        showBuildingProductBurst(cx, cy, data.productId);
+      }
+    });
+    _pastureCollected.delete(animalType);
   });
 }
 

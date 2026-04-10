@@ -471,6 +471,32 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   gap: 2px;
 }
 .pasture-prod-label.ready-label{color:#4caf50;font-weight:900;text-shadow:0 0 6px rgba(76,175,80,.5)}
+.pasture-prod-label.silo-full-label{color:#ff6b35;font-weight:900;text-shadow:0 0 6px rgba(255,107,53,.5);animation:siloFullPulse 1.5s ease-in-out infinite}
+.pasture-prod-label.pasture-almost{color:#ffd700;font-weight:900;text-shadow:0 0 4px rgba(255,215,0,.4)}
+
+/* Pasture product badge — shows what the animal produces */
+.pasture-product-badge{position:absolute;top:4px;left:5px;z-index:3;opacity:.7;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+
+/* Pasture: products blocked by full silo */
+.pasture-tile.pasture-silo-full{border-color:rgba(255,107,53,.4);box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 12px rgba(255,107,53,.25);animation:siloFullGlow 2.5s ease-in-out infinite}
+.pasture-tile.pasture-silo-full .pasture-progress-fill{background:linear-gradient(90deg,#ff9800,#ff6b35) !important}
+@keyframes siloFullGlow{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 8px rgba(255,107,53,.15)}50%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 16px rgba(255,107,53,.35)}}
+@keyframes siloFullPulse{0%,100%{opacity:.8}50%{opacity:1}}
+
+/* Pasture: has ready product (will auto-collect on next review) */
+.pasture-tile.pasture-has-product{border-color:rgba(255,215,0,.4);box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 14px rgba(255,215,0,.3);animation:pastureReady 2s ease-in-out infinite}
+.pasture-tile.pasture-has-product .pasture-progress-fill{background:linear-gradient(90deg,#4caf50,#8bc34a,#ffd700) !important}
+.pasture-tile.pasture-has-product img{animation:pastureReadyBounce 2s ease-in-out infinite !important}
+@keyframes pastureReady{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 10px rgba(255,215,0,.2)}50%{box-shadow:0 3px 10px rgba(0,0,0,.2),0 0 20px rgba(255,215,0,.45)}}
+@keyframes pastureReadyBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-5px) scale(1.08)}60%{transform:translateY(-2px) scale(1.03)}}
+
+/* Pasture: product just collected — brief celebration burst */
+.pasture-tile.pasture-collected{animation:pastureCollectBounce .8s cubic-bezier(.34,1.56,.64,1) !important;z-index:10}
+.pasture-tile.pasture-collected img{animation:pastureCollectPop .6s cubic-bezier(.34,1.56,.64,1) !important}
+.pasture-tile.pasture-collected::before{content:'';position:absolute;inset:-6px;border-radius:20px;background:radial-gradient(circle,rgba(255,215,0,.35),transparent 60%);animation:pastureCollectGlow .8s ease-out forwards;pointer-events:none;z-index:15}
+@keyframes pastureCollectBounce{0%{transform:scale(1)}30%{transform:scale(1.15)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes pastureCollectPop{0%{transform:scale(1)}40%{transform:scale(1.2) translateY(-4px)}100%{transform:scale(1) translateY(0)}}
+@keyframes pastureCollectGlow{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}
 
 /* Info card — scrollable overlay with fixed close button */
 .info-card {

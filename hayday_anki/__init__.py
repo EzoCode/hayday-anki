@@ -194,6 +194,7 @@ def _process_animals(mgr):
                         "product": product,
                         "name": item_info.get("name", product),
                         "qty": count,
+                        "animal_type": animal_id,
                     })
                 else:
                     # Silo full — pause production (don't keep incrementing)
@@ -210,7 +211,7 @@ def _process_animals(mgr):
                             view._js(f"showNotification({json.dumps(msg)})")
     # Sync animals dict from pastures (single source of truth)
     mgr._sync_animals_from_pastures()
-    # Show notifications for collected animal products (with item icons)
+    # Show notifications + visual burst for collected animal products
     if collected_products:
         view = _get_view()
         if view.web:
@@ -218,8 +219,11 @@ def _process_animals(mgr):
                 product_id = p["product"]
                 qty = p["qty"]
                 name = p["name"]
+                animal_type = p.get("animal_type", "")
                 text_part = json.dumps(f" +{qty} {name}")
                 view._js(f"showNotification(itemIcon({json.dumps(product_id)}, 14) + {text_part}, 'reward')")
+                # Trigger visual burst on the pasture tile
+                view._js(f"showPastureCollected({json.dumps(animal_type)}, {json.dumps(product_id)}, {qty})")
 
 
 def _check_achievements(mgr):
