@@ -1150,6 +1150,13 @@ class FarmManager:
             else:
                 return None
 
+        # Coin reward for harvesting (scales with crop value — makes harvest feel rewarding)
+        sell_price = crop_def.get("sell_price", 2)
+        harvest_coins = max(1, sell_price * qty // 3)  # ~33% of sell value as instant bonus
+        self.state.coins += harvest_coins
+        self.state.total_coins_earned += harvest_coins
+        self.state.session_coins_earned += harvest_coins
+
         self.state.xp += xp_gain
         self.state.session_xp_earned += xp_gain
         self.state.total_harvests += 1
@@ -1170,11 +1177,13 @@ class FarmManager:
         field.pop("_wilt_warned", None)
         field.pop("_wilt_remaining", None)
 
-        return {"items": harvested, "xp": xp_gain}
+        return {"items": harvested, "xp": xp_gain, "coins": harvest_coins}
 
-    def plant_all_empty(self) -> int:
-        """Plant last_crop on all empty fields that have one. Returns count planted."""
+    def plant_all_empty(self) -> Dict:
+        """Plant last_crop on all empty fields that have one.
+        Returns dict with planted count and skipped count."""
         count = 0
+        skipped = 0
         for field in self.state.fields:
             if field["state"] != "empty":
                 continue
@@ -1183,12 +1192,15 @@ class FarmManager:
                 continue
             if self.plant_crop(field["id"], last_crop):
                 count += 1
-        return count
+            else:
+                skipped += 1  # Likely insufficient coins
+        return {"planted": count, "skipped": skipped}
 
     def harvest_all(self) -> Dict:
         """Harvest all ready crops. Returns combined results."""
         total_items = {}
         total_xp = 0
+        total_coins = 0
         count = 0
         for field in list(self.state.fields):
             if field["state"] != "ready":
@@ -1197,9 +1209,10 @@ class FarmManager:
             if result:
                 count += 1
                 total_xp += result.get("xp", 0)
+                total_coins += result.get("coins", 0)
                 for item_id, qty in result.get("items", {}).items():
                     total_items[item_id] = total_items.get(item_id, 0) + qty
-        return {"items": total_items, "xp": total_xp, "count": count}
+        return {"items": total_items, "xp": total_xp, "coins": total_coins, "count": count}
 
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""
@@ -1288,19 +1301,22 @@ class FarmManager:
         box = self.state.mystery_boxes[box_index]
         box_def = MYSTERY_BOX_REWARDS.get(box["size"], MYSTERY_BOX_REWARDS["small"])
 
-        # Check gem cost
-        if box_def["cost_gems"] > self.state.gems:
-            # Free open check (2 per day)
+        # Check gem cost — only small boxes (cost_gems=0) are free
+        gem_cost = box_def["cost_gems"]
+        if gem_cost > 0:
+            # Premium box — requires gems, no free bypass
+            if self.state.gems < gem_cost:
+                return None
+            self.state.gems -= gem_cost
+        else:
+            # Free box (small) — limited to 3 per day
             today = date.today().isoformat()
             if self.state.last_mystery_box_date != today:
                 self.state.daily_mystery_boxes_opened = 0
                 self.state.last_mystery_box_date = today
-            if self.state.daily_mystery_boxes_opened >= 2 and box_def["cost_gems"] > 0:
+            if self.state.daily_mystery_boxes_opened >= 3:
                 return None
             self.state.daily_mystery_boxes_opened += 1
-        else:
-            if box_def["cost_gems"] > 0:
-                self.state.gems -= box_def["cost_gems"]
 
         # Roll reward
         rewards_table = box_def["rewards"]
@@ -1427,14 +1443,22 @@ class FarmManager:
                 if product not in order_items:
                     order_items.append(product)
 
-        # Add processed goods from owned buildings (use placed_buildings as source of truth)
+        # Add processed goods from owned buildings — only if all ingredients are obtainable
+        # (player has the crops unlocked or owns animals that produce the ingredients)
         from . import production
+        obtainable = set(order_items)  # items the player can currently get
         for pb in self.state.placed_buildings:
             building_id = pb.get("building_type", "")
             for recipe in production.RECIPES.get(building_id, []):
-                for output_id in recipe["output"]:
-                    if output_id not in order_items:
-                        order_items.append(output_id)
+                # Check all ingredients are obtainable
+                can_make = all(
+                    ing_id in obtainable for ing_id in recipe["ingredients"]
+                )
+                if can_make:
+                    for output_id in recipe["output"]:
+                        if output_id not in order_items:
+                            order_items.append(output_id)
+                            obtainable.add(output_id)
 
         while len(self.state.active_orders) < 3 and order_items:
             items_needed = {}

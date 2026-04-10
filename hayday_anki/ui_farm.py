@@ -256,10 +256,12 @@ class FarmWebView:
                     self._js(f"showReward({json.dumps(result)})")
                     # Show harvest quantity notification with crop icon
                     from .farm_manager import ITEM_CATALOG as _IC
+                    harvest_coins = result.get("coins", 0)
                     for item_id, qty in result.get("items", {}).items():
                         item_name = _IC.get(item_id, {}).get("name", item_id)
                         xp = result.get("xp", 0)
-                        msg = f"+{qty} {item_name} · +{xp} XP"
+                        coins_str = f" · +{harvest_coins} p." if harvest_coins > 0 else ""
+                        msg = f"+{qty} {item_name} · +{xp} XP{coins_str}"
                         self._js(f"showNotification(itemIcon({json.dumps(item_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
                     self._check_and_show_level_up()
                 else:
@@ -272,6 +274,7 @@ class FarmWebView:
                 result = self.manager.harvest_all()
                 if result["count"] > 0:
                     total_xp = result["xp"]
+                    total_coins = result.get("coins", 0)
                     items_text = ", ".join(
                         f"{qty}x {_IC.get(iid, {}).get('name', iid)}"
                         for iid, qty in result["items"].items()
@@ -279,8 +282,9 @@ class FarmWebView:
                     count = result["count"]
                     burst = min(10, count * 2)
                     self._js("SoundMgr.play('harvest')")
-                    self._js(f"showHarvestAllBurst({burst}, {total_xp})")
-                    msg = f"{count} récoltes : {items_text}"
+                    self._js(f"showHarvestAllBurst({burst}, {total_xp}, {total_coins})")
+                    coins_text = f" +{total_coins} pièces," if total_coins > 0 else ""
+                    msg = f"{count} récoltes :{coins_text} {items_text}"
                     self._js(f"showNotification({json.dumps(msg)}, 'reward')")
                     if count >= 3:
                         self._js("createConfetti()")
@@ -314,9 +318,16 @@ class FarmWebView:
                 self.manager.save()
 
             elif action == "plant_all_empty":
-                count = self.manager.plant_all_empty()
-                if count > 0:
-                    self._js(f"showNotification({json.dumps(f'{count} cultures plantées !')})")
+                result = self.manager.plant_all_empty()
+                planted = result["planted"]
+                skipped = result["skipped"]
+                if planted > 0:
+                    msg = f"{planted} cultures plantées !"
+                    if skipped > 0:
+                        msg += f" ({skipped} non plantées — pièces insuffisantes)"
+                    self._js(f"showNotification({json.dumps(msg)})")
+                elif skipped > 0:
+                    self._js("showNotification('Pas assez de pièces pour planter !')")
                 else:
                     self._js("showNotification('Aucune parcelle à replanter !')")
                 self._send_state()

@@ -2151,12 +2151,13 @@ function showHarvestBurst(x, y, cropId) {
     setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 900);
   }
 }
-function showHarvestAllBurst(n, xp) {
+function showHarvestAllBurst(n, xp, coins) {
   const zone = document.querySelector('.zone-fields');
   let cx = window.innerWidth/2, cy = window.innerHeight/3;
   if (zone) { const r = zone.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2; }
   showCoinBurst(cx, cy, n);
-  showFloatingReward('+' + xp + ' XP', cx, cy);
+  if (coins > 0) showFloatingReward('+' + coins, cx - 20, cy - 10);
+  showFloatingReward('+' + xp + ' XP', cx + 20, cy + (coins > 0 ? 5 : -10));
 }
 function showPlantBurst(plotEl, cropId) {
   if (!plotEl) return;
@@ -2339,7 +2340,7 @@ function showWheelResult(r){
     }
   })(performance.now());
 }
-function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Titre',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
+function drawWheel(rot){rot=rot||0;const c=document.getElementById('wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),cx=140,cy=140,r=130;const segs=[{l:'25 p.',c:'#f44336'},{l:'50 p.',c:'#e91e63'},{l:'100 p.',c:'#9c27b0'},{l:'1 gem',c:'#673ab7'},{l:'3 gem',c:'#3f51b5'},{l:'5 gem',c:'#2196f3'},{l:'3 mat.',c:'#009688'},{l:'3 mat.',c:'#4caf50'},{l:'Permis',c:'#ff9800'}];ctx.clearRect(0,0,280,280);const sa=2*Math.PI/segs.length;segs.forEach((s,i)=>{const a=rot+i*sa;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sa);ctx.closePath();ctx.fillStyle=s.c;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sa/2);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(s.l,r*.65,4);ctx.restore()});ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill()}
 
 function showMysteryBox(i){SoundMgr.play('click');currentBoxIndex=i;document.getElementById('mystery-box-overlay').classList.remove('hidden');document.getElementById('mystery-box-result').classList.add('hidden');document.getElementById('open-box-btn').disabled=false;const icon=document.getElementById('box-icon');icon.className='box-icon';const box=(farmData.mystery_boxes||[])[i]||{};const idx=box.size==='large'?2:box.size==='medium'?1:0;const src=S(`ui_chest_${idx}_closed`);if(src)icon.innerHTML=`<img src="${src}" width="64" height="64" style="image-rendering:auto">`;else{const fallbackSrc=S('ui_chest_0_closed');if(fallbackSrc)icon.innerHTML=`<img src="${fallbackSrc}" width="64" height="64" style="image-rendering:auto">`;else icon.innerHTML='<div class="css-chest"></div>'}}
 function doOpenBox(){if(currentBoxIndex===null)return;SoundMgr.play('click');document.getElementById('box-icon').classList.add('shaking');document.getElementById('open-box-btn').disabled=true;pycmd(`farm:open_box:${currentBoxIndex}`)}
@@ -2466,8 +2467,8 @@ function showReward(d){
   if (coins > 0 || xp > 0) {
     if (harvestPos) {
       // Harvest reward: show from the plot position for satisfying feedback
-      showFloatingReward(`+${coins}`, harvestPos.x - 15, harvestPos.y - 10);
-      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, harvestPos.x + 15, harvestPos.y + 5), 150);
+      if (coins > 0) showFloatingReward(`+${coins}`, harvestPos.x - 15, harvestPos.y - 10);
+      if (xp > 0) setTimeout(() => showFloatingReward(`+${xp} XP`, harvestPos.x + (coins > 0 ? 15 : 0), harvestPos.y + (coins > 0 ? 5 : -10)), coins > 0 ? 150 : 0);
     } else if (isBig) {
       // Big reward: full coin burst + floating text + sound (rare, exciting)
       const zone = document.querySelector('.zone-fields');
