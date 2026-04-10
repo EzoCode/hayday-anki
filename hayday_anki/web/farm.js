@@ -1152,7 +1152,20 @@ function updateActionHints() {
       Object.values(d.production_queues||{}).forEach(q => q.forEach(item => { if (item.ready) readyProd++; }));
       if (readyProd > 0) {
         _nextAction = {type:'collect', text:`${readyProd} produit${readyProd>1?'s':''} prêt${readyProd>1?'s':''} à récupérer !`};
-      } else if (fields.length > 0 && emptyFields === 0 && readyFields === 0) {
+      } else {
+        // Check for idle buildings that could be producing
+        let idleBuilding = null;
+        placed.forEach(b => {
+          const bid = b.building_type;
+          const queue = (d.production_queues||{})[bid]||[];
+          if (queue.length === 0) idleBuilding = bid;
+        });
+        if (idleBuilding && !_nextAction) {
+          const bname = buildingName(idleBuilding);
+          _nextAction = {type:'produce', text:`${bname} est vide ! Lance une production.`, buildingId: idleBuilding};
+        }
+      }
+      if (!_nextAction && fields.length > 0 && emptyFields === 0 && readyFields === 0) {
         // All fields growing — encourage reviews
         const closestField = fields.filter(f => f.state === 'growing' || f.state === 'planted')
           .sort((a,b) => {
@@ -1176,6 +1189,7 @@ function updateActionHints() {
       harvest: S('hayday_wheat-icon'),
       plant: S('hayday_plus') || S('hayday_wheat-icon'),
       build: S('hayday_barn'),
+      produce: S('hayday_barn'),
       orders: S('_icon_truck'),
       collect: S('hayday_shop'),
       review: S('_gold_star'),
@@ -1228,6 +1242,10 @@ function handleNextAction() {
       break;
     case 'collect':
       document.querySelector('.zone-workshop')?.scrollIntoView({behavior:'smooth', block:'center'});
+      break;
+    case 'produce':
+      if (_nextAction.buildingId) pycmd('farm:building_detail:' + _nextAction.buildingId);
+      else document.querySelector('.zone-workshop')?.scrollIntoView({behavior:'smooth', block:'center'});
       break;
     case 'review':
       // Nothing to navigate to — just dismiss
@@ -2095,6 +2113,12 @@ function showPlantDialog(plotId) {
     if (growing > 0) infoParts.push(`${growing} en culture`);
     const infoLine = infoParts.length > 0 ? `<span class="crop-extra-info">${infoParts.join(' · ')}</span>` : '';
 
+    // Recipe usage: which recipes use this crop
+    const usage = (_staticDefs.crop_usage || {})[id] || [];
+    const usageLine = usage.length > 0
+      ? `<span class="crop-usage-line">${usage.map(u => `<span class="crop-usage-tag">${u.recipe}</span>`).join('')}</span>`
+      : `<span class="crop-usage-line"><span class="crop-usage-tag crop-usage-sell">Vendre</span></span>`;
+
     el.innerHTML = `
       <div class="crop-choice-icon">${cropPortrait(id, 52) || itemIcon(id, 52)}</div>
       <strong class="crop-choice-name">${name}</strong>
@@ -2106,6 +2130,7 @@ function showPlantDialog(plotId) {
       <div class="crop-yield-info">
         ${harvestMin}-${harvestMax}x · +${xpPerHarvest} XP · <span class="crop-profit">+${profit} net</span>
       </div>
+      ${usageLine}
       ${infoLine}
     `;
     choices.appendChild(el);
@@ -2730,13 +2755,27 @@ function showProductionDialog(data) {
     const c = document.createElement('div');
     c.className = `recipe-card ${r.can_craft ? '' : 'disabled'}`;
 
-    // Ingredients list
+    // Ingredients list with guidance for missing items
     let ingHtml = '';
     Object.entries(r.ingredients || {}).forEach(([id, qty]) => {
       const have = (farmData.inventory || {})[id] || 0;
       const enough = have >= qty;
+      let hintHtml = '';
+      if (!enough) {
+        const cat = ((farmData.item_catalog || {})[id] || {}).category || '';
+        const isGrowing = (farmData.fields || []).some(f => f.crop === id && f.state !== 'empty');
+        if (cat === 'crop' && isGrowing) {
+          hintHtml = '<span class="ing-hint">en culture</span>';
+        } else if (cat === 'crop') {
+          hintHtml = '<span class="ing-hint">plante !</span>';
+        } else if (cat === 'animal_product') {
+          hintHtml = '<span class="ing-hint">animaux</span>';
+        } else if (cat === 'processed') {
+          hintHtml = '<span class="ing-hint">à produire</span>';
+        }
+      }
       ingHtml += `<span class="recipe-ingredient ${enough ? 'has' : 'need'}">
-        ${itemIcon(id, 16)} ${itemName(id)} <b>${have}/${qty}</b>
+        ${itemIcon(id, 16)} ${itemName(id)} <b>${have}/${qty}</b>${hintHtml}
       </span>`;
     });
 

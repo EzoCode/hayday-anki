@@ -838,9 +838,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .achievement-info h4{font-size:12px}
 .achievement-info p{font-size:9px;color:#888}
 .achievement-tier{font-size:8px;font-weight:800;padding:1px 5px;border-radius:3px;text-transform:uppercase}
-.tier-bronze{background:#cd7f32;color:#fff}
-.tier-silver{background:#c0c0c0;color:#333}
-.tier-gold{background:var(--gold);color:#333}
+.tier-bronze{background:linear-gradient(135deg,#cd7f32,#a05a20);color:#fff;box-shadow:0 1px 3px rgba(205,127,50,.3)}
+.tier-silver{background:linear-gradient(135deg,#d4d4d4,#a8a8a8);color:#444;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tier-gold{background:linear-gradient(135deg,#ffe566,#ffd700,#c5a200);color:#5a3520;box-shadow:0 1px 4px rgba(255,215,0,.4)}
 .achievement-progress{width:100%;height:4px;background:rgba(0,0,0,.08);border-radius:2px;margin-top:4px;overflow:hidden}
 .achievement-progress-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047);border-radius:2px;transition:width .5s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 3px rgba(76,175,80,.3)}
 .achievement-gem-reward{font-size:10px;color:var(--gem);font-weight:800;display:flex;align-items:center;gap:2px}
@@ -943,6 +943,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .recipe-ingredient.has{background:rgba(76,175,80,.12);color:#2e7d32;border-color:rgba(76,175,80,.15)}
 .recipe-ingredient.need{background:rgba(244,67,54,.08);color:#c62828;border-color:rgba(244,67,54,.12)}
 .recipe-ingredient b{font-weight:800}
+.ing-hint{font-size:7px;font-weight:800;color:#ff9800;background:rgba(255,152,0,.1);padding:1px 4px;border-radius:4px;margin-left:2px;letter-spacing:.2px;white-space:nowrap}
 .recipe-sell-price{font-size:9px;font-weight:800;color:var(--gold-d);background:rgba(255,215,0,.12);padding:1px 5px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;margin-left:4px}
 .recipe-sell-price img{vertical-align:middle}
 .recipe-reason{font-size:9px;color:#c62828;font-weight:600;padding:2px 6px;background:rgba(198,40,40,.06);border-radius:6px}
@@ -1131,6 +1132,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .crop-cost-badge img{vertical-align:middle}
 .crop-cost-badge.free{background:linear-gradient(135deg,rgba(106,191,71,.2),rgba(76,175,80,.1));color:#2e7d32;border-color:rgba(76,175,80,.25)}
 .crop-profit{color:#2e7d32;font-weight:900}
+.crop-usage-line{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:2px}
+.crop-usage-tag{font-size:8px;font-weight:800;color:#6b4520;background:linear-gradient(135deg,rgba(212,160,86,.15),rgba(139,94,60,.08));padding:2px 6px;border-radius:6px;border:1px solid rgba(212,160,86,.2);letter-spacing:.2px;white-space:nowrap}
+.crop-usage-sell{color:#999;background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
 .crop-choice-locked{opacity:.4;cursor:not-allowed !important;filter:grayscale(.3)}
 .crop-choice-locked:hover{transform:none !important;border-color:rgba(0,0,0,.08) !important;box-shadow:0 2px 8px rgba(0,0,0,.06) !important}
 .crop-choice-locked .crop-choice-icon{filter:grayscale(.5) drop-shadow(1px 2px 3px rgba(0,0,0,.15))}
@@ -1143,7 +1147,8 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* (removed — ready plots show crop via sprite + "Récolter !" badge only) */
 
 /* ===== ACTION HIGHLIGHT — subtle glow on actionable buttons ===== */
-.action-pulse{box-shadow:0 0 8px rgba(255,215,0,.3) !important;border-color:rgba(255,215,0,.35) !important}
+.action-pulse{animation:actionPulseBtn 1.5s ease-in-out infinite !important;border-color:rgba(255,215,0,.5) !important}
+@keyframes actionPulseBtn{0%,100%{box-shadow:0 0 6px rgba(255,215,0,.2);transform:scale(1)}50%{box-shadow:0 0 14px rgba(255,215,0,.5),0 0 24px rgba(255,215,0,.15);transform:scale(1.04)}}
 
 /* ===== REVIEW MICRO-FEEDBACK — subtle +coins near HUD ===== */
 .review-sparkle{position:absolute;font-size:12px;font-weight:900;color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,.7),0 1px 3px rgba(0,0,0,.6);animation:reviewSparkle 1s ease-out forwards;pointer-events:none;z-index:160;letter-spacing:.3px;display:flex;align-items:center;gap:1px}
@@ -1314,19 +1319,25 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== NEXT ACTION GUIDANCE — What to do next (key for engagement) ===== */
 .next-action-bar{
-  display:flex;align-items:center;gap:6px;
-  padding:6px 12px;
-  background:linear-gradient(90deg,rgba(106,191,71,.12),rgba(106,191,71,.06));
-  border-top:1px solid rgba(106,191,71,.15);
-  font-size:11px;font-weight:700;color:rgba(255,255,255,.85);
-  text-shadow:0 1px 2px rgba(0,0,0,.4);
-  cursor:pointer;transition:background .2s;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;margin:6px 10px;
+  background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(244,146,42,.18),rgba(255,215,0,.08));
+  border:1.5px solid rgba(255,215,0,.25);border-radius:14px;
+  font-size:11px;font-weight:800;color:rgba(255,255,255,.95);
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+  cursor:pointer;transition:all .2s;
   position:relative;z-index:1;
+  box-shadow:0 2px 10px rgba(255,215,0,.12),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:nextActionPulse 3s ease-in-out infinite;
 }
-.next-action-bar:hover{background:linear-gradient(90deg,rgba(106,191,71,.2),rgba(106,191,71,.12))}
-.next-action-icon{flex-shrink:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center}
-.next-action-text{flex:1;line-height:1.3}
-.next-action-arrow{color:rgba(255,255,255,.4);font-size:14px;font-weight:900}
+.next-action-bar:hover{background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(244,146,42,.28),rgba(255,215,0,.15));border-color:rgba(255,215,0,.45);transform:scale(1.02);box-shadow:0 4px 16px rgba(255,215,0,.2)}
+.next-action-bar:active{transform:scale(.97)}
+@keyframes nextActionPulse{0%,100%{box-shadow:0 2px 10px rgba(255,215,0,.1)}50%{box-shadow:0 2px 16px rgba(255,215,0,.25)}}
+.next-action-icon{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.next-action-icon img{width:20px;height:20px}
+.next-action-text{flex:1;line-height:1.3;letter-spacing:.2px}
+.next-action-arrow{color:rgba(255,215,0,.7);font-size:16px;font-weight:900;transition:transform .2s}
+.next-action-bar:hover .next-action-arrow{transform:translateX(2px)}
 
 /* ===== SMOOTHER OVERLAY TRANSITIONS ===== */
 .overlay-card{max-height:85vh;overflow-y:auto}

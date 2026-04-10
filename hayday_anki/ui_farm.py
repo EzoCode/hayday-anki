@@ -373,17 +373,6 @@ class FarmWebView:
                 self._send_state()
                 self.manager.save()
 
-            elif action == "open_box":
-                box_index = int(parts[2])
-                result = self.manager.open_mystery_box(box_index)
-                if result:
-                    self._js(f"showBoxResult({json.dumps(result)})")
-                else:
-                    msg = "Impossible d'ouvrir !"
-                    self._js(f"showNotification({json.dumps(msg)})")
-                self._send_state()
-                self.manager.save()
-
             elif action == "fulfill_order":
                 order_index = int(parts[2])
                 result = self.manager.fulfill_order(order_index)

@@ -113,46 +113,6 @@ MATERIAL_DROP_TABLE = [
     ("expansion_permit", 0.02),
 ]
 
-MYSTERY_BOX_REWARDS = {
-    "small": {
-        "cost_gems": 0,
-        "rewards": [
-            ({"coins": 10}, 0.30),
-            ({"coins": 25}, 0.20),
-            ({"item": "bolt", "qty": 2}, 0.15),
-            ({"item": "plank", "qty": 2}, 0.15),
-            ({"gems": 1}, 0.10),
-            ({"item": "nail", "qty": 3}, 0.10),
-        ],
-    },
-    "medium": {
-        "cost_gems": 3,
-        "rewards": [
-            ({"coins": 50}, 0.25),
-            ({"coins": 100}, 0.15),
-            ({"item": "duct_tape", "qty": 3}, 0.15),
-            ({"gems": 3}, 0.15),
-            ({"item": "expansion_permit", "qty": 1}, 0.10),
-            ({"coins": 200}, 0.10),
-            ({"gems": 5}, 0.10),
-        ],
-    },
-    "large": {
-        "cost_gems": 10,
-        "rewards": [
-            ({"coins": 200}, 0.20),
-            ({"coins": 500}, 0.15),
-            ({"gems": 5}, 0.15),
-            ({"gems": 10}, 0.10),
-            ({"item": "land_deed", "qty": 2}, 0.15),
-            ({"item": "expansion_permit", "qty": 2}, 0.10),
-            ({"coins": 1000}, 0.05),
-            ({"gems": 25}, 0.10),
-        ],
-    },
-}
-
-
 class FarmState:
     """Complete farm state that can be serialized/deserialized."""
 
@@ -651,7 +611,6 @@ class FarmManager:
             "coins": 0,
             "xp": 0,
             "items": {},
-            "mystery_box": None,
             "notifications": [],
         }
 
@@ -726,26 +685,6 @@ class FarmManager:
                         "type": "storage_full",
                         "message": f"Grange pleine ! {mat_name} perdu. Vendez ou améliorez la grange.",
                     })
-
-        # Mystery box chance (~1 in 20 reviews)
-        if random.random() < 0.05:
-            box_size = random.choices(
-                ["small", "medium", "large"],
-                weights=[0.6, 0.3, 0.1]
-            )[0]
-            box = {
-                "size": box_size,
-                "x": random.randint(1, 8),
-                "y": random.randint(1, 6),
-                "created_at": datetime.now().isoformat(),
-            }
-            self.state.mystery_boxes.append(box)
-            rewards["mystery_box"] = box
-            box_size_fr = {"small": "petite", "medium": "moyenne", "large": "grande"}.get(box_size, box_size)
-            rewards["notifications"].append({
-                "type": "mystery_box",
-                "message": f"Une {box_size_fr} boîte mystère est apparue !",
-            })
 
         # Advance daily quest progress
         self.advance_quest("reviews", 1)
@@ -1296,59 +1235,6 @@ class FarmManager:
         self.state.silo_level += 1
         self.state.silo_capacity += 25
         return {"new_level": self.state.silo_level, "new_capacity": self.state.silo_capacity}
-
-    # --- Mystery Boxes ---
-
-    def open_mystery_box(self, box_index: int) -> Optional[Dict]:
-        """Open a mystery box. Returns rewards."""
-        if box_index >= len(self.state.mystery_boxes):
-            return None
-
-        box = self.state.mystery_boxes[box_index]
-        box_def = MYSTERY_BOX_REWARDS.get(box["size"], MYSTERY_BOX_REWARDS["small"])
-
-        # Check gem cost — only small boxes (cost_gems=0) are free
-        gem_cost = box_def["cost_gems"]
-        if gem_cost > 0:
-            # Premium box — requires gems, no free bypass
-            if self.state.gems < gem_cost:
-                return None
-            self.state.gems -= gem_cost
-        else:
-            # Free box (small) — limited to 3 per day
-            today = date.today().isoformat()
-            if self.state.last_mystery_box_date != today:
-                self.state.daily_mystery_boxes_opened = 0
-                self.state.last_mystery_box_date = today
-            if self.state.daily_mystery_boxes_opened >= 3:
-                return None
-            self.state.daily_mystery_boxes_opened += 1
-
-        # Roll reward
-        rewards_table = box_def["rewards"]
-        roll = random.random()
-        cumulative = 0
-        reward = rewards_table[0][0]  # fallback
-        for rwd, weight in rewards_table:
-            cumulative += weight
-            if roll < cumulative:
-                reward = rwd
-                break
-
-        # Apply reward
-        result = {"reward": reward, "box_size": box["size"]}
-        if "coins" in reward:
-            self.state.coins += reward["coins"]
-            self.state.total_coins_earned += reward["coins"]
-        if "gems" in reward:
-            self.state.gems += reward["gems"]
-        if "item" in reward:
-            self.state.add_item(reward["item"], reward.get("qty", 1))
-
-        # Remove box
-        self.state.mystery_boxes.pop(box_index)
-        self.state.mystery_boxes_opened += 1
-        return result
 
     # --- Gem Speed-Up Actions ---
 
@@ -1989,12 +1875,26 @@ class FarmManager:
             for did, ddef in progression.DECORATION_CATALOG.items()
         }
 
+        # Build crop→recipe usage map (which recipes use each crop)
+        from . import production as prod_mod
+        crop_usage = {}  # crop_id → [{"recipe": name, "qty": needed}]
+        for bid, recipes in prod_mod.RECIPES.items():
+            for recipe in recipes:
+                for ingredient_id, qty in recipe["ingredients"].items():
+                    if ingredient_id not in crop_usage:
+                        crop_usage[ingredient_id] = []
+                    crop_usage[ingredient_id].append({
+                        "recipe": recipe["name"],
+                        "qty": qty,
+                    })
+
         FarmManager._static_defs_cache = {
             "item_catalog": {k: v for k, v in ITEM_CATALOG.items()},
             "building_defs": building_defs,
             "animal_defs": animal_defs,
             "crop_defs": crop_defs,
             "deco_defs": deco_defs,
+            "crop_usage": crop_usage,
         }
         return FarmManager._static_defs_cache
 
@@ -2038,7 +1938,6 @@ class FarmManager:
             "unlocked_crops": self.state.unlocked_crops,
             "unlocked_buildings": self.state.unlocked_buildings,
             "unlocked_animals": self.state.unlocked_animals,
-            "mystery_boxes": self.state.mystery_boxes,
             "active_orders": self.state.active_orders,
             "orders_completed": self.state.orders_completed,
             "production_queues": self.state.production_queues,
