@@ -134,15 +134,14 @@ function applyHayDayAssets() {
   if (wheelPanelIcon && wheelSrc) {
     wheelPanelIcon.innerHTML = `<img src="${wheelSrc}" width="22" height="22" style="object-fit:contain">`;
   }
-  // Use Hay Day green gradient for overlay cards
+  // Use Hay Day green gradient for production/upgrade overlay cards only
+  // (details-bg.png has tool icons — only appropriate for building/upgrade dialogs)
   const detailsBg = S('hayday_details-bg');
   if (detailsBg) {
-    document.querySelectorAll('.overlay-card').forEach(card => {
-      if (!card.classList.contains('levelup-card') && !card.classList.contains('login-bonus-card')) {
-        card.style.backgroundImage = `url(${detailsBg})`;
-        card.style.backgroundSize = 'cover';
-        card.style.backgroundPosition = 'center bottom';
-      }
+    document.querySelectorAll('.production-card, .info-card').forEach(card => {
+      card.style.backgroundImage = `url(${detailsBg})`;
+      card.style.backgroundSize = 'cover';
+      card.style.backgroundPosition = 'center bottom';
     });
   }
 }
@@ -480,10 +479,9 @@ function animalLbl(id, w) {
 }
 
 function fieldBg(state) {
-  if (state === 'ready') return S('hayday_wheat-field') || S('tiles_grass') || S('hayday_field');
-  if (state === 'growing' || state === 'planted') return S('hayday_alfalfa-field') || S('tiles_dirt_planted') || S('hayday_field');
-  if (state === 'empty') return S('tiles_dirt') || S('hayday_field');
-  return S('hayday_field') || S('tiles_grass');
+  // Don't use isometric diamond sprites as square tile backgrounds — they look wrong.
+  // CSS handles soil textures per state (plot-empty, plot-growing, plot-ready).
+  return null;
 }
 function lockImg(w) { return img('hayday_lock', w||24, w||24, 'lock-icon'); }
 
@@ -893,6 +891,10 @@ function renderFields() {
   fields.forEach(field => {
     const el = document.createElement('div');
     el.className = `plot plot-${field.state}`;
+    // Set growth stage for CSS progressive styling (soil → green transition)
+    if (field.state === 'growing' || field.state === 'planted') {
+      el.setAttribute('data-stage', field.growth_stage || 0);
+    }
 
     const bg = fieldBg(field.state);
     if (bg) el.innerHTML = `<img src="${bg}" class="field-img">`;
@@ -917,15 +919,19 @@ function renderFields() {
       const readyCropName = cropName(field.crop);
       const wiltWarning = field._wilt_warning;
       const wiltLeft = field._wilt_remaining || 0;
+      const cropDef = (farmData.crop_defs||{})[field.crop]||{};
+      const harvestMin = cropDef.harvest_min || 2;
+      const harvestMax = cropDef.harvest_max || 4;
       if (wiltWarning) {
         el.classList.add('plot-wilt-warning');
         el.title = `${readyCropName} — Récolte vite ! Fane dans ${wiltLeft} révisions`;
       } else {
-        el.title = `${readyCropName} — Prêt à récolter !`;
+        el.title = `${readyCropName} — Prêt à récolter ! (${harvestMin}-${harvestMax}x)`;
       }
-      // Hay Day style: big bouncing crop with golden sparkle, no text clutter
+      // Hay Day style: big bouncing crop with golden sparkle + harvest yield badge
       const wiltBadge = wiltWarning ? `<span class="wilt-warning-badge">${wiltLeft}</span>` : '';
-      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}`;
+      const yieldBadge = `<span class="plot-yield-badge">${harvestMin}-${harvestMax}</span>`;
+      el.innerHTML += `<div class="plot-crop plot-crop-bounce">${cropImg(field.crop, 4, 72)}</div>${wiltBadge}${yieldBadge}`;
       el.onclick = () => harvestPlot(field.id);
     } else if (field.state === 'wilted') {
       el.title = `${cropName(field.crop)} — Fané (cliquer pour nettoyer)`;

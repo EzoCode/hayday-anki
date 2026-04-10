@@ -536,15 +536,60 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot:hover{transform:translateY(-3px) scale(1.04);box-shadow:inset 1px 1px 0 rgba(255,255,255,.25),inset -2px -2px 6px rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35);z-index:2}
 .plot:active{transform:scale(.92);box-shadow:inset 2px 2px 4px rgba(0,0,0,.3),0 1px 3px rgba(0,0,0,.2);transition:transform .08s}
 
-.plot-empty{background:linear-gradient(160deg,#a08552 0%,#8b7040 40%,#7a6235 100%);border:2px dashed rgba(255,255,255,.25);transition:border-color .2s,background .2s}
-.plot-empty:hover{border-color:rgba(106,191,71,.7);background:linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 16px rgba(106,191,71,.25),0 4px 12px rgba(0,0,0,.3)}
-.plot-empty .field-img{filter:brightness(.85) saturate(.8)}
-.plot-planted,.plot-growing{background:linear-gradient(160deg,#6b8a4e,#4a6b30);box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
-.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%),repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(0,0,0,.06) 6px,rgba(0,0,0,.06) 7px);pointer-events:none;z-index:0;border-radius:16px}
+.plot-empty{
+  background:
+    /* Soil furrow lines */
+    repeating-linear-gradient(155deg,transparent,transparent 7px,rgba(0,0,0,.08) 7px,rgba(0,0,0,.08) 8px),
+    repeating-linear-gradient(155deg,transparent,transparent 14px,rgba(255,255,255,.04) 14px,rgba(255,255,255,.04) 15px),
+    /* Rich brown soil gradient */
+    linear-gradient(160deg,#b89868 0%,#9a7a4a 30%,#8b6914 60%,#7a5c28 100%);
+  border:2px dashed rgba(255,255,255,.2);transition:border-color .2s,background .2s}
+.plot-empty:hover{border-color:rgba(106,191,71,.7);background:
+    repeating-linear-gradient(155deg,transparent,transparent 7px,rgba(0,0,0,.06) 7px,rgba(0,0,0,.06) 8px),
+    linear-gradient(160deg,#6b8a4e 0%,#5a7d3a 40%,#4a6b30 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 0 16px rgba(106,191,71,.25),0 4px 12px rgba(0,0,0,.3)}
+.plot-planted,.plot-growing{
+  background:
+    /* Subtle soil rows under the crop */
+    repeating-linear-gradient(155deg,transparent,transparent 8px,rgba(90,60,20,.1) 8px,rgba(90,60,20,.1) 9px),
+    /* Green-brown gradient for cultivated soil */
+    radial-gradient(ellipse at 50% 80%,rgba(90,60,20,.2),transparent 70%),
+    linear-gradient(160deg,#5a9d3a 0%,#4a8c32 40%,#3d7828 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25);border:1.5px solid rgba(106,191,71,.2);overflow:hidden}
+.plot-planted::before,.plot-growing::before{content:'';position:absolute;inset:0;background:
+    linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 40%),
+    radial-gradient(ellipse at 50% 90%,rgba(60,40,15,.15),transparent 60%);
+  pointer-events:none;z-index:0;border-radius:16px}
+/* Growth stage progression: soil gets greener as crop matures (Hay Day style) */
+.plot-planted[data-stage="0"],.plot-growing[data-stage="0"]{
+  background:
+    repeating-linear-gradient(155deg,transparent,transparent 8px,rgba(90,60,20,.12) 8px,rgba(90,60,20,.12) 9px),
+    radial-gradient(ellipse at 50% 80%,rgba(110,75,30,.2),transparent 60%),
+    linear-gradient(160deg,#7a8c4a 0%,#6a7d3a 40%,#5a6d2e 100%)}
+.plot-planted[data-stage="1"],.plot-growing[data-stage="1"]{
+  background:
+    repeating-linear-gradient(155deg,transparent,transparent 9px,rgba(60,100,30,.06) 9px,rgba(60,100,30,.06) 10px),
+    radial-gradient(ellipse at 50% 75%,rgba(80,60,20,.12),transparent 55%),
+    linear-gradient(160deg,#5a9d3a 0%,#4a8c32 40%,#3d7828 100%)}
+.plot-planted[data-stage="2"],.plot-growing[data-stage="2"]{
+  background:
+    repeating-linear-gradient(155deg,transparent,transparent 10px,rgba(100,180,60,.05) 10px,rgba(100,180,60,.05) 11px),
+    radial-gradient(ellipse at 50% 70%,rgba(60,140,30,.1),transparent 50%),
+    linear-gradient(160deg,#5da33a 0%,#4c9430 40%,#408228 100%)}
+.plot-planted[data-stage="3"],.plot-growing[data-stage="3"]{
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(120,200,60,.08),transparent 50%),
+    radial-gradient(ellipse at 50% 75%,rgba(40,100,20,.08),transparent 50%),
+    linear-gradient(160deg,#6db844 0%,#5aa83a 40%,#4a9830 100%)}
 /* Almost ready — subtle golden hint like Hay Day pre-harvest glow */
 .plot-almost-ready{border-color:rgba(255,215,0,.25) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.12),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25),0 0 12px rgba(255,215,0,.15) !important}
 .plot-almost-ready .plot-progress-fill{background:linear-gradient(90deg,#4caf50,#8bc34a,#ffd700) !important}
-.plot-ready{background:linear-gradient(160deg,#7daa56,#5a8c3a);box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
+.plot-ready{
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(255,255,200,.12),transparent 60%),
+    radial-gradient(ellipse at 50% 80%,rgba(90,60,20,.15),transparent 60%),
+    linear-gradient(160deg,#7daa56 0%,#5a9d3a 30%,#4a8c32 60%,#5a8c3a 100%);
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.25),0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.15);border:2.5px solid var(--gold);animation:readyGlow 2s ease-in-out infinite;cursor:pointer;overflow:hidden}
 .plot-ready:hover{transform:translateY(-5px) scale(1.1) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.2),0 8px 20px rgba(0,0,0,.3),0 0 30px rgba(255,215,0,.7),0 0 50px rgba(255,215,0,.25) !important;border-color:#fff;z-index:5 !important}
 .plot-ready::after{content:'';position:absolute;top:4px;right:6px;width:12px;height:12px;background:radial-gradient(circle,#fff 0%,#ffd700 30%,rgba(255,215,0,.4) 55%,transparent 70%);border-radius:50%;box-shadow:0 0 10px 4px rgba(255,215,0,.8),0 0 20px 6px rgba(255,215,0,.3);animation:sparkle 1.2s ease-in-out infinite;z-index:3}
 .plot-ready::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(45deg,transparent 40%,rgba(255,215,0,.15) 50%,transparent 60%);animation:readyShine 3s linear infinite;z-index:0}
@@ -573,6 +618,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
 .plot-empty-label{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:.3px}
+/* Harvest yield badge on ready plots — shows expected quantity */
+.plot-yield-badge{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:900;color:#fff;background:linear-gradient(135deg,rgba(106,191,71,.85),rgba(74,158,47,.9));padding:2px 8px;border-radius:8px;z-index:6;border:1px solid rgba(255,255,255,.3);box-shadow:0 2px 6px rgba(74,158,47,.4);text-shadow:0 1px 2px rgba(0,0,0,.3);letter-spacing:.3px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.plot-ready:hover .plot-yield-badge{background:linear-gradient(135deg,rgba(255,215,0,.9),rgba(244,164,42,.9));box-shadow:0 2px 8px rgba(255,215,0,.5);border-color:rgba(255,255,255,.5)}
+
 .plot-replant{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;z-index:1;opacity:.55;transition:all .25s}
 .plot-replant img{transition:transform .25s}
 .plot-replant-label{font-size:8px;color:rgba(255,255,255,.85);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.7);letter-spacing:.2px}
@@ -678,9 +727,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
 .tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border-radius:12px;transition:all .2s;min-width:52px;position:relative}
 .tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
-.tool-btn.active{color:#f4a42a;transform:translateY(-1px);background:rgba(244,164,42,.08)}
-.tool-btn.active::after{content:'';position:absolute;bottom:0px;left:50%;transform:translateX(-50%);width:24px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
-.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.tool-btn.active{color:#f4a42a;transform:translateY(-2px);background:rgba(244,164,42,.1);border-radius:14px}
+.tool-btn.active::after{content:'';position:absolute;bottom:0px;left:50%;transform:translateX(-50%);width:28px;height:3.5px;background:linear-gradient(90deg,transparent,#f4a42a,#ffd54f,#f4a42a,transparent);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 5px rgba(244,164,42,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.3));transform:scale(1.1)}
+.tool-btn.active .tool-label{color:#ffd54f;text-shadow:0 0 8px rgba(244,164,42,.3)}
 .tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:26px}
 .tool-icon img{max-width:26px;max-height:26px;object-fit:contain}
 .tool-label{font-size:9px;font-weight:700;letter-spacing:.3px}
