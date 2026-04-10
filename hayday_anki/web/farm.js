@@ -942,17 +942,20 @@ function renderFields() {
       const pctRound = Math.round(pct);
       const reviewsLeft = totalNeeded - totalDone;
       // Hay Day style: crop grows visually bigger through stages
-      const cropSize = 30 + stage * 12; // 30px at seed → 66px at stage 3
+      const cropSize = 26 + stage * 14; // 26px at seed → 68px at stage 3
       const cName = cropName(field.crop);
       const stageLabel = GROWTH_LABEL[Math.min(stage,4)];
       el.title = `${cName} — ${stageLabel}\n${pctRound}% · ${reviewsLeft} révisions restantes`;
+      // Add stage class for CSS differentiation
+      el.classList.add(`plot-stage-${stage}`);
       // Almost-ready visual hint (like Hay Day subtle glow when crop is close)
       if (pct >= 75) el.classList.add('plot-almost-ready');
-      // Crop sprite + name label + reviews-left pill + progress bar
-      const revsPill = reviewsLeft <= 3
-        ? `<span class="plot-revs-pill plot-revs-soon">${reviewsLeft}</span>`
-        : `<span class="plot-revs-pill">${reviewsLeft}</span>`;
-      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsPill}<div class="plot-crop-name"><span>${cName}</span></div><div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
+      // Clean Hay Day style: just crop sprite growing + thin progress bar
+      // Reviews-left only shown as small badge when close (≤5)
+      const revsBadge = reviewsLeft <= 5
+        ? `<span class="plot-revs-pill${reviewsLeft <= 2 ? ' plot-revs-soon' : ''}">${reviewsLeft}</span>`
+        : '';
+      el.innerHTML += `<div class="plot-crop">${cropImg(field.crop, stage, cropSize)}</div>${revsBadge}<div class="plot-progress"><div class="plot-progress-fill" style="width:${pct}%"></div></div>`;
       el.onclick = () => showCropDetail(field);
     }
     grid.appendChild(el);

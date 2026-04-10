@@ -19,7 +19,11 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== HUD ===== */
 #hud{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;height:54px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.05) 20%,transparent 40%,rgba(0,0,0,.12) 100%),linear-gradient(180deg,#ddb06a,#b87d3e 40%,#8b5e3c 75%,#6b3a1a);
+  background:
+    /* Wood grain */
+    repeating-linear-gradient(90deg,transparent 0px,transparent 12px,rgba(255,255,255,.02) 12px,rgba(255,255,255,.02) 13px),
+    linear-gradient(180deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.06) 15%,transparent 35%,rgba(0,0,0,.15) 100%),
+    linear-gradient(180deg,#ddb06a,#b87d3e 35%,#8b5e3c 70%,#6b3a1a);
   border-bottom:3px solid #4a2810;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 14px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.12) inset}
 .hud-left,.hud-right{display:flex;align-items:center;gap:6px}
 .hud-level{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
@@ -83,15 +87,15 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 #quest-items{display:flex;flex-direction:column;gap:4px}
 .quest-item{
   display:flex;align-items:center;gap:6px;
-  padding:4px 8px;
-  background:rgba(255,255,255,.06);
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,.06);
+  padding:5px 10px;
+  background:rgba(255,255,255,.07);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.07);
   transition:all .3s;
 }
 .quest-item.quest-done{
-  background:rgba(76,175,80,.12);
-  border-color:rgba(76,175,80,.2);
+  background:rgba(76,175,80,.15);
+  border-color:rgba(76,175,80,.25);
 }
 .quest-icon{flex-shrink:0;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .quest-info{flex:1;min-width:0}
@@ -212,23 +216,41 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 .zone-fields {
   background:
-    linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
-    linear-gradient(180deg, #4a8c32 0%, #3d7828 50%, #357020 100%);
+    /* Subtle dirt texture for farm field */
+    repeating-linear-gradient(0deg,transparent,transparent 22px,rgba(0,0,0,.04) 22px,rgba(0,0,0,.04) 23px),
+    repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(255,255,255,.02) 18px,rgba(255,255,255,.02) 19px),
+    linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 30%),
+    linear-gradient(180deg, #508a32 0%, #408028 40%, #387220 70%, #357020 100%);
   border: 1.5px solid rgba(255,255,255,0.12);
   border-bottom: 3px solid rgba(30,60,15,0.5);
 }
 .zone-workshop {
-  background: linear-gradient(180deg, #7d5535 0%, #6b4520 50%, #5a3818 100%);
+  background:
+    /* Wood grain for workshop */
+    repeating-linear-gradient(88deg,transparent 0px,transparent 14px,rgba(255,255,255,.02) 14px,rgba(255,255,255,.02) 15px),
+    linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
+    linear-gradient(180deg, #7d5535 0%, #6b4520 40%, #5a3818 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(70,40,15,0.5);
 }
 .zone-pasture {
-  background: linear-gradient(180deg, #5a9d3a 0%, #4c8c32 50%, #408228 100%);
+  background:
+    /* Grass texture for pasture */
+    repeating-linear-gradient(35deg,transparent 0px,transparent 20px,rgba(100,190,60,.03) 20px,rgba(100,190,60,.03) 21px),
+    repeating-linear-gradient(145deg,transparent 0px,transparent 15px,rgba(50,120,30,.03) 15px,rgba(50,120,30,.03) 16px),
+    linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
+    linear-gradient(180deg, #5a9d3a 0%, #4c8c32 40%, #408228 100%);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(35,70,18,0.45);
 }
 .zone-village {
-  background: linear-gradient(180deg, #a08552 0%, #8a7040 50%, #7a6335 100%);
+  background:
+    /* Cobblestone hint for village */
+    radial-gradient(circle at 10px 10px, rgba(255,255,255,.03) 2px, transparent 3px),
+    radial-gradient(circle at 25px 22px, rgba(255,255,255,.02) 2px, transparent 3px),
+    linear-gradient(180deg, rgba(255,255,255,.06) 0%, transparent 30%),
+    linear-gradient(180deg, #a08552 0%, #8a7040 40%, #7a6335 100%);
+  background-size: 35px 35px, 35px 35px, auto, auto;
   border: 1.5px solid rgba(255,255,255,0.1);
   border-bottom: 3px solid rgba(80,55,25,0.45);
 }
@@ -237,17 +259,19 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   background:
-    /* Wood grain texture */
-    repeating-linear-gradient(95deg, transparent 0px, transparent 8px, rgba(255,255,255,.03) 8px, rgba(255,255,255,.03) 9px),
-    repeating-linear-gradient(85deg, transparent 0px, transparent 12px, rgba(0,0,0,.02) 12px, rgba(0,0,0,.02) 13px),
-    /* Base wood */
-    linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 30%, transparent 50%, rgba(0,0,0,.15) 100%),
-    linear-gradient(180deg, #a0724a, #8b5e3c 50%, #6b4520);
+    /* Wood grain texture — more realistic */
+    repeating-linear-gradient(93deg, transparent 0px, transparent 6px, rgba(255,255,255,.03) 6px, rgba(255,255,255,.03) 7px),
+    repeating-linear-gradient(87deg, transparent 0px, transparent 10px, rgba(0,0,0,.02) 10px, rgba(0,0,0,.02) 11px),
+    /* Wood knot hint */
+    radial-gradient(ellipse at 80% 50%, rgba(0,0,0,.06) 0%, transparent 25%),
+    /* Base wood gradient — warm Hay Day brown */
+    linear-gradient(180deg, rgba(255,220,160,.15) 0%, rgba(255,255,255,.06) 20%, transparent 50%, rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg, #a87a50, #8b5e3c 40%, #6b4520);
   border-bottom: 2px solid rgba(90,53,32,.6);
-  border-top: 1px solid rgba(255,220,160,.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
+  border-top: 1px solid rgba(255,220,160,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.15);
 }
 
 .zone-title {
@@ -566,9 +590,17 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-crop{position:relative;z-index:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.45));transition:filter .3s;display:flex;align-items:center;justify-content:center}
 .plot-crop img{max-width:72px;max-height:72px;width:auto;height:auto;transition:transform .3s ease}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
-.plot-progress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(0,0,0,.4);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
-.plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 8px rgba(76,175,80,.6);position:relative}
+.plot-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,.3);z-index:4;border-radius:0 0 14px 14px;overflow:hidden}
+.plot-progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#66bb6a,#81c784);transition:width .6s cubic-bezier(.25,.46,.45,.94);border-radius:0 0 14px 14px;box-shadow:0 0 6px rgba(76,175,80,.5);position:relative}
 .plot-progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.3),transparent);border-radius:14px}
+/* Stage-based plot enhancements — soil at seed, greener as crop matures */
+.plot-stage-0{background:linear-gradient(160deg,#7a6a4a,#5a4a2a) !important;border-color:rgba(120,90,50,.3) !important}
+.plot-stage-0.plot-planted::before,.plot-stage-0.plot-growing::before{background:
+  repeating-linear-gradient(0deg,transparent,transparent 8px,rgba(0,0,0,.1) 8px,rgba(0,0,0,.1) 9px),
+  linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 50%)}
+.plot-stage-1{background:linear-gradient(160deg,#6b7a4a,#4a5a2a) !important}
+.plot-stage-2{background:linear-gradient(160deg,#5a7a3e,#3a5a22) !important}
+.plot-stage-3{background:linear-gradient(160deg,#508a3a,#386a20) !important;box-shadow:inset 1px 1px 0 rgba(255,255,255,.15),inset -2px -2px 6px rgba(0,0,0,.25),0 4px 10px rgba(0,0,0,.25),0 0 8px rgba(100,180,60,.15) !important}
 .plot-plus{font-size:24px;color:rgba(255,255,255,.3);font-weight:200;position:relative;z-index:1}
 .plot-empty-prompt{display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.65;transition:opacity .2s}
 .plot-empty:hover .plot-empty-prompt{opacity:1}
@@ -672,24 +704,40 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .confetti-piece{position:absolute;bottom:50%;width:8px;height:8px;border-radius:2px;animation:confettiBurst 1.8s ease-out forwards}
 @keyframes confettiBurst{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}40%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.3)}}
 
-/* ===== TOOLBAR — Mobile Tab Bar ===== */
-#toolbar{display:flex;justify-content:space-around;align-items:center;padding:4px 8px 6px;height:58px;flex-shrink:0;z-index:100;
-  background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(90,53,20,.08) 30%,transparent 50%),linear-gradient(180deg,#4a3018,#3a2210 50%,#2a1608);
-  border-top:2px solid rgba(255,255,255,.06);box-shadow:0 -4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
-.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:4px 10px;border-radius:12px;transition:all .2s;min-width:52px;position:relative}
-.tool-btn:hover{color:rgba(255,255,255,.75);transform:translateY(-2px)}
-.tool-btn.active{color:#f4a42a;transform:translateY(-1px);background:rgba(244,164,42,.08)}
-.tool-btn.active::after{content:'';position:absolute;bottom:0px;left:50%;transform:translateX(-50%);width:24px;height:3px;background:linear-gradient(90deg,#f4a42a,#ffd54f,#f4a42a);border-radius:2px;box-shadow:0 0 10px rgba(244,164,42,.7),0 0 20px rgba(244,164,42,.3)}
-.tool-btn.active .tool-icon{filter:drop-shadow(0 0 4px rgba(244,164,42,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
-.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));display:flex;align-items:center;justify-content:center;height:26px}
+/* ===== TOOLBAR — Hay Day Wooden Tab Bar ===== */
+#toolbar{display:flex;justify-content:space-around;align-items:flex-end;padding:6px 6px 4px;height:62px;flex-shrink:0;z-index:100;
+  background:
+    /* Wood grain */
+    repeating-linear-gradient(92deg,transparent 0px,transparent 10px,rgba(255,255,255,.02) 10px,rgba(255,255,255,.02) 11px),
+    linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 20%,rgba(0,0,0,.15) 100%),
+    linear-gradient(180deg,#5a3818,#4a2c12 40%,#3a2010 70%,#2a1608);
+  border-top:2.5px solid rgba(255,200,120,.12);box-shadow:0 -4px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,200,120,.08)}
+.tool-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.1));
+  border:1.5px solid rgba(255,255,255,.06);color:rgba(255,255,255,.45);cursor:pointer;
+  padding:5px 8px 4px;border-radius:14px;transition:all .2s;min-width:54px;position:relative}
+.tool-btn:hover{color:rgba(255,255,255,.8);transform:translateY(-2px);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}
+.tool-btn.active{color:#ffd54f;transform:translateY(-3px);
+  background:linear-gradient(180deg,rgba(244,164,42,.2),rgba(244,130,20,.12));
+  border-color:rgba(255,215,0,.35);
+  box-shadow:0 0 12px rgba(255,215,0,.2),inset 0 1px 0 rgba(255,255,255,.1)}
+.tool-btn.active::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:linear-gradient(90deg,transparent,#ffd54f,transparent);border-radius:2px;box-shadow:0 0 8px rgba(255,215,0,.6)}
+.tool-btn.active .tool-icon{filter:drop-shadow(0 0 5px rgba(255,215,0,.5)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.tool-icon{font-size:20px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));display:flex;align-items:center;justify-content:center;height:26px}
 .tool-icon img{max-width:26px;max-height:26px;object-fit:contain}
-.tool-label{font-size:9px;font-weight:700;letter-spacing:.3px}
-.tab-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(30,18,8,.93);box-shadow:0 2px 4px rgba(231,76,60,.4);animation:badgePulse 1.5s ease-in-out infinite}
+.tool-label{font-size:8px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.tab-badge{position:absolute;top:-4px;right:-4px;background:linear-gradient(135deg,#ff4444,#cc0000);color:#fff;border-radius:50%;width:18px;height:18px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #3a2010;box-shadow:0 2px 6px rgba(231,76,60,.5);animation:badgePulse 1.5s ease-in-out infinite}
 .tool-btn.tab-pulse{animation:tabPulseGlow 1s ease-in-out 2;color:var(--gold) !important}
 @keyframes tabPulseGlow{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(255,215,0,.6),inset 0 0 8px rgba(255,215,0,.2)}}
 
 /* ===== PANELS — Premium Sliding Sheet ===== */
-.panel{position:fixed;bottom:58px;left:0;right:0;max-height:52vh;background:linear-gradient(180deg,#faf4e8,#f0e8d4,#e8dcc4);border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4);z-index:90;display:flex;flex-direction:column;overflow:hidden;animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);border-top:3px solid rgba(212,160,86,.5)}
+.panel{position:fixed;bottom:62px;left:0;right:0;max-height:52vh;
+  background:linear-gradient(180deg,#faf4e8 0%,#f2ead8 30%,#e8dcc4 100%);
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5);
+  z-index:90;display:flex;flex-direction:column;overflow:hidden;
+  animation:panelIn .4s cubic-bezier(.34,1.56,.64,1);
+  border-top:3px solid rgba(212,160,86,.5)}
 .panel.hidden{display:none}
 @keyframes panelIn{0%{opacity:0;transform:translateY(100%)}55%{transform:translateY(-6px)}75%{transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
 .panel-handle{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:8px auto 0}
@@ -712,19 +760,30 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .settings-info p{font-size:11px;color:#999;text-align:center}
 
 /* ===== ITEM GRID — Polished Cards ===== */
-.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;padding:8px 14px;overflow-y:auto;flex:1}
-.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(250,240,220,.6));border-radius:14px;padding:8px 4px;border:1px solid rgba(212,160,86,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;min-height:76px;box-shadow:0 2px 8px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6)}
-.item-cell:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.15),0 0 0 1px rgba(212,160,86,.2)}
-.item-cell:active{transform:scale(.95);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.item-cell img{image-rendering:auto;max-width:40px;max-height:40px;object-fit:contain}
-.item-name{font-size:9px;font-weight:700;color:#666;margin-top:1px;text-align:center}
-.item-qty{font-size:11px;font-weight:900;color:var(--text-d);background:rgba(0,0,0,.05);padding:0 6px;border-radius:8px}
-.item-price{font-size:9px;color:var(--gold-d);font-weight:700}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:7px;padding:8px 14px;overflow-y:auto;flex:1}
+.item-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,rgba(255,252,240,.85),rgba(245,235,210,.55));
+  border-radius:14px;padding:8px 4px;border:1.5px solid rgba(212,160,86,.15);cursor:pointer;
+  transition:transform .15s,box-shadow .15s;min-height:78px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.6),0 1px 0 rgba(180,140,80,.1);
+  position:relative;overflow:hidden}
+.item-cell::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);pointer-events:none;border-radius:12px 12px 0 0}
+.item-cell:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 6px 14px rgba(0,0,0,.12),0 0 0 1px rgba(212,160,86,.2)}
+.item-cell:active{transform:scale(.94);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.item-cell img{image-rendering:auto;max-width:40px;max-height:40px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+.item-name{font-size:9px;font-weight:700;color:#666;margin-top:2px;text-align:center;line-height:1.2}
+.item-qty{font-size:11px;font-weight:900;color:var(--text-d);background:rgba(0,0,0,.06);padding:1px 7px;border-radius:8px}
+.item-price{font-size:9px;color:var(--gold-d);font-weight:800}
 
 /* ===== BUILDINGS LIST ===== */
 #buildings-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.building-card{display:flex;align-items:center;gap:10px;background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .12s;cursor:pointer}
-.building-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.building-card{display:flex;align-items:center;gap:10px;
+  background:linear-gradient(145deg,rgba(255,252,240,.7),rgba(245,235,210,.35));
+  border-radius:14px;padding:12px;border:1.5px solid rgba(212,160,86,.15);
+  box-shadow:0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.4);
+  transition:transform .15s;cursor:pointer;position:relative;overflow:hidden}
+.building-card::before{content:'';position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);pointer-events:none;border-radius:12px 12px 0 0}
+.building-card:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.12)}
 .building-card-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center}
 .building-card-icon img{max-width:56px;max-height:56px;object-fit:contain}
 .building-card-info{flex:1}
@@ -736,18 +795,19 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== ORDERS ===== */
 #orders-list{padding:8px 14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px}
-.order-card{background:linear-gradient(145deg,rgba(255,255,255,.65),rgba(255,255,255,.25));border-radius:12px;padding:10px;border:1px solid rgba(0,0,0,.05);box-shadow:0 2px 6px rgba(0,0,0,.06);transition:transform .1s}
-.order-card:hover{transform:translateY(-1px)}
-.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.order-type{font-size:12px;font-weight:700;color:var(--text-d);display:flex;align-items:center;gap:4px}
-.order-reward{font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px}
-.order-coin-reward{color:var(--gold-d);display:flex;align-items:center;gap:2px;background:rgba(255,215,0,.1);padding:2px 6px;border-radius:6px}
-.order-xp-reward{color:#2e7d32;background:rgba(76,175,80,.1);padding:2px 6px;border-radius:6px}
-.order-gem-reward{color:#0288d1;background:rgba(79,195,247,.12);padding:2px 6px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;font-weight:800}
-.order-items{display:flex;flex-wrap:wrap;gap:4px}
-.order-item{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.03);padding:3px 6px;border-radius:6px;font-size:11px}
-.order-item img{max-width:18px;max-height:18px}
-.order-item.fulfilled{opacity:.65;background:rgba(76,175,80,.08)}
+.order-card{background:linear-gradient(145deg,rgba(255,252,240,.7),rgba(245,235,210,.35));border-radius:14px;padding:12px;border:1.5px solid rgba(212,160,86,.15);box-shadow:0 3px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .15s;position:relative;overflow:hidden}
+.order-card::before{content:'';position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);pointer-events:none;border-radius:12px 12px 0 0}
+.order-card:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.12)}
+.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.order-type{font-size:13px;font-weight:800;color:var(--text-d);display:flex;align-items:center;gap:4px}
+.order-reward{font-size:10px;font-weight:800;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.order-coin-reward{color:var(--gold-d);display:flex;align-items:center;gap:2px;background:rgba(255,215,0,.12);padding:2px 7px;border-radius:8px;border:1px solid rgba(255,215,0,.12)}
+.order-xp-reward{color:#2e7d32;background:rgba(76,175,80,.1);padding:2px 7px;border-radius:8px;border:1px solid rgba(76,175,80,.1)}
+.order-gem-reward{color:#0288d1;background:rgba(79,195,247,.12);padding:2px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:2px;font-weight:800;border:1px solid rgba(79,195,247,.12)}
+.order-items{display:flex;flex-wrap:wrap;gap:5px}
+.order-item{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.04);padding:4px 8px;border-radius:8px;font-size:11px;border:1px solid rgba(0,0,0,.03)}
+.order-item img{max-width:18px;max-height:18px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+.order-item.fulfilled{opacity:.6;background:rgba(76,175,80,.1);border-color:rgba(76,175,80,.12)}
 .order-fulfill-btn{margin-top:8px;width:100%;padding:8px;background:linear-gradient(180deg,#6abf47,#4a9e2f,#3d8a26);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 8px rgba(74,158,47,.3),inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 #2d6e1a;transition:all .15s;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .order-fulfill-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(74,158,47,.4)}
 .order-fulfill-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
@@ -762,8 +822,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== SHOP ===== */
 .shop-tabs{display:flex;gap:3px;padding:6px 14px 0}
-.shop-tab{flex:1;padding:6px 4px;background:rgba(0,0,0,.04);border:none;border-radius:8px 8px 0 0;font-size:11px;font-weight:800;cursor:pointer;color:#999;transition:all .15s}
-.shop-tab.active{background:rgba(212,160,86,.2);color:var(--text-d);box-shadow:0 -2px 4px rgba(0,0,0,.05);border-bottom:2px solid #d4a056}
+.shop-tab{flex:1;padding:7px 4px;background:rgba(0,0,0,.04);border:1px solid transparent;border-bottom:2px solid transparent;border-radius:10px 10px 0 0;font-size:11px;font-weight:800;cursor:pointer;color:#999;transition:all .15s;letter-spacing:.2px}
+.shop-tab:hover{background:rgba(212,160,86,.1);color:#888}
+.shop-tab.active{background:rgba(212,160,86,.2);color:var(--text-d);box-shadow:0 -2px 4px rgba(0,0,0,.05);border-bottom:2px solid #d4a056;border-color:rgba(212,160,86,.12) rgba(212,160,86,.12) #d4a056}
 
 /* ===== PANEL ACTIONS (e.g. Wheel button inside Achievements) ===== */
 .panel-actions{display:flex;gap:6px;padding:4px 14px 6px}
@@ -815,46 +876,54 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes boxOpen{0%{transform:scale(1)}30%{transform:scale(1.4) rotate(15deg)}50%{transform:scale(1.5);opacity:.6}100%{transform:scale(0) rotate(-30deg);opacity:0}}
 #mystery-box-result{font-size:16px;font-weight:900;color:#2e7d32;margin-top:8px}
 
-/* Level up — Hay Day style green card */
-.levelup-card{background:linear-gradient(180deg,#e8f5e9,#c8e6c9,#a5d6a7)!important;color:#2e7d32!important;box-shadow:0 0 60px rgba(76,175,80,.4),0 16px 50px rgba(0,0,0,.45)!important;overflow:hidden;background-size:cover!important;background-position:center!important;border:3px solid rgba(76,175,80,.5)!important}
-.levelup-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.4),transparent 60%);pointer-events:none}
-.levelup-card h1,.levelup-card h2{color:#2e7d32!important;text-shadow:0 1px 2px rgba(255,255,255,.5)!important}
-.levelup-stars{font-size:24px;margin-bottom:4px;animation:starsGlow 2s ease-in-out infinite}
-@keyframes starsGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}
-.levelup-number{font-size:56px;font-weight:900;color:#2e7d32;text-shadow:0 2px 4px rgba(0,0,0,.15),0 0 20px rgba(76,175,80,.3);margin:4px 0;animation:levelPop .6s cubic-bezier(.34,1.56,.64,1)}
-@keyframes levelPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
-#levelup-rewards{font-size:14px;margin:6px 0;font-weight:800;color:var(--gem);text-shadow:0 1px 2px rgba(0,0,0,.1)}
-#levelup-unlocks{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
-.unlock-tag{background:rgba(255,255,255,.35);padding:5px 12px;border-radius:14px;font-size:11px;font-weight:700;/* no blur */;border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.08);animation:unlockPop .4s cubic-bezier(.34,1.56,.64,1) both}
+/* Level up — Hay Day golden celebration card */
+.levelup-card{
+  background:linear-gradient(180deg,#fff8e1 0%,#ffecb3 30%,#ffe082 60%,#ffd54f 100%)!important;
+  color:#5a3520!important;
+  box-shadow:0 0 80px rgba(255,215,0,.5),0 16px 50px rgba(0,0,0,.45)!important;
+  overflow:hidden;background-size:cover!important;background-position:center!important;
+  border:3px solid rgba(255,215,0,.7)!important}
+.levelup-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.5),transparent 55%);pointer-events:none}
+.levelup-card::after{content:'';position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 80%, rgba(255,215,0,.15), transparent 40%),
+  radial-gradient(circle at 80% 20%, rgba(255,215,0,.1), transparent 35%);pointer-events:none}
+.levelup-card h1,.levelup-card h2{color:#5a3520!important;text-shadow:0 1px 2px rgba(255,255,255,.6)!important;position:relative;z-index:1}
+.levelup-stars{font-size:24px;margin-bottom:4px;animation:starsGlow 2s ease-in-out infinite;position:relative;z-index:1}
+@keyframes starsGlow{0%,100%{filter:brightness(1) drop-shadow(0 0 4px rgba(255,215,0,.3))}50%{filter:brightness(1.4) drop-shadow(0 0 12px rgba(255,215,0,.7))}}
+.levelup-number{font-size:60px;font-weight:900;color:#5a3520;text-shadow:0 2px 4px rgba(0,0,0,.1),0 0 20px rgba(255,215,0,.4);margin:4px 0;animation:levelPop .6s cubic-bezier(.34,1.56,.64,1);position:relative;z-index:1}
+@keyframes levelPop{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+#levelup-rewards{font-size:14px;margin:6px 0;font-weight:800;color:#0288d1;text-shadow:0 1px 2px rgba(0,0,0,.1);position:relative;z-index:1}
+#levelup-unlocks{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;position:relative;z-index:1}
+.unlock-tag{background:rgba(255,255,255,.5);padding:6px 14px;border-radius:14px;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.4);display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,.1);animation:unlockPop .4s cubic-bezier(.34,1.56,.64,1) both;color:#5a3520}
 .unlock-tag:nth-child(1){animation-delay:.1s}.unlock-tag:nth-child(2){animation-delay:.2s}.unlock-tag:nth-child(3){animation-delay:.3s}.unlock-tag:nth-child(4){animation-delay:.4s}
-@keyframes unlockPop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes unlockPop{0%{opacity:0;transform:scale(.6) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 
 /* Plant dialog — Hay Day style seed selector */
-#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;padding:8px 4px;max-height:55vh;overflow-y:auto}
-.crop-choice{display:flex;flex-direction:column;align-items:center;gap:4px;
-  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(250,240,220,.6));
-  border-radius:16px;padding:12px 8px 10px;border:1.5px solid rgba(212,160,86,.15);
-  cursor:pointer;transition:all .2s;
-  box-shadow:0 3px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.6);
+#crop-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;padding:10px 6px;max-height:55vh;overflow-y:auto}
+.crop-choice{display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:linear-gradient(160deg,rgba(255,252,240,.92),rgba(245,235,210,.7));
+  border-radius:16px;padding:10px 6px 8px;border:2px solid rgba(212,160,86,.12);
+  cursor:pointer;transition:all .18s;
+  box-shadow:0 3px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.7),0 2px 0 rgba(180,140,80,.15);
   position:relative;overflow:hidden}
-.crop-choice:hover{background:rgba(255,252,245,.97);border-color:rgba(212,160,86,.5);
-  transform:translateY(-4px) scale(1.03);
-  box-shadow:0 8px 20px rgba(212,160,86,.25),inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(212,160,86,.1)}
-.crop-choice:active{transform:scale(.94);box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.2),transparent);pointer-events:none;border-radius:16px 16px 0 0}
-.crop-choice-icon{width:56px;height:56px;display:flex;align-items:center;justify-content:center;
+.crop-choice:hover{background:rgba(255,252,245,.98);border-color:rgba(106,191,71,.5);
+  transform:translateY(-4px) scale(1.04);
+  box-shadow:0 8px 20px rgba(106,191,71,.2),inset 0 1px 0 rgba(255,255,255,.8),0 0 0 1px rgba(106,191,71,.15)}
+.crop-choice:active{transform:scale(.93);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.crop-choice::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.25),transparent);pointer-events:none;border-radius:14px 14px 0 0}
+.crop-choice-icon{width:60px;height:60px;display:flex;align-items:center;justify-content:center;
   filter:drop-shadow(1px 3px 4px rgba(0,0,0,.3));transition:transform .25s;
-  background:radial-gradient(circle,rgba(106,191,71,.08),transparent 70%);border-radius:50%;padding:2px}
-.crop-choice:hover .crop-choice-icon{transform:scale(1.15) rotate(-3deg)}
-.crop-choice-icon img{max-width:52px;max-height:52px;object-fit:contain}
+  background:radial-gradient(circle,rgba(106,191,71,.1),transparent 65%);border-radius:50%;padding:2px}
+.crop-choice:hover .crop-choice-icon{transform:scale(1.18) rotate(-3deg)}
+.crop-choice-icon img{max-width:56px;max-height:56px;object-fit:contain}
 .crop-choice-name{font-size:12px;color:var(--text-d);text-align:center;line-height:1.2;font-weight:800;letter-spacing:.2px}
 .crop-choice-stats{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center}
 .crop-extra-info{font-size:8px;color:#999;font-weight:600;text-align:center;padding:1px 6px;background:rgba(0,0,0,.04);border-radius:6px;margin-top:1px}
 .crop-detail{font-size:8px;color:#999;margin-top:0;display:flex;align-items:center;justify-content:center;gap:2px;flex-wrap:wrap}
-.crop-reviews-badge{background:rgba(76,175,80,.12);color:#2e7d32;font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;display:inline-flex;align-items:center;gap:2px;border:1px solid rgba(76,175,80,.15)}
-.crop-price-badge{background:rgba(255,215,0,.12);color:var(--gold-d);font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;display:inline-flex;align-items:center;gap:2px;border:1px solid rgba(255,215,0,.15)}
+.crop-reviews-badge{background:rgba(76,175,80,.15);color:#2e7d32;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:2px;border:1px solid rgba(76,175,80,.18)}
+.crop-price-badge{background:rgba(255,215,0,.15);color:var(--gold-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;display:inline-flex;align-items:center;gap:2px;border:1px solid rgba(255,215,0,.18)}
 .crop-price-badge img{vertical-align:middle}
-.crop-yield-info{font-size:9px;color:#888;font-weight:700;text-align:center;letter-spacing:.2px;line-height:1.4;padding:3px 6px;background:rgba(0,0,0,.04);border-radius:8px;margin-top:2px}
+.crop-yield-info{font-size:9px;color:#777;font-weight:700;text-align:center;letter-spacing:.2px;line-height:1.3;padding:2px 6px;background:rgba(0,0,0,.04);border-radius:8px;margin-top:1px}
 
 /* Crop stat mini-icons (replacing emojis in plant dialog) */
 .crop-stat-icon{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:1px;opacity:.7}
@@ -1068,14 +1137,14 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* Inventory category section headers */
 .inv-section-header{grid-column:1/-1;font-size:10px;font-weight:800;color:#8b6914;text-transform:uppercase;letter-spacing:.8px;padding:8px 4px 3px;border-bottom:1.5px solid rgba(212,160,86,.2);margin-top:2px}
 
-/* ===== CROP NAME ON GROWING PLOTS ===== */
-.plot-crop-name{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:7px;font-weight:800;color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.4);z-index:5;letter-spacing:.3px;text-transform:uppercase;pointer-events:none;line-height:1}
-.plot-crop-name span{background:rgba(0,0,0,.4);padding:1px 6px;border-radius:4px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+/* ===== CROP NAME ON GROWING PLOTS — hidden for cleaner Hay Day look ===== */
+/* Name shown via tooltip on hover — no label cluttering the visual */
+.plot-crop-name{display:none}
 
-/* Reviews-left pill — tiny counter showing how many reviews until harvest */
-.plot-revs-pill{position:absolute;top:4px;right:5px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);padding:1px 5px;border-radius:6px;z-index:5;letter-spacing:.2px;line-height:1.3;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-shadow:0 1px 2px rgba(0,0,0,.5)}
-.plot-revs-pill.plot-revs-soon{background:linear-gradient(135deg,rgba(255,215,0,.5),rgba(255,180,0,.45));color:#fff;border:1px solid rgba(255,215,0,.4);box-shadow:0 0 6px rgba(255,215,0,.3);animation:revsSoonPulse 1.5s ease-in-out infinite}
-@keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.2)}50%{box-shadow:0 0 10px rgba(255,215,0,.5)}}
+/* Reviews-left pill — only shown when ≤5 reviews from harvest */
+.plot-revs-pill{position:absolute;top:3px;right:4px;font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:8px;z-index:5;line-height:1;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-shadow:0 1px 2px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1)}
+.plot-revs-pill.plot-revs-soon{background:linear-gradient(135deg,rgba(255,215,0,.65),rgba(255,180,0,.55));color:#fff;border:1px solid rgba(255,215,0,.5);box-shadow:0 0 8px rgba(255,215,0,.4);animation:revsSoonPulse 1.2s ease-in-out infinite}
+@keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.2);transform:scale(1)}50%{box-shadow:0 0 12px rgba(255,215,0,.6);transform:scale(1.1)}}
 
 /* ===== CROP PLANTING COST BADGE ===== */
 .crop-cost-badge{background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(255,215,0,.1));color:var(--gold-d);font-size:10px;font-weight:900;padding:3px 10px;border-radius:10px;border:1px solid rgba(255,215,0,.3);display:inline-flex;align-items:center;gap:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
