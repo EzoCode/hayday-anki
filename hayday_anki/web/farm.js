@@ -1197,6 +1197,13 @@ function updateActionHints() {
     const iconSrc = ICONS[_nextAction.type];
     iconEl.innerHTML = iconSrc ? `<img src="${iconSrc}" width="16" height="16">` : '';
     textEl.textContent = _nextAction.text;
+    // Farmer portrait in action bar
+    const farmerEl = document.getElementById('next-action-farmer');
+    if (farmerEl) {
+      const farmerSrc = S('hayday_farmer-woman') || S('hayday_farmer-man');
+      farmerEl.innerHTML = farmerSrc ? `<img src="${farmerSrc}">` : '';
+      farmerEl.style.display = farmerSrc ? '' : 'none';
+    }
     bar.style.display = '';
   } else if (bar) {
     bar.style.display = 'none';
@@ -2554,12 +2561,26 @@ function showReward(d){
       if (hudEl) {
         const r = hudEl.getBoundingClientRect();
         const layer = document.getElementById('reward-layer');
+        // Small coin fly from center to HUD (subtle but satisfying like Hay Day)
+        const coinSrc = S('ui_coin');
+        const coinFly = document.createElement('div');
+        coinFly.className = 'coin-fly-to-hud';
+        if (coinSrc) coinFly.innerHTML = `<img src="${coinSrc}" width="14" height="14">`;
+        else coinFly.innerHTML = '<span class="css-coin" style="width:12px;height:12px"></span>';
+        const startX = window.innerWidth / 2;
+        const startY = window.innerHeight / 2;
+        coinFly.style.left = startX + 'px';
+        coinFly.style.top = startY + 'px';
+        coinFly.style.setProperty('--target-x', (r.left + r.width / 2 - startX) + 'px');
+        coinFly.style.setProperty('--target-y', (r.top + r.height / 2 - startY) + 'px');
+        layer.appendChild(coinFly);
+        setTimeout(() => { if (coinFly.parentNode) coinFly.remove(); }, 700);
         // Coin sparkle with coin icon
         const sparkle = document.createElement('div');
         sparkle.className = 'review-sparkle';
         sparkle.style.left = (r.left + r.width / 2) + 'px';
         sparkle.style.top = (r.bottom + 4) + 'px';
-        const coinIcon = S('ui_coin') ? `<img src="${S('ui_coin')}" width="12" height="12" style="vertical-align:middle;margin-right:1px">` : '';
+        const coinIcon = coinSrc ? `<img src="${coinSrc}" width="12" height="12" style="vertical-align:middle;margin-right:1px">` : '';
         sparkle.innerHTML = `${coinIcon}+${coins}`;
         layer.appendChild(sparkle);
         setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 1000);

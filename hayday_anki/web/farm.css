@@ -559,14 +559,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-crop-bounce img{animation:readyCropBounce 1.8s ease-in-out infinite !important}
 @keyframes readyCropBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-4px) scale(1.06)}60%{transform:translateY(1px) scale(.98)}}
 .plot-label{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;font-size:8px;font-weight:800;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.8);z-index:5;letter-spacing:.2px;white-space:nowrap;background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px}
-/* Crop name label under growing crops */
-.plot-crop-name{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;white-space:nowrap}
-.plot-crop-name span{font-size:8px;font-weight:800;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:4px;letter-spacing:.2px}
-/* Reviews remaining pill — more visible and Hay Day-like */
-.plot-revs-pill{position:absolute;top:4px;right:4px;z-index:6;font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,.4);padding:2px 5px;border-radius:6px;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.1;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-.plot-revs-pill::before{content:'';display:inline-block;width:6px;height:8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Crect x='1' y='0' width='6' height='8' rx='1' fill='%23fff'/%3E%3Cline x1='2.5' y1='2.5' x2='5.5' y2='2.5' stroke='%23bbb' stroke-width='.6'/%3E%3Cline x1='2.5' y1='4.5' x2='5.5' y2='4.5' stroke='%23bbb' stroke-width='.6'/%3E%3C/svg%3E") center/contain no-repeat;margin-right:2px;vertical-align:middle}
-.plot-revs-soon{background:linear-gradient(135deg,rgba(76,175,80,.7),rgba(56,142,60,.8)) !important;border:1px solid rgba(255,255,255,.2);animation:revsSoonPulse 1.5s ease-in-out infinite}
-@keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(76,175,80,.3)}50%{box-shadow:0 0 10px rgba(76,175,80,.6)}}
+/* (Crop name, revs pill — consolidated in CROP NAME ON GROWING PLOTS section below) */
 /* Stage dots (like Hay Day crop progress indicator) */
 .plot-stage-dots{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:3px}
 .plot-stage-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.15);transition:all .3s}
@@ -586,12 +579,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .plot-replant-cost{font-size:7px;color:rgba(255,215,0,.9);font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.6);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:5px}
 .plot-empty:hover .plot-replant{opacity:1;transform:scale(1.08)}
 .plot-empty:hover .plot-replant img{transform:scale(1.15)}
-/* Plot growth animation — subtle scale bump when crop advances */
-.plot-grew{animation:plotGrew .6s cubic-bezier(.34,1.56,.64,1)}
-@keyframes plotGrew{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
-/* Just-harvested plot — invite quick replant with green glow */
-.plot-just-harvested{animation:plotJustHarvested 1.2s ease-out;border-color:rgba(106,191,71,.5) !important}
-@keyframes plotJustHarvested{0%{box-shadow:0 0 20px rgba(106,191,71,.5)}100%{box-shadow:none}}
+/* (Plot growth/harvest animations — consolidated in PLOT GROWING ANIMATION section below) */
 
 /* Gem speed-up button in production queue */
 .gem-speed-btn{background:linear-gradient(135deg,rgba(79,195,247,.2),rgba(2,136,209,.35));border:1px solid rgba(79,195,247,.35);border-radius:8px;padding:3px 8px;font-size:10px;font-weight:800;color:#fff;cursor:pointer;display:flex;align-items:center;gap:3px;text-shadow:0 1px 2px rgba(0,0,0,.4);transition:all .15s;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
@@ -684,9 +672,9 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 .hud-coins.hud-bump,.hud-gems.hud-bump,.hud-streak.hud-bump{animation:hudBump .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes hudBump{0%{transform:scale(1)}30%{transform:scale(1.25)}60%{transform:scale(.95)}100%{transform:scale(1)}}
 .hud-xp .xp-bar-fill{transition:width .6s cubic-bezier(.25,.46,.45,.94)}
-.xp-bar-flash .xp-bar-fill{box-shadow:0 0 12px rgba(76,175,80,.8),0 0 4px rgba(255,255,255,.5) !important}
+.xp-bar-flash .xp-bar-fill{box-shadow:0 0 14px rgba(76,175,80,.9),0 0 6px rgba(255,255,255,.6) !important;background:linear-gradient(180deg,#a5d6a7,#66bb6a) !important}
 .xp-bar-flash{animation:xpFlash .7s ease-out}
-@keyframes xpFlash{0%{filter:brightness(1)}30%{filter:brightness(1.4)}100%{filter:brightness(1)}}
+@keyframes xpFlash{0%{filter:brightness(1)}15%{filter:brightness(1.6)}40%{filter:brightness(1.1)}100%{filter:brightness(1)}}
 .hud-level.level-bump{animation:levelBump .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes levelBump{0%{transform:scale(1)}40%{transform:scale(1.3) rotate(-5deg)}70%{transform:scale(.95) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
 
@@ -1051,9 +1039,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* ===== TUTORIAL ===== */
 .tutorial-card{max-width:320px}
-.tutorial-card h2{margin-top:6px}
-#tutorial-farmer{margin-bottom:4px}
-#tutorial-farmer img{image-rendering:auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.tutorial-card h2{margin-top:6px;font-size:19px}
+#tutorial-farmer{margin-bottom:6px;animation:tutorialFarmerBounce 2s ease-in-out infinite}
+#tutorial-farmer img{image-rendering:auto;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));border-radius:50%;border:3px solid rgba(255,215,0,.4);background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.15),transparent 60%)}
+@keyframes tutorialFarmerBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .tutorial-step{display:none;padding:8px 4px;font-size:13px;color:var(--text-d);line-height:1.5}
 .tutorial-step.active{display:block;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
@@ -1106,6 +1095,10 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 @keyframes cropGrew{0%{transform:scale(1);filter:brightness(1)}15%{transform:scale(1.3);filter:brightness(1.4) saturate(1.3)}40%{transform:scale(.95);filter:brightness(1.1)}100%{transform:scale(1);filter:brightness(1)}}
 @keyframes growGlow{0%{opacity:1;transform:scale(.7)}40%{opacity:.8;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
 
+/* Just-harvested plot — invite quick replant with green glow */
+.plot-just-harvested{animation:plotJustHarvested 1.2s ease-out;border-color:rgba(106,191,71,.5) !important}
+@keyframes plotJustHarvested{0%{box-shadow:0 0 20px rgba(106,191,71,.5)}100%{box-shadow:none}}
+
 /* ===== READY CROP BOUNCE ===== */
 .plot-crop-bounce{animation:readyBounce 1.8s ease-in-out infinite !important}
 @keyframes readyBounce{0%,100%{transform:scale(1) translateY(0)}12%{transform:scale(1.18) translateY(-8px)}28%{transform:scale(1) translateY(0)}40%{transform:scale(1.1) translateY(-5px)}55%{transform:scale(1) translateY(0)}68%{transform:scale(1.05) translateY(-2px)}80%{transform:scale(1) translateY(0)}}
@@ -1124,6 +1117,7 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 
 /* Reviews-left pill — tiny counter showing how many reviews until harvest */
 .plot-revs-pill{position:absolute;top:4px;right:5px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);padding:1px 5px;border-radius:6px;z-index:5;letter-spacing:.2px;line-height:1.3;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.plot-revs-pill::before{content:'';display:inline-block;width:6px;height:8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Crect x='1' y='0' width='6' height='8' rx='1' fill='%23fff'/%3E%3Cline x1='2.5' y1='2.5' x2='5.5' y2='2.5' stroke='%23bbb' stroke-width='.6'/%3E%3Cline x1='2.5' y1='4.5' x2='5.5' y2='4.5' stroke='%23bbb' stroke-width='.6'/%3E%3C/svg%3E") center/contain no-repeat;margin-right:2px;vertical-align:middle}
 .plot-revs-pill.plot-revs-soon{background:linear-gradient(135deg,rgba(255,215,0,.5),rgba(255,180,0,.45));color:#fff;border:1px solid rgba(255,215,0,.4);box-shadow:0 0 6px rgba(255,215,0,.3);animation:revsSoonPulse 1.5s ease-in-out infinite}
 @keyframes revsSoonPulse{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.2)}50%{box-shadow:0 0 10px rgba(255,215,0,.5)}}
 
@@ -1320,24 +1314,28 @@ body{font-family:'Nunito','Varela Round','Trebuchet MS',system-ui,sans-serif;ove
 /* ===== NEXT ACTION GUIDANCE — What to do next (key for engagement) ===== */
 .next-action-bar{
   display:flex;align-items:center;gap:8px;
-  padding:8px 14px;margin:6px 10px;
-  background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(244,146,42,.18),rgba(255,215,0,.08));
-  border:1.5px solid rgba(255,215,0,.25);border-radius:14px;
+  padding:8px 12px;margin:6px 10px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 40%,rgba(0,0,0,.06) 100%),
+    linear-gradient(135deg,#5a4020,#4a3318 60%,#3a2510);
+  border:1.5px solid rgba(255,220,160,.2);border-radius:14px;
   font-size:11px;font-weight:800;color:rgba(255,255,255,.95);
   text-shadow:0 1px 3px rgba(0,0,0,.5);
   cursor:pointer;transition:all .2s;
   position:relative;z-index:1;
-  box-shadow:0 2px 10px rgba(255,215,0,.12),inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow:0 3px 12px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1);
   animation:nextActionPulse 3s ease-in-out infinite;
 }
-.next-action-bar:hover{background:linear-gradient(135deg,rgba(255,215,0,.22),rgba(244,146,42,.28),rgba(255,215,0,.15));border-color:rgba(255,215,0,.45);transform:scale(1.02);box-shadow:0 4px 16px rgba(255,215,0,.2)}
+.next-action-bar:hover{border-color:rgba(255,215,0,.4);transform:scale(1.02);box-shadow:0 4px 16px rgba(0,0,0,.35),0 0 12px rgba(255,215,0,.15)}
 .next-action-bar:active{transform:scale(.97)}
-@keyframes nextActionPulse{0%,100%{box-shadow:0 2px 10px rgba(255,215,0,.1)}50%{box-shadow:0 2px 16px rgba(255,215,0,.25)}}
+@keyframes nextActionPulse{0%,100%{box-shadow:0 3px 12px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1)}50%{box-shadow:0 3px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1),0 0 10px rgba(255,215,0,.12)}}
+.next-action-farmer{flex-shrink:0;width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,215,0,.4);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.next-action-farmer img{width:100%;height:100%;object-fit:cover}
 .next-action-icon{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
 .next-action-icon img{width:20px;height:20px}
 .next-action-text{flex:1;line-height:1.3;letter-spacing:.2px}
 .next-action-arrow{color:rgba(255,215,0,.7);font-size:16px;font-weight:900;transition:transform .2s}
-.next-action-bar:hover .next-action-arrow{transform:translateX(2px)}
+.next-action-bar:hover .next-action-arrow{transform:translateX(3px)}
 
 /* ===== SMOOTHER OVERLAY TRANSITIONS ===== */
 .overlay-card{max-height:85vh;overflow-y:auto}
