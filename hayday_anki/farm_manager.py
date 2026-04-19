@@ -1147,17 +1147,22 @@ class FarmManager:
         total_xp = 0
         total_coins = 0
         count = 0
+        storage_full = 0
         for field in list(self.state.fields):
             if field["state"] != "ready":
                 continue
             result = self.harvest_plot(field["id"])
-            if result:
+            # Only count as harvested if items were actually collected
+            if result and result.get("items"):
                 count += 1
                 total_xp += result.get("xp", 0)
                 total_coins += result.get("coins", 0)
                 for item_id, qty in result.get("items", {}).items():
                     total_items[item_id] = total_items.get(item_id, 0) + qty
-        return {"items": total_items, "xp": total_xp, "coins": total_coins, "count": count}
+            elif result and result.get("error") == "storage_full":
+                storage_full += 1
+        return {"items": total_items, "xp": total_xp, "coins": total_coins,
+                "count": count, "storage_full": storage_full}
 
     def sell_item(self, item_id: str, quantity: int = 1) -> int:
         """Sell items for coins. Returns coins earned."""

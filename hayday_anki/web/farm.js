@@ -778,15 +778,33 @@ function updateHUD() {
 }
 
 function renderDailyQuests() {
+  // Hide the top-of-page quest bar — quests moved to Succès panel
   const bar = document.getElementById('daily-quests-bar');
+  if (bar) bar.style.display = 'none';
+
   const quests = farmData.daily_quests || [];
   const claimed = farmData.daily_quests_claimed || false;
   const allDone = farmData.all_quests_complete || false;
 
-  if (!quests.length) { if (bar) bar.style.display = 'none'; return; }
-  bar.style.display = '';
+  // Render quests inside the achievements panel (if visible)
+  const panelSection = document.getElementById('panel-quests-section');
+  if (!panelSection) return;
+  if (!quests.length) { panelSection.innerHTML = ''; return; }
 
-  const items = document.getElementById('quest-items');
+  // Build a mini-quest-bar inside the achievements panel
+  panelSection.innerHTML = `
+    <div class="quest-panel-card ${claimed ? 'quests-claimed' : ''}">
+      <div class="quest-header">
+        <span class="quest-title">Quêtes du jour</span>
+        <span class="quest-reward-preview" id="quest-reward-preview-panel"></span>
+      </div>
+      <div id="quest-items-panel"></div>
+      <button class="quest-claim-btn" id="quest-claim-btn-panel"
+              style="${(allDone && !claimed) ? '' : 'display:none'}"
+              onclick="pycmd('farm:claim_quests')">Récupérer la récompense !</button>
+    </div>
+  `;
+  const items = document.getElementById('quest-items-panel');
   items.innerHTML = '';
 
   const QUEST_ICONS = {
@@ -815,20 +833,7 @@ function renderDailyQuests() {
     items.appendChild(el);
   });
 
-  // Claim button
-  const claimBtn = document.getElementById('quest-claim-btn');
-  if (allDone && !claimed) {
-    claimBtn.style.display = '';
-  } else {
-    claimBtn.style.display = 'none';
-  }
-
-  // Show "claimed" state
-  if (claimed) {
-    bar.classList.add('quests-claimed');
-  } else {
-    bar.classList.remove('quests-claimed');
-  }
+  // Claim button is now inline in panel-quests-section — no separate DOM update needed
 }
 
 function renderFields() {
@@ -1643,7 +1648,7 @@ function showTab(tab) {
   if (panel) { panel.classList.remove('hidden');
     if(tab==='inventory')renderInventory();if(tab==='buildings')renderBuildingsPanel();
     if(tab==='orders')renderOrders();if(tab==='shop')renderShop();
-    if(tab==='achievements')renderAchievements();if(tab==='settings')renderSettings();
+    if(tab==='achievements'){renderAchievements();renderDailyQuests();}if(tab==='settings')renderSettings();
   }
   SoundMgr.play('click');
 }

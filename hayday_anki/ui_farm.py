@@ -268,8 +268,8 @@ class FarmWebView:
                         self._js(f"showNotification(itemIcon({json.dumps(item_id)}, 14) + ' ' + {json.dumps(msg)}, 'reward')")
                     self._check_and_show_level_up()
                 else:
-                    self._js("showNotification('Silo plein ! Vendez ou améliorez.')")
-                    self._js("SoundMgr.play('error')")
+                    # result is None — field not ready (state desync or already harvested)
+                    self._js("showNotification('Culture non prête ou déjà récoltée')")
                 self._send_state()
                 self.manager.save()
 
@@ -293,6 +293,10 @@ class FarmWebView:
                     if count >= 3:
                         self._js("createConfetti()")
                     self._check_and_show_level_up()
+                elif result.get("storage_full", 0) > 0:
+                    full_n = result["storage_full"]
+                    self._js(f"showNotification('Silo plein ! {full_n} culture(s) non récoltée(s). Vendez ou améliorez.')")
+                    self._js("SoundMgr.play('error')")
                 else:
                     self._js("showNotification('Aucune récolte prête !')")
                 self._send_state()
