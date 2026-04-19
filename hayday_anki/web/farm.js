@@ -612,8 +612,12 @@ function updateFarm(data) {
 }
 
 let _lastStorageWarning = 0;
+let _lastHarvestFullAt = 0;
 function checkStorageWarnings() {
   const now = Date.now();
+  // Suppress ambient storage warning for 10s after a harvest storage-full error
+  // (avoids double notification "Silo plein" stacking)
+  if (now - _lastHarvestFullAt < 10000) return;
   if (now - _lastStorageWarning < 30000) return;
   const d = farmData;
   const barnPct = (d.barn_used||0) / Math.max(1, d.barn_capacity||50);
@@ -622,6 +626,16 @@ function checkStorageWarnings() {
   else if (barnPct >= 0.9) { showNotification(LANG.barn_almost + ' (' + d.barn_used + '/' + d.barn_capacity + ')'); _lastStorageWarning = now; }
   if (siloPct >= 1) { showNotification(LANG.silo_full); _lastStorageWarning = now; }
   else if (siloPct >= 0.9) { showNotification(LANG.silo_almost + ' (' + d.silo_used + '/' + d.silo_capacity + ')'); _lastStorageWarning = now; }
+}
+
+// Called from Python when harvest fails due to full silo — suppresses ambient warnings
+// and opens the inventory panel so the user can sell items immediately
+function onHarvestStorageFull() {
+  _lastHarvestFullAt = Date.now();
+  // Auto-open inventory so the user can sell what they have
+  if (currentPanel !== 'inventory') {
+    setTimeout(() => showTab('inventory'), 400);
+  }
 }
 
 // --- Animated Counter ---

@@ -253,8 +253,9 @@ class FarmWebView:
                 plot_id = int(parts[2])
                 result = self.manager.harvest_plot(plot_id)
                 if result and result.get("error") == "storage_full":
-                    self._js("showNotification('Silo plein ! Vendez ou améliorez.')")
+                    self._js("showNotification('Silo plein — vends des cultures pour faire de la place.')")
                     self._js("SoundMgr.play('error')")
+                    self._js("onHarvestStorageFull()")
                 elif result and result.get("items"):
                     self._js(f"showReward({json.dumps(result)})")
                     # Show harvest quantity notification with crop icon
@@ -295,8 +296,9 @@ class FarmWebView:
                     self._check_and_show_level_up()
                 elif result.get("storage_full", 0) > 0:
                     full_n = result["storage_full"]
-                    self._js(f"showNotification('Silo plein ! {full_n} culture(s) non récoltée(s). Vendez ou améliorez.')")
+                    self._js(f"showNotification('Silo plein — {full_n} culture(s) non récoltée(s). Vends ou améliore le silo.')")
                     self._js("SoundMgr.play('error')")
+                    self._js("onHarvestStorageFull()")
                 else:
                     self._js("showNotification('Aucune récolte prête !')")
                 self._send_state()
